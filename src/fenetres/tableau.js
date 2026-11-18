@@ -285,6 +285,61 @@ html.jour .voile{background:rgba(20,24,30,.35)}
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}.cmd.neuve{animation-duration:.01s}}
+
+/* ══ LE TABLEAU DE BORD DE LA MAQUETTE (Épuré, 2026-11-18, Tableau.dc.html) ══════════════════════════════
+   En-tête (date, « Bonjour, voici le bilan du jour », Lancer la préparation), 4 tuiles, « À préparer maintenant »
+   et l'activité sur 7 jours, puis 4 cartes d'alerte. Tout tient sur l'écran : la liste est MESURÉE. */
+.tm{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:16px;overflow:hidden}
+.tm-tete{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.tm-tete .g{display:flex;flex-direction:column;gap:2px;margin-right:auto}
+.tm-tete .d{font-size:12px;font-weight:600;color:var(--tx2)}
+.tm-tete h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--tx)}
+.tm-tete .prim{height:38px;padding:0 16px;display:flex;align-items:center;gap:8px}
+.tm-kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tm-k{background:var(--f-carte);border:1px solid var(--v08);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.tm-k .l{font-size:12px;font-weight:600;color:var(--tx2)}
+.tm-k .v{font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--tx)}
+.tm-k .s{font-size:12px;font-weight:600;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-mil{flex:1 1 0;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.tm-c{background:var(--f-carte);border:1px solid var(--v08);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0;overflow:hidden}
+.tm-c.l2{grid-column:span 2}
+.tm-c h2{margin:0;font-size:15px;font-weight:800;color:var(--tx);letter-spacing:0;text-transform:none}
+.tm-c .st{font-size:12px;color:var(--tx2)}
+.tm-ct{display:flex;align-items:center;gap:10px}
+.tm-ct h2{margin-right:auto}
+.tm-pill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--ep-neutre-f,var(--v08));color:var(--ep-neutre-t,var(--tx));white-space:nowrap}
+.tm-pill.a{background:var(--ep-ambre-f,rgba(245,158,11,.16));color:var(--ep-ambre-t,var(--tx-att))}
+.tm-pill.r{background:var(--ep-rouge-f,rgba(239,68,68,.16));color:var(--ep-rouge-t,var(--tx-err))}
+.tm-liste{flex:1 1 0;min-height:0;overflow:hidden;display:flex;flex-direction:column}
+.tm-l{flex:none;display:grid;grid-template-columns:96px minmax(0,1fr) 150px 100px 120px;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--v06);font-size:13px}
+.tm-l[hidden]{display:none}
+.tm-l b{font-weight:700}
+.tm-l .cl{display:flex;flex-direction:column;min-width:0}
+.tm-l .cl span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-l .cl span:first-child{font-weight:600}
+.tm-l .cl span+span{font-size:12px;color:var(--tx2)}
+.tm-l .stt{font-size:12px;font-weight:700;padding:4px 10px;border-radius:6px;text-align:center;background:var(--ep-neutre-f,var(--v08));color:var(--ep-neutre-t,var(--tx));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-l .stt.a{background:var(--ep-ambre-f,rgba(245,158,11,.16));color:var(--ep-ambre-t,var(--tx-att))}
+.tm-l .mt{font-weight:700;text-align:right;font-variant-numeric:tabular-nums}
+.tm-l button{height:34px;border-radius:9px;font-weight:700}
+.tm-l button.prep{background:var(--sz-btn-prim,#8a5a2b);border:0;color:var(--sz-btn-prim-txt,#fff)}
+.tm-plus{flex:none;font-size:12px;color:var(--tx2);padding-top:6px}
+.tm-barres{flex:1 1 0;min-height:110px;display:flex;align-items:flex-end;gap:10px;padding-top:6px}
+.tm-b{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;min-width:0}
+.tm-b .v{font-size:11px;font-weight:700;color:var(--tx)}
+.tm-b i{display:block;width:100%;border-radius:6px 6px 2px 2px;background:#4a3c2c;min-height:2px}
+.tm-b.auj i{background:#c9a27a}
+.tm-b .j{font-size:11px;color:var(--tx2)}
+html.jour .tm-b i{background:#e3d3c1}
+html.jour .tm-b.auj i{background:var(--sz-btn-prim,#8a5a2b)}
+.tm-al{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.tm-a{background:var(--f-carte);border:1px solid var(--v08);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:8px;text-align:left;font:inherit;color:var(--tx);cursor:pointer;min-width:0}
+.tm-a .h{display:flex;align-items:center;gap:8px}
+.tm-a .pt{width:8px;height:8px;border-radius:50%;background:#c9ced8;flex:none}
+.tm-a .pt.a{background:#e8a35b}.tm-a .pt.r{background:#e07a78}
+.tm-a b{font-size:14px;font-weight:700}
+.tm-a .tm-pill{margin-left:auto}
+.tm-a .t{font-size:12px;color:var(--tx2);line-height:1.45}
 `;
 
 /** Page complète de la fenêtre native « Tableau de bord ». */
@@ -595,10 +650,92 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   /* ══ LE DESSIN ═════════════════════════════════════════════════════════ */
+
+  /* ══ LA VUE DE LA MAQUETTE (Épuré) ════════════════════════════════════════════════════════════════════ */
+  function MAQ(){ return document.documentElement.getAttribute('data-sz-theme') === 'epure'; }
+  var D7 = null;   // la même lecture, sur 7 jours : l'histogramme de l'activité
+  function chargerSemaine(){
+    if (!MAQ()) return;
+    appeler('tableau:lire', ['all', '7j', false]).then(function(r){ if (r && r.ok) { D7 = r; if (MAQ()) dessiner(); } });
+  }
+  function vueMaquette(){
+    var V = D.vivant || {}, pc = V.parcours || {}, af = D.aFaire || {}, iv = V.inventaire || {}, tu = D.tuiles || {}, k = V.kpi || {};
+    var langue = document.documentElement.lang || 'fr';
+    var date = ''; try { date = new Date().toLocaleDateString('${LIEU()}', { weekday: 'long', day: 'numeric', month: 'long' }); } catch (e) {}
+    date = date.charAt(0).toUpperCase() + date.slice(1);
+    var aFaire = af.aTraiter || 0;
+    var h = '<div class="tm"><header class="tm-tete"><div class="g"><span class="d">' + esc(date) + ' · ${T("Boutique en ligne")}</span>'
+      + '<h1>${T("Bonjour, voici le bilan du jour")}</h1></div>'
+      + (D.peutPreparer && aFaire ? '<button type="button" class="prim" id="tm-file"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>${T("Lancer la préparation")} (' + aFaire + ')</button>' : '')
+      + '</header>';
+    var ecartTxt = (typeof k.ecartCommandes === 'number') ? ((k.ecartCommandes >= 0 ? '+' : '') + k.ecartCommandes + ' % ${T("sur hier")}') : '';
+    var tuile = function(l, v, sous, cible){ return '<button type="button" class="tm-k" data-ouvre="' + cible + '"><span class="l">' + l + '</span><span class="v">' + v + '</span><span class="s">' + esc(sous) + '</span></button>'; };
+    h += '<div class="tm-kpi">'
+      + tuile('${T("Commandes reçues")}', pc.recues || 0, ecartTxt, 'orders')
+      + tuile('${T("En préparation")}', pc.preparation || 0, '${T("en cours")}', 'orders')
+      + tuile('${T("Expédiées aujourd’hui")}', pc.parties || 0, '${T("parties aujourd’hui")}', 'orders')
+      + tuile('${T("Délai moyen avant envoi")}', (V.delaiMoyenH != null ? delai(V.delaiMoyenH) : '—'), '${T("de la commande au départ")}', 'orders')
+      + '</div>';
+    var fil = (V.fil || []).filter(function(c){ return ['pending', 'confirmed', 'preparing', 'verification'].indexOf(c.statut) >= 0; });
+    h += '<div class="tm-mil"><section class="tm-c l2"><div class="tm-ct"><h2>${T("À préparer maintenant")}</h2>'
+      + '<span class="tm-pill' + (aFaire ? ' a' : '') + '">' + aFaire + ' ' + (aFaire > 1 ? '${T("commandes")}' : '${T("commande")}') + '</span></div><div class="tm-liste">'
+      + (fil.length ? fil.map(function(c){
+          var att = c.statut === 'pending';
+          var a = c.article || {}, nom = (typeof a === 'string') ? a : (a.nom || '');
+          var det = ((a.qte > 1) ? a.qte + ' × ' : '') + nom + (c.autres ? ' + ' + c.autres : '');
+          return '<div class="tm-l" data-cmd="' + esc(c.oid) + '"><b>' + esc(c.numero) + '</b><span class="cl"><span>' + esc(c.client) + '</span><span>' + esc(det) + '</span></span>'
+            + '<span class="stt' + (att ? ' a' : '') + '">' + esc(att ? '${T("Paiement en attente")}' : szTd(c.statutLibelle || '')) + '</span>'
+            + '<span class="mt">' + fmt(c.total) + '</span>'
+            + (D.peutPreparer && !att ? '<button type="button" class="prep" data-prep="' + esc(c.oid) + '">${T("Préparer")}</button>' : '<span></span>') + '</div>';
+        }).join('') + '<div class="tm-plus" hidden></div>' : '<div class="st">${T("Rien à préparer pour le moment.")}</div>')
+      + '</div></section>';
+    var c7 = D7 && D7.vivant && D7.vivant.courbe;
+    h += '<section class="tm-c"><h2>${T("Activité des commandes")}</h2><span class="st">${T("7 derniers jours · reçues")}</span><div class="tm-barres">';
+    if (c7 && c7.actuel && c7.actuel.length) {
+      var vals = c7.actuel.slice(-7), et = (c7.etiquettes || []).slice(-7), max = Math.max.apply(null, vals.concat([1]));
+      h += vals.map(function(v, i){
+        return '<div class="tm-b' + (i === vals.length - 1 ? ' auj' : '') + '"><span class="v">' + v + '</span><i style="height:' + Math.max(2, Math.round(v / max * 100)) + '%"></i><span class="j">' + esc(String(et[i] == null ? '' : et[i])) + '</span></div>';
+      }).join('');
+    } else h += '<div class="st">${T("Chargement…")}</div>';
+    h += '</div></section></div>';
+    var sv = sauvegardeTexte();
+    var nMsg = (tu.messagerie || 0) + (af.avis || 0);
+    var alerte = function(l, n, ton, txt, cible){
+      return '<button type="button" class="tm-a" data-ouvre="' + cible + '"><span class="h"><span class="pt ' + ton + '"></span><b>' + l + '</b><span class="tm-pill ' + ton + '">' + esc(String(n)) + '</span></span><span class="t">' + esc(txt) + '</span></button>';
+    };
+    h += '<div class="tm-al">'
+      + alerte('${T("Inventaire")}', iv.aCommander || 0, (iv.aCommander ? 'a' : ''), (iv.aCommander ? '${T("{0} à réassortir, dont {1} en rupture.")}'.split('{0}').join(iv.aCommander).split('{1}').join(iv.ruptures || 0) : '${T("Rien à réassortir.")}'), 'inventory')
+      + alerte('${T("Retours")}', tu.retoursNouveaux || 0, (tu.retoursNouveaux ? 'a' : ''), (tu.retoursNouveaux ? '${T("Retours reçus à inspecter et à rembourser.")}' : '${T("Aucun retour en attente.")}'), 'returns-pending')
+      + alerte('${T("Messagerie et avis")}', nMsg, '', '${T("{0} messages et {1} avis à modérer.")}'.split('{0}').join(tu.messagerie || 0).split('{1}').join(af.avis || 0), 'support-mgmt')
+      + alerte('${T("Sauvegarde")}', (sv && sv.urgent) ? '!' : '${T("OK")}', (sv && sv.urgent) ? 'r' : '', (sv ? sv.texte : '${T("État de la sauvegarde inconnu.")}'), 'sauvegarde')
+      + '</div></div>';
+    return h;
+  }
+  /* « À préparer maintenant » : autant de lignes que la carte en tient — le reste se compte (jamais de glissière). */
+  // Le jeu arrive APRÈS le chargement (posé par la coquille) : on redessine dès qu'il change. La liste suit la fenêtre.
+  try {
+    var _tmJeu = document.documentElement.getAttribute('data-sz-theme');
+    new MutationObserver(function(){
+      var j = document.documentElement.getAttribute('data-sz-theme');
+      if (j !== _tmJeu) { _tmJeu = j; if (D) { dessiner(); chargerSemaine(); } }
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-sz-theme'] });
+    if (window.ResizeObserver) new ResizeObserver(function(){ if (MAQ()) tmAjuste(); }).observe(corps);
+  } catch (e) {}
+  function tmAjuste(){
+    var z = corps.querySelector('.tm-liste'); if (!z) return;
+    var ls = z.querySelectorAll('.tm-l'), plus = z.querySelector('.tm-plus');
+    Array.prototype.forEach.call(ls, function(l){ l.hidden = false; }); if (plus) plus.hidden = true;
+    if (z.scrollHeight <= z.clientHeight + 1) return;
+    var k = 0; if (plus) plus.hidden = false;
+    for (var i = ls.length - 1; i >= 0 && z.scrollHeight > z.clientHeight + 1; i--) { ls[i].hidden = true; k++; }
+    if (plus) plus.textContent = '${T("+ {0} autres — voir les commandes")}'.split('{0}').join(k);
+  }
+
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     var V = D.vivant;
     if (!V) { vide('${T("Tableau de bord indisponible")}', '${T("Le site n’a pas encore cette version du tableau de bord.")}'); return; }
+    if (MAQ()) { barre(); poser(corps, vueMaquette()); setTimeout(tmAjuste, 0); appliquerVerrous(); return; }
     var e = V.etapes || {}, pc = V.parcours || {}, iv = V.inventaire || {}, pr = V.produits || {}, k = V.kpi || {};
     var h = barre() + alertesEtiquettes() + '<div class="grille">';
 
@@ -833,6 +970,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.closest('#tb-zeros')) { ZEROS = !ZEROS; dessiner(); return; }
     var ec = t.closest('button[data-prep]');
     if (ec) { if (!ec.disabled) lancerPreparation(ec.getAttribute('data-prep'), ec); return; }
+    if (t.closest('#tm-file')) { appeler('commandes:fileSuivante', ['']).then(function(r){ if (r && r.ok && r.vide) dire('${T("Plus rien à préparer — la file est vide.")}', 'bon'); else if (!r || !r.ok) dire(expliquer(r), 'err'); }); return; }
+    if (t.closest('.tm-plus')) { ouvrir('orders'); return; }
     var ou = t.closest('[data-ouvre]');
     // La pastille Twilio mène au journal des appels (2026-10-21, sa demande), dans la fenêtre Journaux.
     if (ou && ou.getAttribute('data-ouvre') === 'journaux-appels') { if (P && P.ouvrirJournaux) P.ouvrirJournaux('appels'); return; }
@@ -946,6 +1085,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       dessiner();
       bilanDuSoir();
       chargerSauvegarde();
+      chargerSemaine();
     });
   }
   /* Il se relit seul toutes les 12 s, meme derriere un autre module (sa demande) — sauf pendant que
