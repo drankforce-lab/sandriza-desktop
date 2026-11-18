@@ -69,6 +69,8 @@ html.jour .rg-ic{background:#3d4456}
 `;
 
 function pageReglages() {
+  // Les symboles des pictogrammes, bâtis HORS du gabarit (aucun accent grave dans le gabarit d'une fenêtre).
+  const SYMBOLES = Object.keys(PICTO).map((k) => '<symbol id="rg-' + k + '" viewBox="0 0 24 24"><path d="' + PICTO[k] + '" fill="none" stroke="#ffffff" stroke-width="2.2"></path></symbol>').join('');
   return `${TETE()}
 <title>${T("Réglages — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -82,12 +84,14 @@ function pageReglages() {
   <p class="rg-note" id="note"></p>
 </div>
 <span class="msg" id="msg" role="status"></span>
+<!-- Les pictogrammes en SYMBOLES : les tracés restent des attributs du HTML (des chaînes dans le script seraient prises pour du texte à traduire). -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">${SYMBOLES}</svg>
 <script>
 (function(){
   'use strict';
   var P = window.szPont;
 ${JS_ACTIVITE()}${JS_DIRE()}
-  var PICTO = ${JSON.stringify(PICTO)};
+  var PICTOS = ${JSON.stringify(Object.keys(PICTO))};
   var grille = document.getElementById('grille'), q = document.getElementById('rg-q');
   var G = [];
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -105,8 +109,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var n = 0;
     grille.innerHTML = G.map(function(g, gi){
       n += g.entrees.length;
-      var d = PICTO[sansAccent(g.cle).split(/[^a-z]/)[0]] || PICTO.systeme;
-      return '<section class="rg-carte" data-g="' + gi + '"><div class="rg-ct"><span class="rg-ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" aria-hidden="true"><path d="' + d + '"></path></svg></span>'
+      var k = sansAccent(g.cle).split(/[^a-z]/)[0]; if (PICTOS.indexOf(k) < 0) k = 'systeme';
+      return '<section class="rg-carte" data-g="' + gi + '"><div class="rg-ct"><span class="rg-ic"><svg width="15" height="15" aria-hidden="true"><use href="#rg-' + k + '"></use></svg></span>'
         + '<h2>' + esc(g.nom) + '</h2><span class="nb">' + g.entrees.length + ' ' + (g.entrees.length > 1 ? '${T("réglages")}' : '${T("réglage")}') + '</span></div>'
         + '<div class="rg-ent">' + g.entrees.map(function(e, ei){
             if (e.choix) return '<label class="rg-ch" data-k="' + esc(sansAccent(e.t + ' ' + e.choix.map(function(x){ return x.t; }).join(' '))) + '"><span>' + esc(e.t) + '</span>'
@@ -119,7 +123,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // ⚠ La police embarquée arrive APRÈS le premier dessin et elle est plus large : on remesure quand elle est prête.
     // fonts.ready peut se résoudre AVANT la bascule : on demande la police elle-même, puis une remesure de sûreté.
     // ⚠ MESURÉ : la bascule arrive après 400 ms en sans-tête ; seul l avis « police chargée » est sûr.
-    try { if (document.fonts && document.fonts.load) document.fonts.load('500 13px SzEpure').then(larges, larges); } catch (e) {}
     try { if (document.fonts && document.fonts.addEventListener && !window.__rgPol) { window.__rgPol = 1; document.fonts.addEventListener('loadingdone', function(){ larges(); }); } } catch (e) {}
     setTimeout(larges, 400); setTimeout(larges, 1500);
     document.getElementById('note').textContent = '${T("Les {0} entrées de Configuration tiennent sur un seul écran. Chacune ouvre la même fenêtre qu’avant.")}'.split('{0}').join(n);

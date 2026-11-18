@@ -187,6 +187,52 @@ tbody .det{font-size:.75rem;color:var(--tx2)}
 /* Une commande ETIQUETEE mais pas encore expediee : c est exactement celle qu on
    cherche en reprenant le travail. Elle se repere sans lire. */
 tbody tr.attente{background:rgba(124,92,255,.09)}
+/* ══ COMMANDES FIDÈLE À LA MAQUETTE « Commandes à 50 » (Épuré, 2026-11-18, Volume.dc.html) ══════════════
+   Des GROUPES (À préparer déplié ; En préparation, Annulées repliés), un tableau compact de 38 px (barre de ton,
+   case, commande, client, reçue, total, paiement, livraison, action), pages MESURÉES — jamais de glissière. */
+.mq{flex:1 1 0;min-height:0;display:flex;flex-direction:column;gap:10px;overflow:hidden}
+.cx>.mq{flex:1 1 0;min-height:0}
+.mq-g{flex:none;display:flex;flex-direction:column;gap:6px;min-height:0}
+.mq-g.ouvert{flex:1 1 0}
+.mq-gt{display:flex;align-items:center;gap:10px}
+.mq-gt h2{margin:0;font-size:15px;font-weight:800;color:var(--tx);letter-spacing:0;text-transform:none}
+.mq-gt span{font-size:12px;color:var(--tx2)}
+.mq-carte{flex:1 1 0;min-height:0;display:flex;flex-direction:column;background:var(--f-carte);border:1px solid var(--v08);border-radius:14px;overflow:hidden}
+.mq-lignes{flex:1 1 0;min-height:0;overflow:hidden}
+.mq table{width:100%;border-collapse:collapse;table-layout:fixed}
+.mq th{height:34px;font-size:11px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;text-align:left;
+  border-bottom:1px solid var(--v08);padding:0 6px;background:transparent}
+.mq td{height:38px;font-size:13px;border-bottom:1px solid var(--v06);padding:0 6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;background:transparent}
+.mq tbody tr{cursor:pointer}
+.mq tbody tr:hover td{background:var(--v03)}
+.mq td.b,.mq th.b{padding:0;width:4px}
+.mq td.b i{display:block;width:4px;height:38px;background:var(--mq-ton,#e8a35b)}
+.mq th.b i{display:block;width:4px;height:34px;background:var(--mq-ton,#e8a35b)}
+.mq .no{font-weight:700}
+.mq .vieille{color:var(--tx-att);font-weight:700}
+.mq .mt{text-align:right;font-weight:700;font-variant-numeric:tabular-nums;padding-right:18px}
+.mq .pay{font-size:12px;font-weight:700;padding:3px 9px;border-radius:99px;background:var(--ep-neutre-f,var(--v08));color:var(--ep-neutre-t,var(--tx))}
+.mq .pay.a{background:var(--ep-ambre-f,rgba(245,158,11,.16));color:var(--ep-ambre-t,var(--tx-att))}
+.mq .act button{width:100%;height:28px;border-radius:7px;font-size:12px;font-weight:700;white-space:nowrap;padding:0 8px}
+.mq .act button.prep{background:var(--sz-btn-prim,#8a5a2b);border:0;color:var(--sz-btn-prim-txt,#fff)}
+.mq .act button.tenu{background:var(--ep-ambre-f,rgba(245,158,11,.12));border:1px dashed var(--tx-att);color:var(--tx-att);cursor:default;opacity:1!important}
+/* La barre d'outils : les boutons gardent leur largeur (la recherche passe dessous si la place manque, elle ne les recouvre pas). */
+html[data-sz-theme="epure"] .cx-barre>*:not(.droite){flex-shrink:0}
+/* ⚠ MESURÉ : le bloc de droite débordait VERS LA GAUCHE (justify flex-end) sur « Ventes manuelles » — son minimum = son contenu. */
+html[data-sz-theme="epure"] .cx-barre>.droite,html[data-sz-theme="epure"].jour .cx-barre>.droite{min-width:max-content!important}
+.mq-pied{flex:none;display:flex;align-items:center;gap:8px;height:42px;padding:0 12px;border-top:1px solid var(--v06)}
+.mq-pied span{margin-left:auto;font-size:12px;color:var(--tx2)}
+.mq-pied button{width:30px;height:28px;border-radius:7px;padding:0}
+.mq-replie{flex:none;display:flex;align-items:center;gap:12px;height:46px;padding:0 14px;border-radius:12px;border:1px solid var(--v08);
+  background:var(--f-carte);font:inherit;text-align:left;color:var(--tx);cursor:pointer;width:100%}
+.mq-replie .barre{width:4px;height:22px;border-radius:2px;background:var(--mq-ton,#c9ced8)}
+.mq-replie b{font-size:14px;font-weight:800}
+.mq-replie .det{font-size:12px;color:var(--tx2)}
+.mq-replie .nb{margin-left:auto;min-width:26px;height:22px;padding:0 8px;border-radius:99px;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;
+  background:var(--ep-neutre-f,var(--v08));color:var(--ep-neutre-t,var(--tx))}
+.mq-replie .nb.a{background:var(--ep-ambre-f,rgba(245,158,11,.16));color:var(--ep-ambre-t,var(--tx-att))}
+.mq-vide{padding:1.2rem;font-size:13px;color:var(--tx2)}
+
 /* ══ LA VUE KANBAN (2026-11-18, relooking — ajout choisi par elle) ════════════════════════════════
    Une colonne par statut ; glisser une carte = le MÊME geste qu'un clic droit › statut (flowStatut :
    aperçu du site, confirmation, mêmes refus). ⚠ AUCUNE GLISSIÈRE (sa règle) : les cartes qui ne tiennent
@@ -715,6 +761,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
     t += '</div>';
     if (KB()) t = '<div class="cx-carte cx-liste kb">' + kanban(d, stats) + '</div>';
+    else if (MAQ()) t = vueMaquette(d, ck);
 
     /* ── LE PANNEAU D APPUI : ou en sont les commandes, et ce qui presse — tout depuis les chiffres deja
        recus (tuiles du pont) ; aucune donnee de plus. Absent sur un vieux site. ── */
@@ -741,7 +788,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         if (!nP && !nE) p += '<div class="cx-bon"><span>${T("Rien ne presse.")}</span></div>';
       }
       p += '</div>';
-      h += '<div class="cx-deux">' + t + p + '</div>';
+      h += MAQ() ? t : '<div class="cx-deux">' + t + p + '</div>';   // la maquette n'a pas de panneau d'appui
     } else {
       h += t.replace('cx-carte cx-liste', 'cx-carte cx-liste seule');
     }
@@ -752,10 +799,107 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     brancher();
     listeAutoAjuste();
     if (KB()) { kanbanAjuste(); kanbanBrancher(); }
+    if (MAQ()) {
+      setTimeout(mqAjuste, 0); setTimeout(mqAjuste, 600);
+      // ⚠ La police embarquée arrive après le premier dessin (rangées plus hautes) : on remesure à son arrivée.
+      try { if (document.fonts && !window.__mqPol) { window.__mqPol = 1; document.fonts.addEventListener('loadingdone', function(){ mqAjuste(); }); } } catch (e) {}
+    }
     else corps.ondragstart = corps.ondragend = corps.ondragover = corps.ondrop = null;
   }
 
   /* ══ LA VUE KANBAN (2026-11-18) — une colonne par statut du mode Commandes, et « Expédier » ══ */
+
+  /* ══ COMMANDES FIDÈLE À LA MAQUETTE (Épuré) — la vue « Détaillé » de ce jeu ══════════════════════════════ */
+  function MAQ(){ return MODE !== 'expeditions' && !COMPACT && !KB() && document.documentElement.getAttribute('data-sz-theme') === 'epure'; }
+  var MQ_OUVERT = 'prep', MQ_PG = 0, MQ_CAP = 10;
+  var MQ_GROUPES = [
+    { cle: 'prep', nom: '${T("À préparer")}', st: ['pending', 'confirmed'], ton: '#e8a35b', a: true, det: '${T("les plus anciennes d’abord")}' },
+    { cle: 'cours', nom: '${T("En préparation")}', st: ['preparing', 'verification'], ton: '#e8a35b', a: true, det: '${T("préparation et vérification en cours")}' },
+    { cle: 'annulees', nom: '${T("Annulées")}', st: ['cancelled'], ton: '#c9ced8', a: false, det: '${T("plus rien à faire")}' }
+  ];
+  var MQ_TRANSP = { 'postes-canada': '${T("Postes Canada")}', 'purolator': 'Purolator', 'fedex': 'FedEx', 'ups': 'UPS', 'ramassage': '${T("Ramassage")}', 'canpar': 'Canpar' };
+  function mqTransp(k){ k = String(k || ''); if (!k) return '—'; return MQ_TRANSP[k] || (k.charAt(0).toUpperCase() + k.slice(1).replace(/-/g, ' ')); }
+  function mqRecue(iso){
+    var d = new Date(iso); if (isNaN(d)) return { t: '—', v: false };
+    var n = new Date(), j = Math.floor((n - d) / 86400000);
+    var hh = d.getHours() + ' h' + (d.getMinutes() ? ' ' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes() : '');
+    if (d.toDateString() === n.toDateString()) return { t: '${T("auj.")} ' + hh, v: false };
+    var hier = new Date(n); hier.setDate(n.getDate() - 1);
+    if (d.toDateString() === hier.toDateString()) return { t: '${T("hier")} ' + hh, v: false };
+    return { t: '${T("il y a {0} j")}'.split('{0}').join(Math.max(2, j)), v: j >= 2 };
+  }
+  function mqLignes(d, g){
+    return ((d && d.lignes) || []).filter(function(o){ return g.st.indexOf(o.statut) >= 0; })
+      .sort(function(a, b){ return (b.prioritaire ? 1 : 0) - (a.prioritaire ? 1 : 0) || String(a.date).localeCompare(String(b.date)); });
+  }
+  function mqLigne(o, g, ck){
+    var r = mqRecue(o.date);
+    var act = '';
+    if (o.statut !== 'cancelled') {
+      if (o.enTraitement) act = '<button type="button" class="tenu" disabled>' + esc((o.par || '${T("Quelqu’un")}') + ' ${T("prépare")}') + '</button>';
+      else if (CTX && CTX.peutEditer && o.statut !== 'pending') act = '<button type="button" class="prep" data-prep="' + esc(o.id) + '">${T("Préparer")}</button>';
+    }
+    return '<tr class="' + ck.classe(o) + '" data-id="' + esc(o.id) + '" style="--mq-ton:' + g.ton + '" title="${T("Clic : détails · clic droit : changer le statut")}">'
+      + '<td class="b"><i></i></td>' + ck.td(o)
+      + '<td class="no">' + esc(o.numero) + '</td>'
+      + '<td>' + esc(o.client) + (o.prioritaire ? ' <span class="rf-pill ambre">${T("Prioritaire")}</span>' : '') + '</td>'
+      + '<td class="' + (r.v ? 'vieille' : '') + '">' + esc(r.t) + '</td>'
+      + '<td class="mt">' + argent(o.total) + '</td>'
+      + '<td><span class="pay' + (o.statut === 'pending' ? ' a' : '') + '">' + (o.statut === 'pending' ? '${T("En attente")}' : (o.statut === 'cancelled' ? '${T("Annulée")}' : '${T("Payée")}')) + '</span></td>'
+      + '<td>' + esc(o.manuelle ? '${T("Comptoir")}' : mqTransp(o.transporteur)) + '</td>'
+      + '<td class="act">' + act + '</td></tr>';
+  }
+  function vueMaquette(d, ck){
+    var h = '<div class="mq">' + ck.barre();
+    var tous = (d && d.lignes) || [];
+    if (!tous.length) return h + '<div class="mq-vide">' + (F.q || F.statuts.length || F.prioritaires || F.manuelles ? '${T("Aucune commande ne correspond à ces filtres.")}' : '${T("Aucune commande en cours.")}') + '</div></div>';
+    var vus = MQ_GROUPES.filter(function(g){ return mqLignes(d, g).length; });
+    if (!vus.some(function(g){ return g.cle === MQ_OUVERT; })) { MQ_OUVERT = vus[0].cle; MQ_PG = 0; }
+    vus.forEach(function(g){
+      var l = mqLignes(d, g);
+      if (g.cle === MQ_OUVERT) {
+        var pages = Math.max(1, Math.ceil(l.length / MQ_CAP)); if (MQ_PG > pages - 1) MQ_PG = pages - 1;
+        var debut = MQ_PG * MQ_CAP, page = l.slice(debut, debut + MQ_CAP);
+        h += '<section class="mq-g ouvert"><div class="mq-gt"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="m6 9 6 6 6-6"></path></svg>'
+          + '<h2>' + g.nom + '</h2><span>' + l.length + ' ' + (l.length > 1 ? '${T("commandes")}' : '${T("commande")}') + ' · ' + g.det + '</span></div>'
+          + '<div class="mq-carte"><div class="mq-lignes"><table><colgroup><col style="width:4px"><col style="width:34px"><col style="width:120px"><col><col style="width:110px"><col style="width:110px"><col style="width:120px"><col style="width:16%"><col style="width:130px"></colgroup>'
+          + '<thead><tr style="--mq-ton:' + g.ton + '"><th class="b"><i></i></th>' + ck.th() + '<th>${T("Commande")}</th><th>${T("Client")}</th><th>${T("Reçue")}</th><th class="mt">${T("Total")}</th><th>${T("Paiement")}</th><th>${T("Livraison")}</th><th></th></tr></thead><tbody>'
+          + page.map(function(o){ return mqLigne(o, g, ck); }).join('') + '</tbody></table></div>'
+          + '<div class="mq-pied"><button type="button" class="mini" data-mq-pg="-1" aria-label="${T("Page précédente")}"' + (MQ_PG <= 0 ? ' disabled' : '') + '>‹</button>'
+          + '<button type="button" class="mini" data-mq-pg="1" aria-label="${T("Page suivante")}"' + (MQ_PG >= pages - 1 ? ' disabled' : '') + '>›</button>'
+          + '<span>' + (debut + 1) + '–' + Math.min(debut + MQ_CAP, l.length) + '${T(" sur ")}' + l.length + ' · ${T("page")} ' + (MQ_PG + 1) + ' / ' + pages + '</span></div></div></section>';
+      } else {
+        h += '<button type="button" class="mq-replie" data-mq-g="' + g.cle + '" aria-expanded="false" style="--mq-ton:' + g.ton + '">'
+          + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true"><path d="m9 6 6 6-6 6"></path></svg>'
+          + '<span class="barre"></span><b>' + g.nom + '</b><span class="det">' + g.det + '</span>'
+          + '<span class="nb' + (g.a ? ' a' : '') + '">' + l.length + '</span></button>';
+      }
+    });
+    return h + '</div>';
+  }
+  /* La page MESURÉE : autant de lignes que la carte en tient (jamais de glissière). Redessine si la capacité change. */
+  /* Le jeu de couleurs arrive APRÈS le chargement (la coquille le pose à did-finish-load) : on recharge dans la
+     bonne vue dès qu'il change, au lieu d'attendre la relecture suivante. Et la page mesurée suit la fenêtre. */
+  try {
+    var _mqJeu = document.documentElement.getAttribute('data-sz-theme');
+    new MutationObserver(function(){
+      var j = document.documentElement.getAttribute('data-sz-theme');
+      if (j !== _mqJeu) { _mqJeu = j; MQ_PG = 0; if (typeof charger === 'function' && VUE === 'liste') charger(true); }
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-sz-theme'] });
+    var _mqT = null;
+    window.addEventListener('resize', function(){ clearTimeout(_mqT); _mqT = setTimeout(mqAjuste, 120); });
+    // ⚠ MESURÉ : la place change APRÈS le dessin (barre d'outils, police) — on observe la zone elle-même.
+    if (window.ResizeObserver) new ResizeObserver(function(){ clearTimeout(_mqT); _mqT = setTimeout(mqAjuste, 60); }).observe(corps);
+  } catch (e) {}
+  function mqAjuste(){
+    if (!MAQ()) return;
+    var z = corps.querySelector('.mq-lignes'); if (!z) return;
+    var th = z.querySelector('thead'), tr = z.querySelector('tbody tr');
+    var hL = tr ? tr.getBoundingClientRect().height : 38; if (!(hL > 0)) hL = 38;
+    var cap = Math.max(3, Math.floor((z.clientHeight - (th ? th.getBoundingClientRect().height : 34)) / hL));
+    if (cap !== MQ_CAP) { MQ_CAP = cap; dessiner(); }
+  }
+
   function kbCarte(o){
     var tire = !o.enTraitement && !!(CTX && CTX.peutEditer);
     return '<div class="kb-carte' + (o.enTraitement ? ' tenue' : '') + '" data-kb-id="' + esc(o.id) + '" draggable="' + tire + '"'
@@ -1519,6 +1663,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         }
         return;
       }
+      var mg = t.closest('[data-mq-g]');
+      if (mg) { MQ_OUVERT = mg.getAttribute('data-mq-g'); MQ_PG = 0; dessiner(); return; }
+      var mp = t.closest('[data-mq-pg]');
+      if (mp) { if (!mp.disabled) { MQ_PG = Math.max(0, MQ_PG + (+mp.getAttribute('data-mq-pg'))); dessiner(); } return; }
       // Kanban : « + k autres » ouvre la LISTE filtrée sur ce statut ; une carte ouvre le détail.
       var kp = t.closest('[data-kb-plus]');
       if (kp) {
@@ -1790,7 +1938,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (enCours) { RELANCE = true; return; }
     enCours = true;
     // Kanban : la liste ENTIÈRE du mode (200 au plus, borne du site), les statuts deviennent les colonnes.
-    appeler('commandes:liste', [MODE, KB() ? Object.assign({}, F, { page: 0, parPage: 200, statuts: [] }) : F]).then(function(r){
+    appeler('commandes:liste', [MODE, KB() ? Object.assign({}, F, { page: 0, parPage: 200, statuts: [] })
+      : (MAQ() ? Object.assign({}, F, { page: 0, parPage: 200 }) : F)]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; charger(forcer); return; }
       if (!r.ok) { dire(expliquer(r), 'err'); return; }

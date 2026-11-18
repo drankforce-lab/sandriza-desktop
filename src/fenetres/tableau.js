@@ -499,7 +499,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var slot = document.getElementById('tb-mx-slot');
     var mxH = (D && D.bilan ? '<button class="mini" id="tb-bilan" title="${T("Ce qui s’est passé aujourd’hui, et ce qui reste pour demain")}">${T("Bilan du jour")}</button> ' : '')
       + ((MX && MX.ok) ? '<button class="mini" id="tb-mx" title="${T("Empêcher toute autre connexion pendant une maintenance")}">'
-      + (MX.actif ? '\u{1F512} ${T("Mode exclusif : ACTIF")}' : '\u{1F512} ${T("Mode exclusif")}…') + '</button>' : '');
+      + (MX.actif ? '\u{1F512} ${T("Mode exclusif : ACTIF")}' : '\u{1F512} ${T("Mode exclusif")}') + '</button>' : '');
     if (slot && slot._src !== mxH) { slot.innerHTML = mxH; slot._src = mxH; }   // (même règle : rien ne se repeint sans changement)
     return h;
   }
