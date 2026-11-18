@@ -5047,6 +5047,7 @@ html[data-sz-theme="epure"]:not(.jour){
   --f-bande:#1c2330; --f-entete:#222a38;
   --tx:#e8ecf2; --tx-blanc:#f3f5f9; --tx2:#9aa4b5; --tx3:#8f99aa; --tx-gris:#98a2b3; --tx-bleute:#d5dbe5; --tx-gris2:#d5dbe5; --tx-94a3b8:#9aa4b5;
   --tx-err:#fa9494;   /* le rouge des gestes dangereux, lisible aussi sur le survol bleu nuit (4,48 → au-dessus de 4,5) */
+  --tx-att:#f2c27e;   /* (phase 4) l'AMBRE des maquettes, et non l'olive du jeu par défaut : un seul ambre partout */
 }
 html[data-sz-theme="epure"].jour{
   --sz-fond:#f4f5f9; --sz-fond2:#ffffff; --sz-pied:#ffffff;
@@ -5063,6 +5064,7 @@ html[data-sz-theme="epure"].jour{
   --f-bande:#f4f5f9; --f-entete:#eef0f4;
   --tx:#1f2533; --tx-blanc:#1f2533; --tx2:#5b6273; --tx3:#5b6273; --tx-gris:#5b6273;
   --ep-neutre-f:#eef0f4; --ep-neutre-t:#3d4456; --ep-ambre-f:#fdebd3; --ep-ambre-t:#8a3f00; --ep-rouge-f:#fbe3e2; --ep-rouge-t:#9f2422;
+  --tx-att:#8a3f00;
 }
 /* ⚠ LE FOND DE PAGE (corrigé 2026-11-18, comparé à la maquette) : « html.jour body{background:#f4f2ec} » du socle
    (le crème de l'ancien look) l'emportait sur --f-page — toutes les fenêtres restaient beiges en Épuré jour, au
