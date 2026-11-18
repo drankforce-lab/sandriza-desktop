@@ -207,4 +207,5 @@ module.exports = {
   'Stock': 'Stock',
   'Correct': 'OK',
   '{0} en stock': '{0} in stock',
+  'Importer d’un fournisseur': 'Import from a supplier',
 };

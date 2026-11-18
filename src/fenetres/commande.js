@@ -736,6 +736,7 @@ function pageCommande(id) {
     var f = comptes(), att = attendus();
     function l(t, ok){ return '<span class="ep-ctrl' + (ok ? ' ok' : '') + '"><i>' + (ok ? '✓' : '·') + '</i>' + esc(t) + '</span>'; }
     z.innerHTML = l('${T("Bon de commande imprimé")}', BON_IMPRIME)
+      + (CMD && CMD.paiement ? l(CMD.paiement.attente ? '${T("Paiement en attente")}' : '${T("Paiement confirmé")}', !!CMD.paiement.confirme) : '')
       + l('${T("Tous les articles scannés ({0} sur {1})")}'.split('{0}').join(f).split('{1}').join(att), toutVerifie());
     var ms = document.getElementById('ep-msg');
     if (ms) {

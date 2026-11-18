@@ -411,6 +411,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var h = '<div class="pm" style="display:flex;flex-direction:column;flex:1 1 auto;min-height:0">'
       + '<header class="pm-tete"><div class="g"><h1>${T("Produits et stock")}</h1><p>' + esc(resume.join(' · ')) + '</p></div>'
       + '<label class="rf-rch">${ICO.loupe}<input aria-label="${T("Rechercher un produit")}" type="search" id="p-q" placeholder="${T("Rechercher…")}" value="' + esc(Q) + '"></label>'
+      + (P && P.ouvrirModule ? '<button type="button" id="p-import">${T("Importer d’un fournisseur")}</button>' : '')
       + '<button type="button" id="p-marges">${T("Vérifier mes marges")}</button>'
       + ((D.peutVenteFinale || D.peutLot) && !LOT ? '<button type="button" id="p-lot">${T("Sélectionner")}</button>' : '')
       + '<button type="button" class="prim" id="p-nouveau">${T("+ Nouveau produit")}</button></header>';
@@ -472,6 +473,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         '<button class="mini" id="p-exporter"><span class="ic">⬇</span>${T(" Exporter")}</button>');
     }
     corps.innerHTML = h;
+    var bi = document.getElementById('p-import');
+    if (bi) bi.onclick = function(){ P.ouvrirModule('import-fournisseur'); dire('${T("Ouverture…")}'); };
     corps.querySelectorAll('[data-pm-tous],[data-pm-cat],[data-pm-stock],[data-pm-tag]').forEach(function(b){
       b.onclick = function(){
         if (b.hasAttribute('data-pm-tous')) { CAT = ''; STOCK = ''; TAG = ''; }

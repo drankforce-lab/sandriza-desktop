@@ -428,4 +428,6 @@ module.exports = {
   'Tous les articles scannés ({0} sur {1})': 'All items scanned ({0} of {1})',
   'Scannez encore {0} pour continuer.': 'Scan {0} more to continue.',
   'Tout est scanné : passez à l’étiquette.': 'Everything is scanned: move on to the label.',
+  'Paiement confirmé': 'Payment confirmed',
+  'Paiement en attente': 'Payment pending',
 };

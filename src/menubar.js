@@ -382,8 +382,17 @@ ${css}
     tete.appendChild(x);
     pan.appendChild(tete);
     var grille=document.createElement('div'); grille.className='ep-cols';
-    cols.forEach(function(c){
+    /* (2026-11-18, sa capture d'Affichage : six colonnes, le panneau sortait de la fenêtre et couvrait la colonne)
+       Au-delà de QUATRE groupes, les colonnes passent sur deux rangées au lieu d'élargir le panneau. */
+    var parRang = cols.length > 4 ? Math.ceil(cols.length / Math.ceil(cols.length / 4)) : cols.length;
+    if (cols.length > 4) {
+      grille.style.gridAutoFlow = 'row';
+      grille.style.gridTemplateColumns = 'repeat(' + parRang + ', max-content)';
+      grille.style.rowGap = '18px';
+    }
+    cols.forEach(function(c, ci){
       var col=document.createElement('div'); col.className='ep-col';
+      if (cols.length > 4 && ci % parRang === 0) col.style.borderLeft = '0';
       if (c.t) { var t=document.createElement('span'); t.className='t'; t.textContent=c.t; col.appendChild(t); }
       c.items.forEach(function(it){ col.appendChild(entree(it, false)); });
       grille.appendChild(col);

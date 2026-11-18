@@ -7832,7 +7832,9 @@ const _MODULES_OUVRABLES = ['generations', 'verrous', 'journaux', 'securite', 'i
   // Bons de commande fournisseurs (2026-10-27) : le bouton « Commander » de l Inventaire (Reapprovisionnement) les ouvre.
   'bons-commande',
   // Le calendrier (2026-11-18) : un evenement ouvre le module qui le porte.
-  'calendrier', 'ramassages', 'produits', 'reglages'];
+  'calendrier', 'ramassages', 'produits', 'reglages',
+  // Produits (Épuré, 2026-11-18) : « Importer d’un fournisseur », comme dans la maquette.
+  'import-fournisseur'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();
   if (_MODULES_OUVRABLES.indexOf(n) < 0) return false;

@@ -311,9 +311,9 @@ html.jour .voile{background:rgba(20,24,30,.35)}
 .tm-pill.a{background:var(--ep-ambre-f,rgba(245,158,11,.16));color:var(--ep-ambre-t,var(--tx-att))}
 .tm-pill.r{background:var(--ep-rouge-f,rgba(239,68,68,.16));color:var(--ep-rouge-t,var(--tx-err))}
 .tm-liste{flex:1 1 0;min-height:0;overflow:hidden;display:flex;flex-direction:column}
-.tm-l{flex:none;display:grid;grid-template-columns:96px minmax(0,1fr) 150px 100px 120px;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--v06);font-size:13px}
+.tm-l{flex:none;display:grid;grid-template-columns:140px minmax(0,1fr) 150px 100px 120px;align-items:center;gap:10px;padding:8px 0;border-top:1px solid var(--v06);font-size:13px}
 .tm-l[hidden]{display:none}
-.tm-l b{font-weight:700}
+.tm-l b{font-weight:700;white-space:nowrap}
 .tm-l .cl{display:flex;flex-direction:column;min-width:0}
 .tm-l .cl span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tm-l .cl span:first-child{font-weight:600}
