@@ -242,6 +242,66 @@ html.jour .lien{color:#1d4f91}
 .petit{font-size:.78rem;color:var(--tx2)}
 .petit label{display:flex;align-items:center;gap:.45rem;cursor:pointer}
 @media (max-width:860px){.cote{flex-basis:15rem}.lg{grid-template-columns:2.8rem minmax(0,1fr) auto 6rem}}
+/* ══ « ÉPURÉ » (8.43.0, fidèle à Preparation.dc.html) — les articles VALIDÉS restent dans la liste
+   (sa décision du 2026-11-18 : « A, fidèle à la maquette »). Trois tons : neutre, ambre, rouge. ══ */
+html[data-sz-theme="epure"] .tete .qui .fa{font-size:12px;color:var(--tx2);font-weight:600}
+html[data-sz-theme="epure"] .tete .ep-pill{font-size:12px;font-weight:700;padding:6px 12px;border-radius:8px;white-space:nowrap;background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+html[data-sz-theme="epure"] .tete .ep-bon{height:38px;padding:0 14px;border-radius:10px;font-size:13px;font-weight:600;white-space:nowrap}
+html[data-sz-theme="epure"] .fil{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;padding:14px 1.1rem 0;border-bottom:0}
+html[data-sz-theme="epure"] .fil button{display:flex;align-items:center;gap:12px;padding:12px 16px;border-radius:12px;background:var(--f-page);border:1px solid var(--v08);text-align:left;min-width:0;color:var(--tx)}
+html[data-sz-theme="epure"] .fil button.on{background:var(--f-carte);border-color:var(--sz-btn-prim)}
+html[data-sz-theme="epure"] .fil button .n{width:30px;height:30px;flex:none;border:0;background:var(--v08);color:var(--tx);font-weight:800;font-size:14px}
+html[data-sz-theme="epure"] .fil button.on .n,html[data-sz-theme="epure"] .fil button.fait .n{background:var(--sz-btn-prim,#8a5a2b);color:var(--sz-btn-prim-txt,#fff)}
+html[data-sz-theme="epure"] .fil .tx{display:flex;flex-direction:column;min-width:0}
+html[data-sz-theme="epure"] .fil .tx b{font-size:14px;font-weight:800;white-space:nowrap;color:var(--tx2)}
+html[data-sz-theme="epure"] .fil button.on .tx b,html[data-sz-theme="epure"] .fil button.fait .tx b{color:var(--tx)}
+html[data-sz-theme="epure"] .fil .tx span{font-size:12px;color:var(--tx2);font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ep-c{background:var(--f-carte);border:1px solid var(--v08);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.ep-c h2{margin:0;font-size:15px;font-weight:800;color:var(--tx);letter-spacing:0;text-transform:none}
+.ep-main{flex:1 1 0;min-height:0;gap:14px;padding:18px 20px}
+.ep0 .col{overflow:hidden}
+.ep0 .scan{height:56px;box-sizing:border-box;border:2px solid var(--sz-btn-prim,#8a5a2b);background:var(--f-champ);padding:0 16px}
+.ep0 .scan svg{color:var(--sz-btn-prim,#8a5a2b)}
+.ep0 .scan .pret{font-size:12px;font-weight:700;color:var(--ep-ambre-t);white-space:nowrap}
+.ep-tt{flex:none;display:flex;align-items:center;gap:10px}
+.ep-tt h2{margin-right:auto}
+.ep-tt span{font-size:12px;font-weight:700;color:var(--tx2);white-space:nowrap}
+.ep-barre{flex:none;height:8px;border-radius:99px;background:var(--v08);overflow:hidden}
+.ep-barre i{display:block;height:100%;width:0;border-radius:99px;background:var(--sz-btn-prim,#8a5a2b);transition:width .25s}
+.ep0 .lg{grid-template-columns:64px minmax(0,1fr) auto auto;gap:16px;padding:12px;border-radius:12px;border:1px solid var(--v08);background:var(--f-carte)}
+.ep0 .lg .vg,.ep0 .lg .vg .rf-av{width:64px!important;height:64px!important}
+.ep0 .lg .nm{font-size:15px}
+.ep0 .lg .pl{display:flex;gap:6px;flex-wrap:nowrap;margin-top:4px;overflow:hidden}
+.ep0 .lg .pl span{font-size:12px;font-weight:600;padding:3px 8px;border-radius:6px;background:var(--f-page);color:var(--ep-neutre-t);white-space:nowrap}
+.ep0 .lg .cp{font-size:15px}
+.ep0 .lg .st{justify-self:end;display:flex;align-items:center;gap:8px}
+.ep0 .lg .st b{font-size:13px;font-weight:700;padding:8px 12px;border-radius:8px;white-space:nowrap;background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+.ep0 .lg.ok .st b{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+.ep0 .lg .st button{width:32px;height:32px;padding:0;border-radius:8px}
+.ep0 .lg.fait,.ep0 .lg.flash{border-color:var(--v08);background:var(--f-carte)}
+.ep-bas{flex:none;display:flex;gap:8px;flex-wrap:wrap}
+.ep-bas button{height:34px;padding:0 12px;border-radius:8px;font-size:13px;font-weight:600;white-space:nowrap}
+.ep-cote{flex:0 0 33%!important;max-width:420px}
+.ep-dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-size:13px}
+.ep-dl span{color:var(--tx2);white-space:nowrap}
+.ep-dl b{font-weight:600;overflow-wrap:anywhere}
+.ep-ctrl{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;color:var(--tx2)}
+.ep-ctrl i{width:20px;height:20px;flex:none;border-radius:6px;background:var(--v12);color:var(--tx2);font-style:normal;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center}
+.ep-ctrl.ok{color:var(--tx)}
+.ep-ctrl.ok i{background:var(--sz-btn-prim,#8a5a2b);color:var(--sz-btn-prim-txt,#fff)}
+html[data-sz-theme="epure"] .pied{background:var(--f-carte);border-top:1px solid var(--v08);padding:14px 1.1rem}
+html[data-sz-theme="epure"] .pied .actions button{height:42px;padding:0 18px;border-radius:10px;font-size:14px;font-weight:600}
+html[data-sz-theme="epure"] .pied .actions #v-continuer{width:auto;min-height:0;padding:0 22px;font-weight:700}
+.ep-msg{flex:1 1 auto;font-size:13px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ep0 .retour.cache{display:none}
+html[data-sz-theme="epure"] .tete .ep-pill{margin-left:auto}
+html[data-sz-theme="epure"] .tete .sous{margin-left:0}
+html[data-sz-theme="epure"] .pied #msg:empty{display:none}
+html[data-sz-theme="epure"].jour .pied{background:var(--f-carte)}
+html.jour .ep0 .scan{border-color:#8a5a2b}
+html.jour .ep0 .lg .pl span{color:#3d4456}
+html.jour .ep-ctrl i{color:#3d4456}
+
 `;
 
 /** Page complète de l'assistant. `id` = commande à préparer. */
@@ -341,7 +401,21 @@ function pageCommande(id) {
      Le bon n est pas une étape de travail : c est la question posée à l ouverture. Il porte ✓
      quand il est sorti, et un clic le réimprime. Les trois autres se suivent ; avancer par le fil
      passe par la même garde que le bouton de l étape. */
+  function EPP(){ return document.documentElement.getAttribute('data-sz-theme') === 'epure'; }
   function fil(){
+    if (EPP()) {
+      var ep = [
+        { k: 0, t: '${T("Vérification")}', s: '${T("Scanner chaque article")}', fait: toutVerifie() },
+        { k: 1, t: '${T("Étiquette")}', s: '${T("Transporteur, poids, impression 4 × 6")}', fait: etiquetteFaite() },
+        { k: 2, t: '${T("Expédition")}', s: '${T("Bordereau, étiquette collée, courriel")}', fait: false }
+      ];
+      document.getElementById('fil').innerHTML = ep.map(function(e, n){
+        var on = e.k === ETAPE;
+        return '<button type="button" role="tab" data-fil="' + e.k + '" aria-selected="' + on + '" class="' + (on ? 'on' : (e.fait ? 'fait' : '')) + '" title="Alt+' + (n + 1) + '">'
+          + '<span class="n">' + (e.fait && !on ? '✓' : (n + 1)) + '</span><span class="tx"><b>' + esc(e.t) + '</b><span>' + esc(e.s) + '</span></span></button>';
+      }).join('');
+      return;
+    }
     var et = [
       { k: 'bon', t: '${T("Bon de commande")}', fait: BON_IMPRIME },
       { k: 0, t: '${T("Vérification")}', fait: toutVerifie() },
@@ -377,6 +451,8 @@ function pageCommande(id) {
     if (ETAPE === 0) { dessinerLignes(); focusScan(); }
     if (ETAPE === 1) { entrerEtiquette(); }
     if (ETAPE === 2) { recap(); }
+    var vcp = document.querySelector('.pied #v-continuer'); if (vcp) vcp.hidden = ETAPE !== 0;
+    if (EPP()) majControlesEp();
     majBac();
   }
   document.getElementById('btn-prec').onclick = function(){ aller(ETAPE - 1); };
@@ -391,6 +467,7 @@ function pageCommande(id) {
 
   function dessiner(){
     var h = [];
+    if (EPP()) h.push(etapeVerifEp()); else
     /* 1 — VÉRIFICATION. Champ de scan EN PREMIER et TOUJOURS sous le curseur : on vérifie un
        colis le lecteur à la main, sans regarder l écran. */
     h.push('<div class="etape"><div class="col">'
@@ -473,12 +550,48 @@ function pageCommande(id) {
       + '<button type="button" class="lien" id="x-suivante" hidden></button>'
       + '</aside></div>');
 
+    // Le bouton du pied (Épuré) appartient au dessin précédent : il part avant le nouveau.
+    Array.prototype.forEach.call(document.querySelectorAll('.pied #v-continuer'), function(x){ x.remove(); });
     document.getElementById('corps').innerHTML = h.join('');
     document.getElementById('c-pret').checked = !!CMD.dejaPret;
     poser('c-suivi', CMD.suivi || '');
+    teteEp();
     brancher();
     fil();
+    /* Un REdessin (le jeu change) garde l étape courante, sans rien relancer (pas de nouvelle cotation). */
+    Array.prototype.forEach.call(document.querySelectorAll('.etape'), function(el, n){ el.classList.toggle('on', n === ETAPE); });
+    if (ETAPE === 0) dessinerLignes();
+    var vcp = document.querySelector('.pied #v-continuer'); if (vcp) vcp.hidden = ETAPE !== 0;
   }
+  /* La tête et le pied « Épuré » : le fil d Ariane, « SZ-… · Client », la pastille du nombre d articles et
+     « Réimprimer le bon de commande » ; à gauche du pied, ce qui reste à faire. Rien ne change hors Épuré. */
+  function teteEp(){
+    var ep = EPP(), qui = document.querySelector('.tete .qui'), tete = document.querySelector('.tete');
+    var fa = qui.querySelector('.fa');
+    if (ep && !fa) { fa = document.createElement('span'); fa.className = 'fa'; fa.textContent = '${T("Commandes › Préparation")}'; qui.insertBefore(fa, qui.firstChild); }
+    if (fa) fa.hidden = !ep;
+    document.getElementById('cli').hidden = ep;
+    document.getElementById('titre').textContent = ep ? CMD.numero + ' · ' + (CMD.client || '') : '${T("Préparation —")} ' + CMD.numero;
+    var pil = tete.querySelector('.ep-pill'), bon = tete.querySelector('.ep-bon'), sous = document.getElementById('sous');
+    if (ep && !pil) {
+      pil = document.createElement('span'); pil.className = 'ep-pill'; tete.insertBefore(pil, sous);
+      bon = document.createElement('button'); bon.type = 'button'; bon.className = 'ep-bon'; bon.textContent = '${T("Réimprimer le bon de commande")}';
+      bon.onclick = function(){ imprimer('bon', this); }; tete.insertBefore(bon, sous);
+    }
+    if (pil) { pil.hidden = !ep; pil.textContent = attendus() + ' ' + szPl(attendus(), '${T("article")}', '${T("articles")}') + (CMD.prioritaire ? ' · ${T("Prioritaire")}' : ''); }
+    if (bon) bon.hidden = !ep;
+    var pied = document.querySelector('.pied'), ms = document.getElementById('ep-msg');
+    if (ep && !ms) { ms = document.createElement('span'); ms.id = 'ep-msg'; ms.className = 'ep-msg'; pied.insertBefore(ms, pied.querySelector('.actions')); }
+    if (ms) ms.hidden = !ep;
+  }
+  // Le jeu arrive APRÈS le chargement (posé par la coquille) : la fenêtre se redessine dès qu il change.
+  try {
+    var _prJeu = document.documentElement.getAttribute('data-sz-theme');
+    new MutationObserver(function(){
+      var j = document.documentElement.getAttribute('data-sz-theme');
+      if (j !== _prJeu) { _prJeu = j; PAR_PAGE = 0; if (CMD) dessiner(); }
+    }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-sz-theme'] });
+  } catch (e) {}
 
   /* ══ LES LIGNES (2026-10-19, sa demande) ══════════════════════════════════════════════
      La GRANDE liste ne montre que ce qui RESTE à scanner (un article à 1/2 y reste, avec son
@@ -527,7 +640,93 @@ function pageCommande(id) {
       + '<span class="q">×' + a.quantite + '</span>'
       + '<button type="button" data-annuler="' + esc(a.cle) + '" title="${T("Annuler un scan — remettre à scanner")}" aria-label="${T("Annuler un scan")}">↺</button></div>';
   }
+  /* La vérification « Épuré » : la carte du scan (champ, compte, barre, TOUS les articles), la livraison et
+     les contrôles à droite, et « Aller à l étiquette » dans le pied. Mêmes identifiants que la vue
+     habituelle : brancher() et le clavier n y voient pas de différence. */
+  function etapeVerifEp(){
+    var c = CMD || {};
+    var mode = [c.transporteur ? nomT(c.transporteur) : '', c.service].filter(Boolean).join(' · ');
+    return '<div class="etape ep0"><div class="col"><section class="ep-c ep-main">'
+      + '<div class="reprise" id="v-reprise" hidden><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12a9 9 0 1 0 3-6.7"></path><path d="M3 3v6h6"></path></svg>'
+      + '<span id="v-reprise-t"></span><button type="button" id="v-recommencer">${T("Recommencer")}</button></div>'
+      + '<label class="scan" id="v-scan" for="c-scan"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 6v12M7 6v12M10 6v12M14 6v12M17 6v12M20 6v12"></path></svg>'
+      + '<input id="c-scan" aria-label="${T("Scannez l’article")}" placeholder="${T("Scannez l’article, ou tapez son code")}" autocomplete="off" spellcheck="false">'
+      + '<span class="pret">${T("Lecteur prêt")}</span></label>'
+      + '<div class="retour cache" id="v-retour" role="status" aria-live="polite"></div>'
+      + '<div class="ep-tt"><h2>${T("Articles à scanner")}</h2><span id="ep-compte"></span></div>'
+      + '<div class="ep-barre"><i id="v-barre"></i></div>'
+      + '<div class="lignes" id="v-lignes" aria-label="${T("Articles à scanner")}"></div>'
+      + '<div class="v-pagi" id="v-pagi" hidden><span class="reste" id="v-reste"></span>'
+      + '<button type="button" data-vpg="-1" aria-label="${T("Page précédente")}">‹</button><span class="pos" id="v-pos"></span>'
+      + '<button type="button" data-vpg="1" aria-label="${T("Page suivante")}">›</button></div>'
+      + '<div class="ep-bas"><button type="button" id="ep-annuler">${T("Annuler un scan — remettre à scanner")}</button>'
+      + '<button type="button" id="v-main">${T("Cocher à la main")}</button></div>'
+      + '</section></div>'
+      + '<aside class="cote fixe ep-cote" aria-label="${T("Livraison")}">'
+      + '<section class="ep-c"><h2>${T("Livraison")}</h2><div class="ep-dl">'
+      + '<span>${T("Destinataire")}</span><b>' + esc(c.client || '—') + '</b>'
+      + '<span>${T("Adresse")}</span><b>' + esc(c.adresse || '—') + '</b>'
+      + (mode ? '<span>${T("Mode")}</span><b>' + esc(mode) + '</b>' : '')
+      + (c.notes ? '<span>${T("Note")}</span><b>' + esc(c.notes) + '</b>' : '')
+      + (c.noteClient ? '<span>${T("Fiche client")}</span><b>' + esc(c.noteClient) + '</b>' : '')
+      + '</div></section>'
+      + '<section class="ep-c"><h2>${T("Avant de passer à l’étiquette")}</h2><div id="ep-ctrl" style="display:flex;flex-direction:column;gap:10px"></div></section>'
+      + '<div hidden><b id="v-n"></b><span id="v-sur"></span><span id="v-valides-t"></span><div id="v-valides"></div>'
+      + '<button type="button" id="c-bon"></button><button type="button" id="c-colis"></button></div>'
+      + '<button type="button" class="prim gros-btn" id="v-continuer" disabled>${T("Aller à l’étiquette →")}</button>'
+      + '</aside><div class="coche" id="v-coche"><div><span>✓</span> ${T("Colis vérifié")}</div></div></div>';
+  }
+  function ligneEp(a){
+    var v = COMPTES[a.cle] || 0, ok = v >= a.quantite;
+    return '<div class="lg' + (ok ? ' ok' : '') + (FLASH === a.cle ? ' flash' : '') + '" data-cle="' + esc(a.cle) + '"' + (ok ? '' : ' data-reste="' + esc(a.cle) + '"') + '>'
+      + '<div class="vg">' + szVignette(a.image, a.nom, '', a.nom) + '</div>'
+      + '<div style="min-width:0"><div class="nm">' + esc(a.nom) + '</div><div class="pl">'
+      + (a.taille ? '<span>' + esc('${T("Taille {0}")}'.split('{0}').join(a.taille)) + '</span>' : '')
+      + (a.couleur ? '<span>' + esc(a.couleur) + '</span>' : '')
+      + (a.sku ? '<span>' + esc(a.sku) + '</span>' : '')
+      + (a.precommande > 0 ? '<span>' + esc('${T("{0} en précommande")}'.replace('{0}', String(a.precommande))) + '</span>' : '') + '</div></div>'
+      + '<div class="cp">' + (a.quantite > 1 || (v > 0 && !ok) ? v + ' <small>/ ' + a.quantite + '</small>' : '') + '</div>'
+      + '<div class="st">' + (ok ? '<b>✓ ${T("Validé")}</b><button type="button" data-annuler="' + esc(a.cle) + '" title="${T("Annuler un scan — remettre à scanner")}" aria-label="${T("Annuler un scan")}">↺</button>'
+          : '<b>${T("À scanner")}</b>' + (MAIN_LIBRE ? '<button type="button" data-moins="' + esc(a.cle) + '" aria-label="${T("Retirer une unité")}">−</button><button type="button" data-plus="' + esc(a.cle) + '" aria-label="${T("Ajouter une unité")}">+</button>' : ''))
+      + '</div></div>';
+  }
+  function dessinerLignesEp(mesure){
+    var z = document.getElementById('v-lignes'); if (!z) return;
+    if (!PAR_PAGE) PAR_PAGE = mesurerParPage();
+    var tous = CMD.articles || [], pp = Math.max(1, PAR_PAGE), pages = Math.max(1, Math.ceil(tous.length / pp));
+    PAGE = Math.max(0, Math.min(pages - 1, PAGE));
+    z.innerHTML = tous.slice(PAGE * pp, PAGE * pp + pp).map(ligneEp).join('') || '<div class="vide">${T("Aucun article à préparer dans cette commande.")}</div>';
+    var m = mesurerParPage();
+    if (!mesure && m !== PAR_PAGE && z.clientHeight) { PAR_PAGE = m; return dessinerLignesEp(true); }
+    var v = vueVerif(tous, COMPTES, 1, 0);
+    var pg = document.getElementById('v-pagi');
+    if (pg) {
+      pg.hidden = pages <= 1;
+      document.getElementById('v-reste').textContent = v.restants.length + ' ' + szPl(v.restants.length, '${T("restant")}', '${T("restants")}');
+      document.getElementById('v-pos').textContent = (PAGE + 1) + ' / ' + pages;
+      Array.prototype.forEach.call(pg.querySelectorAll('[data-vpg]'), function(b){
+        b.disabled = (b.getAttribute('data-vpg') === '-1') ? PAGE === 0 : PAGE >= pages - 1;
+      });
+    }
+    var ct = document.getElementById('ep-compte');
+    if (ct) ct.textContent = '${T("{0} sur {1} validé")}'.split('{0}').join(v.valides.length).split('{1}').join(tous.length);
+    var an = document.getElementById('ep-annuler'); if (an) an.disabled = !v.valides.length;
+    majProgres();
+  }
+  function majControlesEp(){
+    var z = document.getElementById('ep-ctrl'); if (!z) return;
+    var f = comptes(), att = attendus();
+    function l(t, ok){ return '<span class="ep-ctrl' + (ok ? ' ok' : '') + '"><i>' + (ok ? '✓' : '·') + '</i>' + esc(t) + '</span>'; }
+    z.innerHTML = l('${T("Bon de commande imprimé")}', BON_IMPRIME)
+      + l('${T("Tous les articles scannés ({0} sur {1})")}'.split('{0}').join(f).split('{1}').join(att), toutVerifie());
+    var ms = document.getElementById('ep-msg');
+    if (ms) {
+      var reste = att - f;
+      ms.textContent = ETAPE !== 0 ? '' : (reste > 0 ? '${T("Scannez encore {0} pour continuer.")}'.split('{0}').join(reste + ' ' + szPl(reste, '${T("article")}', '${T("articles")}')) : '${T("Tout est scanné : passez à l’étiquette.")}');
+    }
+  }
   function dessinerLignes(mesure){
+    if (EPP()) return dessinerLignesEp(mesure);
     var z = document.getElementById('v-lignes'); if (!z) return;
     z.classList.toggle('main-libre', MAIN_LIBRE);
     if (!PAR_PAGE) PAR_PAGE = mesurerParPage();
@@ -566,6 +765,7 @@ function pageCommande(id) {
     var s = document.getElementById('v-sur'); if (s) s.textContent = '${T("sur")} ' + att;
     var b = document.getElementById('v-barre'); if (b) b.style.width = (att ? Math.round(f / att * 100) : 0) + '%';
     var c = document.getElementById('v-continuer'); if (c) c.disabled = !toutVerifie();
+    if (EPP()) majControlesEp();
     fil();
     majExpedier();
   }
@@ -1188,7 +1388,7 @@ function pageCommande(id) {
       PAGE += parseInt(b.getAttribute('data-vpg'), 10) || 0; dessinerLignes(); focusScan();
     });
     // « Annuler un scan » : l article repasse à scanner (une unité de moins), gardé au serveur.
-    document.getElementById('v-valides').addEventListener('click', function(ev){
+    function annulerScan(ev){
       var b = ev.target.closest('[data-annuler]'); if (!b) return;
       if (LECTURE) { dire('${T("Commande en traitement ailleurs — lecture seule.")}', 'err'); return; }
       var cle = b.getAttribute('data-annuler');
@@ -1198,7 +1398,20 @@ function pageCommande(id) {
         if (ok) { AUTO_FAIT = false; compter(cle, -1); retour('<span>↺ <b>' + esc(a.sku || a.nom) + '</b> ${T("remis à scanner.")}</span>', 'att'); }
         focusScan();
       });
-    });
+    }
+    document.getElementById('v-valides').addEventListener('click', annulerScan);
+    if (EPP()) {
+      document.getElementById('v-lignes').addEventListener('click', annulerScan);
+      // « Annuler un scan » (maquette) : le DERNIER article validé repasse à scanner — avec la même confirmation.
+      document.getElementById('ep-annuler').onclick = function(){
+        var v = vueVerif(CMD.articles, COMPTES, 1, 0), a = v.valides[v.valides.length - 1]; if (!a) return;
+        var faux = document.createElement('button'); faux.setAttribute('data-annuler', a.cle);
+        annulerScan({ target: faux });
+      };
+      // Le bouton principal de l étape vit dans le PIED, comme dans la maquette.
+      var act = document.querySelector('.pied .actions'), vc = document.getElementById('v-continuer');
+      if (act && vc) { act.appendChild(vc); vc.hidden = ETAPE !== 0; }
+    }
     suivreTaille();
     document.getElementById('v-main').onclick = function(){
       MAIN_LIBRE = !MAIN_LIBRE;
