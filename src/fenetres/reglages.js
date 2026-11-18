@@ -15,13 +15,15 @@ const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, TETE } = require('./socle.js');
 const T = require('../langue').tr('reglages');
 
 /* Les pictogrammes de la maquette, au trait, blancs sur un carré ardoise. */
+/* ⚠ Indexé par une clé NEUTRE (premier mot du libellé d'origine, sans accent) : des noms français écrits ici
+   finiraient dans le source de la page anglaise (banc-langue-residuel). */
 const PICTO = {
-  'Apparence': 'M12 3a9 9 0 1 0 9 9c0-1-1-1.5-2-1.5h-2a2 2 0 0 1-2-2V7c0-2-1-4-3-4Z',
-  'Paiement & taxes': 'M3 7h18v10H3zM3 11h18',
-  'Livraison': 'M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-.1M17 19a2 2 0 1 0 0-.1',
-  'Communications': 'M4 5h16v11H8l-4 4z',
-  'Sécurité': 'M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z',
-  'Système': 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM12 2v3M12 19v3M2 12h3M19 12h3',
+  'apparence': 'M12 3a9 9 0 1 0 9 9c0-1-1-1.5-2-1.5h-2a2 2 0 0 1-2-2V7c0-2-1-4-3-4Z',
+  'paiement': 'M3 7h18v10H3zM3 11h18',
+  'livraison': 'M3 7h11v9H3zM14 10h4l3 3v3h-7M7 19a2 2 0 1 0 0-.1M17 19a2 2 0 1 0 0-.1',
+  'communications': 'M4 5h16v11H8l-4 4z',
+  'securite': 'M12 3 4 6v6c0 5 3.5 8 8 9 4.5-1 8-4 8-9V6z',
+  'systeme': 'M12 8a4 4 0 1 0 0 8 4 4 0 0 0 0-8ZM12 2v3M12 19v3M2 12h3M19 12h3',
 };
 
 const CSS = `
@@ -44,6 +46,8 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.45 system-ui,-apple-sy
 .rg-carte[hidden]{display:none}
 .rg-ct{display:flex;align-items:center;gap:10px}
 .rg-ic{flex:none;width:28px;height:28px;border-radius:8px;background:#3d4456;display:flex;align-items:center;justify-content:center}
+/* Le carré ardoise de la maquette reste ardoise EN JOUR (pictogramme blanc dessus) — reprise écrite exprès. */
+html.jour .rg-ic{background:#3d4456}
 .rg-ct h2{margin:0;font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rg-ct .nb{margin-left:auto;flex:none;font-size:12px;font-weight:600;color:var(--tx2)}
 .rg-ent{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:6px}
@@ -101,7 +105,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var n = 0;
     grille.innerHTML = G.map(function(g, gi){
       n += g.entrees.length;
-      var d = PICTO[g.cle] || PICTO['Système'];
+      var d = PICTO[sansAccent(g.cle).split(/[^a-z]/)[0]] || PICTO.systeme;
       return '<section class="rg-carte" data-g="' + gi + '"><div class="rg-ct"><span class="rg-ic"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#ffffff" stroke-width="2.2" aria-hidden="true"><path d="' + d + '"></path></svg></span>'
         + '<h2>' + esc(g.nom) + '</h2><span class="nb">' + g.entrees.length + ' ' + (g.entrees.length > 1 ? '${T("réglages")}' : '${T("réglage")}') + '</span></div>'
         + '<div class="rg-ent">' + g.entrees.map(function(e, ei){
