@@ -5131,6 +5131,13 @@ html[data-sz-theme="epure"] .cx-barre .rf-rch,html[data-sz-theme="epure"].jour .
    base 0 et un plancher (recherche 20rem = son texte indicatif ENTIER, mesuré 262 px : banc-champs refuse un indicatif coupé) — la
    recherche se loge sur la ligne quand elle y tient en entier, et passe dessous sinon. */
 html[data-sz-theme="epure"] .cx-barre>.droite,html[data-sz-theme="epure"].jour .cx-barre>.droite{flex:1 1 0;min-width:25rem;justify-content:flex-end}
+/* LES LIGNES DE TABLEAU À PLAT (phase 3, 2026-11-18) : les maquettes (Produits, Commandes à 50) dessinent des
+   rangées séparées d'un filet, pas des cartes arrondies. Les feuilles de document (.feuille, .papier) gardent leur dessin. */
+html[data-sz-theme="epure"] table:not(.feuille table):not(.papier table){border-collapse:collapse;border-spacing:0}
+html[data-sz-theme="epure"] tbody td{border-left:0;border-right:0;border-top:0;border-radius:0;border-bottom:1px solid var(--v06);background:transparent}
+html[data-sz-theme="epure"] tbody td:first-child,html[data-sz-theme="epure"] tbody td:last-child,html[data-sz-theme="epure"] tbody td:only-child{border-radius:0;border-left:0;border-right:0}
+html[data-sz-theme="epure"] tbody tr:hover>td{background:var(--v03);border-color:var(--v06)}
+html[data-sz-theme="epure"] thead th{border-bottom:1px solid var(--v08);padding-bottom:.55rem}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,
