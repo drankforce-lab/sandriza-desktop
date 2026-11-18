@@ -990,8 +990,13 @@ const { globalShortcut } = require('electron');
 let _palette = null;
 const ouvrirRecherchePartout = () => {
   try {
+    /* (2026-11-18, sa capture : « la recherche ne marche pas bien, c'est laid ») Le panneau d'une section
+       restait ouvert PAR-DESSUS la recherche : il se ferme d'abord, et la recherche ne prend jamais le
+       panneau pour parent (elle s'y posait de travers). */
+    try { fermerPanneauMenu(); } catch (e) {}
     if (_palette && !_palette.isDestroyed()) { _palette.focus(); return; }
-    const parent = BrowserWindow.getFocusedWindow() || (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null);
+    let parent = BrowserWindow.getFocusedWindow();
+    if (!parent || parent.isDestroyed() || (panneauWin && parent === panneauWin)) parent = (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null);
     if (!parent || parent.isDestroyed()) return;
     const { pageRecherchePartout } = require('./fenetres/recherche-partout');
     const b = parent.getContentBounds();
@@ -1076,6 +1081,18 @@ const reglagesPage = () => {
     } else if (action(it)) {
       systeme.push({ t: tr(lab), c: c + '|' + lab, coche: it.coche === undefined ? null : !!it.coche });
     }
+  });
+  /* « Aide » et « ? » (2026-11-18, sa demande) : retirés de la colonne Épurée, leurs entrées vivent ici —
+     dans la carte « Système », comme dans la maquette (« Notes des mises à jour », « Aide »). */
+  const aide = systeme;
+  menus.forEach((m, iM) => {
+    const lm = String(m && m.label || '');
+    if (lm !== 'Aide' && lm !== '?') return;
+    (m.items || []).forEach((it, i) => {
+      if (!it || it.sep || it.sub || !action(it)) return;
+      const lab = String(it.label || ''); if (!lab || lab.startsWith('__')) return;
+      aide.push({ t: tr(lab), c: iM + '.' + i + '|' + lab, coche: null });
+    });
   });
   if (systeme.length) groupes.push({ cle: 'Système', nom: tr('Système'), entrees: systeme });
   return { ok: true, groupes };
@@ -6240,6 +6257,22 @@ const montrerPorte = (titre, message, progression, sansTheme, attente) => {
 /* Les gardes qui appartiennent a la PAGE DU SITE, ou qu elle vive. */
 const _poserGardesDeSite = (wc) => {
   if (!wc) return;
+  /* (2026-11-18, sa remarque : « au chargement, à l'endroit des boutons _ □ ✕, ça fait une zone blanche sur
+     noir ») La bande des boutons gardait la couleur envoyée par la page PRÉCÉDENTE (la barre de titre
+     blanche d'Épuré) pendant que la nouvelle se chargeait sur le fond sombre de la fenêtre. Au départ d'un
+     chargement, elle prend la couleur de ce fond ; la page renvoie la sienne dès que sa barre est dessinée. */
+  wc.on('did-start-loading', () => {
+    try {
+      if (!mainWindow || mainWindow.isDestroyed() || typeof mainWindow.setTitleBarOverlay !== 'function') return;
+      if (wc !== mainWindow.webContents) return;
+      // getBackgroundColor rend #RRGGBB, ou #AARRGGBB quand une transparence est posée : on garde la couleur.
+      const bg = String(mainWindow.getBackgroundColor() || '');
+      const fond = _hexOuRien(bg.length === 9 ? '#' + bg.slice(3) : bg) || _fondTheme();
+      const h = fond.replace('#', ''), r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+      const clair = (0.299 * r + 0.587 * g + 0.114 * b) > 140;
+      mainWindow.setTitleBarOverlay({ color: fond, symbolColor: clair ? '#2e2b27' : '#e8edf5' });
+    } catch (_) {}
+  });
   wc.on('did-finish-load', () => {
     applySidebarPref(wc);
     // Un rechargement de la page perd la classe : on la repose si l'on est

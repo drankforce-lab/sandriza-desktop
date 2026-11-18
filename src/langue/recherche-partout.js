@@ -27,4 +27,9 @@ module.exports = {
   'La recherche n’a pas pu se faire.': 'The search could not be run.',
   'Votre rôle ne permet pas d’ouvrir ce résultat.': 'Your role does not allow opening this result.',
   'Ce résultat n’a pas pu s’ouvrir.': 'This result could not be opened.',
+  'Cherchez dans toute l’administration': 'Search the whole admin',
+  'un numéro de commande': 'an order number',
+  'un client, par son nom ou son courriel': 'a customer, by name or email',
+  'un produit, ou son SKU': 'a product, or its SKU',
+  'une fonction du menu ou un réglage': 'a menu function or a setting',
 };

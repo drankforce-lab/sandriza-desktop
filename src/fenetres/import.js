@@ -208,6 +208,30 @@ html.jour .jet.inc{color:#7a5a00}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (max-width:1240px){.module{grid-template-columns:15.5rem minmax(0,1fr)}.galerie{grid-template-columns:repeat(6,minmax(0,1fr))}.barre{grid-template-columns:minmax(0,1fr) 10.5rem auto}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* ══ « ÉPURÉ » (8.44.0, fidèle à Import.dc.html) : la colonne des fournisseurs pleine hauteur, blanche,
+   à filet ; des fournisseurs en rangées bordées ; un en-tête plus grand ; la recherche de 48 px. Pastilles
+   et carrés à lettre NEUTRES ; trois tons. ══ */
+html[data-sz-theme="epure"] .module{gap:0}
+html[data-sz-theme="epure"] .module>.cote{border-radius:0;border:0;border-right:1px solid var(--v08);padding:24px 16px;gap:14px;margin:-.75rem 0 -.75rem -1.05rem}
+html[data-sz-theme="epure"] .cote h2{font-size:16px;font-weight:800;letter-spacing:0;text-transform:none;color:var(--tx)}
+html[data-sz-theme="epure"] .fos{gap:8px}
+html[data-sz-theme="epure"] .fo{grid-template-columns:40px minmax(0,1fr) auto;gap:12px;padding:12px;border-radius:12px;border:1px solid var(--v08);background:var(--f-carte)}
+html[data-sz-theme="epure"] .fo.sel{background:var(--ep-ambre-f);border-color:var(--v20)}
+html[data-sz-theme="epure"] .mono,html[data-sz-theme="epure"] .fo.sel .mono{width:40px;height:40px;border-radius:10px;background:var(--ep-neutre-f);color:var(--ep-neutre-t);font-weight:800;font-size:14px}
+html[data-sz-theme="epure"] .fo .t b{font-size:14px;font-weight:700}
+html[data-sz-theme="epure"] .princ{padding:0 0 0 32px;gap:18px}
+html[data-sz-theme="epure"] .entete .mono{width:48px;height:48px;border-radius:12px;font-size:17px;background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+html[data-sz-theme="epure"] .entete h2{font-size:26px;font-weight:800;letter-spacing:-.02em}
+html[data-sz-theme="epure"] .onglets{gap:8px;padding-bottom:12px;border-bottom:1px solid var(--v08)}
+html[data-sz-theme="epure"] .onglets button{height:34px;padding:0 14px;border-radius:8px;border:0;font-size:13px;font-weight:600}
+html[data-sz-theme="epure"] .onglets button.actif{border:0;background:var(--f-carte);color:var(--tx);font-weight:700;box-shadow:0 1px 2px rgba(16,24,40,.12)}
+html[data-sz-theme="epure"] .onglets button.actif .n{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+html[data-sz-theme="epure"] .barre .q,html[data-sz-theme="epure"] .barre select,html[data-sz-theme="epure"] .barre .prim{height:48px;border-radius:12px}
+html[data-sz-theme="epure"] .barre input#o-nom{height:48px;border-radius:12px;font-size:15px}
+html[data-sz-theme="epure"] .barre .prim{padding:0 22px;font-size:14px;font-weight:700}
+html[data-sz-theme="epure"] .rc{border-radius:16px;border-color:var(--v08);background:var(--f-carte);box-shadow:none}
+html[data-sz-theme="epure"] .rc .sc,html[data-sz-theme="epure"] .rc .sc.haut{background:var(--f-carte);color:var(--tx);border-radius:8px;font-size:12px;padding:4px 8px}
+
 `;
 
 /** Page de la fenêtre. */

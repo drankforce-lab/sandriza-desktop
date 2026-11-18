@@ -49,6 +49,17 @@ body{color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sa
 .pied{flex:0 0 auto;display:flex;gap:1rem;padding:.45rem 1rem;border-top:1px solid var(--v10);font-size:.7rem;color:var(--tx2)}
 .pied .msg{margin-left:auto}
 .pied kbd{font:600 .64rem system-ui,sans-serif;border:1px solid var(--v16);border-radius:4px;padding:0 .3rem;margin-right:.2rem}
+/* (2026-11-18, sa capture : « la recherche ne marche pas bien, c'est laid ») Le champ ne porte plus son propre cadre
+   orange DANS l'en-tête, l'état vide n'a plus sa barre décorative : il dit ce qu'on peut chercher, exemples à cliquer. */
+.ch{padding:14px 18px}
+.ch input,.ch input:focus,.ch input:focus-visible{border:0!important;box-shadow:none!important;outline:none!important;background:transparent!important;padding:0!important;height:auto!important;font-size:16px}
+.vide::before,.vide::after{display:none!important;content:none!important}
+.aide{padding:18px 20px;display:flex;flex-direction:column;gap:12px}
+.aide h3{margin:0;font-size:13px;font-weight:700;color:var(--tx)}
+.aide .ex{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px 14px;align-items:center;font-size:13px;color:var(--tx2)}
+.aide .ex button{justify-self:start;font:inherit;font-size:12.5px;font-weight:600;padding:4px 10px;border-radius:8px;border:1px solid var(--v12);
+  background:var(--v04);color:var(--tx);cursor:pointer;white-space:nowrap}
+.aide .ex button:hover{background:var(--v08)}
 `;
 
 /* Les pictogrammes au trait, gris (sa règle : tout pictogramme en gris). */
@@ -70,7 +81,7 @@ function pageRecherchePartout(menu) {
   <label class="ch"><span class="ic">${ICO.loupe}</span>
     <input id="rp-q" type="search" autocomplete="off" spellcheck="false" aria-label="${T("Rechercher partout")}"
       placeholder="${T("Commande, client, produit, SKU, facture ou fonction…")}"><kbd>${T("Échap")}</kbd></label>
-  <div class="res" id="rp-res" role="listbox"><div class="vide">${T("Tapez au moins deux lettres.")}</div></div>
+  <div class="res" id="rp-res" role="listbox"></div>
   <div class="pied"><span><kbd>↑</kbd><kbd>↓</kbd>${T("choisir")}</span><span><kbd>${T("Entrée")}</kbd>${T("ouvrir")}</span><span><kbd>${T("Échap")}</kbd>${T("fermer")}</span><span class="msg" id="msg" role="status"></span></div>
 </div>
 <script>
@@ -98,7 +109,19 @@ ${JS_MESURES()}
   function sansAccent(s){ try { return String(s).normalize('NFD').replace(/[\\u0300-\\u036f]/g, ''); } catch (e) { return String(s); } }
   function fermer(){ try { window.close(); } catch (e) {} }
 
+  /* L'état de DÉPART : ce qu'on peut chercher, et un exemple de chaque à cliquer (il remplit le champ). */
+  var AIDE = '<div class="aide"><h3>${T("Cherchez dans toute l’administration")}</h3><div class="ex">'
+    + '<button type="button" data-ex="SZ-">SZ-…</button><span>${T("un numéro de commande")}</span>'
+    + '<button type="button" data-ex="Tremblay">Tremblay</button><span>${T("un client, par son nom ou son courriel")}</span>'
+    + '<button type="button" data-ex="robe">robe</button><span>${T("un produit, ou son SKU")}</span>'
+    + '<button type="button" data-ex="taxes">taxes</button><span>${T("une fonction du menu ou un réglage")}</span>'
+    + '</div></div>';
+  res.addEventListener('click', function(ev){
+    var b = ev.target.closest && ev.target.closest('[data-ex]'); if (!b) return;
+    q.value = b.getAttribute('data-ex'); q.focus(); q.dispatchEvent(new Event('input'));
+  });
   function dessiner(texte){
+    if (texte === 'AIDE') { res.innerHTML = AIDE; return; }
     if (texte) { res.innerHTML = '<div class="vide">' + esc(texte) + '</div>'; return; }
     if (!L.length) { res.innerHTML = '<div class="vide">${T("Rien ne correspond.")}</div>'; return; }
     var h = '', avant = '';
@@ -114,7 +137,7 @@ ${JS_MESURES()}
   }
   function chercher(){
     var v = q.value.trim(), n = ++NUM;
-    if (v.length < 2) { L = []; dessiner('${T("Tapez au moins deux lettres.")}'); return; }
+    if (v.length < 2) { L = []; dessiner('AIDE'); return; }
     /* Les fonctions du menu d abord (locales, instantanees), puis les donnees du site. Chaque mot tape doit
        se retrouver dans le libelle ou son chemin, en francais ou en anglais, accents ignores. */
     var mots = sansAccent(v.toLowerCase()).split(/\\s+/).filter(Boolean);
@@ -158,7 +181,7 @@ ${JS_MESURES()}
     var it = ev.target.closest && ev.target.closest('[data-i]');
     if (it) { var i = parseInt(it.getAttribute('data-i'), 10); if (i !== SEL) { SEL = i; dessiner(); } }
   });
-  dessiner("${T("Tapez au moins deux lettres.")}");   // l état de départ, écrit par le script comme tout le reste
+  dessiner('AIDE');   // l état de départ : ce qu'on peut chercher, exemples à cliquer
   q.focus();
 })();
 </script></body></html>`;
