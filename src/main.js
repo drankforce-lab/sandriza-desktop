@@ -1048,6 +1048,39 @@ const menuEntreeParChemin = (brut) => {
   if (!it || it.sub || it.sep || String(it.label || '') !== origine) return null;
   return it;
 };
+/* ══ LA PAGE RÉGLAGES (2026-11-18, relooking — maquette « Réglages ») ══
+   Le menu Configuration, mis en page : les SOUS-MENUS de plus de trois entrées deviennent une carte chacun
+   (Apparence, Paiement et taxes, Livraison, Communications, Sécurité), le reste — entrées isolées et petits
+   choix (Position du menu, Jeu de couleurs, Densité) — forme la carte « Système ». Lu du MÊME modèle que la
+   barre (aucune entrée perdue, les nouvelles y paraissent seules) ; une entrée revient par son chemin, comme
+   Ctrl K (recherche:menu:agir). */
+const reglagesPage = () => {
+  const tr = (x) => { try { return _trMenu(x); } catch (e) { return x; } };
+  const menus = _sansPseudo(_modele.menus);
+  const iC = menus.findIndex((m) => String(m && m.label || '') === 'Configuration');
+  if (iC < 0) return { ok: false, motif: 'introuvable' };
+  const action = (it) => !!(it && (it.app || it.section || it.tab || it.run));
+  const groupes = [], systeme = [];
+  (menus[iC].items || []).forEach((it, i) => {
+    if (!it || it.sep) return;
+    const lab = String(it.label || ''); if (!lab || lab.startsWith('__')) return;
+    const c = iC + '.' + i;
+    if (it.sub) {
+      const feuilles = it.sub.map((x, j) => ({ x, j })).filter((o) => o.x && !o.x.sep && !o.x.sub && action(o.x));
+      if (feuilles.length > 3 && !feuilles.some((o) => o.x.coche !== undefined)) {
+        groupes.push({ cle: lab, nom: tr(lab), entrees: feuilles.map((o) => ({ t: tr(o.x.label), c: c + '.' + o.j + '|' + o.x.label })) });
+      } else {
+        // un petit CHOIX (une seule réponse cochée) : une ligne et sa liste déroulante
+        systeme.push({ t: tr(lab), choix: feuilles.map((o) => ({ t: tr(o.x.label), c: c + '.' + o.j + '|' + o.x.label, on: !!o.x.coche })) });
+      }
+    } else if (action(it)) {
+      systeme.push({ t: tr(lab), c: c + '|' + lab, coche: it.coche === undefined ? null : !!it.coche });
+    }
+  });
+  if (systeme.length) groupes.push({ cle: 'Système', nom: tr('Système'), entrees: systeme });
+  return { ok: true, groupes };
+};
+ipcMain.handle('reglages:page', () => { try { return reglagesPage(); } catch (e) { return { ok: false, motif: 'echec' }; } });
 ipcMain.handle('recherche:menu:agir', (e, brut) => {
   try {
     const it = menuEntreeParChemin(brut);
@@ -4758,6 +4791,8 @@ const PAGES_ANCRABLES = () => ({
   rappels: ['Rappels', () => pageRappels()],
   // Le calendrier (2026-11-18, relooking) : précommandes, ramassages, échéances fiscales et rappels sur un mois.
   calendrier: ['Calendrier', () => pageCalendrier()],
+  // La page Réglages (2026-11-18, maquette) : le menu Configuration mis en page, ouvert par la barre Épuré.
+  reglages: ['Réglages', () => pageReglages()],
   atelier: ['Atelier de création', () => pageAtelier('')],
   fibres: ['Analyses de fibres et étiquettes', () => pageFibres('')],
   liens: ['Liens d’installation', () => pageLiens('')],
@@ -7134,6 +7169,7 @@ const { pageComptabilite } = require('./fenetres/comptabilite');
 const { pageLivre } = require('./fenetres/livre');
 const { pageVehicules } = require('./fenetres/vehicules');
 const { pageCalendrier } = require('./fenetres/calendrier');
+const { pageReglages } = require('./fenetres/reglages');
 const { pageRappels } = require('./fenetres/rappels');
 const { pageAtelier } = require('./fenetres/atelier');
 const { pageFibres } = require('./fenetres/fibres');
@@ -7423,6 +7459,7 @@ const actionApp = (nom, arg) => {
     case 'rappels':
     // Calendrier (2026-11-18) : meme cas, ne natif ; sa section hote cote site ne porte que la zone.
     case 'calendrier':
+    case 'reglages':
     // Atelier de creation (2026-10-16) : meme cas, nee native.
     case 'atelier':
     // Analyses de fibres et etiquettes (2026-10-25) : meme cas, nee native.
@@ -7749,7 +7786,7 @@ const _MODULES_OUVRABLES = ['generations', 'verrous', 'journaux', 'securite', 'i
   // Bons de commande fournisseurs (2026-10-27) : le bouton « Commander » de l Inventaire (Reapprovisionnement) les ouvre.
   'bons-commande',
   // Le calendrier (2026-11-18) : un evenement ouvre le module qui le porte.
-  'calendrier', 'ramassages', 'produits'];
+  'calendrier', 'ramassages', 'produits', 'reglages'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();
   if (_MODULES_OUVRABLES.indexOf(n) < 0) return false;

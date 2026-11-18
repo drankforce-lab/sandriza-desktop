@@ -259,6 +259,8 @@ contextBridge.exposeInMainWorld('szPont', {
      désigne par son CHEMIN d'indices dans le modèle que la coquille détient déjà (« 2.0.3|Libellé ») —
      jamais par du code : le principal retrouve l'entrée chez lui et la déclenche comme le menu natif. */
   menuEntree: (chemin) => ipcRenderer.invoke('recherche:menu:agir', String(chemin || '')).catch(() => false),
+  /* (2026-11-18) La page Réglages : le menu Configuration mis en page par le principal (reglagesPage). */
+  reglagesPage: () => ipcRenderer.invoke('reglages:page').catch(() => ({ ok: false, motif: 'pont' })),
 
   // ⚠ LE SEUL FLUX POUSSÉ VERS UNE FENÊTRE NATIVE, et il existe pour une raison
   // précise. L'affichage client de la caisse doit suivre le scan à l'instant : le

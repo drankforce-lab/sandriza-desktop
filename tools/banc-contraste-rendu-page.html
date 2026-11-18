@@ -60,6 +60,9 @@
        serait mesuré qu'en français et la version anglaise — dont les phrases
        sont PLUS LONGUES — ne passerait jamais devant ce banc. */
     langue: function () { return Promise.resolve(REP['__langue'] || 'fr'); },
+    /* (2026-11-18) La page Réglages lit le modèle par ce verbe, hors `appeler` : piloté sous `__reglagesPage`. */
+    reglagesPage: function () { return Promise.resolve(REP['__reglagesPage'] || { ok: false, motif: 'sans_jeu' }); },
+    menuEntree: function () { return Promise.resolve(true); },
     langueEcrire: function (l) { return Promise.resolve(l); },
     menuPanneau: function () {},
     menuPanneauFermer: function () {},

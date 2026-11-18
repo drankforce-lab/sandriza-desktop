@@ -5064,6 +5064,10 @@ html[data-sz-theme="epure"].jour{
   --tx:#1f2533; --tx-blanc:#1f2533; --tx2:#5b6273; --tx3:#5b6273; --tx-gris:#5b6273;
   --ep-neutre-f:#eef0f4; --ep-neutre-t:#3d4456; --ep-ambre-f:#fdebd3; --ep-ambre-t:#8a3f00; --ep-rouge-f:#fbe3e2; --ep-rouge-t:#9f2422;
 }
+/* ⚠ LE FOND DE PAGE (corrigé 2026-11-18, comparé à la maquette) : « html.jour body{background:#f4f2ec} » du socle
+   (le crème de l'ancien look) l'emportait sur --f-page — toutes les fenêtres restaient beiges en Épuré jour, au
+   lieu du gris bleuté #F4F5F9 de la maquette. */
+html[data-sz-theme="epure"].jour body{background:var(--f-page);color:var(--tx)}
 /* La police : partout, titres compris (le titre des fenêtres quitte Segoe UI Variable sous ce jeu seulement). */
 html[data-sz-theme="epure"] body,html[data-sz-theme="epure"] button,html[data-sz-theme="epure"] input,
 html[data-sz-theme="epure"] select,html[data-sz-theme="epure"] textarea,html[data-sz-theme="epure"] .tete h1{

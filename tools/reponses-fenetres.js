@@ -3452,6 +3452,22 @@ const JEU = {
   // déplacement ouvert en modification) ont leur ouverture directe.
   // Le calendrier (2026-11-18) : un mois chargé — une journée PLEINE (le « + k » de la case et du panneau),
   // les trois tons, les quatre sortes. Les titres sont des données.
+  // La page Réglages (2026-11-18) : le menu Configuration tel que la coquille le met en page (reglagesPage) —
+  // les libellés RÉELS (les plus longs : « Statistiques (Google Analytics) », « Clé et plafond de dépense IA »).
+  'reglages.js': { __reglagesPage: { ok: true, groupes: [
+    { cle: 'Apparence', nom: 'Apparence', entrees: ['Thème et apparence', 'Page d’accueil', 'Logos et marque', 'Icônes personnalisées', 'Navigation (menu boutique)', 'Cabine d’essayage', 'Pied de page', 'Heures d’ouverture', 'Modèles par vue', 'Logothèque'].map(function(t, i){ return { t: t, c: '5.0.' + i + '|' + t }; }) },
+    { cle: 'Paiement & taxes', nom: 'Paiement & taxes', entrees: ['Clés API', 'Configuration des paiements', 'Gestion des taxes', 'Conformité internationale'].map(function(t, i){ return { t: t, c: '5.1.' + i + '|' + t }; }) },
+    { cle: 'Livraison', nom: 'Livraison', entrees: ['Configuration de la livraison', 'Configuration des retours', 'Transporteurs', 'Imprimantes'].map(function(t, i){ return { t: t, c: '5.2.' + i + '|' + t }; }) },
+    { cle: 'Communications', nom: 'Communications', entrees: ['Réseaux sociaux', 'Chat en ligne', 'Téléphonie', 'Automatisations', 'Gabarits courriel', 'Statistiques (Google Analytics)'].map(function(t, i){ return { t: t, c: '5.3.' + i + '|' + t }; }) },
+    { cle: 'Sécurité', nom: 'Sécurité', entrees: ['Incidents de sécurité', 'Accès utilisateurs', 'Réglages de sécurité', 'Clé et plafond de dépense IA', 'Liens d’installation', 'Journaux', 'Verrous (fiches en cours)', 'Personnel connecté', 'Gardien', 'NIP'].map(function(t, i){ return { t: t, c: '5.4.' + i + '|' + t }; }) },
+    { cle: 'Système', nom: 'Système', entrees: [
+      { t: 'Sauvegarde', c: '5.5|Sauvegarde', coche: null }, { t: 'Base de données', c: '5.6|Base de données', coche: null },
+      { t: 'Démarrer avec Windows', c: '5.7|Démarrer avec Windows', coche: false }, { t: 'Veille des commandes (icône)', c: '5.8|Veille des commandes (icône)', coche: true },
+      { t: 'Thème sombre', c: '5.9|Thème sombre', coche: true }, { t: 'Barre d’état (bas de l’écran)', c: '5.10|Barre d’état (bas de l’écran)', coche: true },
+      { t: 'Position du menu', choix: [{ t: 'Ancrer en haut', c: '5.11.0|Ancrer en haut', on: false }, { t: 'Ancrer à gauche', c: '5.11.1|Ancrer à gauche', on: true }, { t: 'Ancrer à droite', c: '5.11.2|Ancrer à droite', on: false }] },
+      { t: 'Jeu de couleurs', choix: [{ t: 'Lin', c: '5.12.0|Lin', on: false }, { t: 'Doré (ancien défaut)', c: '5.12.2|Doré (ancien défaut)', on: false }, { t: 'Épuré (nouveau look)', c: '5.12.8|Épuré (nouveau look)', on: true }] },
+      { t: 'Densité', choix: [{ t: 'Confortable', c: '5.13.0|Confortable', on: true }, { t: 'Compacte', c: '5.13.1|Compacte', on: false }] },
+      { t: 'Outils de développement', c: '5.14|Outils de développement', coche: null } ] } ] } },
   'calendrier.js': { 'calendrier:mois': { ok: true, annee: 2026, mois: 11, aujourdhui: '2026-11-18', evenements: [
     { date: '2026-11-03', sorte: 'fiscal', titre: 'Acompte provisionnel TPS/TVQ', sous: '', ton: 'r', ouvrir: 'rappels' },
     { date: '2026-11-12', sorte: 'ramassage', titre: 'Postes Canada', colis: 3, ton: 'n', ouvrir: 'ramassages' },

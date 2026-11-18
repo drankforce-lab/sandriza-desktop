@@ -280,6 +280,9 @@ function executerPage(script, reponses, opts) {
        verbe ne passe pas par `appeler`, et sans lui la barre de l'écran de
        connexion n'est jamais bâtie — donc jamais éprouvée. Le jeu de réponses le
        pilote sous la clé `__menuLabels`. */
+    /* (2026-11-18) La page Réglages : son modèle sous `__reglagesPage` ; une entrée déclenchée répond vrai. */
+    reglagesPage: () => surveille(Promise.resolve(rep['__reglagesPage'] || { ok: false, motif: 'sans_jeu' })),
+    menuEntree: () => surveille(Promise.resolve(true)),
     menuLabels: () => surveille(Promise.resolve(
       Object.prototype.hasOwnProperty.call(rep, '__menuLabels')
         ? rep['__menuLabels'] : ['Fichier', 'Affichage', 'Aide']

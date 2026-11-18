@@ -68,6 +68,8 @@
     },
     menuLabels: function () { return Promise.resolve(REP['__menuLabels'] || ['Fichier', 'Affichage', 'Aide']); },
     langue: function () { return Promise.resolve(REP['__langue'] || 'fr'); },
+    reglagesPage: function () { return Promise.resolve(REP['__reglagesPage'] || { ok: false, motif: 'sans_jeu' }); },
+    menuEntree: function () { return Promise.resolve(true); },
     langueEcrire: function (l) { return Promise.resolve(l); },
   };
   var natifs = {
