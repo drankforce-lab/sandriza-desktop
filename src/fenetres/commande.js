@@ -1150,9 +1150,11 @@ function pageCommande(id) {
       EXPEDITION = ''; majExpedier(); dire(expliquer({ motif: 'echec' }), 'err');
     });
   }
+  /* (2026-11-18) LA FILE DE PRÉPARATION : la suivante est choisie AU CLIC par le site (prioritaires
+     d'abord, verrous des collègues relus) — plus celle annoncée à l'ouverture, qui a pu être prise entre-temps. */
   function suivante(){
-    var s = CMD && CMD.suivante; if (!s || !s.id) return;
-    P.appeler('commandes:preparer', s.id).then(function(r){
+    P.appeler('commandes:fileSuivante', ID).then(function(r){
+      if (r && r.ok && r.vide) { dire('${T("Plus rien à préparer — la file est vide.")}', 'bon'); return; }
       if (r && r.ok) setTimeout(function(){ P.fermer(); }, 300);
       else dire(expliquer(r), 'err');
     });

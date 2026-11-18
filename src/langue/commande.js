@@ -405,4 +405,5 @@ module.exports = {
   "Précommande — expédition prévue vers le {0}": "Pre-order — expected to ship around {0}",
   "Précommande": "Pre-order",
   "{0} en précommande": "{0} on pre-order",
+  'Plus rien à préparer — la file est vide.': 'Nothing left to prepare — the queue is empty.',
 };

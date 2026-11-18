@@ -3303,6 +3303,8 @@ const OPS_PONT = new Set([
   // article et le contrôle des marges (7.16.0).
   'generations:etat', 'generations:lancer3d', 'generations:rattraper', 'generations:agir', 'generations:ouvrir', 'generations:refaireCouleur', 'produit:photosVerrou', 'produit:couts', 'produit:grosPlanZone', 'produit:grosPlan', 'marges:analyser', 'marges:appliquer',
   'commandes:preparer', 'commandes:expedier',
+  // La file de préparation (2026-11-18) : la suivante choisie AU CLIC (prioritaires, verrous relus).
+  'commandes:fileSuivante',
   // Retours. ⚠ retour:finaliser peut REMBOURSER (Square ou credit boutique) et
   // retour:enregistrer peut generer une etiquette FACTUREE : toute la regle vit
   // dans le site, le pont ne porte que des valeurs.

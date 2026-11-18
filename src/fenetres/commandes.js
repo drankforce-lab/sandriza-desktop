@@ -539,7 +539,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (resT) resT.textContent = TU ? ((expedition ? nbExped(TU.nombre || 0) : nbEnCours(TU.nombre || 0))
       + ' · ' + argent(TU.valeurTotale || 0)) : '';
     var actT = document.getElementById('c-actions');
-    if (actT) actT.innerHTML = expedition ? '' : '<button class="mini" id="c-corbeille" '
+    /* (2026-11-18) LA FILE DE PRÉPARATION : « Lancer la préparation (N) » — N compté sur les statuts que la
+       file prend (comptes du pont, liste entière) ; la commande elle-même est choisie AU CLIC par le site. */
+    var nFile = 0; ['pending', 'confirmed', 'preparing', 'verification'].forEach(function(k){ nFile += (cs[k] || 0); });
+    if (actT) actT.innerHTML = expedition ? '' : (nFile ? '<button class="prim" id="c-file" '
+      + 'title="${T("Ouvre la commande à préparer en premier — prioritaires d’abord, jamais une qu’un collègue tient ; « Commande suivante » enchaîne")}">'
+      + '${T("Lancer la préparation")} (' + nFile + ')</button>' : '')
+      + '<button class="mini" id="c-corbeille" '
       + 'title="${T("Voir les commandes supprimées et les remettre en place")}">${T("Corbeille")}</button>';
 
     /* ── LA BARRE : les statuts en boutons a choix (plusieurs a la fois, comme avant) — « Toutes » defait
@@ -1346,6 +1352,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        et le processus principal filtre le nom contre sa liste blanche (voir
        _MODULES_OUVRABLES dans main.js). Meme chemin que le bouton
        << Verrous >> des Journaux. */
+    var cf = document.getElementById('c-file');
+    if (cf) cf.onclick = function(){
+      cf.disabled = true;
+      appeler('commandes:fileSuivante', ['']).then(function(r){
+        cf.disabled = false;
+        if (r && r.ok && r.vide) dire('${T("Plus rien à préparer — la file est vide.")}', 'bon');
+        else if (!r || !r.ok) dire(expliquer(r), 'err');
+      });
+    };
     var cb = document.getElementById('c-corbeille');
     if (cb) cb.onclick = function(){
       if (P && P.ouvrirModule) P.ouvrirModule('corbeille');

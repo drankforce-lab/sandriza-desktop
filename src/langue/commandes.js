@@ -493,4 +493,7 @@ module.exports = {
   // Gestes groupés (2026-10-29)
   "Seulement les commandes vérifiées en entier, avec leur étiquette : le numéro de suivi part au client.": "Only fully verified orders with their label: the tracking number is sent to the customer.",
   "Avant de continuer : chaque colis a son étiquette collée et son bordereau glissé.": "Before continuing: each parcel has its label stuck on and its packing slip inside.",
+  'Lancer la préparation': 'Start preparing',
+  'Ouvre la commande à préparer en premier — prioritaires d’abord, jamais une qu’un collègue tient ; « Commande suivante » enchaîne': 'Opens the order to prepare first — priority orders first, never one a colleague holds; “Next order” continues',
+  'Plus rien à préparer — la file est vide.': 'Nothing left to prepare — the queue is empty.',
 };
