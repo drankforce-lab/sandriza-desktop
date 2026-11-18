@@ -3450,6 +3450,20 @@ const JEU = {
   // jamais dessiné par un jeu d'essai peut mourir en silence (leçon de #116).
   // Les deux ÉTATS qui ne s'atteignent qu'au clic (la boîte du véhicule, un
   // déplacement ouvert en modification) ont leur ouverture directe.
+  // Le calendrier (2026-11-18) : un mois chargé — une journée PLEINE (le « + k » de la case et du panneau),
+  // les trois tons, les quatre sortes. Les titres sont des données.
+  'calendrier.js': { 'calendrier:mois': { ok: true, annee: 2026, mois: 11, aujourdhui: '2026-11-18', evenements: [
+    { date: '2026-11-03', sorte: 'fiscal', titre: 'Acompte provisionnel TPS/TVQ', sous: '', ton: 'r', ouvrir: 'rappels' },
+    { date: '2026-11-12', sorte: 'ramassage', titre: 'Postes Canada', colis: 3, ton: 'n', ouvrir: 'ramassages' },
+    { date: '2026-11-18', sorte: 'rappel', titre: 'Saisir les dépenses de la semaine', sous: 'Reçus du mardi', ton: 'a', ouvrir: 'rappels' },
+    { date: '2026-11-18', sorte: 'ramassage', titre: 'FedEx', colis: 1, ton: 'a', ouvrir: 'ramassages' },
+    { date: '2026-11-18', sorte: 'precommande', titre: 'Manteau d’hiver Aurore', ton: 'a', ouvrir: 'produits' },
+    { date: '2026-11-18', sorte: 'precommande', titre: 'Robe Élégance mi-longue', ton: 'a', ouvrir: 'produits' },
+    { date: '2026-11-18', sorte: 'rappel', titre: 'Relancer le fournisseur Atelier Rivière', sous: '', ton: 'a', ouvrir: 'rappels' },
+    { date: '2026-11-18', sorte: 'rappel', titre: 'Vérifier le stock des foulards', sous: '', ton: 'a', ouvrir: 'rappels' },
+    { date: '2026-11-21', sorte: 'precommande', titre: 'Jupe plissée Camélia', ton: 'a', ouvrir: 'produits' },
+    { date: '2026-11-30', sorte: 'fiscal', titre: 'Déclaration TPS/TVQ', sous: 'Trimestre 3', ton: 'n', ouvrir: 'rappels' },
+  ] } },
   'vehicules.js': (function(){
     var TYPES = [
       { cle: 'essence', nom: 'Essence / recharge', entiere: false },

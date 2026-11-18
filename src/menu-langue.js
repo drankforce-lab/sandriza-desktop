@@ -255,6 +255,7 @@ const MENU_APP_EN = {
   'Épuré (nouveau look)': 'Clean (new look)',
   'Rechercher': 'Search',
   'Densité': 'Density',
+  'Calendrier': 'Calendar',
   'Confortable': 'Comfortable',
   'Compacte': 'Compact',
   'Rechercher partout': 'Search everywhere',

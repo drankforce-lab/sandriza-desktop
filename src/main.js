@@ -3267,6 +3267,8 @@ const OPS_PONT = new Set([
   'vehicules:deplacement', 'vehicules:deplacementOter', 'vehicules:changement',
   // La DPA demandee d une annee : moins que le maximum, ou retour au maximum.
   'vehicules:dpa',
+  // Le calendrier (2026-11-18) : lecture seule, chaque source selon son droit (pont.js, calendrierMois).
+  'calendrier:mois',
   // La liste des marques et modeles d une annee, demandee a la NHTSA (vPIC).
   'vehicules:catalogue',
   // Atelier de creation (2026-10-16) : les modeles de vetements. ⚠ `atelier:donnees` est l op de
@@ -3989,6 +3991,7 @@ const LIMITES_PONT = {
   'vehicules:ecrire': 30000, 'vehicules:odometre': 30000, 'vehicules:supprimer': 30000,
   'vehicules:deplacement': 30000, 'vehicules:deplacementOter': 30000, 'vehicules:changement': 30000,
   'vehicules:dpa': 30000,
+  'calendrier:mois': 15000,
   /* 37 demandes paralleles a la NHTSA (une par marque), puis l ecriture de la
      configuration partagee : 10 a 30 s d habitude, davantage sur un reseau lent. */
   'vehicules:catalogue': 90000,
@@ -4753,6 +4756,8 @@ const PAGES_ANCRABLES = () => ({
   livre: ['Livre de comptes', () => pageLivre()],
   vehicules: ['Véhicules et déplacements', () => pageVehicules()],
   rappels: ['Rappels', () => pageRappels()],
+  // Le calendrier (2026-11-18, relooking) : précommandes, ramassages, échéances fiscales et rappels sur un mois.
+  calendrier: ['Calendrier', () => pageCalendrier()],
   atelier: ['Atelier de création', () => pageAtelier('')],
   fibres: ['Analyses de fibres et étiquettes', () => pageFibres('')],
   liens: ['Liens d’installation', () => pageLiens('')],
@@ -7128,6 +7133,7 @@ const { pageImpot } = require('./fenetres/impot');
 const { pageComptabilite } = require('./fenetres/comptabilite');
 const { pageLivre } = require('./fenetres/livre');
 const { pageVehicules } = require('./fenetres/vehicules');
+const { pageCalendrier } = require('./fenetres/calendrier');
 const { pageRappels } = require('./fenetres/rappels');
 const { pageAtelier } = require('./fenetres/atelier');
 const { pageFibres } = require('./fenetres/fibres');
@@ -7415,6 +7421,8 @@ const actionApp = (nom, arg) => {
     case 'vehicules':
     // Rappels (2026-10-02) : meme cas, sa section hote cote site ne porte que la zone.
     case 'rappels':
+    // Calendrier (2026-11-18) : meme cas, ne natif ; sa section hote cote site ne porte que la zone.
+    case 'calendrier':
     // Atelier de creation (2026-10-16) : meme cas, nee native.
     case 'atelier':
     // Analyses de fibres et etiquettes (2026-10-25) : meme cas, nee native.
@@ -7739,7 +7747,9 @@ const _MODULES_OUVRABLES = ['generations', 'verrous', 'journaux', 'securite', 'i
   // Les rapports d encan (2026-10-25) : la console de l encan les ouvre (bouton « Rapports »).
   'encan-rapports',
   // Bons de commande fournisseurs (2026-10-27) : le bouton « Commander » de l Inventaire (Reapprovisionnement) les ouvre.
-  'bons-commande'];
+  'bons-commande',
+  // Le calendrier (2026-11-18) : un evenement ouvre le module qui le porte.
+  'calendrier', 'ramassages', 'produits'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();
   if (_MODULES_OUVRABLES.indexOf(n) < 0) return false;
