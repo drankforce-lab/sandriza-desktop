@@ -163,6 +163,11 @@ html.jour .alerte-q{color:#1d5e33;background:rgba(34,197,94,.12)}
 .pill.plusieurs{background:rgba(96,165,250,.16);color:var(--tx-info,#93c5fd)}
 .pill.introuvable,.pill.erreur{background:rgba(239,68,68,.16);color:var(--tx-err2)}
 .pill.creee{background:rgba(34,197,94,.16);color:var(--tx-ok)}
+/* (2026-11-18, relooking phase 2) Épuré : TROIS tons — le vert (configuré, fait, créé) devient NEUTRE. */
+html[data-sz-theme="epure"] .point:not(.off),html[data-sz-theme="epure"].jour .point:not(.off){background:var(--tx2)}
+html[data-sz-theme="epure"] .rc .qte,html[data-sz-theme="epure"].jour .rc .qte,html[data-sz-theme="epure"] .alerte-q,html[data-sz-theme="epure"].jour .alerte-q,html[data-sz-theme="epure"] .pill.creee,html[data-sz-theme="epure"].jour .pill.creee{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+html[data-sz-theme="epure"] .rc.fait,html[data-sz-theme="epure"].jour .rc.fait{border-color:var(--v16)}
+html[data-sz-theme="epure"] .rc.fait button,html[data-sz-theme="epure"].jour .rc.fait button{color:var(--tx)}
 html.jour .pill.a_verifier{color:#7a5a00}
 html.jour .pill.plusieurs{color:#1e4f8f}
 html.jour .pill.introuvable,html.jour .pill.erreur{color:#7a2e2e}
