@@ -255,6 +255,11 @@ contextBridge.exposeInMainWorld('szPont', {
   // Rend le nouvel état (true = plein écran) pour que le bouton dise la vérité.
   pleinEcran: () => ipcRenderer.invoke('fenetre:pleinecran').catch(() => null),
 
+  /* (2026-11-18, relooking phase 1) La palette Ctrl K trouve aussi les FONCTIONS DU MENU. Une entrée se
+     désigne par son CHEMIN d'indices dans le modèle que la coquille détient déjà (« 2.0.3|Libellé ») —
+     jamais par du code : le principal retrouve l'entrée chez lui et la déclenche comme le menu natif. */
+  menuEntree: (chemin) => ipcRenderer.invoke('recherche:menu:agir', String(chemin || '')).catch(() => false),
+
   // ⚠ LE SEUL FLUX POUSSÉ VERS UNE FENÊTRE NATIVE, et il existe pour une raison
   // précise. L'affichage client de la caisse doit suivre le scan à l'instant : le
   // faire demander l'état en boucle serait un sondage permanent pour une

@@ -53,20 +53,23 @@ body{color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sa
 
 /* Les pictogrammes au trait, gris (sa règle : tout pictogramme en gris). */
 const PICTO = {
+  menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h10"/></svg>',
   commande: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8l8-4 8 4v8l-8 4-8-4z"/><path d="M4 8l8 4 8-4M12 12v8"/></svg>',
   client: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 4-5.5 7-5.5s5.8 1.9 7 5.5"/></svg>',
   produit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="7.5" r="1.3"/></svg>',
   facture: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7M9 7h4"/></svg>',
 };
 
-function pageRecherchePartout() {
+function pageRecherchePartout(menu) {
+  /* (2026-11-18) Les fonctions du menu, aplaties par le principal (menuAplati) : cherchées ICI, sans aller au site. */
+  const MENU = Array.isArray(menu) ? menu.slice(0, 600) : [];
   return `${TETE()}
 <title>${T("Rechercher partout")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="pal" role="dialog" aria-label="${T("Rechercher partout")}">
   <label class="ch"><span class="ic">${ICO.loupe}</span>
     <input id="rp-q" type="search" autocomplete="off" spellcheck="false" aria-label="${T("Rechercher partout")}"
-      placeholder="${T("Commande, client, produit, SKU ou facture…")}"><kbd>${T("Échap")}</kbd></label>
+      placeholder="${T("Commande, client, produit, SKU, facture ou fonction…")}"><kbd>${T("Échap")}</kbd></label>
   <div class="res" id="rp-res" role="listbox"><div class="vide">${T("Tapez au moins deux lettres.")}</div></div>
   <div class="pied"><span><kbd>↑</kbd><kbd>↓</kbd>${T("choisir")}</span><span><kbd>${T("Entrée")}</kbd>${T("ouvrir")}</span><span><kbd>${T("Échap")}</kbd>${T("fermer")}</span><span class="msg" id="msg" role="status"></span></div>
 </div>
@@ -77,10 +80,11 @@ function pageRecherchePartout() {
   var q = document.getElementById("rp-q"), res = document.getElementById("rp-res");
   var L = [], SEL = 0, MINUT = null, NUM = 0;
   var PICTO = ${JSON.stringify(PICTO)};
+  var MENU = ${JSON.stringify(MENU).replace(/</g, '\\u003c')};
   /* (2026-10-27) szArgent vient des MESURES du socle : cette palette ne charge pas JS_DIRE (qui les porte), il faut
      les poser ici — sans elles, « Rechercher partout » tombait au premier resultat chiffre (construction 40608387952). */
 ${JS_MESURES()}
-  var GROUPES = { commande: '${T("Commandes")}', client: '${T("Clients")}', produit: '${T("Produits")}', facture: '${T("Factures")}' };
+  var GROUPES = { commande: '${T("Commandes")}', client: '${T("Clients")}', produit: '${T("Produits")}', facture: '${T("Factures")}', menu: '${T("Fonctions du menu")}' };
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function argent(n){ return szArgent(Number(n) || 0); }   // la monnaie du socle, dans la langue du poste
@@ -91,6 +95,7 @@ ${JS_MESURES()}
     if (!p || typeof p.then !== 'function') return Promise.resolve({ ok: false, motif: 'pont_indisponible' });
     return p.then(function(r){ return r || { ok: false, motif: 'echec' }; }).catch(function(){ return { ok: false, motif: 'echec' }; });
   }
+  function sansAccent(s){ try { return String(s).normalize('NFD').replace(/[\\u0300-\\u036f]/g, ''); } catch (e) { return String(s); } }
   function fermer(){ try { window.close(); } catch (e) {} }
 
   function dessiner(texte){
@@ -110,14 +115,29 @@ ${JS_MESURES()}
   function chercher(){
     var v = q.value.trim(), n = ++NUM;
     if (v.length < 2) { L = []; dessiner('${T("Tapez au moins deux lettres.")}'); return; }
+    /* Les fonctions du menu d abord (locales, instantanees), puis les donnees du site. Chaque mot tape doit
+       se retrouver dans le libelle ou son chemin, en francais ou en anglais, accents ignores. */
+    var mots = sansAccent(v.toLowerCase()).split(/\\s+/).filter(Boolean);
+    var F = MENU.filter(function(e){ var k = sansAccent(e.k); return mots.every(function(m){ return k.indexOf(m) >= 0; }); })
+      .slice(0, 6).map(function(e){ return { sorte: 'menu', titre: e.t, sous: e.s, id: e.c + '|' + e.o }; });
+    L = F; SEL = 0; if (F.length) dessiner();
     appeler('recherche:partout', [v]).then(function(r){
       if (n !== NUM) return;   // une frappe plus récente a déjà relancé
-      if (!r || !r.ok) { L = []; dessiner(r && r.motif === 'session' ? '${T("Connectez-vous dans la fenêtre principale.")}' : '${T("La recherche n’a pas pu se faire.")}'); return; }
-      L = r.resultats || []; SEL = 0; dessiner();
+      if (!r || !r.ok) {
+        L = F; if (F.length) { dessiner(); return; }
+        dessiner(r && r.motif === 'session' ? '${T("Connectez-vous dans la fenêtre principale.")}' : '${T("La recherche n’a pas pu se faire.")}'); return;
+      }
+      L = F.concat(r.resultats || []); SEL = 0; dessiner();
     });
   }
   function ouvrir(i){
-    var r = L[i]; if (!r || !r.ouvrir) return;
+    var r = L[i]; if (!r) return;
+    if (r.sorte === 'menu') {
+      var pm = null; try { pm = P.menuEntree(r.id); } catch (e) {}
+      Promise.resolve(pm).then(function(ok){ if (ok) fermer(); else dessiner('${T("Ce résultat n’a pas pu s’ouvrir.")}'); });
+      return;
+    }
+    if (!r.ouvrir) return;
     appeler(r.ouvrir, [r.id]).then(function(x){
       if (x && x.ok) fermer();
       else dessiner(x && x.motif === 'droit' ? '${T("Votre rôle ne permet pas d’ouvrir ce résultat.")}' : '${T("Ce résultat n’a pas pu s’ouvrir.")}');

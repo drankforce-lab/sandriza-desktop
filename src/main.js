@@ -1009,10 +1009,55 @@ const ouvrirRecherchePartout = () => {
     win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
     win.webContents.on('did-finish-load', () => appliquerTheme(win.webContents));
     win.once('ready-to-show', () => { try { win.show(); win.focus(); } catch {} });
-    win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageRecherchePartout())).catch(() => {});
+    let _menu = []; try { _menu = menuAplati(); } catch (e) {}
+    win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageRecherchePartout(_menu))).catch(() => {});
   } catch (er) { console.error('[recherche partout]', er && er.message); }
 };
 ipcMain.on('recherche:partout:ouvrir', () => ouvrirRecherchePartout());
+
+/* ══ LES FONCTIONS DU MENU DANS Ctrl K (2026-11-18, relooking phase 1) ══
+   La palette reçoit, à sa naissance, la liste APLATIE du modèle de menu que appbar.js envoie déjà à la
+   coquille (titre dans la langue du poste, chemin « Section › Sous-menu », clés de recherche FR + EN).
+   ⚠ Une entrée revient ici par son CHEMIN d'indices, jamais par du code : on la retrouve dans _modele et on
+   la déclenche par versTemplateNatif — la MÊME règle que le menu natif et ses raccourcis, aucune seconde voie.
+   ⚠ Le modèle a pu changer entre l'ouverture et le choix (rôle, langue) : le libellé d'origine voyage avec le
+   chemin et doit concorder, sinon on refuse plutôt que de lancer une AUTRE entrée. */
+const menuAplati = () => {
+  const out = [];
+  const tr = (x) => { try { return _trMenu(x); } catch (e) { return x; } };
+  const marcher = (items, chemin, fil) => (items || []).forEach((it, i) => {
+    if (!it || it.sep) return;
+    const c = chemin.concat(i), lab = String(it.label || '');
+    if (!lab || lab.startsWith('__')) return;
+    if (it.sub) { marcher(it.sub, c, fil.concat(tr(lab))); return; }
+    if (!it.app && !it.section && !it.tab && !it.run) return;
+    out.push({ c: c.join('.'), o: lab, t: tr(lab), s: fil.join(' › '),
+      k: (lab + ' ' + tr(lab) + ' ' + fil.join(' ')).toLowerCase() });
+  });
+  _sansPseudo(_modele.menus).forEach((m, i) => marcher(m.items, [i], [tr(String(m.label || ''))]));
+  return out;
+};
+const menuEntreeParChemin = (brut) => {
+  const s = String(brut || ''), p = s.indexOf('|');
+  if (p < 0) return null;
+  const idx = s.slice(0, p).split('.').map((n) => parseInt(n, 10)), origine = s.slice(p + 1);
+  if (!idx.length || idx.some((n) => !(n >= 0))) return null;
+  const m = _sansPseudo(_modele.menus)[idx[0]];
+  let it = m ? { sub: m.items } : null;
+  for (let k = 1; k < idx.length && it; k++) it = (it.sub || [])[idx[k]];
+  if (!it || it.sub || it.sep || String(it.label || '') !== origine) return null;
+  return it;
+};
+ipcMain.handle('recherche:menu:agir', (e, brut) => {
+  try {
+    const it = menuEntreeParChemin(brut);
+    if (!it) return false;
+    const t = versTemplateNatif([it])[0];
+    if (!t || typeof t.click !== 'function') return false;
+    setTimeout(() => { try { t.click(); } catch (er) { console.error('[menu Ctrl K]', er && er.message); } }, 0);
+    return true;
+  } catch (er) { return false; }
+});
 app.on('browser-window-focus', () => {
   try { if (!globalShortcut.isRegistered('CommandOrControl+K')) globalShortcut.register('CommandOrControl+K', ouvrirRecherchePartout); } catch {}
 });

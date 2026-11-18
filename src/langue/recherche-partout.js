@@ -20,6 +20,8 @@ module.exports = {
   'Clients': 'Customers',
   'Produits': 'Products',
   'Factures': 'Invoices',
+  'Fonctions du menu': 'Menu functions',
+  'Commande, client, produit, SKU, facture ou fonction…': 'Order, customer, product, SKU, invoice or function…',
   'Rien ne correspond.': 'Nothing matches.',
   'Connectez-vous dans la fenêtre principale.': 'Sign in from the main window.',
   'La recherche n’a pas pu se faire.': 'The search could not be run.',
