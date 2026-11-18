@@ -126,6 +126,10 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .pill.moi{background:rgba(59,130,246,.18);color:var(--tx-bleu)}
 /* ⚠ LE RÔLE EN PASTILLE NEUTRE DANS LA LISTE — jamais coloré. */
 .pill.role{background:rgba(148,163,184,.16);color:var(--tx-c3cfdd);font-weight:600}
+/* « Épuré » (phase 5) : trois tons — actif, MFA, « vous », rôle et désactivé en neutre ; « à surveiller » en ambre ; fiches blanches. */
+html[data-sz-theme="epure"] .pill.on,html[data-sz-theme="epure"] .pill.off,html[data-sz-theme="epure"] .pill.mfa,html[data-sz-theme="epure"] .pill.moi,html[data-sz-theme="epure"] .pill.role{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+html[data-sz-theme="epure"] .pill.warn{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+html[data-sz-theme="epure"] .fiche{background:var(--f-carte);border-color:var(--v08);border-radius:16px}
 
 /* ── LES COMPTES EN FICHES ────────────────────────────────────────────────
    Le tableau dense convenait à des transactions ; ici chaque ligne est une

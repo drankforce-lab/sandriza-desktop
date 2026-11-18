@@ -5163,6 +5163,10 @@ html[data-sz-theme="epure"].jour .pied{background:var(--f-carte);border-top:1px 
 html[data-sz-theme="epure"] .carte h2:not(:empty){text-transform:none;letter-spacing:0;font-size:15px;font-weight:800;color:var(--tx)}
 html[data-sz-theme="epure"].jour{--tx-ok:#1f2533;--tx-ok2:#1f2533}
 html[data-sz-theme="epure"]:not(.jour){--tx-ok:#e8ecf2;--tx-ok2:#e8ecf2}
+/* Les PASTILLES PARTAGÉES (.rf-pill) en trois tons : vert et bleu deviennent neutres ; ambre et rouge prennent ceux des maquettes. */
+html[data-sz-theme="epure"] .rf-pill.vert,html[data-sz-theme="epure"] .rf-pill.bleu{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+html[data-sz-theme="epure"] .rf-pill.ambre{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+html[data-sz-theme="epure"] .rf-pill.rouge{background:var(--ep-rouge-f);color:var(--ep-rouge-t)}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,
