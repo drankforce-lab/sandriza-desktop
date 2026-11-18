@@ -5273,6 +5273,18 @@ html[data-sz-theme="epure"] tbody td > .rf-pill:only-child{background:transparen
 html[data-sz-theme="epure"] tbody td > .rf-pill.ambre:only-child{color:var(--ep-ambre-t)}
 html[data-sz-theme="epure"] tbody td > .rf-pill.rouge:only-child{color:var(--ep-rouge-t)}
 html[data-sz-theme="epure"] tbody td > .rf-pill:only-child::before{display:none}
+/* (Monday, suite) L'ACTION PRINCIPALE EN TÊTE DE BARRE, tout aligné à gauche : le groupe de droite rejoint la barre ; le bouton
+   brun passe premier, la recherche juste après ; les onglets d'état, s'il y en a, prennent leur propre rangée au-dessus. */
+html[data-sz-theme="epure"] .rf-tb .rf-droite,html[data-sz-theme="epure"] .cx-barre>.droite{display:contents}
+html[data-sz-theme="epure"] .cx-barre{flex-wrap:wrap;row-gap:12px}
+html[data-sz-theme="epure"] .cx-barre>.ed-seg{order:-3;flex:1 1 100%}
+html[data-sz-theme="epure"] .rf-tb .prim,html[data-sz-theme="epure"] .cx-barre .prim{order:-2}
+html[data-sz-theme="epure"] .rf-tb .rf-rch,html[data-sz-theme="epure"] .cx-barre .rf-rch{order:-1}
+html[data-sz-theme="epure"] .ls-tete{flex-wrap:wrap;row-gap:12px;gap:6px}
+html[data-sz-theme="epure"] .ls-tete>.droite{display:contents}
+html[data-sz-theme="epure"] .ls-tete>.ed-seg{order:-3;flex:1 1 100%}
+html[data-sz-theme="epure"] .ls-tete .ed-bt.fort{order:-2}
+html[data-sz-theme="epure"] .ls-tete .ls-rch{order:-1;height:34px;max-width:260px}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,
