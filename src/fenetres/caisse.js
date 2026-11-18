@@ -89,6 +89,8 @@ input[type=checkbox]{width:auto;min-height:0}
 .ch{display:flex;flex-direction:column;gap:.25rem;min-width:0}
 .ch > span{font-size:.74rem;color:var(--tx2);font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+/* (2026-11-18) Épuré : « Téléphone — 000 000-0000 » ne tenait plus à moitié de rangée (police plus large). */
+html[data-sz-theme="epure"] .champs .g2{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)}
 .g3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.55rem}
 .champs{display:flex;flex-direction:column;gap:.4rem}
 .sep{height:1px;background:var(--v07);margin:.65rem 0}

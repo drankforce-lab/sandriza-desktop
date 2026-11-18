@@ -5092,6 +5092,12 @@ html[data-sz-theme="epure"] .cx-averti,html[data-sz-theme="epure"].jour .cx-aver
 html[data-sz-theme="epure"] .cx-piste>i.ok,html[data-sz-theme="epure"].jour .cx-piste>i.ok,html[data-sz-theme="epure"] .cx-piste>i.info,html[data-sz-theme="epure"].jour .cx-piste>i.info{background:var(--tx2)}
 html[data-sz-theme="epure"] .cx-tuile.ok,html[data-sz-theme="epure"].jour .cx-tuile.ok{border-color:var(--sz-bord)}
 html[data-sz-theme="epure"] .cx-kpi.ok>b,html[data-sz-theme="epure"].jour .cx-kpi.ok>b{color:var(--tx)}
+/* Inventaire : « Seuil non atteint » (.pill.ok, vert) et la jauge des variantes en stock (verte) → neutre ; les
+   variantes basses (ambre) et en rupture (rouge) gardent leur ton. Avatars teintés par catégorie (.rf-av.tc :
+   rose, bleu…) → NEUTRES (sa règle : « avatars et icônes neutres »). */
+html[data-sz-theme="epure"] .pill.ok,html[data-sz-theme="epure"].jour .pill.ok{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+html[data-sz-theme="epure"] .gp .jauge i:not(.bas):not(.rup),html[data-sz-theme="epure"].jour .gp .jauge i:not(.bas):not(.rup){background:color-mix(in srgb,var(--tx2) 45%,transparent)}
+html[data-sz-theme="epure"] .rf-av.tc,html[data-sz-theme="epure"].jour .rf-av.tc{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
 /* L'étiquette imprimée mais pas partie : une action attend (le dépôt) → un voile AMBRE, plus le violet. */
 html[data-sz-theme="epure"] tbody tr.attente,html[data-sz-theme="epure"].jour tbody tr.attente{background:color-mix(in srgb,var(--ep-ambre-f) 60%,transparent)}
 /* Les compteurs dans les onglets de statut (maquette « 50 commandes ») : écrits par la fenêtre dans TOUS les jeux,
@@ -5105,11 +5111,11 @@ html[data-sz-theme="epure"] .ed-seg .ct.z,html[data-sz-theme="epure"].jour .ed-s
 /* Onglets resserrés : avec leurs compteurs, la recherche passait sur une 2e ligne (capture 1400 px). */
 html[data-sz-theme="epure"] .ed-seg button,html[data-sz-theme="epure"].jour .ed-seg button{padding:0 .6rem}
 html[data-sz-theme="epure"] .cx-barre,html[data-sz-theme="epure"].jour .cx-barre{gap:.45rem}
-html[data-sz-theme="epure"] .cx-barre .rf-rch,html[data-sz-theme="epure"].jour .cx-barre .rf-rch{min-width:8rem}
+html[data-sz-theme="epure"] .cx-barre .rf-rch,html[data-sz-theme="epure"].jour .cx-barre .rf-rch{min-width:20rem}
 /* ⚠ Le retour à la ligne se décide sur la largeur SOUHAITÉE du bloc (recherche jusqu’à 22rem), pas sur son minimum :
-   base 0 et un plancher de 19rem (son texte indicatif ENTIER : banc-champs refuse un indicatif coupé) — la
+   base 0 et un plancher (recherche 20rem = son texte indicatif ENTIER, mesuré 262 px : banc-champs refuse un indicatif coupé) — la
    recherche se loge sur la ligne quand elle y tient en entier, et passe dessous sinon. */
-html[data-sz-theme="epure"] .cx-barre>.droite,html[data-sz-theme="epure"].jour .cx-barre>.droite{flex:1 1 0;min-width:19rem;justify-content:flex-end}
+html[data-sz-theme="epure"] .cx-barre>.droite,html[data-sz-theme="epure"].jour .cx-barre>.droite{flex:1 1 0;min-width:25rem;justify-content:flex-end}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE,

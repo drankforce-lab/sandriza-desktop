@@ -46,6 +46,9 @@ const OPT = (n) => ARGS.includes(n);
 const GARDER = OPT('--garder');
 const CHOISIES = ARGS.filter((a) => !a.startsWith('--'));
 const MODES = OPT('--jour') ? ['jour'] : ['nuit'];
+/* --theme=X (2026-11-18, relooking) : pose html[data-sz-theme=X] avant le premier rendu — mesurer un jeu de couleurs.
+   ⚠ Épuré change la POLICE (Plus Jakarta Sans, ~8 % plus large que Segoe UI) : ce qui tenait peut déborder. */
+const THEME = ((ARGS.find((a) => a.startsWith('--theme=')) || '').slice(8)).replace(/[^a-z0-9-]/gi, '');
 const DETACHE = OPT('--detache');
 /* SZ_DEB_L / SZ_DEB_H (2026-10-12) : une taille a la main, pour garder de la MARGE sur ce poste — sous Linux
    (travail << contrastes >>) les polices sont plus larges, et ce qui tient ici a 1080 peut y deborder de 47 px. */
@@ -290,6 +293,7 @@ function main() {
            << contrastes >> tourne sous Linux, ou la police par defaut (DejaVu Sans) a presque les metriques de
            Verdana — plus large que Segoe UI : ce qui tient ici debordait la-bas de 11 a 47 px. Avant de pousser
            une retouche de mise en page : SZ_DEB_POLICE=Verdana node tools/banc-debordement.js --detache */
+        if (THEME) page = page.replace(/<\/head>/i, (m) => '<script>document.documentElement.setAttribute("data-sz-theme",' + JSON.stringify(THEME) + ')</script>' + m);
         if (process.env.SZ_DEB_POLICE) page = page.replace(/<\/head>/i, (m) => '<style>*{font-family:' + JSON.stringify(process.env.SZ_DEB_POLICE) + ',sans-serif!important}</style>' + m);
         /* ⚠ LE DERNIER </body>, JAMAIS LE PREMIER : un jeu de reponses peut
            contenir une page HTML entiere (l apercu d un courriel), et le premier

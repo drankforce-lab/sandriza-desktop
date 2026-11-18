@@ -70,6 +70,8 @@ const COEUR = fs.readFileSync(path.join(__dirname, 'audit-boutons-coeur.js'), 'u
 const RAPPORT_F = path.join(__dirname, 'audit-boutons-rapport.json');
 
 const ARGS = process.argv.slice(2);
+/* --theme=X (2026-11-18, relooking) : pose html[data-sz-theme=X] avant le premier rendu (banc-champs --theme=epure). */
+const THEME = ((ARGS.find((a) => a.startsWith('--theme=')) || '').slice(8)).replace(/[^a-z0-9-]/gi, '');
 const OPT = (n) => ARGS.includes(n);
 const VAL = (n, d) => { const a = ARGS.find((x) => x.startsWith('--' + n + '=')); return a ? a.slice(n.length + 3) : d; };
 const GARDER = OPT('--garder');
@@ -366,6 +368,7 @@ function main() {
       try { brut = String(f.fabrique(c.jeu.id || '')); }
       catch (e) { rates.push(f.nom + ' / ' + c.nom + ' : la fabrique a levé — ' + e.message); continue; }
       let page = /<head[^>]*>/i.test(brut) ? brut.replace(/<head([^>]*)>/i, (m) => m + '\n' + prologue(c.jeu)) : prologue(c.jeu) + brut;
+      if (THEME) page = page.replace(/<\/head>/i, (m) => '<script>document.documentElement.setAttribute("data-sz-theme",' + JSON.stringify(THEME) + ')</script>' + m);
       /* ⚠ LE DERNIER </body> : un jeu peut porter une page HTML entière dans une chaîne. */
       const fin = page.toLowerCase().lastIndexOf('</body>');
       const ep = epilogue(f.nom, c.nom);

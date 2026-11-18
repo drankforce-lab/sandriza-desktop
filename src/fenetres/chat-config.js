@@ -78,6 +78,8 @@ textarea.t{min-height:4.2em;resize:vertical;line-height:1.5}
 input.t:focus,textarea.t:focus{outline:none;border-color:var(--or)}
 input.t:disabled,textarea.t:disabled{opacity:.45}
 .rang{display:flex;gap:.45rem;align-items:center}
+/* (2026-11-18) base nulle : le champ garde sa largeur vide ou rempli (banc-champs S_ETIRE, vu sous Épuré). */
+.rang>input.t{flex:1 1 0;min-width:0}
 .rang input.t{flex:1 1 auto;min-width:0}
 .sources{display:grid;grid-template-columns:repeat(auto-fill,minmax(13rem,1fr));gap:.45rem;margin:0 0 .9rem}
 .sources label{display:flex;align-items:center;gap:.45rem;font-size:.82rem;cursor:pointer;

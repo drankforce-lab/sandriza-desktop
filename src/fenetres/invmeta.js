@@ -56,6 +56,8 @@ input:focus,button:focus,select:focus{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
+/* (2026-11-18) Épuré : sa police est ~8 % plus large — « #FF6B6B » ne tenait plus dans 105 px. */
+html[data-sz-theme="epure"] #inv-color-hex{width:118px!important}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600;padding:.34rem .7rem}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.ghost{background:transparent}
@@ -375,7 +377,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
     }).join('');
     return '<div style="display:flex;justify-content:space-between;flex-wrap:wrap;gap:.4rem;margin-bottom:.5rem">'
       + '<span class="aide" style="margin:0">' + phrase(used, '${T("{0} utilisée")}', '${T("{0} utilisées")}') + ' · ' + phrase(dispo, '${T("{0} disponible")}', '${T("{0} disponibles")}') + '</span>'
-      + '<span>' + fbtn('all', '${T("Toutes")}') + ' ' + fbtn('used', '${T("Utilisées (")}' + used + ')') + ' ' + fbtn('unused', '${T("Non utilisées (")}' + dispo + ')') + '</span></div>'
+      + '<span style="display:inline-flex;gap:.35rem;flex-wrap:wrap">' + fbtn('all', '${T("Toutes")}') + fbtn('used', '${T("Utilisées (")}' + used + ')') + fbtn('unused', '${T("Non utilisées (")}' + dispo + ')') + '</span></div>'
       + '<div class="aide" style="margin:0 0 .5rem">${T("Cliquez une couleur pour la sélectionner dans le formulaire d’ajout.")}</div>'
       + '<div class="swatches">' + sw + '</div>';
   }
