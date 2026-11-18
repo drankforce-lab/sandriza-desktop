@@ -29,8 +29,26 @@ const T = LANGUE.tr('socle');
  * premier `require`. Garde : `banc-langue-page.js` refuse qu une fenetre
  * reecrive l une des trois a la main.
  */
+/* LE THÈME DÈS LA PREMIÈRE PEINTURE (2026-11-18, sa remarque : « la section _ □ X est toujours blanche sur noir
+   dans l'écran de chargement ») : une fenêtre naissait en NUIT (le défaut de la feuille) et ne recevait le jour,
+   le jeu de couleurs et la densité qu'à la FIN du chargement (jsTheme, à did-finish-load) — elle restait noire tout
+   le temps du chargement, sous une barre de titre blanche. Le principal fournit ici le thème du poste, et la
+   page le porte dans sa balise <html> : peinte juste du premier coup. Sans fournisseur (bancs, captures),
+   rien ne change. */
+let _themeDepart = null;
+const fournirThemeDepart = (f) => { _themeDepart = (typeof f === 'function') ? f : null; };
+const _attrsTheme = () => {
+  try {
+    const t = _themeDepart && _themeDepart();
+    if (!t) return '';
+    const cl = [t.jour ? 'jour' : '', t.dense ? 'dense' : ''].filter(Boolean).join(' ');
+    const th = /^[a-z0-9-]+$/.test(String(t.theme || '')) ? String(t.theme) : '';
+    return (cl ? ' class="' + cl + '"' : '') + (th ? ' data-sz-theme="' + th + '"' : '')
+      + ' style="color-scheme:' + (t.jour ? 'light' : 'dark') + '"';
+  } catch (e) { return ''; }
+};
 const TETE = (attrs) =>
-  '<!doctype html><html lang="' + LANGUE.langueCourante() + '"'
+  '<!doctype html><html lang="' + LANGUE.langueCourante() + '"' + _attrsTheme()
   + (attrs ? ' ' + attrs : '') + '><head><meta charset="utf-8">';
 const LIEU = () => (LANGUE.langueCourante() === 'en' ? 'en-CA' : 'fr-CA');
 /* ⚠ En anglais, remplacer le point PAR LE POINT : le geste devient un
@@ -5173,4 +5191,4 @@ module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + C
   CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_MESURES, JS_BROUILLON, JS_TUILES, JS_BORNER, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
-  TETE, LIEU, SEP_DEC, CSS_SUIVI };
+  TETE, LIEU, SEP_DEC, CSS_SUIVI, fournirThemeDepart };

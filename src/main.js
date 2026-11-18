@@ -5540,6 +5540,12 @@ const jsTheme = () => {
     + 'document.documentElement.classList.toggle("dense",' + (reglages.get('densite') === 'compacte') + ');'
     + 'document.documentElement.style.colorScheme=' + JSON.stringify(jour ? 'light' : 'dark') + ';';
 };
+/* Le thème du poste, fourni aux pages natives À LEUR GÉNÉRATION (socle.TETE) : peintes justes dès la première image. */
+try {
+  require('./fenetres/socle').fournirThemeDepart(() => ({
+    jour: !_modele.sombre, theme: _themeCouleur(), dense: reglages.get('densite') === 'compacte',
+  }));
+} catch (e) {}
 const appliquerTheme = (wc) => {
   try { if (wc && !wc.isDestroyed()) wc.executeJavaScript(jsTheme(), true).catch(() => {}); } catch {}
 };
