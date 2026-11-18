@@ -230,6 +230,11 @@ ${css}
   font-size:13px!important;font-weight:500!important;white-space:nowrap!important;width:auto!important;gap:12px!important}
 .sz-sombre.ep-pan .ep-col .sz-item{border-bottom-color:#222a38!important}
 .ep-pan .ep-col .sz-item .sz-lbl{font-size:13px!important;overflow:visible!important;text-overflow:clip!important}
+.ep-nb{flex:0 0 auto;margin-left:auto;min-width:26px;height:22px;padding:0 8px;box-sizing:border-box;border-radius:99px;
+  display:inline-flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;font-variant-numeric:tabular-nums;background:#eef0f4;color:#3d4456}
+.ep-nb.a{background:#fdebd3;color:#8a3f00}
+.sz-sombre .ep-nb{background:#252d3b;color:#c9d1dd}
+.sz-sombre .ep-nb.a{background:#33270f;color:#f2c27e}
 /* Autonome : les lignes ne dépendent pas de la feuille du site (cssRail) pour leur apparence. */
 .ep-pan .ep-col .sz-item{display:flex!important;align-items:center;justify-content:flex-start;background:transparent!important;border-top:0!important;
   border-left:0!important;border-right:0!important;color:inherit!important;font-family:inherit!important;text-align:left;cursor:pointer;box-shadow:none!important}
@@ -286,6 +291,8 @@ ${css}
     if(it.coche!==undefined){ var c=document.createElement('span'); c.className='sz-coche';
       c.textContent=it.coche?'\\u2713':''; b.appendChild(c); }
     var l=document.createElement('span'); l.className='sz-lbl'; l.textContent=it.label; b.appendChild(l);
+    // (2026-11-18, maquette) le compteur de l'entrée, dans une pastille nette (ambre : une action attend ; gris : information)
+    if(it.nb){ var nb=document.createElement('span'); nb.className='ep-nb'+(it.ton==='a'?' a':''); nb.textContent=it.nb>99?'99+':String(it.nb); b.appendChild(nb); }
     if(it.accel){ var a=document.createElement('span'); a.className='sz-acc'; a.textContent=it.accel; b.appendChild(a); }
     if(it.sub){
       var f=document.createElement('span'); f.className='sz-fleche'; f.textContent='\\u25B8'; b.appendChild(f);
