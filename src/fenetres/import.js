@@ -109,25 +109,35 @@ button.lien:hover:not(:disabled){background:transparent;text-decoration:underlin
 .avance{font-size:.8rem;color:var(--tx2);min-height:1.2em}
 .res-t{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap;font-size:.84rem;color:var(--tx2)}
 .res-t b{color:var(--tx)}
-.res{flex:1 1 0;min-height:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(10.5rem,1fr));gap:.7rem;overflow:hidden;align-content:start}
-.rc{display:flex;flex-direction:column;border:1px solid var(--v10);border-radius:12px;overflow:hidden;background:var(--v03,transparent)}
-.rc .im{position:relative;aspect-ratio:4/5;background:var(--v08)}
+/* (8.33.3, sa capture : « c'est bien trop pogné, ça doit être plus professionnel ») Des cartes plus larges et aérées :
+   photo carrée sur fond blanc (les photos de grossiste sont détourées sur blanc), titre sur deux lignes, puis UN
+   chiffre qui se lit de loin — la vente proposée — et dessous, en petit, le prix du fournisseur et notre coût,
+   alignés en colonnes. L alerte de quantité tient sur une ligne ; la phrase entière reste au survol. */
+.res{flex:1 1 0;min-height:0;display:grid;grid-template-columns:repeat(auto-fill,minmax(13.5rem,1fr));gap:1rem;overflow:hidden;align-content:start}
+.rc{display:flex;flex-direction:column;border:1px solid var(--v10);border-radius:14px;overflow:hidden;background:var(--v03,transparent);box-shadow:0 6px 18px -12px rgba(0,0,0,.45);transition:border-color .15s ease}
+.rc:hover{border-color:var(--v20,var(--v10))}
+.rc .im{position:relative;aspect-ratio:1/1;background:#fff}
 .rc .im img{width:100%;height:100%;object-fit:cover;display:block}
 .rc .sc{position:absolute;left:.4rem;top:.4rem;font:700 .66rem/1 system-ui;padding:.22rem .45rem;border-radius:99px;background:rgba(10,14,22,.78);color:var(--tx)}
 .rc .sc.haut{background:var(--or);color:#1a1208}
-.rc .bd{padding:.5rem .6rem .6rem;display:flex;flex-direction:column;gap:.35rem;flex:1 1 auto}
-.rc b{font-size:.78rem;font-weight:650;line-height:1.3;max-height:2.6em;overflow:hidden}
+.rc .bd{padding:.8rem .9rem .9rem;display:flex;flex-direction:column;gap:.6rem;flex:1 1 auto}
+.rc [data-ti] b{font-size:.8rem;font-weight:600;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;min-height:2.7em}
 .rc [data-ti]{display:block}
-.rc [data-ti] b{display:block}
-.rc .px{display:flex;flex-direction:column;gap:.12rem;font-size:.72rem;color:var(--tx2);line-height:1.35}
-.rc .px .pf{color:var(--tx);font-weight:650}
-.rc .px .vt{color:var(--tx)}
-.rc .px .vt b{font-size:.8rem}
+/* (8.33.3) le titre est limité à deux lignes plus haut : pas de display:block ici, il annulerait la limite */
+.rc .px{display:flex;flex-direction:column;gap:.5rem;padding-top:.6rem;border-top:1px solid var(--v08);font-size:.72rem;color:var(--tx2);line-height:1.35}
+.rc .px .pf{color:var(--tx);font-weight:600}
 .rc .px .lec{font-style:italic}
+.rc .pv{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem}
+.rc .pv-l{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2)}
+.rc .pv-v{font:700 1.2rem/1 system-ui;color:var(--tx);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
+.rc .kv{display:grid;grid-template-columns:1fr auto;gap:.25rem .75rem}
+.rc .kv span:nth-child(even){color:var(--tx);text-align:right;font-weight:550;font-variant-numeric:tabular-nums;white-space:nowrap}
+.rc .qte{font-size:.7rem;font-weight:650;color:var(--tx-ok);background:rgba(34,197,94,.10);border-radius:7px;padding:.32rem .55rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+html.jour .rc .qte{color:#1d5e33}
 .rc .orig{font-size:.64rem;color:var(--tx2)}
 .alerte-q{display:inline-block;font-size:.68rem;font-weight:700;padding:.12rem .45rem;border-radius:7px;background:rgba(34,197,94,.14);color:var(--tx-ok);line-height:1.35}
 html.jour .alerte-q{color:#1d5e33;background:rgba(34,197,94,.12)}
-.rc button{margin-top:auto;font-size:.76rem;font-weight:650}
+.rc button{margin-top:auto;width:100%;padding:.5rem .7rem;font-size:.78rem;font-weight:650}
 .rc.fait{border-color:var(--tx-ok)}
 .rc.fait button{color:var(--tx-ok)}
 .etapes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;margin-top:.4rem}
@@ -374,7 +384,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="res" data-pages="import-resultats">' + r.candidats.map(function(c, i){
       var fid = PREP[c.url];
       return '<div class="rc' + (fid ? ' fait' : '') + '"><div class="im" data-im="' + i + '">' + imCarte(c) + '</div>'
-        + '<div class="bd"><span data-ti="' + i + '">' + tiCarte(c) + '</span><span class="px" data-px="' + i + '">' + pxCarte(c) + '</span>'
+        + '<div class="bd"><span data-ti="' + i + '">' + tiCarte(c) + '</span><div class="px" data-px="' + i + '">' + pxCarte(c) + '</div>'
         + (fid ? '<button type="button" data-voir="' + esc(fid) + '">${T("✓ Fiche prête — compléter")}</button>'
                : '<button type="button" data-prep="' + i + '"' + (OCCUPE ? ' disabled' : '') + '>${T("Préparer la fiche")}</button>') + '</div></div>';
     }).join('') + '</div>';
@@ -503,11 +513,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var brut = (c.prix != null) ? '<span class="pf">' + esc(argent(c.prix)) + '</span>' : '';
     if (!x || x.etat === 'lecture') return brut + '<span class="lec">${T("Lecture des prix…")}</span>';
     if (x.etat !== 'ok' || !x.e || x.e.prixFournisseur == null) return brut || '${T("Prix non affiché")}';
-    var e = x.e, h = '<span><span class="pf">' + esc(montant(e.prixFournisseur, e.devise)) + '</span> ${T("chez le fournisseur")}</span>';
-    if (e.devise !== 'CAD') h += '<span>' + (e.cout != null ? '${T("Coût chez nous ≈ {0}")}'.replace('{0}', esc(argent(e.cout))) : '${T("Taux de change indisponible : coût à saisir")}') + '</span>';
-    if (e.prix != null) h += '<span class="vt">${T("Vente proposée :")} <b>' + esc(argent(e.prix)) + '</b></span>';
-    if (e.qteMin > 1) h += '<span>' + '${T("Minimum de commande : {0} pièces")}'.replace('{0}', String(e.qteMin)) + '</span>';
-    if (e.alerte) h += '<span class="alerte-q">' + alerteTexte(e.alerte, e.devise) + '</span>';
+    var e = x.e, h = '';
+    if (e.prix != null) h += '<div class="pv"><span class="pv-l">${T("Vente proposée")}</span><span class="pv-v">' + esc(argent(e.prix)) + '</span></div>';
+    h += '<div class="kv"><span>${T("Fournisseur")}</span><span>' + esc(montant(e.prixFournisseur, e.devise)) + '</span>';
+    if (e.devise !== 'CAD') h += '<span>${T("Coût chez nous")}</span><span>' + (e.cout != null ? '≈ ' + esc(argent(e.cout)) : '${T("à saisir")}') + '</span>';
+    if (e.qteMin > 1) h += '<span>${T("Minimum")}</span><span>' + '${T("{0} pièces")}'.replace('{0}', String(e.qteMin)) + '</span>';
+    h += '</div>';
+    if (e.devise !== 'CAD' && e.cout == null) h += '<span class="lec">${T("Taux de change indisponible : coût à saisir")}</span>';
+    if (e.alerte) h += '<div class="qte" title="' + esc(alerteTexte(e.alerte, e.devise)) + '">'
+      + '${T("−{0} % dès {1} pièces · {2}")}'.replace('{0}', pct(e.alerte.economie)).replace('{1}', String(e.alerte.min)).replace('{2}', esc(montant(e.alerte.prix, e.devise))) + '</div>';
     return h;
   }
   /* Une carte se complète SANS redessiner la fenêtre (la saisie en cours et la page affichée ne bougent pas). */

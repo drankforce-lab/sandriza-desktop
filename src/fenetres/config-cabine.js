@@ -181,7 +181,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (D.ouverte ? '' : '<div class="alerte">${T("La cabine est fermée.")}</div>') + '</div>');
     if (O === 'general') h.push('<div class="carte"><h2>${T("Types de hauts")}</h2><p class="sous">${T("Les sortes de hauts que la cabine distingue. Le type d’un article se choisit dans sa fiche ; sans choix, il est déduit de son nom.")}</p>'
       + '<div class="puces">' + types.map(function(t, i){ return '<span class="puce">' + esc(t) + (RO ? '' : '<button type="button" data-rt="' + i + '" aria-label="${T("Retirer")} ' + esc(t) + '">×</button>') + '</span>'; }).join('') + '</div>'
-      + (RO ? '' : '<div class="ajout"><input type="text" id="f-type" maxlength="30" placeholder="${T("Nouveau type (ex. polo)")}" aria-label="${T("Nouveau type (ex. polo)")}"><button type="button" id="b-type">${T("Ajouter")}</button></div>') + '</div>');
+      + (RO ? '' : '<div class="ajout"><input type="text" id="f-type" maxlength="30" placeholder="${T("Type (ex. polo)")}" aria-label="${T("Nouveau type (ex. polo)")}"><button type="button" id="b-type">${T("Ajouter")}</button></div>') + '</div>');
     var opts = types.map(function(t){ return '<option>' + esc(t) + '</option>'; }).join('');
     if (O === 'general') h.push('<div class="carte"><h2>${T("Superpositions permises")}</h2><p class="sous">${T("Deux hauts portés l’un sur l’autre dans la cabine — seulement ces paires. Hors liste, le second haut remplace le premier.")}</p>'
       + ((R.superpositions || []).length ? '<div class="puces">' + R.superpositions.map(function(p, i){ return '<span class="puce">' + esc(p[0]) + ' + ' + esc(p[1]) + (RO ? '' : '<button type="button" data-rs="' + i + '" aria-label="${T("Retirer")}">×</button>') + '</span>'; }).join('') + '</div>'

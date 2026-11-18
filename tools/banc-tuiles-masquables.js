@@ -82,6 +82,8 @@ const PAS_UN_BANDEAU = {
     + 'échantillon de couleurs, il ne compte rien',
   promotions: 'la boîte modale d’édition — son h3 est gras et ses h4 sont en capitales. '
     + 'Un formulaire, pas un bandeau',
+  import: 'les cartes de résultat de recherche (8.33.3) : chaque carte porte le prix de vente proposé '
+    + 'DE CE PRODUIT en gros, « Vente proposée » en capitales. Un prix de produit, pas des totaux à replier',
 };
 
 const GROS = (c) => /font\s*:\s*[5-9]00\s+[\d.]+rem/.test(c)

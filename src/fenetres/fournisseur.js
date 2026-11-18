@@ -37,7 +37,9 @@ function pageFournisseur(id) {
 .imp-verif{display:flex;align-items:center;gap:.6rem;margin-top:.6rem;flex-wrap:wrap}
 .imp-etat{font-size:.8rem;color:var(--tx2)}
 .imp-etat.bon{color:var(--tx-ok)}.imp-etat.err{color:var(--tx-err)}.imp-etat.att{color:var(--tx-att)}
-.imp-aide{font-size:.76rem;color:var(--tx2);line-height:1.45;margin:.6rem 0 0}</style></head><body>
+.imp-aide{font-size:.76rem;color:var(--tx2);line-height:1.45;margin:.6rem 0 0}
+.imp-maj-t{display:block;font-size:.73rem;color:var(--tx2);margin-bottom:.3rem}
+.imp-maj{display:block;font-size:.8rem;color:var(--tx);line-height:1.45}</style></head><body>
 <div class="tete"><span class="ico">${ICO.suppliers}</span><h1 id="titre">${T("Fournisseur")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="pas" id="pas"></div>
@@ -58,7 +60,6 @@ function pageFournisseur(id) {
   MOTIFS.import_site_invalide = '${T("Adresse du site invalide (exemple : https://grossiste.ca).")}';
   MOTIFS.import_type_requis = '${T("Choisissez ce que vend ce fournisseur.")}';
   MOTIFS.import_recherche_invalide = '${T("L’adresse de recherche doit être une adresse complète contenant {q}.")}';
-  MOTIFS.import_majoration_invalide = '${T("La majoration doit être entre 1 et 10 (exemple : 2,2).")}';
   var ID   = ${ident};
   var bEnr = document.getElementById('btn-enr');
   var sous = document.getElementById('sous');
@@ -127,7 +128,10 @@ function pageFournisseur(id) {
       + '<option value="">${T("Choisir…")}</option>'
       + fam.map(function(f){ return '<option value="' + esc(f.cle) + '">' + esc(f.libelle) + '</option>'; }).join('')
       + '</select></div>'
-      + ch('f-imp-maj', '${T("Majoration proposée (×)")}', { placeholder: String(CTX.majorationDefaut || 2) })
+      /* (2026-11-17, sa règle) Plus de majoration par fournisseur : le prix proposé suit les paliers de la boutique,
+         jamais sous 120 % de profit. On les MONTRE ici, là où l on cherchait le champ — on ne les règle plus. */
+      + '<div class="ch"><span class="imp-maj-t">${T("Prix de vente proposé")}</span>'
+      + '<span class="imp-maj">${T("Coût sous 5 $ : ×10 · de 5 à 20 $ : ×4 · 20 $ et plus : ×2,2 (jamais moins de 120 % de profit)")}</span></div>'
       + ch('f-imp-rech', '${T("Adresse de recherche (facultative)")}', { large: true, placeholder: 'https://…/recherche?q={q}' })
       + '</div><div class="imp-verif"><button type="button" id="f-imp-verif">${T("Vérifier le site")}</button>'
       + '<span id="f-imp-etat" class="imp-etat"></span></div>'
@@ -151,7 +155,6 @@ function pageFournisseur(id) {
       poser('f-notes', fiche.notes);
       poser('f-imp-site', fiche.importSite || ''); poser('f-imp-type', fiche.importType || '');
       poser('f-imp-rech', fiche.importRecherche || '');
-      poser('f-imp-maj', fiche.importMajoration ? String(fiche.importMajoration).replace('.', '${SEP_DEC()}') : '');
       var choisies = fiche.categories || [];
       Array.prototype.forEach.call(document.querySelectorAll('.f-cat'), function(c){
         c.checked = choisies.indexOf(c.value) >= 0;
@@ -274,7 +277,7 @@ function pageFournisseur(id) {
      passent pas par l aide generique, d ou la liste explicite ci-dessous. */
   var BR_CHAMPS = ['f-nom', 'f-contact', 'f-courriel', 'f-tel', 'f-web',
     'f-rue', 'f-ville', 'f-prov', 'f-cp', 'f-delai', 'f-actif', 'f-notes',
-    'f-imp-site', 'f-imp-type', 'f-imp-rech', 'f-imp-maj'];
+    'f-imp-site', 'f-imp-type', 'f-imp-rech'];
   function brCats(){
     return Array.prototype.filter.call(document.querySelectorAll('.f-cat'), function(c){ return c.checked; })
       .map(function(c){ return c.value; });
@@ -344,8 +347,7 @@ function pageFournisseur(id) {
                     .map(function(c){ return c.value; }),
       leadTime: val('f-delai'), notes: val('f-notes'), active: val('f-actif') === '1',
       importSite: String(val('f-imp-site') || '').trim(), importType: val('f-imp-type'),
-      importRecherche: String(val('f-imp-rech') || '').trim(),
-      importMajoration: String(val('f-imp-maj') || '').trim().replace(',', '.')
+      importRecherche: String(val('f-imp-rech') || '').trim()
     }).then(function(r){
       if (!r || !r.ok) { bEnr.disabled = false; dire(expliquer(r), 'err'); return; }
       /* ⚠ LE BROUILLON MEURT ICI, ET AVANT LE P.fermer() DIFFERE : la fenetre part

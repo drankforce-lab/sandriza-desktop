@@ -35,6 +35,7 @@ module.exports = {
   "Les sortes de hauts que la cabine distingue. Le type d’un article se choisit dans sa fiche ; sans choix, il est déduit de son nom.": "The kinds of tops the fitting room tells apart. An item’s type is chosen on its product sheet; without a choice, it is guessed from its name.",
   "Retirer": "Remove",
   "Nouveau type (ex. polo)": "New type (e.g. polo)",
+  "Type (ex. polo)": "Type (e.g. polo)",
   "Ajouter": "Add",
   "Superpositions permises": "Allowed layering",
   "Deux hauts portés l’un sur l’autre dans la cabine — seulement ces paires. Hors liste, le second haut remplace le premier.": "Two tops worn one over the other in the fitting room — only these pairs. Outside the list, the second top replaces the first.",
