@@ -6242,6 +6242,16 @@ const poserVueConnexion = () => {
   } catch (e) {}
 };
 
+/* (2026-11-19, sa capture : bande _ □ ✕ noire au-dessus de « Fichier Affichage Aide » de la connexion) La vue de connexion n'envoie
+   pas sa couleur (elle n'est pas « la principale ») : la bande gardait la dernière reçue. On y pose celle de SA barre. */
+const _bandeConnexion = () => {
+  try {
+    const s = _sombreCourant();
+    const ep = _themeCouleur() === 'epure';
+    const fond = ep ? (s ? '#181e29' : '#ffffff') : _fondTheme(s);
+    _overlay(mainWindow, { color: fond, symbolColor: s ? '#e8ecf2' : '#1f2533' });
+  } catch (e) {}
+};
 const connexionMontrer = () => {
   if (!mainWindow || mainWindow.isDestroyed()) return false;
   /* Déjà là : on la repose et on la ramène devant plutôt que d'en créer une
@@ -6250,6 +6260,7 @@ const connexionMontrer = () => {
   if (vueConnexion) {
     poserVueConnexion();
     try { vueConnexion.setVisible(true); vueConnexion.webContents.focus(); } catch (e) {}
+    _bandeConnexion();
     return true;
   }
   let view;
@@ -6297,6 +6308,7 @@ const connexionMontrer = () => {
   catch (e) { cnxDire("addChildView ECHEC : " + e.message); vueConnexion = null; return false; }
   poserVueConnexion();
   try { view.setVisible(true); } catch (e) {}
+  _bandeConnexion();
   cnxDire("posee " + JSON.stringify(view.getBounds()));
   /* ⚠⚠ ON REPOSE DEUX FOIS, ET C EST LA CAUSE DE SA BANDE NOIRE. Au moment de
      l ouverture, la fenêtre principale n a pas toujours sa taille définitive :
