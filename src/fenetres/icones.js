@@ -69,6 +69,11 @@ body{background:var(--f-page);color:var(--tx);
 .bascule:has(input:disabled){cursor:default;color:var(--tx3)}  /* le texte reste lisible ; seul le curseur s estompe (socle) — 2026-10-04 */
 /* Le bloc de depot : vignette a gauche, formulaire a droite. */
 .pose{display:grid;grid-template-columns:7rem 1fr;gap:1rem;align-items:start}
+/* (2026-11-19, contrôle visuel) Le libellé « Retirer le fond de l’image » passait SOUS le bouton voisin : la colonne du
+   formulaire empile ses éléments, chacun sur sa ligne, et le libellé peut se couper. */
+.pose > div:last-child{display:flex;flex-direction:column;align-items:flex-start;gap:.65rem;min-width:0}
+.pose > div:last-child > .ch{width:100%;margin:0}
+.pose .bascule{margin:0!important;white-space:normal!important;max-width:100%}
 @media (max-width:620px){.pose{grid-template-columns:1fr}}
 .vig{height:7rem;border-radius:10px;background:#f5f2ec;display:flex;align-items:center;
   justify-content:center;padding:.6rem;overflow:hidden;border:1px dashed var(--v18);

@@ -145,7 +145,10 @@ tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:mi
   margin-left:calc(.9rem + 1px);cursor:pointer}
 .gc-mini{flex:0 0 auto;width:6.6rem;height:4.1rem;border-radius:9px;padding:.45rem .6rem;display:flex;flex-direction:column;justify-content:space-between;
   color:#f7efe2;background:linear-gradient(135deg,#1c2541 0%,#2a3358 55%,#8f6f42 140%);box-shadow:0 4px 12px rgba(0,0,0,.3)}
-.gc-mini b{font:700 .5rem/1 Georgia,serif;letter-spacing:.24em;color:#f0d6a0}
+/* (2026-11-19, contrôle visuel) En Épuré, la règle générale des noms en gras grossissait ce « SANDRIZA » : il sortait de la
+   mini-carte et recouvrait le nom de la cliente. La mini-carte garde SA petite capitale, bornée à sa largeur. */
+.gc-mini b{font:700 .5rem/1 Georgia,serif!important;letter-spacing:.24em!important;color:#f0d6a0!important;max-width:100%;overflow:hidden;white-space:nowrap;display:block}
+.gc-mini{overflow:hidden}
 .gc-mini strong{font-size:.9rem;font-weight:800;font-variant-numeric:tabular-nums}
 .cc-rang.eteinte .gc-mini{filter:grayscale(.85)}
 .cc-rang .bilan small{font-size:.76rem;font-weight:500;color:var(--tx2)}
