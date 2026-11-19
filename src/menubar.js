@@ -166,6 +166,30 @@ function pagePanneau(desc) {
      doublait l'échelle (« c'est beaucoup trop gros »). Le facteur de zoom de
      la fenêtre principale est posé par la coquille (setZoomFactor), pour que
      panneau et barre paraissent à la même taille. */
+  /* (2026-11-19, sa capture du panneau « Catalogue » : « il faudrait une couleur de fond des menus différente, ça devient
+     confondant, la même couleur partout ») Le panneau avait EXACTEMENT la couleur des cartes (#181e29 la nuit, blanc le
+     jour) : posé sur le tableau de bord, il s'y fondait. Il prend une surface À LUI, « surélevée » et teintée du thème —
+     un cran plus claire la nuit, une pointe de l'accent le jour — et une bordure à l'accent. Contrastes mesurés dans les
+     8 thèmes : libellé gris ≥ 5,4, survol ≥ 8,2. */
+  let PAN = '';
+  try {
+    const T = require('./teintes'); const t = T.teinte(te) || {};
+    const mix = (a, b, k) => { const h = (x) => [1, 3, 5].map((i) => parseInt(String(x).slice(i, i + 2), 16)); const A = h(a), B = h(b);
+      return '#' + A.map((v, i) => Math.round(v * k + B[i] * (1 - k)).toString(16).padStart(2, '0')).join(''); };
+    const rgb = (x) => [1, 3, 5].map((i) => parseInt(String(x).slice(i, i + 2), 16)).join(',');
+    const pj = t.prim || '#8a5a2b', pn = t.primN || '#c9a27a';
+    PAN = '.sz-panneau.ep-pan{background:' + mix(pj, '#ffffff', 0.06) + '!important;border-color:rgba(' + rgb(pj) + ',.24)!important}'
+      + '.ep-pan .ep-col .sz-item{border-bottom-color:' + mix(pj, '#e9ebf1', 0.10) + '!important}'
+      + '.ep-pan .ep-col .sz-item:hover{background:' + mix(pj, '#ffffff', 0.13) + '!important}'
+      + '.ep-pan .ep-col+.ep-col{border-left-color:' + mix(pj, '#e4e7ee', 0.10) + '}'
+      + '.ep-pan .ep-tete .x{background:transparent;border-color:rgba(' + rgb(pj) + ',.24)}'
+      + '.sz-panneau.ep-pan.sz-sombre{background:' + mix(pn, '#252d3d', 0.08) + '!important;border-color:rgba(' + rgb(pn) + ',.30)!important}'
+      + '.sz-sombre.ep-pan .ep-col .sz-item{border-bottom-color:' + mix(pn, '#323b4d', 0.08) + '!important}'
+      + '.sz-sombre.ep-pan .ep-col .sz-item:hover{background:' + mix(pn, '#252d3d', 0.16) + '!important}'
+      + '.sz-sombre.ep-pan .ep-col+.ep-col{border-left-color:' + mix(pn, '#36404f', 0.08) + '}'
+      + '.sz-sombre.ep-pan .ep-tete .x{background:transparent;border-color:rgba(' + rgb(pn) + ',.30)}'
+      + '.sz-sombre .ep-tete .nb,.sz-sombre .ep-col .t{color:#a9b2c1}';
+  } catch (e) { PAN = ''; }
   return `<!doctype html><html lang="${LANG()}" data-sz-teinte="${te}"><head><meta charset="utf-8">
 <style>${POLICE}
 html,body{margin:0;overflow:hidden}
@@ -245,6 +269,7 @@ ${css}
 .sz-sombre.ep-pan .sz-coche{color:var(--ep-aN,#c9a27a)}
 #sous{display:none;margin-left:7px}
 .sz-item .sz-fleche{margin-left:auto;opacity:.6;font-size:.8em;padding-left:1.2em}
+${PAN}
 </style></head><body>
 <script>
 (function(){
