@@ -4973,6 +4973,15 @@ const PAGES_ANCRABLES = () => ({
   /* Configuration › Mon entreprise (2026-11-18, sa demande) : l'onglet de Fiscalité devenu un écran de Configuration —
      même page (impot.js), ouverte seule. Super-administrateur pour écrire (cœur + serveur). Section hôte « entreprise ». */
   'entreprise': ['Mon entreprise', () => pageImpot('entreprise-seule')],
+  /* (2026-11-18, sa demande : « continue avec les modules non ancrés ») Les derniers MODULES qui s'ouvraient à part
+     s'ancrent comme « Générations » : `_dockOuvrir` direct, sans section hôte côté site (_ouvrirAncre). */
+  'questions': ['Questions sur les produits', () => pageQuestions('')],
+  'secondevie': ['Seconde vie', () => pageSecondeVie('')],
+  'reappro': ['Prévision de réapprovisionnement', () => pageAnalyse('reappro')],
+  'rentabilite': ['Rentabilité par produit', () => pageAnalyse('rentabilite')],
+  'import-fournisseur': ['Import de produits fournisseurs', () => pageImport()],
+  'encan-rapports': ['Rapports d’encan', () => pageEncanRapports('')],
+  'encan': ['Encan en direct', () => pageEncan()],
   'maintenance': ['Mode usage exclusif', () => pageMaintenance()],
   'connexion': ['Connexion', () => pageConnexion()],
   'maj': ['Mise à jour', (id) => pageMaj(id)],
@@ -5022,7 +5031,7 @@ const NON_DETACHABLES = new Set(['tableau', 'connexion']);
 /* ⚠⚠ (2026-11-18, sa demande : « retirer ce mode partout, ça doit être ancré permanent partout, sauf pour les écrans
    obligatoires comme la vente de comptoir ») Le bouton « Détacher » n'existe plus que pour CES écrans-ci ; tous les autres
    sont ancrés en permanence, et un état « détaché » retenu d'avant (poste ou profil) est ignoré. */
-const DETACHABLES = new Set(['caisse', 'explorateur', 'generations']);
+const DETACHABLES = new Set(['caisse', 'explorateur', 'generations', 'encan']);   // l'encan : la console du direct, comme le comptoir
 const _detachable = (c) => DETACHABLES.has(c) && !NON_DETACHABLES.has(c);
 /* ⚠ DETACHE PAR DEFAUT (#32). L explorateur de photos n a aucun sens ancre :
    c est justement parce qu il vivait dans la colonne du Studio — etroit,
@@ -7629,38 +7638,17 @@ const actionApp = (nom, arg) => {
       break;
     // (2026-10-25, lot 4) Les rapports d'encan : une séance par direct, et la comparaison entre séances.
     // (8.28.0) Les questions posées sur les fiches : répondre, publier, masquer.
-    case 'questions':
-      ouvrirNative('questions', TF('Questions sur les produits'), () => pageQuestions(''),
-        { width: 1200, height: 780, minWidth: 820, minHeight: 560 });
-      break;
+    case 'questions': _ouvrirAncre('questions'); break;
     // (8.29.0) L'analyse des produits : une fenêtre, deux portes (l'onglet ouvert d'abord).
     // (8.29.0) La seconde vie : les reprises de vêtements et les réglages des deux sections.
-    case 'secondevie':
-      ouvrirNative('secondevie', TF('Seconde vie'), () => pageSecondeVie(''),
-        { width: 1240, height: 800, minWidth: 860, minHeight: 580 });
-      break;
-    case 'reappro':
-      ouvrirNative('reappro', TF('Prévision de réapprovisionnement'), () => pageAnalyse('reappro'),
-        { width: 1320, height: 820, minWidth: 900, minHeight: 600 });
-      break;
+    case 'secondevie': _ouvrirAncre('secondevie'); break;
+    case 'reappro': _ouvrirAncre('reappro'); break;
     // (8.33.0) L'import de produits depuis le site d'un fournisseur.
-    case 'import-fournisseur':
-      ouvrirNative('import-fournisseur', TF('Import de produits fournisseurs'), () => pageImport(),
-        { width: 1340, height: 840, minWidth: 980, minHeight: 600 });
-      break;
-    case 'rentabilite':
-      ouvrirNative('rentabilite', TF('Rentabilité par produit'), () => pageAnalyse('rentabilite'),
-        { width: 1320, height: 820, minWidth: 900, minHeight: 600 });
-      break;
-    case 'encan-rapports':
-      ouvrirNative('encan-rapports', TF('Rapports d’encan'), () => pageEncanRapports(''),
-        { width: 1280, height: 820, minWidth: 900, minHeight: 600 });
-      break;
+    case 'import-fournisseur': _ouvrirAncre('import-fournisseur'); break;
+    case 'rentabilite': _ouvrirAncre('rentabilite'); break;
+    case 'encan-rapports': _ouvrirAncre('encan-rapports'); break;
     // (2026-10-20) L'encan en direct : la console de l'animatrice (l'écran filmé s'ouvre depuis elle).
-    case 'encan':
-      ouvrirNative('encan', TF('Encan en direct'), () => pageEncan(),
-        { width: 1280, height: 820, minWidth: 760, minHeight: 560 });
-      break;
+    case 'encan': _ouvrirAncre('encan'); break;
     /* ⚠ TOUS LES ECRANS ANCRABLES DU MENU PASSENT PAR LE FLUX D ANCRAGE
        (demande du 2026-08-09 : << si je passe par le menu, ca doit etre ancre,
        sauf si je l ai detache — l etat persiste par profil >>). On ne pose plus
@@ -7747,16 +7735,7 @@ const actionApp = (nom, arg) => {
        menu vers un bouton — sans jamais suivre le chemin jusqu au bout. On ne
        repare pas un bouton muet en changeant l endroit ou l on appuie.
        ➡ Un banc suit maintenant ce chemin : `banc-modules-ouvrables.js`. */
-    case 'corbeille': {
-      const _avC = fenetresNatives.get('corbeille');
-      const _reuC = !!(_avC && !_avC.isDestroyed());
-      const winC = ouvrirNative('corbeille', TF('Corbeille des commandes'), () => pageCorbeille(),
-        { width: 1040, height: 720, minWidth: 720, minHeight: 480 });
-      if (_reuC && winC && !winC.isDestroyed()) {
-        winC.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
-      }
-      break;
-    }
+    case 'corbeille': _ouvrirAncre('corbeille'); break;   // (2026-11-18) ancré, comme les autres modules
     /* ⚠ LES GÉNÉRATIONS (2026-10-18) : ni `dock:naviguer` (aucune section du site ne la porte — le clic serait
        muet, le piège de la corbeille), ni `ouvrirNative` (elle ne pourrait plus s'ancrer) : `_dockOuvrir`, le corps
        de dock:ouvrir. Ancrée, elle a besoin de la fenêtre principale à l'écran. */
@@ -7765,16 +7744,7 @@ const actionApp = (nom, arg) => {
       _dockOuvrir('generations').catch(() => {});
       break;
     }
-    case 'verrous': {
-      const _avV = fenetresNatives.get('verrous');
-      const _reuV = !!(_avV && !_avV.isDestroyed());
-      const winV = ouvrirNative('verrous', TF('Verrous'), () => pageVerrous(),
-        { width: 900, height: 660, minWidth: 680, minHeight: 440 });
-      if (_reuV && winV && !winV.isDestroyed()) {
-        winV.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
-      }
-      break;
-    }
+    case 'verrous': _ouvrirAncre('verrous'); break;   // (2026-11-18) ancré, comme les autres modules
     /* ⚠ FENETRE A PART, PAS UN ECRAN DU DOCK — meme montage que << Verrous >>,
        et pour la meme raison : aucune section << presence >> n existe cote site.
        ⚠ ELLE MONTRE LA FENETRE PRINCIPALE D ABORD quand elle est cachee. C est
@@ -7822,16 +7792,7 @@ const actionApp = (nom, arg) => {
     /* Le GARDIEN : fenetre a part de 7.5.0 a 7.8.x ; ANCRABLE depuis 7.9.0
        (2026-10-09, sa demande) — il est dans le bloc ancrable plus haut, avec
        sa section hote << gardien >> cote site. */
-    case 'presence': {
-      const _avP = fenetresNatives.get('presence');
-      const _reuP = !!(_avP && !_avP.isDestroyed());
-      const winP = ouvrirNative('presence', TF('Personnel connecté'), () => pagePresence(),
-        { width: 860, height: 620, minWidth: 680, minHeight: 420 });
-      if (_reuP && winP && !winP.isDestroyed()) {
-        winP.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
-      }
-      break;
-    }
+    case 'presence': _ouvrirAncre('presence'); break;   // (2026-11-18) ancré, comme les autres modules
     /* ⚠ `case 'veilleur'` EST PARTI LE 2026-09-09 avec sa fenêtre. Une action de
        menu qui ouvre un écran retiré ne « fait rien » — c'est le défaut MUET que
        ce fichier traque partout ailleurs. Voir le registre des fenêtres, plus
@@ -8016,6 +7977,11 @@ ipcMain.handle('journaux:ouvrir', (e, onglet) => {
    Les deux ont leur section hote cote site : le chemin d ancrage les trouve. */
 /* ⚠ Les modules qu un RAPPEL peut ouvrir (bouton « Ouvrir » de la fenetre
    Rappels, 2026-10-02) : les cles de `Rappels.MODULES` du site. */
+/* Ouvre un module ANCRÉ sans section hôte côté site (le chemin de « Générations ») : la fenêtre principale d'abord. */
+const _ouvrirAncre = (cle) => {
+  if (mainWindow && !mainWindow.isDestroyed()) { try { if (mainWindow.isMinimized()) mainWindow.restore(); mainWindow.show(); mainWindow.focus(); } catch (e) {} }
+  _dockOuvrir(cle).catch(() => {});
+};
 const _MODULES_OUVRABLES = ['generations', 'verrous', 'journaux', 'securite', 'incidents', 'config-logotheque', 'corbeille', 'depenses', 'vehicules',
   'rappels', 'impot', 'bankrec', 'livre', 'compta', 'factures', 'inventaire', 'commandes',
   // Configuration > NIP (2026-10-19) : ses liens (Atelier, mode usage exclusif) et le lien des anciens emplacements vers elle.

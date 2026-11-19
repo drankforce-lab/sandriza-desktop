@@ -20,6 +20,7 @@
 
 module.exports = {
   /* ── LA FENÊTRE ─────────────────────────────────────────────────────────── */
+  'Tout sélectionner': 'Select all',
   'Bons de commande fournisseurs — Administration Sandriza': 'Purchase orders — Sandriza Administration',
   'Bons de commande fournisseurs': 'Purchase orders',
   'En cours': 'Open',

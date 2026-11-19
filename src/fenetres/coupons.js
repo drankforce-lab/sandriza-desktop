@@ -128,6 +128,8 @@ tbody tr:hover td{background:var(--v04)}
 html.jour .ls-rang.coche{background:rgba(143,111,66,.08)}
 .cp-lot{display:flex;align-items:flex-start;gap:.55rem;flex:0 0 auto}
 .cp-lot>.szk-c{flex:0 0 auto;display:flex;align-items:center;justify-content:center;width:1.4rem;min-height:2.55rem;margin-left:1rem}
+html[data-sz-theme="epure"] .cp-lot>.szk-c{min-height:0;margin-left:6px}
+html[data-sz-theme="epure"] .cp-lot{align-items:center}
 .cp-lot>.szk-barre{flex:1 1 auto;min-width:0}
 .cp-ticket{flex:0 0 auto;width:9.5rem;height:2.6rem;padding:0 .8rem;display:flex;align-items:center;justify-content:center;
   border:1.5px dashed var(--sz-accent);border-radius:9px;background:var(--sz-accent-doux);color:var(--tx);
@@ -455,7 +457,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
       + '</div>');
 
     // Les gestes groupes (2026-10-29) : « tout cocher » et la barre d actions, au-dessus des rangs.
-    h += '<div class="cp-lot">' + (rows.length ? lotTout() : '') + CK.barre() + '</div>';
+    // (2026-11-18) La case n'est plus seule : son libellé en fait l'en-tête de la liste.
+    h += '<div class="cp-lot">' + (rows.length ? lotTout() + '<span class="lot-lib">${T("Tout sélectionner")}</span>' : '') + CK.barre() + '</div>';
     // La liste en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
     h += '<div class="ls-liste sz-pagee">';
     if (!rows.length) {

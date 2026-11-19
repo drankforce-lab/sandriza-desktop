@@ -97,6 +97,18 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 .duo>div:last-child{overflow:auto;padding-right:.15rem}
 .ent,.ana{display:grid;grid-template-columns:1.6rem 5.2rem minmax(0,1fr) minmax(0,1.1fr) minmax(0,1fr) minmax(0,.9rem) 5.4rem 6.4rem;
   gap:.6rem;align-items:center;padding:.45rem .55rem}
+.ent span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+/* (2026-11-18, Monday) Les nombres des vues, la fiche : geste principal à gauche, Supprimer à droite sans cadre. */
+.mo-vues .fb-ct{display:inline-block;margin-left:6px;padding:0 7px;border-radius:99px;font-size:11px;font-weight:800;background:var(--ep-neutre-f,var(--v08));color:var(--ep-neutre-t,var(--tx))}
+.mo-vues .fb-ct.a{background:var(--ep-ambre-f,#fdebd3);color:var(--ep-ambre-t,#8a3f00)}
+html[data-sz-theme="epure"] .ent,html[data-sz-theme="epure"] .ana{grid-template-columns:1.6rem 5.2rem minmax(0,.8fr) minmax(0,1.5fr) minmax(0,1.1fr) minmax(0,.7fr) 5.4rem 5.6rem 6.4rem}
+html[data-sz-theme="epure"] .ana{border-radius:0;border-top:1px solid var(--v10);box-shadow:inset 3px 0 0 var(--sz-btn-prim)}
+html[data-sz-theme="epure"] .ana:nth-of-type(even){background:var(--f-carte2)}
+html[data-sz-theme="epure"] .ana:hover{background:var(--v05)}
+html[data-sz-theme="epure"] .ana.sel{background:var(--sz-accent-doux)}
+.detail .apercu canvas{max-width:100%!important;height:auto!important;aspect-ratio:300/180}
+.fb-gestes{display:flex;gap:6px;align-items:center;justify-content:flex-start;flex-wrap:wrap}
+.fb-gestes .fb-sup{margin-left:auto;border:0!important;background:transparent!important;color:var(--tx-err)!important}
 .ent{font-size:.68rem;font-weight:650;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em}
 .ana{border-top:1px solid var(--v08);font-size:.82rem;border-radius:8px}
 .ana:hover{background:var(--v03)}
@@ -565,6 +577,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function outils(){
     if (!D) { elOutils.innerHTML = ''; return; }
     var h = '';
+    // (2026-11-18, Monday) En Épuré, les gestes de la banque descendent dans SA barre (voir banque()) : la tête reste nue.
+    if (VUE === 'banque' && EPF()) { elOutils.innerHTML = ''; return; }
     if (VUE === 'banque') {
       var n = nbCoches();
       h += '<button type="button" data-act="planche"' + (n ? '' : ' disabled') + ' title="${T("Cochez des analyses confirmées pour les mettre sur une planche")}">'
@@ -580,6 +594,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   /* ══ LA BANQUE ═════════════════════════════════════════════════════════════ */
+  function EPF(){ return document.documentElement.getAttribute('data-sz-theme') === 'epure'; }
   var FILTRES = [['toutes', '${T("Toutes")}'], ['a_confirmer', '${T("À confirmer")}'], ['confirmee', '${T("Confirmées")}'], ['a_creer', '${T("Produit à créer")}']];
   function visibles(){
     var q = Q.trim().toLowerCase();
@@ -616,7 +631,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function banque(){
     var L = (D.analyses || []);
-    var h = '<div class="filtres"><div class="puces" role="group" aria-label="${T("Filtrer les analyses")}">'
+    var h = '';
+    if (EPF()) {
+      /* LE PRINCIPE MONDAY (2026-11-18, sa capture : « ouf, c'est vraiment à améliorer ») : les vues en onglets avec leur
+         nombre, puis UNE barre — « + Nouvelle analyse » à gauche, Rechercher, Scanner, puis les gestes en boutons de barre. */
+      var cpt = { toutes: L.length, a_confirmer: 0, confirmee: 0, a_creer: 0 };
+      L.forEach(function(a){ if (a.etat === 'a_confirmer') cpt.a_confirmer++; if (a.etat === 'confirmee') cpt.confirmee++; if (!a.produit) cpt.a_creer++; });
+      var nC = nbCoches();
+      h += '<div class="mo-vues" role="tablist" aria-label="${T("Filtrer les analyses")}">'
+        + FILTRES.map(function(f){ return '<button type="button" role="tab" data-filtre="' + f[0] + '" aria-selected="' + (FILTRE === f[0]) + '" class="' + (FILTRE === f[0] ? 'on' : '') + '">'
+          + f[1] + ' <span class="fb-ct' + (f[0] === 'a_confirmer' && cpt.a_confirmer ? ' a' : '') + '">' + cpt[f[0]] + '</span></button>'; }).join('') + '</div>'
+        + '<div class="mo-outils">'
+        + (PA ? '<button type="button" class="prim" data-act="nouvelle">${T("+ Nouvelle analyse")}</button><span class="mo-sep"></span>' : '')
+        + '<label class="rf-rch mo-rch"><input type="search" id="f-q" maxlength="80" value="' + esc(Q) + '" aria-label="${T("Rechercher")}" placeholder="${T("Rechercher")}"></label>'
+        + '<label class="rf-rch mo-rch"><input type="text" id="f-scan" maxlength="40" autocomplete="off" aria-label="${T("Scanner")}" placeholder="${T("Scanner une étiquette")}" title="${T("Scannez le code de l’étiquette thermocollante, ou tapez le numéro d’analyse : l’analyse s’ouvre.")}"></label>'
+        + '<button type="button" class="mo-o' + (nC ? ' actif' : '') + '" data-act="planche"' + (nC ? '' : ' disabled') + ' title="${T("Cochez des analyses confirmées pour les mettre sur une planche")}">${T("Générer une planche")}' + (nC ? ' <span class="nb">' + nC + '</span>' : '') + '</button>'
+        + ((PA || (gabarit('fonce') && gabarit('pale'))) ? '<button type="button" class="mo-o" data-act="mixtes" title="${T("Une feuille pleine pour vêtements foncés et une pour vêtements pâles, sans analyse")}">${T("Pages pleines")}</button>' : '')
+        + '<button type="button" class="mo-o" data-act="historique">${T("Historique")}</button>'
+        + '</div>';
+    } else h += '<div class="filtres"><div class="puces" role="group" aria-label="${T("Filtrer les analyses")}">'
       + FILTRES.map(function(f){ return '<button type="button" class="puce" data-filtre="' + f[0] + '" aria-pressed="' + (FILTRE === f[0]) + '">' + f[1] + '</button>'; }).join('')
       + '</div><div class="q"><label class="lbl" for="f-scan">${T("Scanner")}</label><input type="text" id="f-scan" maxlength="40" autocomplete="off" placeholder="${T("Étiquette d’analyse…")}" title="${T("Scannez le code de l’étiquette thermocollante, ou tapez le numéro d’analyse : l’analyse s’ouvre.")}">'
       + '<label class="lbl" for="f-q">${T("Rechercher")}</label><input type="search" id="f-q" maxlength="80" value="' + esc(Q) + '" placeholder="${T("N°, fibre, produit, remarque…")}"></div></div>';
@@ -631,7 +664,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (PG >= nbp) PG = nbp - 1; if (PG < 0) PG = 0;
     var vue = V.slice(PG * BU, (PG + 1) * BU);
     h += '<div class="duo"><div><div class="cx-carte liste"><h2>${T("Banque des analyses")} <span class="cx-sub">' + V.length + ' ' + (V.length > 1 ? '${T("analyses")}' : '${T("analyse")}') + '</span>' + nav(nbp) + '</h2>'
-      + '<div class="ent"><span></span><span>${T("N°")}</span><span>${T("Lecture de l’IA")}</span><span>${T("Composition confirmée")}</span><span>${T("Produit / nom provisoire")}</span><span class="rq">${T("Remarque")}</span><span class="nb">${T("Imprimées")}</span><span>${T("Vinyle")}</span><span>${T("État")}</span></div>'
+      + '<div class="ent"><span></span><span>${T("N°")}</span><span>${T("Lecture IA")}</span><span>${T("Composition")}</span><span>${T("Produit")}</span><span class="rq">${T("Remarque")}</span><span class="nb">${T("Imprimées")}</span><span>${T("Vinyle")}</span><span>${T("État")}</span></div>'
       + (vue.length ? vue.map(ligneAnalyse).join('') : '<div class="aide" style="padding:.8rem">${T("Aucune analyse ne correspond à ce filtre.")}</div>')
       + '</div></div><div>' + detail() + '</div></div>';
     return h;
@@ -657,10 +690,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             return '<br><span class="gris" data-opt="1">' + esc(szJour(i.le)) + ' · ' + i.n + (t ? ' (' + esc(t) + ')' : '') + (i.par ? ' · ' + esc(i.par) : '') + '</span>'; }).join('') + '</div>'
       + (!a.produit && PM ? '<div class="avert">${T("Pas encore rattachée à un produit. Une fois le produit créé dans l’inventaire, rattachez-la : l’analyse, l’étiquette et son historique d’impression le suivront.")}'
           + '<div class="boutons" style="margin-top:.35rem"><button type="button" class="prim" data-rattacher="' + esc(a.id) + '">${T("Rattacher à un produit")}</button></div></div>' : '')
-      + '<div class="boutons">'
-      + (PS ? '<button type="button" class="danger gauche" data-sup="' + esc(a.id) + '">${T("Supprimer")}</button>' : '')
-      + '<button type="button" data-temp="' + esc(a.id) + '" title="${T("Une petite étiquette, au format de vos codes-barres, à coller sur le vêtement le temps de poser l’étiquette thermocollante.")}">${T("Étiquette temporaire")}</button>'
+      + '<div class="boutons fb-gestes">'
+      // (2026-11-18) Le geste principal d'abord, à gauche ; Supprimer en dernier, sans cadre.
       + (PM ? '<button type="button" class="prim" data-ouvrir="' + esc(a.id) + '">${T("Ouvrir")}</button>' : '')
+      + '<button type="button" data-temp="' + esc(a.id) + '" title="${T("Une petite étiquette, au format de vos codes-barres, à coller sur le vêtement le temps de poser l’étiquette thermocollante.")}">${T("Étiquette temporaire")}</button>'
+      + (PS ? '<button type="button" class="danger fb-sup" data-sup="' + esc(a.id) + '">${T("Supprimer")}</button>' : '')
       + '</div></div>';
   }
   function choisir(id){

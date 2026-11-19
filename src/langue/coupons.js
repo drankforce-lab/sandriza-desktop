@@ -28,6 +28,7 @@ module.exports = {
      ⚠ Et les en-tetes du fichier sont plus DETAILLES que ceux du tableau : a
      l ecran << Utilise >> tient le compte ET le maximum dans une seule
      colonne ; un tableur les veut separes pour pouvoir calculer. */
+  'Tout sélectionner': 'Select all',
   'coupon': 'coupon',
   'coupons': 'coupons',
   'Cumul avec solde': 'Stacks with sale',

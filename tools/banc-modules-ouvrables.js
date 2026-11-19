@@ -80,7 +80,8 @@ const ouvreEnNatif = (nom) => {
     const bloc = fin > 0 ? suite.slice(0, fin) : suite.slice(0, 1500);
     /* `_dockOuvrir` (2026-10-18) : le corps de dock:ouvrir, appelé d'ici — la vue native ancrable, née sans
        jumeau web (la fenêtre Générations). Elle s'ouvre sans demander de section au site. */
-    if (/ouvrirNative\s*\(|_dockOuvrir\s*\(/.test(bloc)) return true;
+    /* `_ouvrirAncre` (2026-11-18) : main.js enveloppe de `_dockOuvrir` (fenêtre principale montrée d'abord) — même chemin. */
+    if (/ouvrirNative\s*\(|_dockOuvrir\s*\(|_ouvrirAncre\s*\(/.test(bloc)) return true;
   }
   return false;
 };

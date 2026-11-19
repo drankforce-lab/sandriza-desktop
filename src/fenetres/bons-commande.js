@@ -53,6 +53,16 @@ body{background:var(--f-page);color:var(--tx);
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
 .pile{display:flex;flex-direction:column;gap:.7rem}
+/* (2026-11-18, Monday) En Épuré, la pile de cartes devient UNE liste : rangées franches (filet, liseré, une sur deux teintée),
+   « Recevoir » seul geste plein, les autres sans cadre (Clore / Annuler en rouge). */
+html[data-sz-theme="epure"] .pile{gap:0;background:var(--f-carte);border:1px solid var(--v10);border-radius:14px;overflow:hidden}
+html[data-sz-theme="epure"] .pile>.carte{margin:0;border:0!important;border-radius:0!important;border-bottom:1px solid var(--v10)!important;box-shadow:inset 3px 0 0 var(--sz-btn-prim)!important;background:transparent}
+html[data-sz-theme="epure"] .pile>.carte:last-child{border-bottom:0!important}
+html[data-sz-theme="epure"] .pile>.carte:nth-child(even){background:var(--f-carte2)}
+html[data-sz-theme="epure"] .pile>.carte:hover{background:var(--v05)}
+html[data-sz-theme="epure"] .pile>.carte button.mini:not(.prim){border:0!important;background:transparent!important;box-shadow:none!important;color:var(--tx2)}
+html[data-sz-theme="epure"] .pile>.carte button.mini:not(.prim):hover{background:var(--v08)!important;color:var(--tx)}
+html[data-sz-theme="epure"] .pile>.carte button.mini.danger{color:var(--ep-rouge-t)!important}
 /* La rangee d en-tete d un fournisseur, dans le tableau « A commander ». */
 tr.groupe td{background:var(--v04);border-top:1px solid var(--v10);padding:.45rem .5rem}
 tr.groupe:hover td{background:var(--v05)}
@@ -469,7 +479,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (D.peutEcrire ? '<br><span class="dt">${T("L’onglet <strong>À commander</strong> propose un bon par fournisseur à partir des articles sous leur seuil.")}</span>' : '')
         + '</div>';
     }
-    return '<div class="lot-rang">' + lotCase(CK.th(), 'lot-tout') + CK.barre() + '</div>'
+    return '<div class="lot-rang">' + lotCase(CK.th(), 'lot-tout') + '<span class="lot-lib">${T("Tout sélectionner")}</span>' + CK.barre() + '</div>'
       + '<div class="sz-pagee"><div class="pile" data-pages="bc-cours">' + l.map(function(b){ return carteBon(b, true); }).join('') + '</div></div>';
   }
 

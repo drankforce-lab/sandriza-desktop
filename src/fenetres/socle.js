@@ -5257,6 +5257,11 @@ html[data-sz-theme="epure"] .st-onglets button{border-radius:0!important}
 .sz-retour-cfg{flex:none;height:30px;padding:0 10px;margin-right:4px;border:0!important;border-radius:8px;background:transparent!important;
   color:var(--tx-or,var(--tx));font:inherit;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;-webkit-app-region:no-drag}
 .sz-retour-cfg:hover{background:var(--v06)!important}
+/* (2026-11-18) La case « tout cocher » posée seule au-dessus d'une liste (Coupons, Bons de commande) : une fine bande d'en-tête
+   avec son libellé, au lieu d'une case perdue. La barre des gestes, elle, reste flottante en bas quand on coche. */
+html[data-sz-theme="epure"] :is(.cp-lot,.lot-rang):has(.lot-lib){display:flex;align-items:center;gap:10px;padding:6px 14px;margin:0 0 8px;
+  border-radius:10px;background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
+.lot-lib{font-size:12.5px;font-weight:600;color:var(--tx2);white-space:nowrap}
 /* (2026-11-18, sa capture des Transporteurs : « pas comme ça ») Les onglets « en dossiers » (.tr-ong) deviennent les onglets
    soulignés du look, comme partout ailleurs ; leur pastille d'état (point) reste. */
 html[data-sz-theme="epure"] .tr-ong{padding:0 16px!important;gap:2px!important;border-bottom:1px solid var(--v08);background:transparent!important}
