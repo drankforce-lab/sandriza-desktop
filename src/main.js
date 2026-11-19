@@ -4994,6 +4994,7 @@ const PAGES_ANCRABLES = () => ({
   'encan-rapports': ['Rapports d’encan', () => pageEncanRapports('')],
   'encan': ['Encan en direct', () => pageEncan()],
   'maintenance': ['Mode usage exclusif', () => pageMaintenance()],
+  'notes': ['Notes des mises à jour', () => pageNotes()],
   'connexion': ['Connexion', () => pageConnexion()],
   'maj': ['Mise à jour', (id) => pageMaj(id)],
   /* ⚠⚠ « veilleur » A QUITTÉ CE REGISTRE LE 2026-09-09, avec sa fenêtre, son
@@ -7828,7 +7829,11 @@ const actionApp = (nom, arg) => {
        visible dessous au lieu de poser un rectangle vide par-dessus la seule
        porte d entrée. */
     case 'connexion': { connexionMontrer(); return; }
+    /* (2026-11-19, sa décision : « ancré partout », les deux) « Mode usage exclusif » et les « Notes des mises à jour »
+       s'ouvrent ANCRÉS dès qu'une session a posé sa zone d'ancrage. Sans zone (écran de connexion — les notes y sont
+       permises, FENETRES_HORS_SESSION), la fenêtre à part reste le repli : un bouton ne doit jamais être muet. */
     case 'maintenance': {
+      if (zoneAncrage) { _ouvrirAncre('maintenance'); break; }
       const _avM = fenetresNatives.get('maintenance');
       const _reuM = !!(_avM && !_avM.isDestroyed());
       const winM = ouvrirNative('maintenance', TF('Mode usage exclusif'), () => pageMaintenance(),
@@ -7850,6 +7855,7 @@ const actionApp = (nom, arg) => {
        ce fichier traque partout ailleurs. Voir le registre des fenêtres, plus
        haut, pour où sont passés les trois réglages qu'il portait. */
     case 'notes': {
+      if (zoneAncrage) { _ouvrirAncre('notes'); break; }
       const _avN = fenetresNatives.get('notes');
       const _reuN = !!(_avN && !_avN.isDestroyed());
       const winN = ouvrirNative('notes', TF('Notes des mises à jour'), () => pageNotes(),
