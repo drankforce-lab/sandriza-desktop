@@ -2467,7 +2467,7 @@ function szLotDerouler(o){
 const JS_CEDER = () => `
 (function(){
   if (typeof document === 'undefined' || window.__szCeder) return; window.__szCeder = true;
-  function rogneur(t){
+  function _szCdRogneur(t){
     for (var a = t.parentElement; a && a !== document.body; a = a.parentElement) {
       var c = getComputedStyle(a);
       if (c.overflowX === 'visible') continue;
@@ -2475,7 +2475,7 @@ const JS_CEDER = () => `
     }
     return null;
   }
-  function ajuster(){
+  function _szCdAjuster(){
     var tabs = document.querySelectorAll('table');
     for (var i = 0; i < tabs.length; i++) {
       var t = tabs[i];
@@ -2486,7 +2486,7 @@ const JS_CEDER = () => `
         for (var d = 0; d < deja.length; d++) { deja[d].classList.remove('sz-cede-auto'); deja[d].style.width = ''; }
       }
       if (!t.offsetParent || !t.tBodies[0] || !t.tBodies[0].rows.length) continue;
-      var a = rogneur(t); if (!a) continue;
+      var a = _szCdRogneur(t); if (!a) continue;
       var ra = a.getBoundingClientRect(), rt = t.getBoundingClientRect();
       if (rt.right - ra.right <= 1) continue;
       var r0 = t.tBodies[0].rows[0], n = r0.cells.length, fus = false;
@@ -2531,25 +2531,25 @@ const JS_CEDER = () => `
     }
   }
   var tm = null, occupe = false;
-  function bientot(){ if (occupe) return; clearTimeout(tm); tm = setTimeout(function(){ occupe = true; try { ajuster(); } catch (e) {} setTimeout(function(){ occupe = false; }, 0); }, 60); }
-  function demarrer(){
+  function _szCdBientot(){ if (occupe) return; clearTimeout(tm); tm = setTimeout(function(){ occupe = true; try { _szCdAjuster(); } catch (e) {} setTimeout(function(){ occupe = false; }, 0); }, 60); }
+  function _szCdDemarrer(){
     // On ignore NOS propres <colgroup> : sinon le garde se relancerait lui-même sans fin.
     var nous = function(nd){ return nd.nodeType === 1 && nd.classList && nd.classList.contains('sz-cede-cols'); };
     try { new MutationObserver(function(ms){
       for (var i = 0; i < ms.length; i++) {
         var m = ms[i], k;
-        for (k = 0; k < m.addedNodes.length; k++) if (!nous(m.addedNodes[k])) { bientot(); return; }
-        for (k = 0; k < m.removedNodes.length; k++) if (!nous(m.removedNodes[k])) { bientot(); return; }
+        for (k = 0; k < m.addedNodes.length; k++) if (!nous(m.addedNodes[k])) { _szCdBientot(); return; }
+        for (k = 0; k < m.removedNodes.length; k++) if (!nous(m.removedNodes[k])) { _szCdBientot(); return; }
       }
     }).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
     // Le thème, le mode jour/nuit et la densité changent les largeurs sans rien ajouter à la page ; la police aussi, en arrivant.
-    try { new MutationObserver(bientot).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-sz-theme', 'data-sz-teinte'] }); } catch (e) {}
-    try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(bientot); } catch (e) {}
-    window.addEventListener('resize', bientot);
-    window.addEventListener('load', bientot);
-    bientot();
+    try { new MutationObserver(_szCdBientot).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-sz-theme', 'data-sz-teinte'] }); } catch (e) {}
+    try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(_szCdBientot); } catch (e) {}
+    window.addEventListener('resize', _szCdBientot);
+    window.addEventListener('load', _szCdBientot);
+    _szCdBientot();
   }
-  if (document.body) demarrer(); else document.addEventListener('DOMContentLoaded', demarrer);
+  if (document.body) _szCdDemarrer(); else document.addEventListener('DOMContentLoaded', _szCdDemarrer);
 })();
 `;
 const CSS_CEDER = `
