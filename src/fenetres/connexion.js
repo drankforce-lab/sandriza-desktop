@@ -353,10 +353,24 @@ html[data-sz-theme="epure"] .admlogin-nipbox .npr button{background:#eef0f4;bord
 html[data-sz-theme="epure"] .cx-barre{--cxb-fond:#ffffff!important;--cxb-trait:#e4e7ee!important;--cxb-txt:#1f2533!important;--cxb-surv:#eef0f4!important;background:#ffffff!important}
 html[data-sz-theme="epure"] .cx-barre button{color:#1f2533!important}
 html[data-sz-theme="epure"] .cx-ver{color:#5b6273!important}
+html[data-sz-theme="epure"] .cx-clepret{background:#ffffff;border:1px solid #e4e7ee;box-shadow:none}
+html[data-sz-theme="epure"] .cx-clepret .em{background:#8a5a2b;box-shadow:none}
+html[data-sz-theme="epure"] .cx-clepret b{color:#1f2533}
+html[data-sz-theme="epure"] .cx-clepret span.t{color:#5b6273}
+html[data-sz-theme="epure"] .cx-clepret .etat{background:#eef0f4;border:0;color:#3d4456}
+html[data-sz-theme="epure"] .cx-clepret .etat::before{display:none}
+html[data-sz-theme="epure"] .cx-btn:focus-visible,html[data-sz-theme="epure"] .cx-btn:focus{outline:2px solid rgba(138,90,43,.35);outline-offset:3px}
 /* La nuit */
 html[data-sz-theme="epure"]:not(.jour) .cx-barre{--cxb-fond:#181e29!important;--cxb-trait:#2a3240!important;--cxb-txt:#e8ecf2!important;--cxb-surv:#252d3b!important;background:#181e29!important}
 html[data-sz-theme="epure"]:not(.jour) .cx-barre button{color:#e8ecf2!important}
 html[data-sz-theme="epure"]:not(.jour) .cx-ver{color:#9aa4b5!important}
+html[data-sz-theme="epure"]:not(.jour) .cx-clepret{background:#181e29;border-color:#2a3240}
+html[data-sz-theme="epure"]:not(.jour) .cx-clepret .em{background:#c9a27a;color:#1a1208}
+html[data-sz-theme="epure"]:not(.jour) .cx-clepret b{color:#e8ecf2}
+html[data-sz-theme="epure"]:not(.jour) .cx-clepret span.t{color:#9aa4b5}
+html[data-sz-theme="epure"]:not(.jour) .cx-clepret .etat{background:#252d3b;color:#c9d1dd}
+html[data-sz-theme="epure"]:not(.jour) .cx-btn:focus-visible,html[data-sz-theme="epure"]:not(.jour) .cx-btn:focus{outline-color:rgba(201,162,122,.35)}
+html[data-sz-theme="epure"]:not(.jour) .admlogin-logo-img{filter:invert(1) hue-rotate(180deg)}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-root,html[data-sz-theme="epure"]:not(.jour) .admlogin-form-panel{background:#11151d!important}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-brand{background:#181e29;border-right-color:#2a3240;color:#e8ecf2}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-logo-badge{background:#c9a27a!important;color:#1a1208}
