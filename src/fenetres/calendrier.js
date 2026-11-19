@@ -94,6 +94,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var SORTES = { rappel: '${T("Rappel")}', fiscal: '${T("Échéance fiscale")}', ramassage: '${T("Ramassage")}', precommande: '${T("Précommande")}' };
   var TON = { n: 'bleu', a: 'ambre', r: 'rouge' };
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session: '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     pont_indisponible: '${T("La fenêtre principale ne répond pas.")}',
     delai: '${T("La fenêtre principale n’a pas répondu à temps.")}',

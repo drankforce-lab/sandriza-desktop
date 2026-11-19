@@ -201,6 +201,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:            '${T("Aucune session ouverte dans l’application.")}',
     droit:              '${T("Seul un super-administrateur peut voir et régler le gardien.")}',
     soi:                '${T("Votre propre compte se déverrouille par le lien reçu dans l’alerte.")}',

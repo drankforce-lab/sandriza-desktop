@@ -42,6 +42,7 @@ module.exports = {
   'remboursements déduits': 'refunds deducted',
   /* ── L EN-TETE ──────────────────────────────────────────────────────────── */
   'Fiscalité et impôt — Administration Sandriza': 'Tax and income tax — Sandriza Administration',
+  'Mon entreprise — Administration Sandriza': 'My business — Sandriza Administration',
   'Fiscalité et impôt': 'Tax and income tax',
   'Fiscalité indisponible': 'Tax section unavailable',
   'Votre rôle ne donne pas accès à la fiscalité.':

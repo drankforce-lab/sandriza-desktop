@@ -204,6 +204,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:'${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:'${T("Votre rôle ne permet pas cette modification.")}',
     indisponible:'${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',

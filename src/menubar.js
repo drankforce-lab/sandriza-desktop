@@ -155,6 +155,7 @@ function pagePanneau(desc) {
   const sombre = !!desc.sombre;
   // Le jeu de couleurs du poste (Carbone…) : la feuille du site le lit sur data-sz-th (2026-10-12).
   const th = String(desc.theme || 'lin').replace(/[^a-z]/g, '');
+  const te = String(desc.teinte || 'epure').replace(/[^a-z]/g, '');   // (2026-11-18) le THÈME du look : l'accent suit
 
   /* ⚠ TOUS LES MENUS SONT CONSTRUITS D'AVANCE, UNE FOIS. La première version
      rechargeait la page a CHAQUE survol d'un bouton de la barre — c'était le
@@ -165,7 +166,7 @@ function pagePanneau(desc) {
      doublait l'échelle (« c'est beaucoup trop gros »). Le facteur de zoom de
      la fenêtre principale est posé par la coquille (setZoomFactor), pour que
      panneau et barre paraissent à la même taille. */
-  return `<!doctype html><html lang="${LANG()}"><head><meta charset="utf-8">
+  return `<!doctype html><html lang="${LANG()}" data-sz-teinte="${te}"><head><meta charset="utf-8">
 <style>${POLICE}
 html,body{margin:0;overflow:hidden}
 /* ⚠ FENETRE TRANSPARENTE : chaque panneau porte SON fond, sa bordure et son
@@ -238,10 +239,10 @@ ${css}
 /* Autonome : les lignes ne dépendent pas de la feuille du site (cssRail) pour leur apparence. */
 .ep-pan .ep-col .sz-item{display:flex!important;align-items:center;justify-content:flex-start;background:transparent!important;border-top:0!important;
   border-left:0!important;border-right:0!important;color:inherit!important;font-family:inherit!important;text-align:left;cursor:pointer;box-shadow:none!important}
-.ep-pan .ep-col .sz-item:hover{background:#f4f5f9!important;color:#6b431e!important}
-.sz-sombre.ep-pan .ep-col .sz-item:hover{background:#222a38!important;color:#e3c29e!important}
-.ep-pan .sz-coche{display:inline-block;width:1em;flex:none;color:#8a5a2b;font-weight:800}
-.sz-sombre.ep-pan .sz-coche{color:#c9a27a}
+.ep-pan .ep-col .sz-item:hover{background:#f4f5f9!important;color:var(--ep-doux-t,#6b431e)!important}
+.sz-sombre.ep-pan .ep-col .sz-item:hover{background:#222a38!important;color:var(--ep-douxN-t,#e3c29e)!important}
+.ep-pan .sz-coche{display:inline-block;width:1em;flex:none;color:var(--ep-a,#8a5a2b);font-weight:800}
+.sz-sombre.ep-pan .sz-coche{color:var(--ep-aN,#c9a27a)}
 #sous{display:none;margin-left:7px}
 .sz-item .sz-fleche{margin-left:auto;opacity:.6;font-size:.8em;padding-left:1.2em}
 </style></head><body>

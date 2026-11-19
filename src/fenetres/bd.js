@@ -112,6 +112,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function octets(n){ return szOctets(n); }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit:'${T("Votre rôle ne donne pas accès à la configuration.")}',
     lecture_seule:'${T("Votre rôle est en lecture seule.")}',

@@ -163,6 +163,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // Un ecran d imprimantes qui affiche « pret » faute de reponse est pire
   // qu un ecran vide — on lance une impression en croyant que c est verifie.
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:        '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:          '${T("Votre rôle ne donne pas accès à la configuration des imprimantes.")}',
     agent_absent:   '${T("L’agent d’impression n’est pas joignable sur ce poste.")}',

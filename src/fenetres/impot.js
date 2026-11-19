@@ -216,12 +216,15 @@ html.jour .ent-etat.manque{color:#6e4308;background:#fbf0dc}
  * ne simule aucun clic, et les deux autres resteraient dans l'ombre.
  */
 function pageImpot(onglet) {
-  const ok = ['revenus', 'documents', 'entreprise', 'memo'];
-  const depart = (ok.indexOf(String(onglet || '')) >= 0) ? String(onglet) : 'taxes';
+  /* (2026-11-18, sa demande) « Mon entreprise » est passée dans Configuration : la même vue, ouverte SEULE (mode
+     « entreprise-seule », clé d'ancrage « entreprise »), sans les onglets de la fiscalité. Ici elle n'est plus un onglet. */
+  const seule = String(onglet || '') === 'entreprise-seule';
+  const ok = ['revenus', 'documents', 'memo'];
+  const depart = seule ? 'entreprise' : ((ok.indexOf(String(onglet || '')) >= 0) ? String(onglet) : 'taxes');
   return `${TETE()}
-<title>${T("Fiscalité et impôt — Administration Sandriza")}</title>
+<title>${seule ? T("Mon entreprise — Administration Sandriza") : T("Fiscalité et impôt — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete" id="tete"><span class="ico">${ICO.impot}</span><h1>${T("Fiscalité et impôt")}</h1>
+<div class="tete" id="tete"><span class="ico">${ICO.impot}</span><h1>${seule ? T("Mon entreprise") : T("Fiscalité et impôt")}</h1>
   <span class="cx-resume" id="sous"></span></div>
 <div class="ong-barre" id="barre-onglets"><nav class="ongf" id="onglets" role="tablist" aria-label="${T("Sections de la fiscalité")}"></nav>
   <div class="cx-actions" id="actions"></div></div>
@@ -236,6 +239,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
 
   var D = null;
   var ONGLET = '${depart}';
+  var SEULE = ${seule ? 'true' : 'false'};   // « Mon entreprise » ouverte depuis Configuration
   var ANNEE = 0;
   var TRIM = 0;             // trimestre choisi pour les documents trimestriels
   var OCCUPE = false;
@@ -265,6 +269,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne donne pas accès à la fiscalité.")}',
     indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',
@@ -342,7 +347,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
        endroit ou saisir ce profil etait inatteignable. Rouvert par #33. */
     /* ⚠ LA PASTILLE, PAS LE BANDEAU (grammaire du 2026-10-16) : le titre court
        dans la pastille, la phrase ENTIERE au clic, et la sortie juste a cote. */
-    if (!D.profil.complet && ONGLET !== 'entreprise') {
+    if (!D.profil.complet && ONGLET !== 'entreprise' && !SEULE) {
       h += '<div class="cx-barre"><details class="cx-det"><summary class="cx-averti"><span><b>${T("Profil d’entreprise incomplet")}</b>'
         + ' ${T("· détail")}</span></summary><div class="cx-sub">${T("— il manque le nom, ")}'
         + '${T("le NEQ ou vos numéros de TPS/TVQ. Les documents s’imprimeront sans eux, et ils ne")} '
@@ -354,11 +359,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       return '<button type="button" role="tab" aria-selected="' + (ONGLET === cle) + '" class="' + (ONGLET === cle ? 'on' : '') + '" data-onglet="' + cle + '">'
         + ic + '<span>' + lbl + '</span>' + (extra || '') + '</button>';
     };
-    document.getElementById('onglets').innerHTML =
+    document.getElementById('onglets').innerHTML = SEULE ? '' :
         ong('taxes', IC_O.taxes, 'TPS / TVQ')
       + ong('revenus', IC_O.revenus, '${T("Revenus")}')
       + ong('documents', IC_O.documents, '${T("Documents")}')
-      + ong('entreprise', IC_O.entreprise, '${T("Mon entreprise")}', D.profil.complet ? '' : '<span class="n hi">!</span>')
       + ong('memo', IC_O.memo, '${T("Aide-mémoire")}');
     /* Le nom de l entreprise passe dans le resume de la tete (il s abrege au
        besoin) : la tete porte deja cinq onglets, l annee et le geste principal. */
@@ -828,7 +832,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
     var t = ev.target;
     if (!t || !t.closest) return;
     var og = t.closest('[data-onglet]');
-    if (og) { ONGLET = og.getAttribute('data-onglet'); dessiner(); chargerOnglet(); return; }
+    if (og) {
+      // « Mon entreprise » vit dans Configuration désormais : les liens vers elle ouvrent CET écran-là.
+      if (og.getAttribute('data-onglet') === 'entreprise' && !SEULE) { try { if (P && P.ouvrirModule) P.ouvrirModule('entreprise'); } catch (e) {} return; }
+      ONGLET = og.getAttribute('data-onglet'); dessiner(); chargerOnglet(); return;
+    }
     var tq = t.closest('[data-trim]');
     if (tq) { TRIM = parseInt(tq.getAttribute('data-trim'), 10) || 0; dessiner(); return; }
     var dc = t.closest('[data-doc]');

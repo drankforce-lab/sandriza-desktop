@@ -42,7 +42,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.45 system-ui,-apple-sy
 .rg-rch svg{flex:none;color:var(--tx2)}
 .rg-rch input{border:0!important;outline:none;background:transparent!important;font:inherit;font-size:14px;width:100%;color:var(--tx);padding:0!important;height:auto!important}
 /* (2026-11-18) Trois colonnes qui se TASSENT (plus de rangées fixes) : une carte courte ne laisse plus un trou sous elle. */
-.rg-grille{display:block;column-count:3;column-gap:14px;column-fill:balance;flex:none!important;height:auto!important;min-height:0}
+.rg-grille{display:block;columns:4 14.5rem;column-gap:14px;column-fill:balance;flex:none!important;height:auto!important;min-height:0}
 .rg-grille>.rg-carte{break-inside:avoid;margin:0 0 14px}
 .rg-carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:16px;padding:14px 16px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}
 .rg-carte[hidden]{display:none}

@@ -330,7 +330,7 @@ html.jour .voile{background:rgba(20,24,30,.35)}
 .tm-b{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;min-width:0}
 .tm-b .v{font-size:11px;font-weight:700;color:var(--tx)}
 .tm-b i{display:block;width:100%;border-radius:6px 6px 2px 2px;background:#4a3c2c;min-height:2px}
-.tm-b.auj i{background:#c9a27a}
+.tm-b.auj i{background:var(--sz-btn-prim,#c9a27a)}
 .tm-b .j{font-size:11px;color:var(--tx2)}
 html.jour .tm-b i{background:#e3d3c1}
 html.jour .tm-b.auj i{background:var(--sz-btn-prim,#8a5a2b)}
@@ -382,6 +382,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function pl(n, un, plus){ return n + ' ' + szPl(n, un, plus); }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne donne pas accès au tableau de bord.")}',
     indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',

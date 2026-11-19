@@ -291,6 +291,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var EN = (P && P.encan && typeof P.encan.geste === 'function') ? P.encan : null;
   var $ = function(id){ return document.getElementById(id); };
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     encan_en_cours: '${T("Un encan est en cours : terminez-le avant.")}',
     article_requis: '${T("Choisissez d’abord un article.")}',
     deja_lance: '${T("L’encan est déjà lancé.")}',

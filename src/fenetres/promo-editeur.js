@@ -360,6 +360,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:      '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:        '${T("Votre compte n’a pas le droit de modifier les objets promotionnels.")}',
     module_promo: '${T("Le module d’impression n’est pas chargé dans la fenêtre principale.")}',

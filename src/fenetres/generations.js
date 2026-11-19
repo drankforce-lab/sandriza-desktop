@@ -195,6 +195,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:            '${T("Aucune session ouverte dans l’application.")}',
     droit:              '${T("Votre rôle ne permet pas de gérer les aperçus 3D.")}',
     indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',

@@ -147,6 +147,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return '&#' + c.charCodeAt(0) + ';'; }); }
   function dire(t, cl){ szDire(t, cl); }
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session: '${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit: '${T("Votre rôle ne permet pas de modifier la cabine d’essayage.")}',
     serveur: '${T("Les réglages de la cabine n’ont pas pu être lus.")}',

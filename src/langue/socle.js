@@ -87,6 +87,7 @@ module.exports = {
   'La fenêtre principale ne répond pas.': 'The main window is not answering.',
   'La fenêtre principale n’a pas répondu à temps.': 'The main window did not answer in time.',
   'Erreur inattendue (': 'Unexpected error (',
+  'Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.': 'An update is being installed: this operation is paused until the application restarts.',
   'Cette version de l’application ne connaît pas cette opération.':
     'This version of the application does not know this operation.',
   'L’opération a échoué.': 'The operation failed.',

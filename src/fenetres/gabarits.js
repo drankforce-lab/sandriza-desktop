@@ -154,6 +154,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
   function chk(id){ var e = document.getElementById(id); return !!(e && e.checked); }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit:'${T("Votre rôle ne donne pas accès à la configuration.")}',
     lecture_seule:'${T("Votre rôle est en lecture seule.")}',

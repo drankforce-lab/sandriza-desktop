@@ -228,7 +228,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
   function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
   function chk(id){ var e = document.getElementById(id); return e ? e.checked : false; }
 
-  var MOTIFS = { session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
+  var MOTIFS = { maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}', session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit:'${T("Votre rôle ne permet pas cette action.")}', indisponible:'${T("L’administration n’est pas chargée.")}',
     nom:'${T("Nom requis.")}', message:'${T("Message requis.")}', introuvable:'${T("Campagne introuvable.")}', echec:'${T("L’opération a échoué.")}' };
   function expliquer(r){ if (!r) return '${T("Aucune réponse de la fenêtre principale.")}'; if (r.detail) return String(r.detail); return MOTIFS[r.motif] || MOTIFS.echec; }

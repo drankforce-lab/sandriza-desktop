@@ -183,6 +183,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     secret_egal_id: '${T("Le Client Secret est identique au Client ID — il a sans doute été collé dans la mauvaise case.")}',
     session:            '${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',

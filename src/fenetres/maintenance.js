@@ -143,6 +143,7 @@ function pageMaintenance() {
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:            '${T("Aucune session ouverte dans l’application.")}',
     superadmin_required:'${T("Le serveur refuse : cette action est réservée au super-administrateur.")}',
     /* ⚠ Meme 403, autre cause : le role a change DEPUIS la connexion. Voir le

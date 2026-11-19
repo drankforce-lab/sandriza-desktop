@@ -255,6 +255,7 @@ const MENU_APP_EN = {
   'Réglages': 'Settings',
   'Sandriza — Administration': 'Sandriza — Administration',
   'Densité': 'Density',
+  'Mon entreprise': 'My business',
   'Calendrier': 'Calendar',
   'Confortable': 'Comfortable',
   'Compacte': 'Compact',

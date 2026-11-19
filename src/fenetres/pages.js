@@ -366,6 +366,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'pol-t':120,'pol-s':200})}${JS_BROUILLO
   }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:'${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',
     droit:'${T("Votre rôle ne donne pas accès aux pages du site.")}',
     lecture_seule:'${T("Votre rôle est en lecture seule.")}',

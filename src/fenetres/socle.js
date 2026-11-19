@@ -2466,6 +2466,7 @@ const JS_SOCLE = () => `
 var P = window.szPont;
 ` + JS_ACTIVITE() + JS_DIRE() + `
 var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
   session:            '${T('Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.')}',
   droit:              '${T("Votre rôle ne donne pas accès à cette opération.")}',
   indisponible:       '${T('L’administration n’est pas encore chargée dans la fenêtre principale.')}',
@@ -5343,9 +5344,15 @@ html[data-sz-theme="epure"] .rf-tb > .rf-jet[data-onglet].on{color:var(--tx)!imp
    survol, posé par JS_SOCLE). Les en-têtes ne se coupent plus en deux. */
 html[data-sz-theme="epure"] thead th{white-space:nowrap}
 html[data-sz-theme="epure"] tbody td{white-space:nowrap}
-html[data-sz-theme="epure"] tbody tr > td.szk-c + td,html[data-sz-theme="epure"] tbody tr > td:first-child:not(.szk-c):not(.c){max-width:0;width:42%}
+html[data-sz-theme="epure"] tbody tr > td.szk-c + td,html[data-sz-theme="epure"] tbody tr > td:first-child:not(.szk-c):not(.c){max-width:0;width:42%;min-width:15rem}
 html[data-sz-theme="epure"] tbody tr > td.szk-c + td :is(div,b,strong,span:not(.rf-pill):not(.rf-av)),
 html[data-sz-theme="epure"] tbody tr > td:first-child:not(.szk-c):not(.c) :is(div,b,strong,span:not(.rf-pill):not(.rf-av)){white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+/* ⚠ (2026-11-18, sa capture des Dépenses : « c'est ça que tu appelles beau… ») Un nom en GRAS est un élément EN LIGNE :
+   overflow:hidden ne le rogne pas — il passait par-dessus les colonnes voisines. La CELLULE se rogne elle-même, et les
+   éléments en ligne deviennent des blocs-en-ligne bornés à la cellule, qui finissent par « … ». */
+html[data-sz-theme="epure"] tbody tr > td.szk-c + td,html[data-sz-theme="epure"] tbody tr > td:first-child:not(.szk-c):not(.c){overflow:hidden;text-overflow:ellipsis}
+html[data-sz-theme="epure"] tbody tr > td.szk-c + td :is(b,strong,span:not(.rf-pill):not(.rf-av)),
+html[data-sz-theme="epure"] tbody tr > td:first-child:not(.szk-c):not(.c) :is(b,strong,span:not(.rf-pill):not(.rf-av)){display:inline-block;max-width:100%;vertical-align:bottom}
 html[data-sz-theme="epure"] .onglets,html[data-sz-theme="epure"] .ls-onglets{margin-bottom:14px}
 /* (2026-11-18, sa capture de la Conciliation bancaire : « plein de déformations ») Des onglets DANS la tête (.ed-seg, .onglets — 13
    fenêtres) : titre, onglets et boutons sur une seule rangée se coupaient en deux lignes. En Épuré, les onglets descendent sur

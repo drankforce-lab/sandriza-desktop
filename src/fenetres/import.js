@@ -263,6 +263,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:           '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:             '${T("Votre rôle ne permet pas d’ajouter des produits.")}',
     indisponible:      '${T("Le module d’import n’est pas chargé dans la fenêtre principale. Rechargez-la (Ctrl+R).")}',

@@ -394,6 +394,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function pctTxt(n){ return szNombre(n, 2).replace(/[.,]00$/, '') + ' %'; }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne permet pas d’encaisser une vente.")}',
     indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',

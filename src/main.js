@@ -988,7 +988,24 @@ ipcMain.on('bulle:native', (e, type, msg) => {
    le focus (browser-window-focus / blur), sinon Ctrl+K serait volé à tous les autres logiciels. */
 const { globalShortcut } = require('electron');
 let _palette = null;
-const ouvrirRecherchePartout = () => {
+/* (2026-11-18, sa capture : « la recherche se détache du champ, c'est pas beau ») La palette s'ouvre SUR le champ « Rechercher »
+   de la colonne : on lit sa place dans la page principale (en px CSS, × le zoom de la page = px de la fenêtre) et la palette
+   part de son coin. Sans champ (menu en haut, autre fenêtre), elle reste centrée comme avant. */
+let _rechOuverture = false;
+const ouvrirRecherchePartout = async () => {
+  if (_rechOuverture) return;
+  let ancre = null;
+  try {
+    if (mainWindow && !mainWindow.isDestroyed() && (!BrowserWindow.getFocusedWindow() || BrowserWindow.getFocusedWindow() === mainWindow)) {
+      _rechOuverture = true;
+      const wcS = siteWC();
+      const r = !wcS ? null : await Promise.race([
+        wcS.executeJavaScript('(function(){var e=document.querySelector(".sz-ep-rech");if(!e||!e.offsetParent)return null;var r=e.getBoundingClientRect();return {x:r.left,y:r.top,l:r.width};})()', true),
+        new Promise((res) => setTimeout(() => res(null), 250)),
+      ]);
+      if (r && Number.isFinite(r.x) && Number.isFinite(r.y)) ancre = { ...r, z: wcS.getZoomFactor() || 1 };
+    }
+  } catch (e) { ancre = null; } finally { _rechOuverture = false; }
   try {
     /* (2026-11-18, sa capture : « la recherche ne marche pas bien, c'est laid ») Le panneau d'une section
        restait ouvert PAR-DESSUS la recherche : il se ferme d'abord, et la recherche ne prend jamais le
@@ -1001,8 +1018,14 @@ const ouvrirRecherchePartout = () => {
     const { pageRecherchePartout } = require('./fenetres/recherche-partout');
     const b = parent.getContentBounds();
     const L = Math.min(640, Math.max(420, b.width - 40)), H = Math.min(500, Math.max(300, b.height - 60));
+    let px = Math.round(b.x + (b.width - L) / 2), py = Math.round(b.y + Math.min(90, b.height * 0.12));
+    if (ancre && parent === mainWindow) {
+      // Le coin du champ, à 6 px près (l'ombre de la palette) ; jamais hors de la fenêtre.
+      px = Math.round(b.x + ancre.x * ancre.z) - 6; py = Math.round(b.y + ancre.y * ancre.z) - 6;
+      px = Math.max(b.x, Math.min(px, b.x + b.width - L)); py = Math.max(b.y, Math.min(py, b.y + b.height - H));
+    }
     const win = new BrowserWindow({
-      parent, x: Math.round(b.x + (b.width - L) / 2), y: Math.round(b.y + Math.min(90, b.height * 0.12)), width: L, height: H,
+      parent, x: px, y: py, width: L, height: H,
       frame: false, transparent: true, resizable: false, movable: false, minimizable: false, maximizable: false,
       fullscreenable: false, skipTaskbar: true, show: false, hasShadow: true,
       webPreferences: { preload: path.join(__dirname, 'pont-preload.js'), contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: false },
@@ -4437,7 +4460,14 @@ ipcMain.handle('pont:appeler', (e, op, args) => {
       return r;
     });
   }
-  return executerOpSite(String(op || ''), args, e.sender);
+  const opN = String(op || '');
+  if (OPS_CRITIQUES.has(opN)) {
+    if (_majVerrou) return { ok: false, motif: 'maj_en_cours' };
+    _opsCritiquesEnVol++;
+    return Promise.resolve().then(() => executerOpSite(opN, args, e.sender))
+      .finally(() => { _opsCritiquesEnVol = Math.max(0, _opsCritiquesEnVol - 1); });
+  }
+  return executerOpSite(opN, args, e.sender);
 });
 // L'APERÇU 3D, PRÉPARÉ AU POSTE (7.16.0) : le modèle rendu par Fal.ai (17 à 20 Mo) est téléchargé
 // ICI puis compressé (modele3d.js : matière mate, textures 1024 px, géométrie simplifiée + Draco),
@@ -4924,6 +4954,9 @@ const PAGES_ANCRABLES = () => ({
   /* Configuration > NIP (2026-10-19, sa demande) : ANCRABLE, section hote << nips >> cote site (_DOCKABLES),
      comme le Gardien. Super-administrateur seul : le coeur et le SERVEUR refusent tout autre role. */
   'nips': ['NIP', () => pageNips()],
+  /* Configuration › Mon entreprise (2026-11-18, sa demande) : l'onglet de Fiscalité devenu un écran de Configuration —
+     même page (impot.js), ouverte seule. Super-administrateur pour écrire (cœur + serveur). Section hôte « entreprise ». */
+  'entreprise': ['Mon entreprise', () => pageImpot('entreprise-seule')],
   'maintenance': ['Mode usage exclusif', () => pageMaintenance()],
   'connexion': ['Connexion', () => pageConnexion()],
   'maj': ['Mise à jour', (id) => pageMaj(id)],
@@ -6715,7 +6748,50 @@ const majEtat = (etat) => {
   try { const wc = siteWC(); if (wc) wc.send('maj:progression', etat); } catch {}
 };
 
-const installerEtRelancer = (autoUpdater) => {
+/* ══ PENDANT L'ATTENTE DE L'INSTALLATION, LES FONCTIONS CRITIQUES SONT SUSPENDUES (2026-11-18, sa demande : « quand tu
+   installes une mise à jour, il serait important de désactiver les fonctions critiques qui pourraient être lancées pendant
+   l'attente de l'installation »). Dès que l'installation est DÉCIDÉE (« Installer maintenant », la porte, le téléchargement
+   demandé), une vente, une étiquette achetée, un remboursement, un envoi… lancé à ce moment serait coupé net par le
+   redémarrage : à moitié fait chez Square, chez le transporteur ou dans la base.
+   ➡ (1) Ces opérations sont REFUSÉES (motif « maj_en_cours », expliqué dans chaque fenêtre) ; (2) celles déjà parties
+   sont ATTENDUES avant de quitter (90 s au plus) ; (3) un bandeau ambre le dit dans toutes les fenêtres. */
+const OPS_CRITIQUES = new Set([
+  'caisse:vendre', 'caisse:verifierPaiement', 'encan:vendre', 'encan:annuler', 'stock:vendre', 'stock:vendreLot',
+  'commande:etiquette', 'commande:expedier', 'commande:statut', 'commandes:expedier', 'commandes:statutEcrire', 'commandes:rembourser',
+  'expedition:etiquette', 'expedition:confirmer', 'expedition:annulerEtiquette', 'retour:reprendreEtiquette', 'retour:renvoyer',
+  'remboursement:ecrire', 'factures:payer', 'bc:envoyer', 'campagnes:envoyer', 'campagnes:renvoyer-echecs', 'config:vip:envoyer',
+  'tel:sms:envoyer', 'compta:cloturer', 'sauvegarde:creer', 'sauvegarde:restaurer', 'config:bd:restaurer', 'banque:importer',
+  'lot:importer', 'photos:importer', 'abonnes:importer',
+]);
+let _majVerrou = false;
+let _opsCritiquesEnVol = 0;
+const _majBandeau = (on) => {
+  let txt = 'Mise à jour en cours d’installation : ventes, étiquettes, remboursements et envois sont suspendus jusqu’au redémarrage.';
+  try { if (require('./langue').langueCourante() === 'en') txt = 'Update being installed: sales, labels, refunds and sends are paused until the restart.'; } catch (e) {}
+  const js = '(function(on,t){try{var b=document.getElementById("sz-maj-bandeau");if(!on){if(b)b.remove();return;}if(!b){b=document.createElement("div");b.id="sz-maj-bandeau";b.setAttribute("role","status");'
+    + 'b.style.cssText="position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:99999;max-width:min(720px,calc(100vw - 32px));padding:10px 16px;border-radius:12px;'
+    + 'background:#fdebd3;color:#8a3f00;font:600 13px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px -12px rgba(0,0,0,.35);pointer-events:none";document.body.appendChild(b);}b.textContent=t;}catch(e){}})('
+    + (on ? 'true' : 'false') + ',' + JSON.stringify(txt) + ');';
+  const tous = [];
+  try { const w = siteWC(); if (w) tous.push(w); } catch (e) {}
+  try { fenetresNatives.forEach((w) => { if (w && !w.isDestroyed()) tous.push(w.webContents); }); } catch (e) {}
+  try { ancrees.forEach((a) => { if (a.view && !a.view.webContents.isDestroyed()) tous.push(a.view.webContents); }); } catch (e) {}
+  tous.forEach((wc) => { try { wc.executeJavaScript(js, true).catch(() => {}); } catch (e) {} });
+};
+const majVerrouiller = () => {
+  if (_majVerrou) return;
+  _majVerrou = true;
+  _majBandeau(true);
+};
+// Attend que les opérations critiques déjà parties aient fini (au plus `max` ms).
+const _attendreOpsCritiques = (max) => new Promise((res) => {
+  const fin = Date.now() + (max || 90000);
+  const tic = () => { if (_opsCritiquesEnVol <= 0 || Date.now() > fin) return res(); setTimeout(tic, 250); };
+  tic();
+});
+const installerEtRelancer = async (autoUpdater) => {
+  majVerrouiller();
+  await _attendreOpsCritiques(90000);
   // ⚠ LE LAISSEZ-PASSER, SANS QUOI LA PROTECTION SE MORD LA QUEUE. Le garde de
   // fermeture bloque tout départ pendant une mise à jour ; or installer EXIGE de
   // quitter. Sans cette ligne, la mise à jour se téléchargerait indéfiniment sans
@@ -7144,6 +7220,7 @@ const proposerInstallation = async (version) => {
     sales = fenetresNonEnregistrees();
   }
   _installDemandee = true;
+  majVerrouiller();   // l'installation est décidée : plus de vente ni d'étiquette pendant le téléchargement
   let updater; try { updater = getUpdater(); } catch (e) { return false; }
   if (_majVersionPrete) { installerEtRelancer(updater); return true; }
   majEtat({ etape: 'telechargement', version: v, percent: 0 });
@@ -7602,7 +7679,7 @@ const actionApp = (nom, arg) => {
     case 'compte-paiement':
     case 'config-paiements': case 'config-cles': case 'studio':
     case 'config-cabine':
-    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'sociaux-config': case 'chat-config': case 'listenoire': case 'profil': case 'journaux': case 'incidents': case 'sauvegarde': case 'gardien': case 'nips': {
+    case 'config-livraison': case 'config-retours': case 'config-navigation': case 'config-carriers': case 'config-automations': case 'config-telephonie': case 'config-models': case 'config-gabarits': case 'config-logotheque': case 'config-analytics': case 'config-turso': case 'config-homepage': case 'config-launch': case 'pages': case 'securite': case 'reglages-securite': case 'sociaux-config': case 'chat-config': case 'listenoire': case 'profil': case 'journaux': case 'incidents': case 'sauvegarde': case 'gardien': case 'nips': case 'entreprise': {
       /* ⚠ Le parametre s appelle NOM — << action >> a plante en production
          (ReferenceError au premier clic de menu, 2026-08-09). */
       const _aA = ancrees.get(nom);
@@ -7911,7 +7988,7 @@ ipcMain.handle('journaux:ouvrir', (e, onglet) => {
 const _MODULES_OUVRABLES = ['generations', 'verrous', 'journaux', 'securite', 'incidents', 'config-logotheque', 'corbeille', 'depenses', 'vehicules',
   'rappels', 'impot', 'bankrec', 'livre', 'compta', 'factures', 'inventaire', 'commandes',
   // Configuration > NIP (2026-10-19) : ses liens (Atelier, mode usage exclusif) et le lien des anciens emplacements vers elle.
-  'nips', 'atelier', 'maintenance',
+  'nips', 'atelier', 'maintenance', 'entreprise',
   // Analyses de fibres (2026-10-25) : un rappel ou un lien peut l ouvrir ; elle-meme ouvre « impot » (le numero CA).
   'fibres',
   // Les rapports d encan (2026-10-25) : la console de l encan les ouvre (bouton « Rapports »).
@@ -7989,6 +8066,7 @@ ipcMain.handle('menu:set', (e, cle, valeur) => {
   /* (2026-11-18) LE THÈME du look Épuré : même chemin que la densité — enregistré pour le poste, appliqué tout de suite. */
   if (cle === 'teinte') {
     reglages.set('teinte', require('./teintes').teinteValide(valeur));
+    panneauSale = true;   // le panneau du menu se reconstruit avec le nouvel accent
     appliquerThemePartout();
     const wcT = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null;
     if (wcT) { appliquerTheme(wcT); wcT.send('menu:reglages', reglages.lire()); }
@@ -8192,7 +8270,7 @@ ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
        APRÈS avoir ouvert un menu. */
     panneauWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pagePanneau({
       menus: _trItems(_menusLangue()),
-      cssRail: _modele.cssRail || '', sombre: !!_modele.sombre, theme: _themeCouleur(),
+      cssRail: _modele.cssRail || '', sombre: !!_modele.sombre, theme: _themeCouleur(), teinte: _teinte(),
     })));
   } else {
     montrer();

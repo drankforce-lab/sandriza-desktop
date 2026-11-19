@@ -207,6 +207,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne donne pas accès à la configuration.")}',
     pont_indisponible:  '${T("La fenêtre principale ne répond pas.")}',

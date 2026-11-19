@@ -209,6 +209,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     refunded: '${T("Remboursée")}', completed: '${T("Complétée")}', disputed: '${T("En attente d’analyse")}'
   };
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne permet pas de traiter les retours.")}',
     indisponible:       '${T("L’administration n’est pas encore chargée dans la fenêtre principale.")}',

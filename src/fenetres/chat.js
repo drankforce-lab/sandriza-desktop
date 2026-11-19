@@ -210,6 +210,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
   function dire(t, cl){ szDire(t, cl); }
 
   var MOTIFS = {
+  maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne donne pas accès au chat.")}',
     conversation_fermee: '${T("Cette conversation a été fermée depuis un autre poste : elle n’a pas été rouverte.")}',
