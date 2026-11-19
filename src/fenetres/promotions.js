@@ -191,7 +191,10 @@ input[type=checkbox]{accent-color:var(--or)}
 .pr-vu{min-width:0;display:flex}
 .pr-mini{flex:1 1 auto;min-width:0;display:flex;align-items:center;justify-content:center;gap:.6rem;height:2.3rem;padding:0 .9rem;
   border-radius:9px;font-size:.78rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pr-mini i{font-style:normal;font-size:.68rem;padding:.1rem .55rem;border:1px solid currentColor;border-radius:99px}
+/* (2026-11-18, sa capture) Centré dans une boîte flexible, un message long se coupait des DEUX côtés sans « … » : en bloc, il part
+   de la gauche et finit par « … » (le texte entier au survol). */
+.pr-mini{display:block;line-height:2.3rem;text-align:left}
+.pr-mini i{margin-left:.6rem;font-style:normal;font-size:.68rem;padding:.1rem .55rem;border:1px solid currentColor;border-radius:99px}
 .pr-badge{display:inline-flex;align-items:center;height:1.7rem;padding:0 .75rem;border-radius:7px;background:var(--sz-btn-prim);
   color:var(--sz-btn-prim-txt);font-size:.74rem;font-weight:700;letter-spacing:.04em;text-transform:uppercase}
 .eteint .pr-mini,.eteint .pr-badge{filter:grayscale(.7)}
@@ -686,7 +689,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
         var bandeau = a.genre === 'announcement';
         // Ce que la cliente verra : le bandeau a ses couleurs, ou le badge.
         var vu = bandeau
-          ? '<span class="pr-mini" style="background:' + esc(a.fond || '#1a1a2e') + ';color:' + esc(a.texte || '#ffffff') + '">'
+          ? '<span class="pr-mini" title="' + esc(a.message || '') + '" style="background:' + esc(a.fond || '#1a1a2e') + ';color:' + esc(a.texte || '#ffffff') + '">'
             + esc(a.message || '—') + (a.cta ? '<i>' + esc(a.cta) + '</i>' : '') + '</span>'
           : '<span class="pr-badge">' + esc(a.badge || '—') + '</span>';
         return '<div data-ctx-ligne class="ls-rang pr-rang-an' + (a.enCours ? '' : ' eteint') + '">'

@@ -92,7 +92,6 @@ const MENU_APP_EN = {
   /* ⚠ << Status bar >> est le terme CONVENU dans les logiciels de bureau ; c est
      ainsi qu on la cherche. Le rappel de sa place est garde entre parentheses
      des deux cotes, parce que c est ce qui la distingue de la barre de menus. */
-  'Barre d’état (bas de l’écran)': 'Status bar (bottom of the screen)',
   'Base de données': 'Database',
   'Boutique': 'Shop',
   'Campagnes et chaînes': 'Campaigns and sequences',
