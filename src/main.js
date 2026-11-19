@@ -5708,15 +5708,23 @@ const _teteSansCadre = () => { try { return process.platform === 'win32' && _the
 const _bandeTete = () => {
   const s = _sombreCourant();
   let t = ''; try { t = _themeCouleur(); } catch (_) { t = ''; }
-  const fond = t === 'epure' ? (s ? '#181e29' : '#ffffff') : _fondTheme(s);
+  /* (2026-11-19, sa capture, « ça fait plusieurs fois que je te le demande ») En Épuré, la bande partait sur la CARTE de nuit
+     #181e29 figée, alors que la fenêtre peint la PAGE du thème : un rectangle plus clair derrière _ □ ✕ jusqu'à ce que la
+     page envoie sa couleur — et pour toujours si elle ne la renvoyait pas (voir _bandeSig). Elle part sur la page du thème. */
+  const fond = _fondTheme(s);
   return { color: fond, symbolColor: s ? '#e8ecf2' : '#1f2533', height: 44 };
 };
+/* La signature du thème : la couleur RÉELLE qu'une fenêtre a envoyée (fenetre:bande) reste valable tant qu'elle ne change pas. */
+const _bandeSig = () => { try { return _themeCouleur() + '|' + _teinte() + '|' + _sombreCourant(); } catch (_) { return ''; } };
 const appliquerThemePartout = () => {
   _majThemeOS();
   fenetresNatives.forEach((w) => {
     if (!w || w.isDestroyed()) return;
     appliquerTheme(w.webContents);
-    if (w._szWco) { try { _overlay(w, _bandeTete()); } catch (_) {} }
+    /* ⚠ (2026-11-19) Ne plus ÉCRASER la couleur réelle de la fenêtre par le défaut : la page ne la renvoyait pas (elle la
+       croyait déjà reçue) et la bande restait fausse. Même thème → on remet la couleur réelle ; thème changé → le défaut,
+       et la page renvoie la sienne dès que ses attributs changent. */
+    if (w._szWco) { try { const r = w._szBandeReelle; _overlay(w, r && r.sig === _bandeSig() ? r.o : _bandeTete()); } catch (_) {} }
   });
   ancrees.forEach((a) => { if (a.view && !a.view.webContents.isDestroyed()) appliquerTheme(a.view.webContents); });
   // la petite fenêtre du suivi des générations (src/taches.js)
@@ -8406,7 +8414,9 @@ ipcMain.on('fenetre:bande', (e, color, symbol) => {
     const w = BrowserWindow.fromWebContents(e.sender);
     if (!w || w.isDestroyed() || !w._szWco || w === mainWindow) return;
     const c = _hexOuRien(color); if (!c) return;
-    _overlay(w, { color: c, symbolColor: _hexOuRien(symbol) || '#1f2533', height: 44 });
+    const o = { color: c, symbolColor: _hexOuRien(symbol) || '#1f2533', height: 44 };
+    w._szBandeReelle = { o, sig: _bandeSig() };
+    _overlay(w, o);
   } catch (_) {}
 });
 ipcMain.on('chrome:titlebar', (e, color, symbol) => {

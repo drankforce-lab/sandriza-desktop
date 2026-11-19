@@ -34,6 +34,10 @@ const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE, LIEU } = require('
 const T = require('../langue').tr('impot');
 
 const CSS = `
+/* (2026-11-19, banc des tableaux rognés : +123 px à 1080) « Par période » porte SIX colonnes de montants, « Taxe nette » trois avec un
+   libellé qui passe à la ligne : la place va à celle qui en a besoin. */
+.cx-deux.moitie.imp-tps{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
+
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -593,7 +597,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
         + ' ${T("taxable, −")}' + arg(t.rembTps) + ' ${T("TPS")}, −' + arg(t.rembTvq) + ' ${T("TVQ.")}</div>';
     }
 
-    h += '<div class="cx-deux moitie"><div class="cx-col">';
+    h += '<div class="cx-deux moitie imp-tps"><div class="cx-col">';
     h += '<div class="cx-carte"><h2>${T("Taxe nette")} ${T("à remettre")} <span class="cx-sub">${T("après crédits sur intrants")} ${T("(CTI / RTI)")}</span></h2>'
       + '<table><thead><tr><th></th><th style="text-align:right">TPS</th>'
       + '<th style="text-align:right">TVQ</th><th style="text-align:right">${T("Total")}</th></tr></thead><tbody>'

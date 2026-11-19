@@ -95,6 +95,23 @@ function mesurer(racine, contexte) {
     var pq = pc.nextElementSibling, ptxt = pq && pq.classList && pq.classList.contains('sz-pages') ? (pq.textContent || '').replace(/\s+/g, ' ').trim() : '';
     dit('PAG|' + contexte + '|' + pc.getAttribute('data-pages') + '|' + vis + '/' + tot + '|' + ptxt.replace(/\|/g, ' '));
   }
+  /* ── LES TABLEAUX ROGNÉS (2026-11-19, sa capture des Dépenses : « je t'ai demandé un contrôle de qualité… clairement c'est
+     pas fait »). Un tableau plus large que sa carte n'a AUCUN contrôle hors d'atteinte quand ses dernières colonnes ne portent
+     que du texte : la carte (overflow:hidden) les coupe sans glissière, et rien ci-dessus ne le voyait. On compare la largeur
+     du tableau à celle de son premier ancêtre qui rogne. */
+  var rog = [], tabs = racine.querySelectorAll('table');
+  for (var ti = 0; ti < tabs.length; ti++) {
+    var tb = tabs[ti]; if (!_visible(tb)) continue;
+    for (var an = tb.parentElement; an && an !== document.body; an = an.parentElement) {
+      var ac = getComputedStyle(an);
+      if (ac.overflowX === 'visible') continue;
+      if (/(auto|scroll)/.test(ac.overflowX)) break;          // une zone qui défile est déjà comptée plus haut
+      var depasse = Math.round(tb.getBoundingClientRect().right - an.getBoundingClientRect().right + 0.5);
+      if (depasse > 1) rog.push((an.getAttribute('data-pages') || an.className.split(' ')[0] || an.tagName.toLowerCase()) + ' +' + depasse + 'px');
+      break;
+    }
+  }
+  dit('ROG|' + contexte + '|' + rog.length + '|' + rog.slice(0, 4).join(' ; ').replace(/\|/g, ' '));
   dit('ZON|' + contexte + '|' + zones.length + '|' + zones.slice(0, 6).join(' ; ').replace(/\|/g, ' '));
   dit('DEB|' + contexte + '|' + vw + 'x' + vh + '|' + pageH + '|' + pageW + '|' + n + '|' + defilants + '|' + vus + '|' + hors.join(' ; '));
 }

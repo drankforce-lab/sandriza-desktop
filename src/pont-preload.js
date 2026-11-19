@@ -418,7 +418,9 @@ try {
     clearTimeout(_szBandeT);
     _szBandeT = setTimeout(() => {
       const r = _szCouleurCoin(); if (!r) return;
-      const k = r.couleur + r.symbole; if (k === _szBandeDer) return; _szBandeDer = k;
+      // (2026-11-19) Plus de « déjà envoyée » ici : la coquille pouvait avoir remis son défaut entre-temps, et la bande restait
+      // fausse. Le tri des doublons se fait côté coquille (_overlay compare à la bande RÉELLEMENT posée).
+      _szBandeDer = r.couleur + r.symbole;
       try { ipcRenderer.send('fenetre:bande', r.couleur, r.symbole); } catch (e) {}
     }, 120);
   };

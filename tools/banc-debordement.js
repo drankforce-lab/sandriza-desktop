@@ -438,6 +438,20 @@ function rapport(lignes, nbFenetres, rates, lotsMorts, noms) {
   console.log('');
   console.log('   ZONES QUI DEFILENT (glissiere visible — sa regle : pagination, jamais de barre) : ' + zn.length + ' fenetre(s)');
   for (const n of zn) console.log('   ' + n.padEnd(21) + ' ' + String(zones[n].n).padStart(3) + '   ' + zones[n].detail.slice(0, 150));
+  /* (2026-11-19) LES TABLEAUX ROGNÉS : plus larges que leur carte, coupés sans glissière (voir debordement-coeur.js). Aucune
+     dette : un tableau rogné cache des colonnes à la personne, c'est un échec franc. */
+  const rogs = {};
+  for (const l of lignes) {
+    if (!l.startsWith('ROG|')) continue;
+    const p = l.split('|'); const nom = String(p[1]).split('@')[0]; const n = +p[2] || 0;
+    if (nom === '_temoin' || !n) continue;
+    if (!rogs[nom] || n > rogs[nom].n) rogs[nom] = { n, detail: p.slice(3).join('|') };
+  }
+  const rn = Object.keys(rogs).sort();
+  console.log('');
+  console.log('   TABLEAUX ROGNES (plus larges que leur carte — colonnes coupees sans rien dire) : ' + rn.length + ' fenetre(s)');
+  for (const n of rn) console.log('   ✗ ' + n.padEnd(21) + ' ' + rogs[n].detail.slice(0, 150));
+  if (rn.length) process.exitCode = 1;
   if (lotsMorts) console.log('⚠ ' + lotsMorts + ' lot(s) muet(s) : leurs fenetres manquent a la mesure.');
   if (ECRIRE_DETTE) {
     let tout = {};

@@ -31,6 +31,12 @@ const T = require('../langue').tr('depenses');
 const LANGUE = require('../langue');
 
 const CSS = `
+/* (2026-11-19) La catégorie cède la place comme le nom : bornée, « … », le numéro de ligne fiscale toujours visible. */
+td.dp-cat{max-width:0;width:30%;min-width:7rem;overflow:hidden;white-space:nowrap}
+td.dp-cat .dp-cat-l{display:inline-block;max-width:calc(100% - 3.4rem);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
+td.dp-cat .cx-code{vertical-align:middle;margin-left:6px}
+td.num .rf-pill.usd{margin:0 .35rem 0 0}
+.dp-tx{white-space:nowrap;color:var(--tx2)}
 :root{color-scheme:dark}
 *{box-sizing:border-box}
 html,body{margin:0;height:100%}
@@ -508,22 +514,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
          les taxes sur deux lignes ; le recu en pastille. Crochets gardes : tr[data-id]. */
       h += CKD.barre() + '<div class="liste" data-pages="depenses-liste"><table><thead><tr>' + CKD.th() + '<th>${T("Dépense")}</th><th>${T("Catégorie (ligne fiscale)")}</th>'
         + '<th>${T("Date")}</th><th style="text-align:right">${T("Montant")}</th>'
-        + '<th style="text-align:right">${T("Taxes")}</th><th>${T("Reçu")}</th></tr></thead><tbody>'
+        + '<th style="text-align:right">${T("TPS · TVQ")}</th><th>${T("Reçu")}</th></tr></thead><tbody>'
         + rows.map(function(r){
             var sous = [];
             if (r.fournisseur && r.description) sous.push(esc(r.fournisseur));
             if (r.paiement) sous.push(esc(szTd(r.paiement)));
             return '<tr data-id="' + esc(r.id) + '" class="' + CKD.classe(r) + '" title="${T("Voir le détail")}">'
               + CKD.td(r)
-              + '<td><b>' + esc(r.description || r.fournisseur || '—') + '</b>'
-              + (r.usd ? '<span class="rf-pill bleu usd">USD</span>' : '')
+              + '<td class="dp-nom"><b>' + esc(r.description || r.fournisseur || '—') + '</b>'
               + (sous.length ? '<span class="cx-l2">' + sous.join(' · ') + '</span>' : '') + '</td>'
-              + '<td>' + esc(catLbl(r.categorie, r.categorieLbl))
-              + (r.ligne ? ' <span class="cx-code">' + esc(r.ligne) + '</span>' : '') + '</td>'
+              /* (2026-11-19, sa capture : « clairement c'est pas fait ») Une catégorie longue (« Frais de gestion et
+                 administration ») refusait de se couper : le tableau devenait plus large que sa carte, qui rognait Taxes
+                 et Reçu sans rien dire. La catégorie CÈDE elle aussi (« … », entière au survol) ; le numéro de ligne reste. */
+              + '<td class="dp-cat" title="' + esc(catLbl(r.categorie, r.categorieLbl)) + '"><span class="dp-cat-l">' + esc(catLbl(r.categorie, r.categorieLbl)) + '</span>'
+              + (r.ligne ? '<span class="cx-code">' + esc(r.ligne) + '</span>' : '') + '</td>'
               + '<td class="dt" style="white-space:nowrap">' + esc(szJour(r.date) || r.dateFr) + '</td>'
-              + '<td class="num"><b>' + esc(r.montant) + '</b></td>'
+              /* (2026-11-19) « USD » suit le MONTANT : dans la cellule du nom, qui se coupe, la pastille finissait en « ··· ». */
+              + '<td class="num">' + (r.usd ? '<span class="rf-pill bleu usd">USD</span>' : '') + '<b>' + esc(r.montant) + '</b></td>'
               + '<td class="num" style="font-weight:400">'
-              + (r.aTaxes ? '${T("TPS")} ' + esc(r.tps) + '<span class="cx-l2">${T("TVQ")} ' + esc(r.tvq) + '</span>'
+              /* Une seule ligne : « 0,72 · 1,43 » sous l'en-tête « TPS · TVQ » (deux lignes par taxe doublaient la hauteur). */
+              + (r.aTaxes ? '<span class="dp-tx">' + esc(r.tps) + ' · ' + esc(r.tvq) + '</span>'
                   : '<span class="cx-gris">—</span>') + '</td>'
               + '<td>' + (r.recu ? '<span class="rf-pill vert">${T("Joint")}</span>'
                   : '<span class="rf-pill ambre">${T("Manquant")}</span>') + '</td>'

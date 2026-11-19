@@ -2458,9 +2458,111 @@ function szLotDerouler(o){
 }
 `;
 
+/* ⚠⚠ (2026-11-19, sa capture des Dépenses : « je t'ai demandé un contrôle de qualité… clairement c'est pas fait ») LE TABLEAU
+   NE DÉPASSE JAMAIS SA CARTE. Une ligne par cellule (Épuré) : sur une fenêtre ancrée étroite, ou avec de vrais libellés plus
+   longs que ceux des essais, un tableau devenait plus large que sa carte, qui coupait les dernières colonnes SANS RIEN DIRE
+   (Taxes, Reçu…). Le banc des débordements le mesure désormais (« TABLEAUX ROGNÉS ») ; ici, le garde : tant que le tableau
+   dépasse, la plus large de ses colonnes de TEXTE (jamais un montant .num, un bouton, un champ ni une pastille d'état seule)
+   cède la place — « … », le texte entier au survol —, puis la suivante. Refait à chaque redessin et redimensionnement. */
+const JS_CEDER = () => `
+(function(){
+  if (typeof document === 'undefined' || window.__szCeder) return; window.__szCeder = true;
+  function rogneur(t){
+    for (var a = t.parentElement; a && a !== document.body; a = a.parentElement) {
+      var c = getComputedStyle(a);
+      if (c.overflowX === 'visible') continue;
+      return /(auto|scroll)/.test(c.overflowX) ? null : a;
+    }
+    return null;
+  }
+  function ajuster(){
+    var tabs = document.querySelectorAll('table');
+    for (var i = 0; i < tabs.length; i++) {
+      var t = tabs[i];
+      if (t.__szSerre) {   // on repart de la mise en page naturelle avant de remesurer
+        t.style.tableLayout = ''; t.style.width = ''; t.__szSerre = false;
+        var cg = t.querySelector('colgroup.sz-cede-cols'); if (cg) cg.remove();
+        var deja = t.querySelectorAll('.sz-cede-auto');
+        for (var d = 0; d < deja.length; d++) { deja[d].classList.remove('sz-cede-auto'); deja[d].style.width = ''; }
+      }
+      if (!t.offsetParent || !t.tBodies[0] || !t.tBodies[0].rows.length) continue;
+      var a = rogneur(t); if (!a) continue;
+      var ra = a.getBoundingClientRect(), rt = t.getBoundingClientRect();
+      if (rt.right - ra.right <= 1) continue;
+      var r0 = t.tBodies[0].rows[0], n = r0.cells.length, fus = false;
+      for (var f = 0; f < n; f++) if (r0.cells[f].colSpan > 1) fus = true;
+      if (fus || t.querySelector('colgroup')) continue;      // fusions ou largeurs déjà posées : on ne devine pas
+      var larg = [], texte = [], fixe = 0, souple = 0;
+      for (var k = 0; k < n; k++) {
+        var c0 = r0.cells[k], w = c0.offsetWidth;
+        var seule = c0.children.length === 1 && c0.children[0].classList.contains('rf-pill') && !c0.textContent.replace(c0.children[0].textContent, '').trim();
+        var tx = !(c0.classList.contains('num') || c0.classList.contains('arg') || c0.querySelector('button,input,select,textarea') || seule || w < 70);
+        larg.push(w); texte.push(tx);
+        if (tx) souple += w; else fixe += w;
+      }
+      var dispo = Math.floor(ra.right - rt.left) - 2, exces = Math.ceil(rt.width) - dispo;
+      // Les colonnes de texte les plus larges BAISSENT ENSEMBLE à un même niveau (comme l'eau) : aucune n'est sacrifiée seule
+      // (le numéro de facture restait « FAC-202… »), et les étroites (une date, un code) restent entières. Jamais sous 90 px.
+      var txt = []; for (var o = 0; o < n; o++) if (texte[o]) txt.push(larg[o]);
+      var niveau = Math.max.apply(null, txt.concat([0]));
+      var perte = function(L){ var p = 0; for (var u = 0; u < txt.length; u++) if (txt[u] > L) p += txt[u] - L; return p; };
+      while (niveau > 90 && perte(niveau) < exces) niveau--;
+      if (perte(niveau) < exces) continue;                   // rien ne peut céder assez : le banc le dira
+      var cede = {};
+      for (var kk = 0; kk < n; kk++) if (texte[kk] && larg[kk] > niveau) { larg[kk] = niveau; cede[kk] = true; }
+      t.__szSerre = true;
+      // Un <colgroup> porte les largeurs : il vaut même quand l'en-tête a moins de cellules que les lignes (colonne de boutons).
+      var grp = document.createElement('colgroup'); grp.className = 'sz-cede-cols';
+      for (var k2 = 0; k2 < n; k2++) {
+        var col = document.createElement('col');
+        col.style.width = larg[k2] + 'px';
+        grp.appendChild(col);
+      }
+      t.insertBefore(grp, t.firstChild);
+      t.style.tableLayout = 'fixed'; t.style.width = dispo + 'px';
+      for (var k2 = 0; k2 < n; k2++) {
+        if (!cede[k2]) continue;
+        for (var j = 0; j < t.rows.length; j++) {
+          var cel = t.rows[j].cells[k2]; if (!cel) continue;
+          cel.classList.add('sz-cede-auto');
+          if (!cel.title && cel.tagName === 'TD') cel.title = (cel.textContent || '').replace(/\s+/g, ' ').trim();
+        }
+      }
+    }
+  }
+  var tm = null, occupe = false;
+  function bientot(){ if (occupe) return; clearTimeout(tm); tm = setTimeout(function(){ occupe = true; try { ajuster(); } catch (e) {} setTimeout(function(){ occupe = false; }, 0); }, 60); }
+  function demarrer(){
+    // On ignore NOS propres <colgroup> : sinon le garde se relancerait lui-même sans fin.
+    var nous = function(nd){ return nd.nodeType === 1 && nd.classList && nd.classList.contains('sz-cede-cols'); };
+    try { new MutationObserver(function(ms){
+      for (var i = 0; i < ms.length; i++) {
+        var m = ms[i], k;
+        for (k = 0; k < m.addedNodes.length; k++) if (!nous(m.addedNodes[k])) { bientot(); return; }
+        for (k = 0; k < m.removedNodes.length; k++) if (!nous(m.removedNodes[k])) { bientot(); return; }
+      }
+    }).observe(document.body, { childList: true, subtree: true }); } catch (e) {}
+    // Le thème, le mode jour/nuit et la densité changent les largeurs sans rien ajouter à la page ; la police aussi, en arrivant.
+    try { new MutationObserver(bientot).observe(document.documentElement, { attributes: true, attributeFilter: ['class', 'data-sz-theme', 'data-sz-teinte'] }); } catch (e) {}
+    try { if (document.fonts && document.fonts.ready) document.fonts.ready.then(bientot); } catch (e) {}
+    window.addEventListener('resize', bientot);
+    window.addEventListener('load', bientot);
+    bientot();
+  }
+  if (document.body) demarrer(); else document.addEventListener('DOMContentLoaded', demarrer);
+})();
+`;
+const CSS_CEDER = `
+td.sz-cede-auto,th.sz-cede-auto{max-width:none!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis;white-space:nowrap}
+td.sz-cede-auto > div{max-width:100%;min-width:0;overflow:hidden}
+td.sz-cede-auto > div > *{min-width:0}
+td.sz-cede-auto > :is(b,strong,a,span:not(.rf-pill):not(.cx-code)){display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:bottom}
+td.sz-cede-auto div :is(b,strong,a,span:not(.rf-pill):not(.cx-code):not(.rf-av)),td.sz-cede-auto div > div{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.sz-cede-auto div :is(b,strong){display:block}
+`;
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
   + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_PAGES() + JS_COMPTE() + JS_MESURES()
-  + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX() + JS_CONFIRMER() + JS_COCHES();
+  + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX() + JS_CONFIRMER() + JS_COCHES() + JS_CEDER();
 
 const JS_SOCLE = () => `
 var P = window.szPont;
@@ -4862,7 +4964,9 @@ const CSS_COMPTA = `
 .cx-kpi>b.mot{font-size:1.1rem;margin:.42rem 0 .18rem}
 .cx-barre{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
 .cx-barre>.droite{margin-left:auto;display:flex;align-items:center;gap:.5rem}
-.cx-deux{display:grid;grid-template-columns:minmax(0,1fr) 22rem;gap:.9rem}
+/* (2026-11-19, Dépenses à 1160 px : Reçu rogné) La colonne d'appui ne garde ses 22 rem que si la fenêtre les a : étroite, elle
+   rend la place au tableau (26 % de la largeur, jamais sous 15 rem). */
+.cx-deux{display:grid;grid-template-columns:minmax(0,1fr) clamp(15rem,26vw,22rem);gap:.9rem}
 .cx-deux.moitie{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}
 .cx-carte{min-height:0;overflow:hidden;padding:.95rem 1.1rem;border-radius:16px;background:var(--f-carte);border:1px solid var(--sz-bord);
   display:flex;flex-direction:column;gap:.62rem}
@@ -5355,9 +5459,15 @@ html[data-sz-theme="epure"] tbody td{white-space:nowrap}
 /* ⚠ (2026-11-19, contrôle des Véhicules : les boutons « Supprimer » sortaient du cadre) La colonne qui CÈDE la place n'est plus
    « la première » (une date, parfois) : c'est toute cellule qui porte un NOM — un gras, une fiche (.rf-prod/.rf-nom) — et
    aucun bouton. Plusieurs peuvent céder ensemble (trajet ET raison) ; chacune finit par « … », le texte entier au survol. */
-html[data-sz-theme="epure"] tbody td:is(:has(> b),:has(> strong),:has(.rf-prod),:has(.rf-nom),:has(> div > b)):not(:has(button)):not(.c):not(.d){max-width:0;width:38%;min-width:11rem;overflow:hidden;text-overflow:ellipsis}
-html[data-sz-theme="epure"] tbody td:is(:has(> b),:has(> strong),:has(.rf-prod),:has(.rf-nom),:has(> div > b)):not(:has(button)):not(.c):not(.d) :is(div,b,strong,span:not(.rf-pill):not(.rf-av)){white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
-html[data-sz-theme="epure"] tbody td:is(:has(> b),:has(> strong),:has(.rf-prod),:has(.rf-nom),:has(> div > b)):not(:has(button)):not(.c):not(.d) :is(b,strong,span:not(.rf-pill):not(.rf-av)){display:inline-block;max-width:100%;vertical-align:bottom}
+html[data-sz-theme="epure"] tbody td:is(:has(> b),:has(> strong),:has(.rf-prod),:has(.rf-nom),:has(> div > b)):not(:has(button)):not(.c):not(.d):not(.num){max-width:0;width:38%;min-width:11rem;overflow:hidden;text-overflow:ellipsis}
+html[data-sz-theme="epure"] tbody td:is(:has(> b),:has(> strong),:has(.rf-prod),:has(.rf-nom),:has(> div > b)):not(:has(button)):not(.c):not(.d):not(.num) :is(div,b,strong,span:not(.rf-pill):not(.rf-av)){white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+html[data-sz-theme="epure"] tbody td:is(:has(> b),:has(> strong),:has(.rf-prod),:has(.rf-nom),:has(> div > b)):not(:has(button)):not(.c):not(.d):not(.num) :is(b,strong,span:not(.rf-pill):not(.rf-av)){display:inline-block;max-width:100%;vertical-align:bottom}
+/* ⚠ (2026-11-19, sa capture des Dépenses : un « … » ISOLÉ après chaque nom) La seconde ligne (.cx-l2 : fournisseur · paiement)
+   devenait elle aussi un bloc-en-ligne, posé À CÔTÉ du nom, réduit à son « … ». Une ligne par cellule : dans une cellule
+   qui cède, la seconde ligne se retire (le texte entier reste au survol).
+   ⚠ Et un MONTANT en gras (td.num > b) était pris pour un nom : il réservait 11 rem et 38 % de la largeur, dans TOUS les
+   tableaux — c'est ce qui poussait Taxes et Reçu hors de la carte. Les cellules de chiffres (.num) ne cèdent jamais. */
+html[data-sz-theme="epure"] tbody td:is(:has(> b),:has(> strong),:has(.rf-prod),:has(.rf-nom),:has(> div > b)):not(:has(button)):not(.c):not(.d):not(.num) .cx-l2{display:none!important}
 /* ⚠ (2026-11-18, sa capture des Dépenses : « c'est ça que tu appelles beau… ») Un nom en GRAS est un élément EN LIGNE :
    overflow:hidden ne le rogne pas — il passait par-dessus les colonnes voisines. La CELLULE se rogne elle-même, et les
    éléments en ligne deviennent des blocs-en-ligne bornés à la cellule, qui finissent par « … ». */
@@ -5387,3 +5497,6 @@ module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + C
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_MESURES, JS_BROUILLON, JS_TUILES, JS_BORNER, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC, CSS_SUIVI, fournirThemeDepart, themeDepart: () => { try { return _themeDepart ? _themeDepart() : null; } catch (e) { return null; } } };
+/* Le garde des tableaux (JS_CEDER) : sa feuille en DERNIER dans les deux feuilles que chargent les fenêtres. */
+module.exports.CSS_SOCLE += CSS_CEDER;
+module.exports.CSS_JOUR += CSS_CEDER;
