@@ -159,7 +159,6 @@ const MENU_APP_EN = {
   'Incidents de sécurité': 'Security incidents',
   'Infolettre': 'Newsletter',
   'Inventaire': 'Inventory',
-  'Jeu de couleurs': 'Colour scheme',
   'Journaux': 'Logs',
   'Lien comptable': 'Accounting link',
   // Livre de comptes (#128 phase 2). ⚠ PAS << Accounts book >> : le terme
@@ -243,15 +242,15 @@ const MENU_APP_EN = {
      (`THEMES_COULEUR`) et non d'un `label:` écrit à la main — c'est pour ça que
      le banc les relève séparément. Sans ça ils seraient restés français dans un
      sous-menu anglais, invisibles à tout relevé qui ne lirait que `label:`. */
-  'Lin': 'Linen',
-  'Carbone': 'Carbon',
-  'Doré (ancien défaut)': 'Gold (former default)',
-  'Océan': 'Ocean',
-  'Violet': 'Purple',
-  'Ardoise': 'Slate',
-  'Graphite': 'Graphite',
-  'Émeraude': 'Emerald',
-  'Épuré (nouveau look)': 'Clean (new look)',
+  'Thèmes': 'Themes',
+  'Épuré': 'Pure',
+  'Sauge': 'Sage',
+  'Lagune': 'Lagoon',
+  'Rose poudré': 'Powder pink',
+  'Ardoise et laiton': 'Slate and brass',
+  'Abricot': 'Apricot',
+  'Lavande': 'Lavender',
+  'Minuit doré': 'Golden midnight',
   'Rechercher': 'Search',
   'Réglages': 'Settings',
   'Sandriza — Administration': 'Sandriza — Administration',

@@ -1098,8 +1098,23 @@ const reglagesPage = () => {
   return { ok: true, groupes };
 };
 ipcMain.handle('reglages:page', () => { try { return reglagesPage(); } catch (e) { return { ok: false, motif: 'echec' }; } });
+/* ══ « ← CONFIGURATION » (2026-11-18, sa demande : « tu dois permettre un retour aux configurations dans tous les modules
+   de la configuration ») Un écran ouvert DEPUIS la page Configuration porte, en tête, un bouton qui y ramène. Ouvert
+   d'ailleurs (menu, Ctrl K), il ne l'a pas. La coquille sait d'où vient le geste : c'est elle qui l'exécute. */
+let _depuisReglages = 0;
+const _retourCfgPoser = (wc, on) => {
+  if (!wc || wc.isDestroyed()) return;
+  let lib = '← Configuration';
+  try { if (require('./langue').langueCourante() === 'en') lib = '← Settings'; } catch (e) {}
+  const js = '(function(on,lib){try{var t=document.querySelector(".tete");if(!t)return;var b=document.getElementById("sz-retour-cfg");'
+    + 'if(!on){if(b)b.remove();return;}if(!b){b=document.createElement("button");b.type="button";b.id="sz-retour-cfg";b.className="sz-retour-cfg";'
+    + 'b.onclick=function(){try{window.szPont&&window.szPont.ouvrirModule&&window.szPont.ouvrirModule("reglages");}catch(e){}};t.insertBefore(b,t.firstChild);}'
+    + 'b.textContent=lib;}catch(e){}})(' + (on ? 'true' : 'false') + ',' + JSON.stringify(lib) + ');';
+  try { wc.executeJavaScript(js, true).catch(() => {}); } catch (e) {}
+};
 ipcMain.handle('recherche:menu:agir', (e, brut) => {
   try {
+    try { const r = ancrees.get('reglages'); if (r && r.view && !r.view.webContents.isDestroyed() && r.view.webContents === e.sender) _depuisReglages = Date.now(); } catch (er) {}
     const it = menuEntreeParChemin(brut);
     if (!it) return false;
     const t = versTemplateNatif([it])[0];
@@ -5088,6 +5103,8 @@ const _dockOuvrir = async (cle, etat) => {
   const defs = PAGES_ANCRABLES();
   const c = String(cle || '');
   if (!defs[c]) return false;
+  const versCfg = c !== 'reglages' && (Date.now() - _depuisReglages) < 6000;   // ouvert depuis la page Configuration
+  if (versCfg) _depuisReglages = 0;
   /* L ETAT VOULU VIENT DU SITE depuis 1.56.0 (profil de la PERSONNE, Turso) :
      le reglages.json du poste n est plus que le repli des sites plus vieux
      qui n envoient pas le 2e argument. */
@@ -5162,6 +5179,7 @@ const _dockOuvrir = async (cle, etat) => {
       if (a.fenetre || _detachable(c)) view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(' + (a.fenetre ? 'false' : 'true') + ');', true).catch(() => {});
       appliquerTheme(view.webContents);
       _zoomRattraper(view.webContents);
+      if (a.retourCfg) _retourCfgPoser(view.webContents, true);   // un rechargement garde le retour
     });
     await new Promise((resolve) => {
       let fait = false;
@@ -5203,6 +5221,7 @@ const _dockOuvrir = async (cle, etat) => {
      clignotait dans la zone de scan, mais les frappes du lecteur (un clavier) partaient dans la page du menu. */
   try { a.view.webContents.focus(); } catch {}
   ancreeVisible = c; vueVoilee = null;
+  a.retourCfg = versCfg; _retourCfgPoser(a.view.webContents, versCfg);
   /* ⚠ « VISIBLE » N'EST PAS « PEINTE » (2026-09-26, filmé chez lui) : après
      `setVisible`, une vue restée cachée met ~250 ms à peindre sa première
      image. Le site, lui, fait tomber son écran de chargement dès notre
@@ -5544,9 +5563,13 @@ const _themeCouleur = () => {
       reglages.set('epureImpose', true);
     }
   } catch {}
-  const t = String(reglages.get('themeCouleur') || 'epure');
-  return THEMES_CONNUS.indexOf(t) >= 0 ? t : 'epure';
+  /* ⚠ (2026-11-18, sa demande : « les thèmes doivent obligatoirement toujours utiliser le look épuré ») Lin, Carbone,
+     Doré et les autres jeux sont retirés : le look est TOUJOURS Épuré ; ce qui se choisit, c'est son THÈME (réglage
+     « teinte », src/teintes.js). Un jeu retenu d'avant est ramené à Épuré (le menu du site le relit). */
+  try { if (reglages.get('themeCouleur') !== 'epure') reglages.set('themeCouleur', 'epure'); } catch (e) {}
+  return 'epure';
 };
+const _teinte = () => { try { return require('./teintes').teinteValide(reglages.get('teinte')); } catch (e) { return 'epure'; } };
 /* ── LE FOND DES FENETRES ET DES VUES AVANT LEUR PREMIERE PEINTURE (2026-10-15) ──
    Sa remarque, deux fois : « la page de chargement n a toujours pas le theme, c est encore bleu ».
    Une douzaine d endroits peignaient en dur le bleu nuit de l ancien defaut (#0e1522) : fond des
@@ -5568,6 +5591,7 @@ const _fondTheme = (sombre) => {
   const s = (typeof sombre === 'boolean') ? sombre : _sombreCourant();
   let t = 'lin';
   try { t = _themeCouleur(); } catch {}
+  if (t === 'epure') { try { return require('./teintes').fondPage(_teinte(), s); } catch (e) {} }
   return (_FONDS[t] || _FONDS.lin)[s ? 0 : 1];
 };
 const _bandeTheme = () => {
@@ -5578,6 +5602,7 @@ const jsTheme = () => {
   const jour = !_modele.sombre;
   return 'document.documentElement.classList.toggle("jour",' + jour + ');'
     + 'document.documentElement.setAttribute("data-sz-theme",' + JSON.stringify(_themeCouleur()) + ');'
+    + 'document.documentElement.setAttribute("data-sz-teinte",' + JSON.stringify(_teinte()) + ');'
     /* (2026-11-18) La DENSITÉ voyage comme le jeu de couleurs : un réglage du poste, posé sur toutes les fenêtres. */
     + 'document.documentElement.classList.toggle("dense",' + (reglages.get('densite') === 'compacte') + ');'
     + 'document.documentElement.style.colorScheme=' + JSON.stringify(jour ? 'light' : 'dark') + ';';
@@ -5585,7 +5610,7 @@ const jsTheme = () => {
 /* Le thème du poste, fourni aux pages natives À LEUR GÉNÉRATION (socle.TETE) : peintes justes dès la première image. */
 try {
   require('./fenetres/socle').fournirThemeDepart(() => ({
-    jour: !_modele.sombre, theme: _themeCouleur(), dense: reglages.get('densite') === 'compacte',
+    jour: !_modele.sombre, theme: _themeCouleur(), dense: reglages.get('densite') === 'compacte', teinte: _teinte(),
   }));
 } catch (e) {}
 const appliquerTheme = (wc) => {
@@ -7961,8 +7986,15 @@ ipcMain.handle('menu:set', (e, cle, valeur) => {
     const wcD = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null;
     if (wcD) { appliquerTheme(wcD); wcD.send('menu:reglages', reglages.lire()); }
   }
+  /* (2026-11-18) LE THÈME du look Épuré : même chemin que la densité — enregistré pour le poste, appliqué tout de suite. */
+  if (cle === 'teinte') {
+    reglages.set('teinte', require('./teintes').teinteValide(valeur));
+    appliquerThemePartout();
+    const wcT = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null;
+    if (wcT) { appliquerTheme(wcT); wcT.send('menu:reglages', reglages.lire()); }
+  }
   if (cle === 'themeCouleur') {
-    const t = String(valeur || 'defaut');
+    const t = 'epure';   // (2026-11-18) le look est toujours Épuré : un ancien menu qui demanderait Lin n'y change rien
     reglages.set('themeCouleur', THEMES_CONNUS.indexOf(t) >= 0 ? t : 'defaut');
     appliquerThemePartout();
     const wc0 = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null;

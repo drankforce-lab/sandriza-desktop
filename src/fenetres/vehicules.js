@@ -259,7 +259,7 @@ function pageVehicules(ouverture) {
 <div class="tete"><span class="ico">${ICO.vehicule}</span><h1>${T("Véhicules et déplacements")}</h1>
   <span class="cx-resume" id="sous"></span>
   <div class="cx-actions" id="outils"></div></div>
-<div class="cx-barre" id="vh-barre"><div class="ed-seg" id="onglets" role="group" aria-label="${T("Onglets du registre")}"></div><div class="droite" id="vh-droite"></div></div>
+<div class="cx-barre" id="vh-barre"><div class="ed-seg" id="onglets" role="tablist" aria-label="${T("Onglets du registre")}"></div><div class="droite" id="vh-droite"></div></div>
 <div class="cx" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>

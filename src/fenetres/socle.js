@@ -43,7 +43,8 @@ const _attrsTheme = () => {
     if (!t) return '';
     const cl = [t.jour ? 'jour' : '', t.dense ? 'dense' : ''].filter(Boolean).join(' ');
     const th = /^[a-z0-9-]+$/.test(String(t.theme || '')) ? String(t.theme) : '';
-    return (cl ? ' class="' + cl + '"' : '') + (th ? ' data-sz-theme="' + th + '"' : '')
+    const te = require('../teintes').teinteValide(t.teinte);   // le THÈME du look Épuré (2026-11-18)
+    return (cl ? ' class="' + cl + '"' : '') + (th ? ' data-sz-theme="' + th + '"' : '') + ' data-sz-teinte="' + te + '"'
       + ' style="color-scheme:' + (t.jour ? 'light' : 'dark') + '"';
   } catch (e) { return ''; }
 };
@@ -5242,6 +5243,30 @@ html[data-sz-theme="epure"] .ed-seg button{height:34px;padding:0 12px;border-rad
   background:transparent!important;color:var(--tx2);font-size:13px;font-weight:600;box-shadow:none!important}
 html[data-sz-theme="epure"] .ed-seg button:hover{color:var(--tx)}
 html[data-sz-theme="epure"] .ed-seg button.on{color:var(--tx);border-bottom-color:var(--sz-btn-prim)!important;background:transparent!important}
+/* (2026-11-18, sa capture de l'Atelier : « c'est pas beau ») Un .ed-seg qui sert à CHOISIR (role="group" : outil, matière,
+   taille affichée…) n'est pas une rangée d'onglets : en onglets soulignés il se cassait sur deux lignes. Il devient une
+   rangée de puces qui passent à la ligne proprement ; le choix actif prend l'accent doux du thème. */
+html[data-sz-theme="epure"] .ed-seg[role="group"]{display:flex;flex-wrap:wrap;gap:4px;border-bottom:0}
+html[data-sz-theme="epure"] .ed-seg[role="group"] button{height:30px;padding:0 10px;margin:0;border:1px solid var(--v10)!important;border-radius:8px!important;
+  background:var(--f-carte)!important;color:var(--tx)!important;font-size:12.5px;white-space:nowrap}
+html[data-sz-theme="epure"] .ed-seg[role="group"] button:hover{background:var(--v05)!important}
+html[data-sz-theme="epure"] .ed-seg[role="group"] button.on{background:var(--sz-accent-doux)!important;border-color:var(--sz-accent)!important;color:var(--tx-or)!important}
+html[data-sz-theme="epure"] .st-onglets button{border-radius:0!important}
+/* « ← Configuration » (posé par la coquille quand l'écran vient de la page Configuration) : un lien de retour discret, en tête. */
+.sz-retour-cfg{flex:none;height:30px;padding:0 10px;margin-right:4px;border:0!important;border-radius:8px;background:transparent!important;
+  color:var(--tx-or,var(--tx));font:inherit;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;-webkit-app-region:no-drag}
+.sz-retour-cfg:hover{background:var(--v06)!important}
+/* (2026-11-18, sa capture des Transporteurs : « pas comme ça ») Les onglets « en dossiers » (.tr-ong) deviennent les onglets
+   soulignés du look, comme partout ailleurs ; leur pastille d'état (point) reste. */
+html[data-sz-theme="epure"] .tr-ong{padding:0 16px!important;gap:2px!important;border-bottom:1px solid var(--v08);background:transparent!important}
+html[data-sz-theme="epure"] .tr-ong button{height:38px;padding:0 12px!important;border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;
+  margin-bottom:-1px;background:transparent!important;color:var(--tx2)!important;font-size:13px;font-weight:600;box-shadow:none!important;white-space:nowrap}
+html[data-sz-theme="epure"] .tr-ong button:hover:not(:disabled){color:var(--tx)!important}
+html[data-sz-theme="epure"] .tr-ong button.on{color:var(--tx)!important;border-bottom-color:var(--sz-btn-prim)!important}
+/* (2026-11-18, contrôle des fenêtres de Configuration) Les encadrés d'aide « .info » (bleus dans Statistiques, Lancement…) :
+   le bleu n'est pas un des trois tons — ils passent en NEUTRE. */
+html[data-sz-theme="epure"] .info{background:var(--ep-neutre-f)!important;border:0!important;color:var(--ep-neutre-t)!important;border-radius:10px}
+html[data-sz-theme="epure"] .info *{color:inherit!important}
 html[data-sz-theme="epure"] .rf-tb .rf-jet,html[data-sz-theme="epure"] .cx-barre .rf-jet{height:34px;padding:0 10px;border-radius:8px;border:0!important;background:transparent!important;
   color:var(--tx);font-size:13px;font-weight:600;box-shadow:none}
 html[data-sz-theme="epure"] .rf-tb .rf-jet:hover,html[data-sz-theme="epure"] .cx-barre .rf-jet:hover{background:var(--v05)!important}
@@ -5340,8 +5365,10 @@ html.sz-wco .tete{-webkit-app-region:drag;min-height:44px;padding-right:calc(100
 html.sz-wco .tete :is(button,a,input,select,label,[role=button]){-webkit-app-region:no-drag}
 `;
 
-module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,
-  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,
+/* Les THÈMES du look Épuré (src/teintes.js) : en dernier, ils surchargent l'accent et la page d'Épuré. */
+const CSS_TEINTES = require('../teintes').css();
+module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE + CSS_TEINTES,
+  CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE + CSS_TEINTES,
   JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_MESURES, JS_BROUILLON, JS_TUILES, JS_BORNER, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC, CSS_SUIVI, fournirThemeDepart, themeDepart: () => { try { return _themeDepart ? _themeDepart() : null; } catch (e) { return null; } } };

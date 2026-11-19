@@ -441,7 +441,7 @@ html.jour .v3-cam button[aria-pressed="true"]{background:#DDD5C8}
 .v3-tnb .rp-opts{display:flex;flex-wrap:wrap;gap:.35rem .8rem;align-items:center;justify-content:center;font-size:.8rem;color:#2b2621}
 .v3-tnb .rp-opts .lib{font-weight:700;color:#4f463d}
 .v3-tnb .rp-opts label{display:inline-flex;align-items:center;gap:.3rem;cursor:pointer}
-.v3-rp-retour{position:absolute;right:.7rem;top:.7rem;z-index:4;font:inherit;font-size:.75rem;padding:.25rem .6rem;border-radius:8px;cursor:pointer;
+.v3-rp-retour{position:absolute;left:.7rem;top:.7rem;/* (2026-11-18) à gauche : à droite il chevauchait la barre de zoom */ z-index:4;font:inherit;font-size:.75rem;padding:.25rem .6rem;border-radius:8px;cursor:pointer;
   border:1px solid rgba(0,0,0,.25);background:#FBF9F6;color:#2b2621}
 .v3-tnb .t1{font:700 1.02rem/1.3 system-ui;color:#2b2621}
 .v3-tnb .t2{font-size:.84rem;color:#4f463d;max-width:30rem;line-height:1.5}

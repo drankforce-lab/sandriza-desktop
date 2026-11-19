@@ -41,7 +41,9 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.45 system-ui,-apple-sy
   border:1px solid var(--v12);border-radius:12px}
 .rg-rch svg{flex:none;color:var(--tx2)}
 .rg-rch input{border:0!important;outline:none;background:transparent!important;font:inherit;font-size:14px;width:100%;color:var(--tx);padding:0!important;height:auto!important}
-.rg-grille{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;align-items:start;min-height:0}
+/* (2026-11-18) Trois colonnes qui se TASSENT (plus de rangées fixes) : une carte courte ne laisse plus un trou sous elle. */
+.rg-grille{display:block;column-count:3;column-gap:14px;column-fill:balance;flex:none!important;height:auto!important;min-height:0}
+.rg-grille>.rg-carte{break-inside:avoid;margin:0 0 14px}
 .rg-carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:16px;padding:14px 16px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}
 .rg-carte[hidden]{display:none}
 .rg-ct{display:flex;align-items:center;gap:10px}
@@ -51,6 +53,7 @@ html.jour .rg-ic{background:#3d4456}
 .rg-ct h2{margin:0;font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rg-ct .nb{margin-left:auto;flex:none;font-size:12px;font-weight:600;color:var(--tx2)}
 .rg-ent{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:6px}
+.rg-ent.une{grid-template-columns:minmax(0,1fr)}
 .rg-e{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;font:inherit;font-size:13px;font-weight:500;
   color:var(--tx);background:transparent;border:0;text-align:left;cursor:pointer;min-width:0}
 .rg-e span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -130,9 +133,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function larges(){
     var bs = grille.querySelectorAll('.rg-e');
     Array.prototype.forEach.call(bs, function(b){ b.classList.remove('large'); });
+    Array.prototype.forEach.call(grille.querySelectorAll('.rg-ent'), function(z){ z.classList.remove('une'); });
     Array.prototype.forEach.call(bs, function(b){
       var s = b.querySelector('span'); if (s && s.scrollWidth > s.clientWidth + 1) b.classList.add('large');
     });
+    /* (2026-11-18, sa capture : « pourquoi Imprimantes n'est pas en dessous ») Une carte dont UNE entrée est trop longue
+       pour la demi-colonne passe TOUTE en une colonne : plus de « Transporteurs | Imprimantes » côte à côte sous des
+       entrées pleine largeur. */
+    Array.prototype.forEach.call(grille.querySelectorAll('.rg-ent'), function(z){ if (z.querySelector('.rg-e.large')) z.classList.add('une'); });
   }
   var minutR = null;
   window.addEventListener('resize', function(){ clearTimeout(minutR); minutR = setTimeout(larges, 120); });
