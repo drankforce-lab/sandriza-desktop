@@ -413,7 +413,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     return '<div class="avis jaune">${T("Les unités en transit sont <strong>retirées du stock vendable</strong> : ")}'
       + '${T("l’article s’affiche épuisé sur la boutique le temps du trajet, et les clients inscrits à l’alerte ")}'
       + '${T("« de retour en stock » sont prévenus à la réception.")}</div>'
-      + '<div class="sz-pagee"><div class="lot-haut">' + lotTout() + CK.barre() + '</div><div class="pile" data-pages="transferts-transit">' + l.map(carteTransit).join('') + '</div></div>';
+      + '<div class="sz-pagee"><div class="lot-haut">' + lotTout() + '<span class="lot-lib">${T("Tout sélectionner")}</span>' + CK.barre() + '</div><div class="pile" data-pages="transferts-transit">' + l.map(carteTransit).join('') + '</div></div>';
   }
 
   function carteTransit(t){

@@ -220,7 +220,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     VUE = l;
     var compte = function(t){ return toutes.filter(function(e){ return e.type === t; }).length; };
     var h = '<div class="entete">'
-      + '<p class="quoi">${T("Une commande dont le <b>courriel</b>, le <b>code postal</b> ou l’<b>adresse de livraison</b> figure ici est refusée à la caisse. Retirer une entrée redonne le droit de commander.")}</p>'
+      + (document.documentElement.getAttribute('data-sz-theme') === 'epure' ? '' : '<p class="quoi">${T("Une commande dont le <b>courriel</b>, le <b>code postal</b> ou l’<b>adresse de livraison</b> figure ici est refusée à la caisse. Retirer une entrée redonne le droit de commander.")}</p>')
       + (D.peutAjouter && !AJOUT ? '<button class="prim" id="l-nouveau">${T("＋ Ajouter une entrée")}</button>' : '')
       + '</div>';
     /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE A LA LISTE NOIRE (2026-09-25) ══

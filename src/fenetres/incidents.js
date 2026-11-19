@@ -297,7 +297,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('incidents')}
   function vueRegistre(){
     var st = D.stats||{}, lg = D.lignes||[];
     var h = '<div class="entete">'
-      + '<p class="loi">${T("La <b>Loi 25</b> impose de consigner <b>tout</b> incident de confidentialité — même sans risque de préjudice sérieux — et de pouvoir remettre ce registre à la <b>Commission d’accès à l’information</b> sur demande. Chaque entrée est conservée <b>cinq ans</b> après la prise de connaissance, puis retirée d’elle-même. Ce registre n’est pas public.")}</p>'
+      + (document.documentElement.getAttribute('data-sz-theme') === 'epure' ? '' : '<p class="loi">${T("La <b>Loi 25</b> impose de consigner <b>tout</b> incident de confidentialité — même sans risque de préjudice sérieux — et de pouvoir remettre ce registre à la <b>Commission d’accès à l’information</b> sur demande. Chaque entrée est conservée <b>cinq ans</b> après la prise de connaissance, puis retirée d’elle-même. Ce registre n’est pas public.")}</p>')
       + (D.peutModifier ? '<button class="prim" id="i-nouveau">${T("＋ Consigner un incident")}</button>' : '')
       + '</div>';
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel

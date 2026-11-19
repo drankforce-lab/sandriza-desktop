@@ -512,7 +512,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     if (!rows.length) {
       h += '<div class="ls-vide">' + (Q || STATUT ? '${T("Rien ne correspond.")}' : '${T("Aucune carte-cadeau.")}') + '</div>';
     } else {
-      h += '<div class="lot-rang">' + lotCase(CK.th()).replace('class="c szk-c"', 'class="szk-c lot-tout"') + CK.barre() + '</div>';
+      h += '<div class="lot-rang">' + lotCase(CK.th()).replace('class="c szk-c"', 'class="szk-c lot-tout"') + '<span class="lot-lib">${T("Tout sélectionner")}</span>' + CK.barre() + '</div>';
       h += '<div data-pages="cartescadeaux"' + szPagesCoeurAttr(D) + '>' + rows.map(function(g){
         var pc = g.initial > 0 ? Math.max(0, Math.min(100, Math.round(100 * g.solde / g.initial))) : 0;
         return '<div class="ls-rang cc-rang' + (g.statut === 'active' || g.statut === 'pending' ? '' : ' eteinte') + CK.classe(g) + '" data-id="' + esc(g.id) + '" title="${T("Voir le détail")}">'

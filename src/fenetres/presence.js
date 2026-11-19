@@ -341,6 +341,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
        << manifeste >>, << connectee >> — et la fenetre en portait une quinzaine
        d autres. Corrige le 2026-09-13, en la traduisant : c est la quatrieme
        fenetre du depot ou le francais lui-meme etait a relire d abord. */
+    if (!(document.documentElement.getAttribute('data-sz-theme') === 'epure'))   // (2026-11-19) en Épuré, pas de paragraphe d'explication
     h += '<div class="note">'
       + '${T("<strong>Déconnecter quelqu’un coupe sa session sans lui demander</strong> : ")}'
       + '${T("son travail non enregistré est perdu, et ses fiches ouvertes se libèrent. ")}'

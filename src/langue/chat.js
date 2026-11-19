@@ -29,6 +29,7 @@
 module.exports = {
   /* ⚠ Le nom de repli quand la personne n en a pas donne — trouve par
      banc-libelle-argument : il passait en argument a `esc()`. */
+  'Tout sélectionner': 'Select all',
   'Visiteur': 'Visitor',
   /* ⚠ LES DEUX ALTERNATIVES EN ENTIER : le pluriel ne se fabrique pas en
      ajoutant une lettre. Voir `tools/banc-pluriel-colle.js`. */

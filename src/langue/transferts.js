@@ -26,6 +26,7 @@
 
 module.exports = {
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
+  'Tout sélectionner': 'Select all',
   'Transferts de stock — Administration Sandriza':
     'Stock transfers — Sandriza Administration',
   'Transferts de stock': 'Stock transfers',

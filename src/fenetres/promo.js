@@ -326,6 +326,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('promo')}
 
     /* ⚠ CE QUI N EST PAS ICI EST DIT ICI (regle de la 2.0.0 : une fenetre au
        perimetre partiel annonce ou trouver le reste). */
+    if (!(document.documentElement.getAttribute('data-sz-theme') === 'epure'))   // (2026-11-19) en Épuré, pas de renvoi vers un autre écran
     h += '<div class="aide" style="padding:.2rem .1rem">'
       + '${T("La <strong>mise en page d’un modèle</strong> et la <strong>logothèque</strong> ")}'
       + '${T("restent à l’écran Catalogue → Centre d’impression de la fenêtre principale :")} '

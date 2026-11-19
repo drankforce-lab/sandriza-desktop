@@ -25,6 +25,7 @@
 
 module.exports = {
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
+  'Tout sélectionner': 'Select all',
   'Cartes-cadeaux — Administration Sandriza': 'Gift cards — Sandriza Administration',
   'Cartes-cadeaux': 'Gift cards',
   'Cartes-cadeaux indisponibles': 'Gift cards unavailable',

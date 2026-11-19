@@ -5259,7 +5259,7 @@ html[data-sz-theme="epure"] .st-onglets button{border-radius:0!important}
 .sz-retour-cfg:hover{background:var(--v06)!important}
 /* (2026-11-18) La case « tout cocher » posée seule au-dessus d'une liste (Coupons, Bons de commande) : une fine bande d'en-tête
    avec son libellé, au lieu d'une case perdue. La barre des gestes, elle, reste flottante en bas quand on coche. */
-html[data-sz-theme="epure"] :is(.cp-lot,.lot-rang):has(.lot-lib){display:flex;align-items:center;gap:10px;padding:6px 14px;margin:0 0 8px;
+html[data-sz-theme="epure"] :is(.cp-lot,.lot-rang,.lot-haut):has(.lot-lib){display:flex;align-items:center;gap:10px;padding:6px 14px;margin:0 0 8px;
   border-radius:10px;background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
 .lot-lib{font-size:12.5px;font-weight:600;color:var(--tx2);white-space:nowrap}
 /* (2026-11-18, sa capture des Transporteurs : « pas comme ça ») Les onglets « en dossiers » (.tr-ong) deviennent les onglets
@@ -5349,15 +5349,15 @@ html[data-sz-theme="epure"] .rf-tb > .rf-jet[data-onglet].on{color:var(--tx)!imp
    survol, posé par JS_SOCLE). Les en-têtes ne se coupent plus en deux. */
 html[data-sz-theme="epure"] thead th{white-space:nowrap}
 html[data-sz-theme="epure"] tbody td{white-space:nowrap}
-html[data-sz-theme="epure"] tbody tr > td.szk-c + td,html[data-sz-theme="epure"] tbody tr > td:first-child:not(.szk-c):not(.c){max-width:0;width:42%;min-width:15rem}
-html[data-sz-theme="epure"] tbody tr > td.szk-c + td :is(div,b,strong,span:not(.rf-pill):not(.rf-av)),
-html[data-sz-theme="epure"] tbody tr > td:first-child:not(.szk-c):not(.c) :is(div,b,strong,span:not(.rf-pill):not(.rf-av)){white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+/* ⚠ (2026-11-19, contrôle des Véhicules : les boutons « Supprimer » sortaient du cadre) La colonne qui CÈDE la place n'est plus
+   « la première » (une date, parfois) : c'est toute cellule qui porte un NOM — un gras, une fiche (.rf-prod/.rf-nom) — et
+   aucun bouton. Plusieurs peuvent céder ensemble (trajet ET raison) ; chacune finit par « … », le texte entier au survol. */
+html[data-sz-theme="epure"] tbody td:is(:has(> b),:has(> strong),:has(.rf-prod),:has(.rf-nom),:has(> div > b)):not(:has(button)):not(.c):not(.d){max-width:0;width:38%;min-width:11rem;overflow:hidden;text-overflow:ellipsis}
+html[data-sz-theme="epure"] tbody td:is(:has(> b),:has(> strong),:has(.rf-prod),:has(.rf-nom),:has(> div > b)):not(:has(button)):not(.c):not(.d) :is(div,b,strong,span:not(.rf-pill):not(.rf-av)){white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+html[data-sz-theme="epure"] tbody td:is(:has(> b),:has(> strong),:has(.rf-prod),:has(.rf-nom),:has(> div > b)):not(:has(button)):not(.c):not(.d) :is(b,strong,span:not(.rf-pill):not(.rf-av)){display:inline-block;max-width:100%;vertical-align:bottom}
 /* ⚠ (2026-11-18, sa capture des Dépenses : « c'est ça que tu appelles beau… ») Un nom en GRAS est un élément EN LIGNE :
    overflow:hidden ne le rogne pas — il passait par-dessus les colonnes voisines. La CELLULE se rogne elle-même, et les
    éléments en ligne deviennent des blocs-en-ligne bornés à la cellule, qui finissent par « … ». */
-html[data-sz-theme="epure"] tbody tr > td.szk-c + td,html[data-sz-theme="epure"] tbody tr > td:first-child:not(.szk-c):not(.c){overflow:hidden;text-overflow:ellipsis}
-html[data-sz-theme="epure"] tbody tr > td.szk-c + td :is(b,strong,span:not(.rf-pill):not(.rf-av)),
-html[data-sz-theme="epure"] tbody tr > td:first-child:not(.szk-c):not(.c) :is(b,strong,span:not(.rf-pill):not(.rf-av)){display:inline-block;max-width:100%;vertical-align:bottom}
 html[data-sz-theme="epure"] .onglets,html[data-sz-theme="epure"] .ls-onglets{margin-bottom:14px}
 /* (2026-11-18, sa capture de la Conciliation bancaire : « plein de déformations ») Des onglets DANS la tête (.ed-seg, .onglets — 13
    fenêtres) : titre, onglets et boutons sur une seule rangée se coupaient en deux lignes. En Épuré, les onglets descendent sur

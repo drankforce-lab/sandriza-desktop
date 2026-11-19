@@ -425,7 +425,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
       + '${T("c’est elle que le client voit en premier sur une fiche.")}</div>';
     h += '<div class="ls-liste sz-pagee">';
     if (lotOn() && ((D.regles || []).length || (D.supprimees || []).length))
-      h += '<div class="lot-rang">' + lotCase(CK.th()).replace('class="c szk-c"', 'class="szk-c lot-tout"') + CK.barre() + '</div>';
+      h += '<div class="lot-rang">' + lotCase(CK.th()).replace('class="c szk-c"', 'class="szk-c lot-tout"') + '<span class="lot-lib">${T("Tout sélectionner")}</span>' + CK.barre() + '</div>';
     if (!(D.regles || []).length) {
       h += '<div class="ls-vide">${T("Aucune règle pour l’instant")}'
         + (D.peutModifier ? ' ${T("— utilisez « + Nouvelle règle » ci-dessus pour en créer une.")}' : '.') + '</div>';

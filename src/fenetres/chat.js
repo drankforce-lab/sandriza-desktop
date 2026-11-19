@@ -370,7 +370,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
       return h;
     }
     // La file en PAGES mesurees (JS_PAGES du socle) : elle prend la hauteur qui reste.
-    h += '<div class="sz-pagee"><div class="lot-rang">' + lotCase(CK.th()).replace('class="c szk-c"', 'class="szk-c lot-tout"') + CK.barre() + '</div>'
+    h += '<div class="sz-pagee"><div class="lot-rang">' + lotCase(CK.th()).replace('class="c szk-c"', 'class="szk-c lot-tout"') + '<span class="lot-lib">${T("Tout sélectionner")}</span>' + CK.barre() + '</div>'
       + '<div class="pile" data-pages="chat-file">' + rows.map(function(c){
       return '<div class="ligne' + CK.classe(c) + '" data-id="' + esc(c.id) + '" title="${T("Ouvrir la conversation")}">'
         + lotCase(CK.td(c)).replace('class="c szk-c"', 'class="szk-c lot-c"')

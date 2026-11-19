@@ -300,7 +300,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '</div>';
     } else {
       // Les demandes en PAGES mesurees (JS_PAGES du socle) : la pile prend la hauteur qui reste.
-      h += '<div class="sz-pagee"><div class="lot-rang">' + lotCase(CK.th()).replace('class="c szk-c"', 'class="szk-c lot-tout"') + CK.barre() + '</div>'
+      h += '<div class="sz-pagee"><div class="lot-rang">' + lotCase(CK.th()).replace('class="c szk-c"', 'class="szk-c lot-tout"') + '<span class="lot-lib">${T("Tout sélectionner")}</span>' + CK.barre() + '</div>'
         + '<div class="pile" data-pages="messagerie">' + rows.map(function(r){
         return '<div class="ligne' + CK.classe(r) + '" data-id="' + esc(r.id) + '" title="${T("Ouvrir la demande")}">'
           + lotCase(CK.td(r)).replace('class="c szk-c"', 'class="szk-c lot-c"')

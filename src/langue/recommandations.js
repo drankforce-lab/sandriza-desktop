@@ -28,6 +28,7 @@
 
 module.exports = {
   /* Les DEUX alternatives en entier — voir tools/banc-pluriel-colle.js. */
+  'Tout sélectionner': 'Select all',
   'article': 'item',
   'articles': 'items',
   'retenu': 'kept',

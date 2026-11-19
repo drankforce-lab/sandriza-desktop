@@ -465,6 +465,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
        ecriture refusee) GARDE LE BLOC OUVERT : on ne replie pas une alerte. */
     var nb = (items.match(/<li/g) || []).length;
     var grave = items.indexOf('class="mauvais"') >= 0;
+    // (2026-11-19) Même règle que Rapports et budget : en Épuré, le bandeau part — sauf un point grave (balance, écriture refusée).
+    if (!grave && document.documentElement.getAttribute('data-sz-theme') === 'epure') return '';
     /* La PASTILLE (.cx-averti) est le resume ; le detail entier s ouvre dessous, au clic. */
     return '<details class="avert"' + (grave || AVERT_OUVERT ? ' open' : '') + '><summary class="cx-averti"><b>' + nb + ' ' + szPl(nb, '${T("point")}', '${T("points")}') + '</b>'
       + '<span>${T("Ce que ce livre ne dit pas tout seul")}</span></summary><ul>' + items + '</ul></details>';

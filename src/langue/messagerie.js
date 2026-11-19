@@ -29,6 +29,7 @@
 
 module.exports = {
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
+  'Tout sélectionner': 'Select all',
   'Messagerie clients — Administration Sandriza':
     'Customer messages — Sandriza Administration',
   'Messagerie clients': 'Customer messages',
