@@ -3652,14 +3652,10 @@ ipcMain.handle('fenetre:fournisseur', (e, id) => {
 
 // La LISTE des factures — ouverte par << Tout voir >> du tableau de bord ou
 // par le menu. Reutilisee, elle RELIT (szRevenir) : une facture a pu se payer.
+/* (2026-11-19, « ancré partout ») « Tout voir » du tableau de bord ouvrait encore la liste dans une FENÊTRE À PART, alors que
+   la même liste ouverte par le menu est ancrée : deux portes, deux comportements. Elle passe par l'ancrage, comme le menu. */
 ipcMain.handle('fenetre:factures', () => {
-  const _avant = fenetresNatives.get('factures');
-  const _reutilisee = !!(_avant && !_avant.isDestroyed());
-  const win = ouvrirNative('factures', TF('Factures'), () => pageFactures(''),
-    { width: 1000, height: 720, minWidth: 780, minHeight: 500 });
-  if (_reutilisee && win && !win.isDestroyed()) {
-    win.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {});
-  }
+  _ouvrirAncre('factures');
   return true;
 });
 
