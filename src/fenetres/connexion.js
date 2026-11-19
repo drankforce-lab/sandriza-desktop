@@ -322,25 +322,37 @@ select:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
    Le jeu du poste arrive dans la balise <html> (TETE). Panneau de marque blanc à filet, carré « S » brun, police
    Plus Jakarta Sans, formulaire sur le gris bleuté des maquettes, bouton principal brun ; halos et voiles retirés.
    Trois tons ; la nuit reprend les jetons nuit d'Épuré. Les autres jeux gardent l'écran d'avant. */
+/* (2026-11-19) Les THÈMES du look (src/teintes.js) sur l'écran de connexion : accent, page, carte de nuit, fond en image. */
+const CSS_TEINTES_CNX = (() => {
+  try {
+    const T = require('../teintes');
+    const rgb = (h) => [1, 3, 5].map((k) => parseInt(h.slice(k, k + 2), 16)).join(',');
+    return T.TEINTES.filter((t) => t.prim).map((t) => {
+      const s = 'html[data-sz-theme="epure"][data-sz-teinte="' + t.id + '"]';
+      return s + '.jour{--cx-a:' + t.prim + ';--cx-a-rgb:' + rgb(t.prim) + ';--cx-page:' + t.page + ';--cx-fond:' + t.fond + '}\n'
+        + s + ':not(.jour){--cx-a:' + t.primN + ';--cx-a-rgb:' + rgb(t.primN) + ';--cx-page:' + t.pageN + ';--cx-fond:' + t.fondN + ';--cx-carte:' + T.carteNuit(t, 0) + '}\n';
+    }).join('');
+  } catch (e) { return ''; }
+})();
 const CSS_EPURE_CNX = `
 html[data-sz-theme="epure"] body,html[data-sz-theme="epure"] button,html[data-sz-theme="epure"] input,html[data-sz-theme="epure"] select{font-family:"SzEpure","Segoe UI",system-ui,sans-serif}
-html[data-sz-theme="epure"] .admlogin-root{background:#f4f5f9!important;--cx-lueur:rgba(138,90,43,.25)}
-html[data-sz-theme="epure"] .admlogin-orb,html[data-sz-theme="epure"] .admlogin-brand::before,html[data-sz-theme="epure"] .admlogin-brand::after,html[data-sz-theme="epure"] .admlogin-logo-plate::before{display:none!important}
+html[data-sz-theme="epure"] .admlogin-root{background:var(--cx-page,#f4f5f9)!important;--cx-lueur:rgba(138,90,43,.25)}
+html[data-sz-theme="epure"] .admlogin-orb,html[data-sz-theme="epure"] .admlogin-brand::before,html[data-sz-theme="epure"] .admlogin-brand::after{display:none!important}
 html[data-sz-theme="epure"] .admlogin-brand{background:#ffffff;border-right:1px solid #e4e7ee;color:#1f2533}
-html[data-sz-theme="epure"] .admlogin-logo-badge{background:#8a5a2b!important;border-radius:14px;font:800 2rem/1 "SzEpure",system-ui,sans-serif;box-shadow:none}
+html[data-sz-theme="epure"] .admlogin-logo-badge{background:var(--cx-a,#8a5a2b)!important;border-radius:14px;font:800 2rem/1 "SzEpure",system-ui,sans-serif;box-shadow:none}
 html[data-sz-theme="epure"] .admlogin-logo-plate{animation:none}
 html[data-sz-theme="epure"] .admlogin-brand h1{font-family:"SzEpure",system-ui,sans-serif;font-weight:800;letter-spacing:-.02em;color:#1f2533}
 html[data-sz-theme="epure"] .admlogin-eyebrow{color:#5b6273;letter-spacing:.14em}
-html[data-sz-theme="epure"] .admlogin-eyebrow .al-line{background:#8a5a2b}
+html[data-sz-theme="epure"] .admlogin-eyebrow .al-line{background:var(--cx-a,#8a5a2b)}
 html[data-sz-theme="epure"] .admlogin-feat{color:#3d4456}
 html[data-sz-theme="epure"] .admlogin-feat .al-ic{background:#eef0f4;border:0;color:#3d4456}
-html[data-sz-theme="epure"] .admlogin-form-panel{background:#f4f5f9}
+html[data-sz-theme="epure"] .admlogin-form-panel{background:var(--cx-page,#f4f5f9)}
 html[data-sz-theme="epure"] .cx-titre{font-family:"SzEpure",system-ui,sans-serif;font-weight:800;letter-spacing:-.02em;color:#1f2533}
 html[data-sz-theme="epure"] .cx-sous,html[data-sz-theme="epure"] .cx-lbl{color:#5b6273}
 html[data-sz-theme="epure"] input[type=text],html[data-sz-theme="epure"] input[type=password],html[data-sz-theme="epure"] input[type=email]{background:#ffffff;border:1px solid #d9dde6;border-radius:10px;color:#1f2533}
-html[data-sz-theme="epure"] input:focus{border-color:#8a5a2b;box-shadow:0 0 0 3px rgba(138,90,43,.14)}
-html[data-sz-theme="epure"] .cx-btn{background:#8a5a2b!important;color:#ffffff!important;border:0!important;border-radius:10px;font-weight:700;box-shadow:none}
-html[data-sz-theme="epure"] .cx-btn:focus-visible{outline-color:#8a5a2b}
+html[data-sz-theme="epure"] input:focus{border-color:var(--cx-a,#8a5a2b);box-shadow:0 0 0 3px rgba(138,90,43,.14)}
+html[data-sz-theme="epure"] .cx-btn{background:var(--cx-a,#8a5a2b)!important;color:#ffffff!important;border:0!important;border-radius:10px;font-weight:700;box-shadow:none}
+html[data-sz-theme="epure"] .cx-btn:focus-visible{outline-color:var(--cx-a,#8a5a2b)}
 html[data-sz-theme="epure"] .admlogin-back,html[data-sz-theme="epure"] .admlogin-forgot{background:#ffffff;border:1px solid #d9dde6;color:#3d4456;border-radius:10px}
 html[data-sz-theme="epure"] .admlogin-back:hover,html[data-sz-theme="epure"] .admlogin-forgot:hover{background:#eef0f4;border-color:#d9dde6;box-shadow:none}
 html[data-sz-theme="epure"] .admlogin-maint{background:#fdebd3;border-color:#f2c99a;box-shadow:none}
@@ -354,7 +366,7 @@ html[data-sz-theme="epure"] .cx-barre{--cxb-fond:#ffffff!important;--cxb-trait:#
 html[data-sz-theme="epure"] .cx-barre button{color:#1f2533!important}
 html[data-sz-theme="epure"] .cx-ver{color:#5b6273!important}
 html[data-sz-theme="epure"] .cx-clepret{background:#ffffff;border:1px solid #e4e7ee;box-shadow:none}
-html[data-sz-theme="epure"] .cx-clepret .em{background:#8a5a2b;box-shadow:none}
+html[data-sz-theme="epure"] .cx-clepret .em{background:var(--cx-a,#8a5a2b);box-shadow:none}
 html[data-sz-theme="epure"] .cx-clepret b{color:#1f2533}
 html[data-sz-theme="epure"] .cx-clepret span.t{color:#5b6273}
 html[data-sz-theme="epure"] .cx-clepret .etat{background:#eef0f4;border:0;color:#3d4456}
@@ -365,22 +377,22 @@ html[data-sz-theme="epure"]:not(.jour) .cx-barre{--cxb-fond:#181e29!important;--
 html[data-sz-theme="epure"]:not(.jour) .cx-barre button{color:#e8ecf2!important}
 html[data-sz-theme="epure"]:not(.jour) .cx-ver{color:#9aa4b5!important}
 html[data-sz-theme="epure"]:not(.jour) .cx-clepret{background:#181e29;border-color:#2a3240}
-html[data-sz-theme="epure"]:not(.jour) .cx-clepret .em{background:#c9a27a;color:#1a1208}
+html[data-sz-theme="epure"]:not(.jour) .cx-clepret .em{background:var(--cx-a,#c9a27a);color:#1a1208}
 html[data-sz-theme="epure"]:not(.jour) .cx-clepret b{color:#e8ecf2}
 html[data-sz-theme="epure"]:not(.jour) .cx-clepret span.t{color:#9aa4b5}
 html[data-sz-theme="epure"]:not(.jour) .cx-clepret .etat{background:#252d3b;color:#c9d1dd}
 html[data-sz-theme="epure"]:not(.jour) .cx-btn:focus-visible,html[data-sz-theme="epure"]:not(.jour) .cx-btn:focus{outline-color:rgba(201,162,122,.35)}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-logo-img{filter:invert(1) hue-rotate(180deg)}
-html[data-sz-theme="epure"]:not(.jour) .admlogin-root,html[data-sz-theme="epure"]:not(.jour) .admlogin-form-panel{background:#11151d!important}
-html[data-sz-theme="epure"]:not(.jour) .admlogin-brand{background:#181e29;border-right-color:#2a3240;color:#e8ecf2}
-html[data-sz-theme="epure"]:not(.jour) .admlogin-logo-badge{background:#c9a27a!important;color:#1a1208}
+html[data-sz-theme="epure"]:not(.jour) .admlogin-root,html[data-sz-theme="epure"]:not(.jour) .admlogin-form-panel{background:var(--cx-page,#11151d)!important}
+html[data-sz-theme="epure"]:not(.jour) .admlogin-brand{background:var(--cx-carte,#181e29);border-right-color:#2a3240;color:#e8ecf2}
+html[data-sz-theme="epure"]:not(.jour) .admlogin-logo-badge{background:var(--cx-a,#c9a27a)!important;color:#1a1208}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-brand h1,html[data-sz-theme="epure"]:not(.jour) .cx-titre{color:#e8ecf2}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-eyebrow,html[data-sz-theme="epure"]:not(.jour) .cx-sous,html[data-sz-theme="epure"]:not(.jour) .cx-lbl{color:#9aa4b5}
-html[data-sz-theme="epure"]:not(.jour) .admlogin-eyebrow .al-line{background:#c9a27a}
+html[data-sz-theme="epure"]:not(.jour) .admlogin-eyebrow .al-line{background:var(--cx-a,#c9a27a)}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-feat{color:#c9d1dd}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-feat .al-ic{background:#252d3b;color:#c9d1dd}
 html[data-sz-theme="epure"]:not(.jour) input[type=text],html[data-sz-theme="epure"]:not(.jour) input[type=password],html[data-sz-theme="epure"]:not(.jour) input[type=email]{background:#131822;border-color:#2a3240;color:#e8ecf2}
-html[data-sz-theme="epure"]:not(.jour) .cx-btn{background:#c9a27a!important;color:#1a1208!important}
+html[data-sz-theme="epure"]:not(.jour) .cx-btn{background:var(--cx-a,#c9a27a)!important;color:#1a1208!important}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-back,html[data-sz-theme="epure"]:not(.jour) .admlogin-forgot{background:#181e29;border-color:#2a3240;color:#c9d1dd}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-nipbox{background:#181e29;border-color:#2a3240}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-nipbox .npt{color:#e8ecf2}
@@ -388,13 +400,30 @@ html[data-sz-theme="epure"]:not(.jour) .admlogin-nipbox input{background:#131822
 html[data-sz-theme="epure"]:not(.jour) .admlogin-nipbox .npr button{background:#252d3b;border-color:#2a3240;color:#c9d1dd}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-maint{background:#33270f;border-color:#5a4520}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-maint .amt,html[data-sz-theme="epure"]:not(.jour) .admlogin-maint .amd{color:#f2c27e}
+/* (2026-11-19, sa demande : « je n'ai plus mon halo derrière mon logo, je le veux, adapte-le ») Le halo revient, à la manière
+   d'Épuré : une lueur douce de l'accent du thème le jour, une lumière claire teintée la nuit — sans animation. */
+html[data-sz-theme="epure"] .admlogin-logo-plate::before{display:block!important;filter:blur(18px);
+  background:radial-gradient(60% 70% at 50% 50%,rgba(var(--cx-a-rgb,138,90,43),.16) 0%,rgba(var(--cx-a-rgb,138,90,43),.07) 45%,transparent 75%)!important}
+html[data-sz-theme="epure"]:not(.jour) .admlogin-logo-plate::before{
+  background:radial-gradient(60% 70% at 50% 50%,rgba(255,255,255,.10) 0%,rgba(var(--cx-a-rgb,201,162,122),.10) 40%,transparent 75%)!important}
+/* (2026-11-19, banc des contrastes au rendu) Le libellé « Se souvenir… » et le sélecteur FR/EN gardaient les bruns de l'ancien écran. */
+html[data-sz-theme="epure"] .cx-souvenir label{color:#5b6273}
+html[data-sz-theme="epure"]:not(.jour) .cx-souvenir label{color:#9aa4b5}
+html[data-sz-theme="epure"] .cx-langue .grp{background:var(--ep-pill,#eef0f4);border-color:transparent}
+html[data-sz-theme="epure"]:not(.jour) .cx-langue .grp{background:#222a38}
+html[data-sz-theme="epure"] .cx-langue button{color:#5b6273}
+html[data-sz-theme="epure"]:not(.jour) .cx-langue button{color:#c9d1dd}
+html[data-sz-theme="epure"] .cx-langue button.on{background:var(--cx-a,#8a5a2b);color:#ffffff}
+html[data-sz-theme="epure"]:not(.jour) .cx-langue button.on{background:var(--cx-a,#c9a27a);color:#1a1208}
+/* Le fond en image du thème, derrière le formulaire. */
+html[data-sz-theme="epure"] .admlogin-form-panel{background-image:var(--cx-fond,none)!important;background-size:cover}
 `;
 
 function pageConnexion(depart) {
   var _dep = String(depart || '').replace(/[^a-zA-Z]/g, '');
   return `${TETE()}
 <title>Connexion</title>
-<style>${CSS_WEB}${CSS_FEN}${POLICE_EPURE}${CSS_EPURE_CNX}</style></head><body>
+<style>${CSS_WEB}${CSS_FEN}${POLICE_EPURE}${CSS_EPURE_CNX}${CSS_TEINTES_CNX}</style></head><body>
 <div id="corps"></div>
 <script>
 (function(){

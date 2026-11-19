@@ -189,6 +189,21 @@
         var c = lireCouleur(cs.backgroundColor);
         if (c === null) return { indet: 'illisible' };
         if (c.a > 0.001) fonds.push(c);
+      } else {
+        /* ⚠ (2026-11-19) LE DÉGRADÉ EST PEINT SUR LA COULEUR DE FOND, PAS À SA PLACE. Les fonds en image des thèmes sont des
+           dégradés TRANSLUCIDES posés sur la page sombre : n'en garder que les arrêts les composait sur le blanc du
+           navigateur — 90 « textes illisibles » par thème, sur des fonds clairs qui n'existent pas à l'écran. Chaque arrêt
+           est donc composé sur la couleur de fond du même niveau, et la couleur seule reste une alternative (zones sans
+           arrêt visible). */
+        var bc = lireCouleur(cs.backgroundColor);
+        if (bc && bc.a > 0.001) {
+          fonds = fonds.map(function(st){
+            var a = st.a + bc.a * (1 - st.a);
+            return { r: (st.r * st.a + bc.r * bc.a * (1 - st.a)) / a, g: (st.g * st.a + bc.g * bc.a * (1 - st.a)) / a,
+                     b: (st.b * st.a + bc.b * bc.a * (1 - st.a)) / a, a: a };
+          });
+          fonds.push(bc);
+        }
       }
       out.push({ o: o, fonds: fonds });
       var plein = fonds.length > 0;

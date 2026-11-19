@@ -8,7 +8,8 @@
  * La mise en page, les cartes (unies, pour rester lisibles) et les TROIS TONS d'état (neutre, ambre, rouge) ne bougent
  * pas : ils appartiennent au look, pas au thème.
  *
- * Le fond « en image » est fait de lumières floues superposées (dégradés) : aucun fichier, net à toute taille, et le
+ * Le fond « en image » est fait de lumières floues superposées (dégradés) — de jour, à demi-intensité (2026-11-19 : le banc
+ * des contrastes au rendu a montré que les petits textes posés sur la page tombaient sous 4,5 au cœur du halo) : aucun fichier, net à toute taille, et le
  * même dans toutes les fenêtres. Il se pose sur la page, derrière les cartes.
  *
  * Contrastes (tools/banc-teintes.js les mesure) : texte blanc sur `prim` le jour, texte foncé sur `primN` la nuit,
@@ -20,44 +21,44 @@ const TEINTES = [
     prim: '#4a6645', primFort: '#3a5236', or: '#a9c29a', orRgb: '169,194,154', txOr: '#3a5236', doux: 'rgba(74,102,69,.12)',
     primN: '#a9c29a', primFortN: '#bcd4ae', txOrN: '#bcd4ae', douxN: 'rgba(169,194,154,.16)',
     page: '#f2f4ef', pageN: '#10150f',
-    fond: 'radial-gradient(40% 55% at 12% 20%,rgba(138,170,120,.32),transparent 70%),radial-gradient(45% 60% at 88% 85%,rgba(196,214,170,.5),transparent 70%),radial-gradient(35% 45% at 70% 10%,rgba(232,226,200,.6),transparent 70%)',
-    fondN: 'radial-gradient(40% 55% at 12% 20%,rgba(80,120,70,.3),transparent 70%),radial-gradient(45% 60% at 88% 85%,rgba(60,90,60,.3),transparent 70%)' },
+    fond: 'radial-gradient(40% 55% at 12% 20%,rgba(138,170,120,0.112),transparent 70%),radial-gradient(45% 60% at 88% 85%,rgba(196,214,170,0.175),transparent 70%),radial-gradient(35% 45% at 70% 10%,rgba(232,226,200,0.21),transparent 70%)',
+    fondN: 'radial-gradient(40% 55% at 12% 20%,rgba(80,120,70,0.15),transparent 70%),radial-gradient(45% 60% at 88% 85%,rgba(60,90,60,0.15),transparent 70%)' },
   { id: 'lagune', nom: 'Lagune', en: 'Lagoon',
     prim: '#1c666e', primFort: '#16545b', or: '#8fcfd3', orRgb: '143,207,211', txOr: '#16545b', doux: 'rgba(28,102,110,.12)',
     primN: '#7cc7cc', primFortN: '#9fd9dc', txOrN: '#9fd9dc', douxN: 'rgba(124,199,204,.16)',
     page: '#f0f5f6', pageN: '#0c1416',
-    fond: 'radial-gradient(50% 60% at 85% 15%,rgba(120,200,205,.4),transparent 70%),radial-gradient(45% 55% at 10% 90%,rgba(70,140,170,.26),transparent 70%),radial-gradient(30% 40% at 40% 40%,rgba(220,240,240,.7),transparent 70%)',
-    fondN: 'radial-gradient(50% 60% at 85% 15%,rgba(40,120,130,.36),transparent 70%),radial-gradient(45% 55% at 10% 90%,rgba(20,70,100,.4),transparent 70%)' },
+    fond: 'radial-gradient(50% 60% at 85% 15%,rgba(120,200,205,0.14),transparent 70%),radial-gradient(45% 55% at 10% 90%,rgba(70,140,170,0.091),transparent 70%),radial-gradient(30% 40% at 40% 40%,rgba(220,240,240,0.245),transparent 70%)',
+    fondN: 'radial-gradient(50% 60% at 85% 15%,rgba(40,120,130,0.18),transparent 70%),radial-gradient(45% 55% at 10% 90%,rgba(20,70,100,0.2),transparent 70%)' },
   { id: 'poudre', nom: 'Rose poudré', en: 'Powder pink',
     prim: '#8f4659', primFort: '#7a3a4b', or: '#e6b3bf', orRgb: '230,179,191', txOr: '#7a3a4b', doux: 'rgba(143,70,89,.12)',
     primN: '#e3a6b5', primFortN: '#efbcc8', txOrN: '#efbcc8', douxN: 'rgba(227,166,181,.16)',
     page: '#f8f3f4', pageN: '#161012',
-    fond: 'radial-gradient(40% 50% at 15% 15%,rgba(240,190,200,.55),transparent 70%),radial-gradient(45% 55% at 90% 80%,rgba(250,215,200,.55),transparent 70%),radial-gradient(30% 40% at 60% 30%,rgba(255,240,240,.8),transparent 70%)',
-    fondN: 'radial-gradient(40% 50% at 15% 15%,rgba(150,70,90,.32),transparent 70%),radial-gradient(45% 55% at 90% 80%,rgba(120,60,70,.28),transparent 70%)' },
+    fond: 'radial-gradient(40% 50% at 15% 15%,rgba(240,190,200,0.196),transparent 70%),radial-gradient(45% 55% at 90% 80%,rgba(250,215,200,0.196),transparent 70%),radial-gradient(30% 40% at 60% 30%,rgba(255,240,240,0.28),transparent 70%)',
+    fondN: 'radial-gradient(40% 50% at 15% 15%,rgba(150,70,90,0.16),transparent 70%),radial-gradient(45% 55% at 90% 80%,rgba(120,60,70,0.14),transparent 70%)' },
   { id: 'laiton', nom: 'Ardoise et laiton', en: 'Slate and brass',
     prim: '#6b5a2e', primFort: '#5a4a22', or: '#d6c088', orRgb: '214,192,136', txOr: '#5a4a22', doux: 'rgba(107,90,46,.12)',
     primN: '#d1b76e', primFortN: '#e2cd8f', txOrN: '#e2cd8f', douxN: 'rgba(209,183,110,.16)',
     page: '#eef0f2', pageN: '#121519',
-    fond: 'linear-gradient(160deg,rgba(255,255,255,.55),transparent 40%),radial-gradient(60% 70% at 100% 100%,rgba(120,135,150,.26),transparent 70%)',
-    fondN: 'radial-gradient(60% 70% at 100% 100%,rgba(90,105,120,.28),transparent 70%),radial-gradient(40% 50% at 0% 0%,rgba(209,183,110,.1),transparent 70%)' },
+    fond: 'linear-gradient(160deg,rgba(255,255,255,0.196),transparent 40%),radial-gradient(60% 70% at 100% 100%,rgba(120,135,150,0.091),transparent 70%)',
+    fondN: 'radial-gradient(60% 70% at 100% 100%,rgba(90,105,120,0.14),transparent 70%),radial-gradient(40% 50% at 0% 0%,rgba(209,183,110,0.05),transparent 70%)' },
   { id: 'abricot', nom: 'Abricot', en: 'Apricot',
     prim: '#9c4b17', primFort: '#843f12', or: '#f2b48a', orRgb: '242,180,138', txOr: '#843f12', doux: 'rgba(156,75,23,.12)',
     primN: '#f0a46a', primFortN: '#f6bd8f', txOrN: '#f6bd8f', douxN: 'rgba(240,164,106,.16)',
     page: '#f8f4f0', pageN: '#15110e',
-    fond: 'radial-gradient(55% 60% at 90% 10%,rgba(255,200,150,.55),transparent 70%),radial-gradient(45% 55% at 5% 95%,rgba(250,180,160,.4),transparent 70%)',
-    fondN: 'radial-gradient(55% 60% at 90% 10%,rgba(170,80,30,.32),transparent 70%),radial-gradient(45% 55% at 5% 95%,rgba(120,50,40,.28),transparent 70%)' },
+    fond: 'radial-gradient(55% 60% at 90% 10%,rgba(255,200,150,0.196),transparent 70%),radial-gradient(45% 55% at 5% 95%,rgba(250,180,160,0.14),transparent 70%)',
+    fondN: 'radial-gradient(55% 60% at 90% 10%,rgba(170,80,30,0.16),transparent 70%),radial-gradient(45% 55% at 5% 95%,rgba(120,50,40,0.14),transparent 70%)' },
   { id: 'lavande', nom: 'Lavande', en: 'Lavender',
     prim: '#574a85', primFort: '#483c70', or: '#c3b8ec', orRgb: '195,184,236', txOr: '#483c70', doux: 'rgba(87,74,133,.12)',
     primN: '#b6a8e6', primFortN: '#c9bff0', txOrN: '#c9bff0', douxN: 'rgba(182,168,230,.16)',
     page: '#f3f2f8', pageN: '#121119',
-    fond: 'radial-gradient(45% 55% at 85% 20%,rgba(190,175,235,.45),transparent 70%),radial-gradient(40% 50% at 10% 85%,rgba(215,200,240,.55),transparent 70%)',
-    fondN: 'radial-gradient(45% 55% at 85% 20%,rgba(100,80,170,.32),transparent 70%),radial-gradient(40% 50% at 10% 85%,rgba(70,50,120,.32),transparent 70%)' },
+    fond: 'radial-gradient(45% 55% at 85% 20%,rgba(190,175,235,0.161),transparent 70%),radial-gradient(40% 50% at 10% 85%,rgba(215,200,240,0.196),transparent 70%)',
+    fondN: 'radial-gradient(45% 55% at 85% 20%,rgba(100,80,170,0.16),transparent 70%),radial-gradient(40% 50% at 10% 85%,rgba(70,50,120,0.16),transparent 70%)' },
   { id: 'minuit', nom: 'Minuit doré', en: 'Golden midnight',
     prim: '#7a5b1e', primFort: '#5e4614', or: '#e2c58a', orRgb: '226,197,138', txOr: '#5e4614', doux: 'rgba(122,91,30,.12)',
     primN: '#e2bf72', primFortN: '#ecd08f', txOrN: '#ecd08f', douxN: 'rgba(226,191,114,.16)',
     page: '#eef0f5', pageN: '#0b0f1c',
-    fond: 'radial-gradient(50% 60% at 50% 0%,rgba(190,200,230,.4),transparent 70%)',
-    fondN: 'radial-gradient(60% 70% at 80% 0%,rgba(40,60,130,.5),transparent 70%),radial-gradient(40% 50% at 10% 100%,rgba(226,191,114,.12),transparent 70%)' },
+    fond: 'radial-gradient(50% 60% at 50% 0%,rgba(190,200,230,0.14),transparent 70%)',
+    fondN: 'radial-gradient(60% 70% at 80% 0%,rgba(40,60,130,0.25),transparent 70%),radial-gradient(40% 50% at 10% 100%,rgba(226,191,114,0.06),transparent 70%)' },
 ];
 const IDS = TEINTES.map((t) => t.id);
 const teinteValide = (v) => (IDS.indexOf(String(v || '')) >= 0 ? String(v) : 'epure');

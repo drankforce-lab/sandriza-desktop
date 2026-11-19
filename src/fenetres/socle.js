@@ -5257,6 +5257,9 @@ html[data-sz-theme="epure"] .st-onglets button{border-radius:0!important}
 .sz-retour-cfg{flex:none;height:30px;padding:0 10px;margin-right:4px;border:0!important;border-radius:8px;background:transparent!important;
   color:var(--tx-or,var(--tx));font:inherit;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;-webkit-app-region:no-drag}
 .sz-retour-cfg:hover{background:var(--v06)!important}
+/* (2026-11-19, banc des contrastes au rendu) Le COMPTEUR d'un onglet (Bons de commande, Transferts…) : l'onglet actif lui
+   passait la couleur de son texte (claire la nuit) sur l'accent — illisible. Les compteurs d'onglets sont en ton NEUTRE. */
+html[data-sz-theme="epure"] .onglets button .pastille{background:var(--ep-neutre-f)!important;color:var(--ep-neutre-t)!important}
 /* (2026-11-18) La case « tout cocher » posée seule au-dessus d'une liste (Coupons, Bons de commande) : une fine bande d'en-tête
    avec son libellé, au lieu d'une case perdue. La barre des gestes, elle, reste flottante en bas quand on coche. */
 html[data-sz-theme="epure"] :is(.cp-lot,.lot-rang,.lot-haut):has(.lot-lib){display:flex;align-items:center;gap:10px;padding:6px 14px;margin:0 0 8px;

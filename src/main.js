@@ -2384,8 +2384,13 @@ const _porteEpure = (p) => {
   if (!p || t !== 'epure') return '';
   let police = ''; try { police = require('./police-epure'); } catch (e) { police = ''; }
   const j = p.scheme === 'light';
-  const fond = j ? '#ffffff' : '#181e29', page = j ? '#f4f5f9' : '#11151d', filet = j ? '#e4e7ee' : '#2a3240';
-  const tx = j ? '#1f2533' : '#e8ecf2', tx2 = j ? '#5b6273' : '#9aa4b5', brun = j ? '#8a5a2b' : '#c9a27a', neutre = j ? '#eef0f4' : '#252d3b';
+  // (2026-11-19) Le THÈME du poste (src/teintes.js) : sa page, son accent, sa carte de nuit — la porte n'est plus toujours brune.
+  let te = null; try { const T = require('./teintes'); te = T.teinte(reglages.get('teinte')); } catch (e) { te = null; }
+  const aT = te && te.prim ? (j ? te.prim : te.primN) : null;
+  let carteN = null; try { carteN = require('./teintes').carteNuit(te, 0); } catch (e) { carteN = null; }
+  const fond = j ? '#ffffff' : (carteN || '#181e29'), filet = j ? '#e4e7ee' : '#2a3240';
+  const page = te && te.prim ? (j ? te.page : te.pageN) : (j ? '#f4f5f9' : '#11151d');
+  const tx = j ? '#1f2533' : '#e8ecf2', tx2 = j ? '#5b6273' : '#9aa4b5', brun = aT || (j ? '#8a5a2b' : '#c9a27a'), neutre = j ? '#eef0f4' : '#252d3b';
   const F = '"SzEpure","Segoe UI",system-ui,sans-serif';
   return police
     + 'body{background:' + page + '!important;font-family:' + F + '}'
@@ -6103,7 +6108,7 @@ const _bandePortePalette = () => {
   /* (2026-11-18, sa capture : « c'est pas les mêmes couleurs ») En Épuré, _ □ ✕ tombent sur le côté DROIT de la porte (la
      page, #11151d la nuit, #f4f5f9 le jour), pas sur le panneau de marque : la bande prend la couleur de la page. */
   let t = ''; try { t = _themeCouleur(); } catch (_) { t = ''; }
-  if (p && t === 'epure') return { color: p.scheme === 'light' ? '#f4f5f9' : '#11151d', symbolColor: p.h1 };
+  if (p && t === 'epure') { let c = p.scheme === 'light' ? '#f4f5f9' : '#11151d'; try { c = require('./teintes').fondPage(reglages.get('teinte'), p.scheme !== 'light'); } catch (e) {} return { color: c, symbolColor: p.h1 }; }
   return p ? { color: p.panel, symbolColor: p.h1 } : PORTE_BANDE;
 };
 const _bandePorte = (dessus) => {
@@ -6244,13 +6249,30 @@ const poserVueConnexion = () => {
 
 /* (2026-11-19, sa capture : bande _ □ ✕ noire au-dessus de « Fichier Affichage Aide » de la connexion) La vue de connexion n'envoie
    pas sa couleur (elle n'est pas « la principale ») : la bande gardait la dernière reçue. On y pose celle de SA barre. */
+/* ⚠ (2026-11-19, sa capture suivante) Pas une couleur DEVINÉE : avant que la barre « Fichier… » ne soit dessinée, le haut de
+   l'écran est la PAGE (#11151d), pas la barre (#181e29). On lit ce qui est réellement peint en haut à droite de la vue
+   (voile et barre compris), maintenant puis quand la barre arrive. */
+const _JS_COIN = '(function(){try{var p=document.elementsFromPoint(Math.max(0,innerWidth-8),8)||[],c=[255,255,255];'
+  + 'for(var i=p.length-1;i>=0;i--){var m=(getComputedStyle(p[i]).backgroundColor||"").match(/[0-9.]+/g);if(!m||m.length<3)continue;'
+  + 'var a=m.length>3?parseFloat(m[3]):1;if(!(a>0))continue;c=c.map(function(v,k){return v*(1-a)+parseFloat(m[k])*a;});}'
+  + 'return "#"+c.map(function(v){return Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,"0");}).join("");}catch(e){return "";}})()';
 const _bandeConnexion = () => {
-  try {
-    const s = _sombreCourant();
-    const ep = _themeCouleur() === 'epure';
-    const fond = ep ? (s ? '#181e29' : '#ffffff') : _fondTheme(s);
-    _overlay(mainWindow, { color: fond, symbolColor: s ? '#e8ecf2' : '#1f2533' });
-  } catch (e) {}
+  const poser = (fond) => {
+    try {
+      const h = String(fond || '').replace('#', '');
+      if (!/^[0-9a-f]{6}$/i.test(h)) return;
+      const r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
+      const clair = (0.299 * r + 0.587 * g + 0.114 * b) > 140;
+      _overlay(mainWindow, { color: '#' + h, symbolColor: clair ? '#1f2533' : '#e8ecf2' });
+    } catch (e) {}
+  };
+  const lire = () => {
+    try {
+      if (!_vivant(vueConnexion)) return;
+      vueConnexion.webContents.executeJavaScript(_JS_COIN, true).then(poser).catch(() => {});
+    } catch (e) {}
+  };
+  lire(); setTimeout(lire, 800); setTimeout(lire, 2500);
 };
 const connexionMontrer = () => {
   if (!mainWindow || mainWindow.isDestroyed()) return false;
@@ -6425,10 +6447,14 @@ const _montrerDemarrage = () => {
    peint sans montrer la fenêtre. Tout autre écran la montre, une fois PEINT. */
 const montrerPorte = (titre, message, progression, sansTheme, attente) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
-  _porteSansTheme = !!sansTheme;
+  /* (2026-11-19, sa capture de « Nouvelle version disponible » : « ça doit être fidèle au thème, jour et nuit ») Le retour à
+     l'écran d'origine pendant une vraie mise à jour (2026-10-15) ne vaut plus en Épuré : le look est le même partout. */
+  let epureP = false; try { epureP = _themeCouleur() === 'epure'; } catch (e) {}
+  _porteSansTheme = !!sansTheme && !epureP;
   _bandePorte(true);
   mainWindow.loadURL(portePage(titre, message, progression))
-    .then(() => { if (!attente) _montrerDemarrage(); })
+    // La navigation remet la bande au fond de la fenêtre (did-start-navigation) : on repose celle de la porte une fois chargée.
+    .then(() => { _bandePorte(true); if (!attente) _montrerDemarrage(); })
     .catch(() => { if (!attente) _montrerDemarrage(); });
 };
 

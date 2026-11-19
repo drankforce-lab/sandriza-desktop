@@ -243,6 +243,9 @@ const MENU_APP_EN = {
      le banc les relève séparément. Sans ça ils seraient restés français dans un
      sous-menu anglais, invisibles à tout relevé qui ne lirait que `label:`. */
   'Thèmes': 'Themes',
+  'Produit': 'Product',
+  'Collection': 'Collection',
+  'Fournisseur': 'Supplier',
   'Épuré': 'Pure',
   'Sauge': 'Sage',
   'Lagune': 'Lagoon',
