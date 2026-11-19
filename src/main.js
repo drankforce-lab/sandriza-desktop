@@ -6861,8 +6861,13 @@ let _opsCritiquesEnVol = 0;
 const _majBandeau = (on) => {
   let txt = 'Mise à jour en cours d’installation : ventes, étiquettes, remboursements et envois sont suspendus jusqu’au redémarrage.';
   try { if (require('./langue').langueCourante() === 'en') txt = 'Update being installed: sales, labels, refunds and sends are paused until the restart.'; } catch (e) {}
+  /* (2026-11-19, sa capture : DEUX bandeaux, l'un sur le contenu, l'autre coincé derrière la barre d'état) Il est injecté dans le
+     SITE aussi, sous la vue ancrée : à 14 px du bas, le sien tombait dans la bande de la barre d'état, que la vue ne couvre pas.
+     Dans le site, il se pose désormais AU-DESSUS de la barre d'état (#sz-statut) — dans la zone de contenu, donc caché par la
+     vue ancrée quand il y en a une, seul visible quand il n'y en a pas. */
   const js = '(function(on,t){try{var b=document.getElementById("sz-maj-bandeau");if(!on){if(b)b.remove();return;}if(!b){b=document.createElement("div");b.id="sz-maj-bandeau";b.setAttribute("role","status");'
-    + 'b.style.cssText="position:fixed;left:50%;bottom:14px;transform:translateX(-50%);z-index:99999;max-width:min(720px,calc(100vw - 32px));padding:10px 16px;border-radius:12px;'
+    + 'var st=document.getElementById("sz-statut");'
+    + 'b.style.cssText="position:fixed;left:50%;bottom:"+((st&&st.offsetHeight?st.offsetHeight:0)+14)+"px;transform:translateX(-50%);z-index:99999;max-width:min(720px,calc(100vw - 32px));padding:10px 16px;border-radius:12px;'
     + 'background:#fdebd3;color:#8a3f00;font:600 13px/1.4 system-ui,sans-serif;box-shadow:0 10px 30px -12px rgba(0,0,0,.35);pointer-events:none";document.body.appendChild(b);}b.textContent=t;}catch(e){}})('
     + (on ? 'true' : 'false') + ',' + JSON.stringify(txt) + ');';
   const tous = [];
