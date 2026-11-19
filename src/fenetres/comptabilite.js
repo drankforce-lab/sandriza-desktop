@@ -838,6 +838,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     /* Ouvert d office seulement sous l etat des RESULTATS (r fourni) : c est la
        que le chiffre surestime se lit. Sous le budget, replie. */
     var grave = !!r && A.some(function(a){ return a.code === 'cout-inconnu'; });
+    /* (2026-11-18, sa capture : « retire le 2 points ici ») En Épuré, le bandeau disparaît — SAUF quand un point fausse le
+       résultat qu'on lit (coût inconnu : bénéfice surestimé), qui reste affiché et ouvert. */
+    if (!grave && document.documentElement.getAttribute('data-sz-theme') === 'epure') return '';
     /* La PASTILLE (.cx-averti) est le resume ; le detail entier s ouvre dessous, au clic. */
     return '<details class="avert"' + (grave ? ' open' : '') + '><summary class="cx-averti"><b>' + nbPts + ' ' + szPl(nbPts, '${T("point")}', '${T("points")}') + '</b>'
       + '<span>${T("Ce que ces chiffres ne disent pas")}</span></summary><ul>' + items + '</ul></details>';

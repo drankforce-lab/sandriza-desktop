@@ -5285,6 +5285,59 @@ html[data-sz-theme="epure"] .ls-tete>.droite{display:contents}
 html[data-sz-theme="epure"] .ls-tete>.ed-seg{order:-3;flex:1 1 100%}
 html[data-sz-theme="epure"] .ls-tete .ed-bt.fort{order:-2}
 html[data-sz-theme="epure"] .ls-tete .ls-rch{order:-1;height:34px;max-width:260px}
+/* ══ SES RETOURS DU 2026-11-18 (soir) : « les couleurs ne sont pas unies », « les entrées ne se démarquent pas »,
+   « tout est trop pogné ». Tête de fenêtre UNIE (plus de dégradé), rangées franches (filet, liseré brun, une rangée sur
+   deux teintée), gestes de rangée sans cadre, onglets en pastilles (rf-jet data-onglet) soulignés comme les autres. */
+html[data-sz-theme="epure"] .tete{background:var(--f-carte)!important;-webkit-backdrop-filter:none;backdrop-filter:none}
+html[data-sz-theme="epure"] .mo-vues button{border-top:0!important;border-left:0!important;border-right:0!important;border-bottom:2px solid transparent!important}
+html[data-sz-theme="epure"] .mo-vues button.on{border-bottom-color:var(--sz-btn-prim)!important}
+html[data-sz-theme="epure"] .ls-note{display:none!important}
+html[data-sz-theme="epure"] .ls-liste:has(.ls-rang){background:var(--f-carte);border:1px solid var(--v10);border-radius:14px;overflow:hidden}
+html[data-sz-theme="epure"] .ls-liste:has(.ls-rang) :has(> .ls-rang){background:transparent;border:0;border-radius:0}
+html[data-sz-theme="epure"] .ls-liste>.lot-rang{margin:0!important;padding:8px 16px!important;background:var(--ep-neutre-f);border-bottom:1px solid var(--v10)}
+html[data-sz-theme="epure"] .ls-rang{border-bottom:1px solid var(--v10)!important;box-shadow:inset 3px 0 0 var(--sz-btn-prim)}
+html[data-sz-theme="epure"] .ls-rang:nth-child(even){background:var(--f-carte2)}
+html[data-sz-theme="epure"] .ls-rang:hover{background:var(--v05)}
+html[data-sz-theme="epure"] .ls-rang.eteint{box-shadow:inset 3px 0 0 var(--v16)}
+html[data-sz-theme="epure"] .ls-rang .qui b{font-size:14px;font-weight:700;color:var(--tx)}
+html[data-sz-theme="epure"] .ls-rang .gestes{gap:2px}
+html[data-sz-theme="epure"] .ls-rang .gestes button,html[data-sz-theme="epure"] .ls-rang button.geste{border:0!important;background:transparent!important;box-shadow:none!important;
+  color:var(--tx2)!important;height:30px;min-height:0;padding:0 10px;border-radius:8px;font-size:13px;font-weight:600}
+html[data-sz-theme="epure"] .ls-rang .gestes button:hover:not(:disabled),html[data-sz-theme="epure"] .ls-rang button.geste:hover:not(:disabled){background:var(--v08)!important;color:var(--tx)!important}
+html[data-sz-theme="epure"] .ls-rang .gestes button.danger,html[data-sz-theme="epure"] .ls-rang button.geste.danger{color:var(--ep-rouge-t)!important}
+html[data-sz-theme="epure"] .ls-rang .gestes button:disabled,html[data-sz-theme="epure"] .ls-rang button.geste:disabled{opacity:.35}
+html[data-sz-theme="epure"] .carte:has(> .rf-tb:only-child){background:transparent!important;border:0!important;box-shadow:none!important;padding:0!important}
+html[data-sz-theme="epure"] .rf-tb:has(> .rf-jet[data-onglet]){flex-wrap:wrap;row-gap:14px}
+html[data-sz-theme="epure"] .rf-tb:has(> .rf-jet[data-onglet])::before{content:"";order:-3;flex:1 1 100%;height:1px;background:var(--v08);margin-top:-15px}
+html[data-sz-theme="epure"] .rf-tb > .rf-jet[data-onglet]{order:-4;height:36px;padding:0 12px;border:0!important;border-bottom:2px solid transparent!important;border-radius:0!important;
+  background:transparent!important;color:var(--tx2)!important;font-size:13px;font-weight:600;box-shadow:none!important}
+html[data-sz-theme="epure"] .rf-tb > .rf-jet[data-onglet]:hover{color:var(--tx)!important}
+html[data-sz-theme="epure"] .rf-tb > .rf-jet[data-onglet].on{color:var(--tx)!important;border-bottom-color:var(--sz-btn-prim)!important}
+/* « ça prend trop de lignes par entrée » (Factures, Dépenses) : en Épuré, UNE ligne par cellule dans tous les tableaux ; seule la
+   colonne principale (la première après la case à cocher) cède la place, et un nom trop long y finit par « … » (le nom entier au
+   survol, posé par JS_SOCLE). Les en-têtes ne se coupent plus en deux. */
+html[data-sz-theme="epure"] thead th{white-space:nowrap}
+html[data-sz-theme="epure"] tbody td{white-space:nowrap}
+html[data-sz-theme="epure"] tbody tr > td.szk-c + td,html[data-sz-theme="epure"] tbody tr > td:first-child:not(.szk-c):not(.c){max-width:0;width:42%}
+html[data-sz-theme="epure"] tbody tr > td.szk-c + td :is(div,b,strong,span:not(.rf-pill):not(.rf-av)),
+html[data-sz-theme="epure"] tbody tr > td:first-child:not(.szk-c):not(.c) :is(div,b,strong,span:not(.rf-pill):not(.rf-av)){white-space:nowrap;min-width:0;overflow:hidden;text-overflow:ellipsis}
+html[data-sz-theme="epure"] .onglets,html[data-sz-theme="epure"] .ls-onglets{margin-bottom:14px}
+/* (2026-11-18, sa capture de la Conciliation bancaire : « plein de déformations ») Des onglets DANS la tête (.ed-seg, .onglets — 13
+   fenêtres) : titre, onglets et boutons sur une seule rangée se coupaient en deux lignes. En Épuré, les onglets descendent sur
+   leur propre rangée sous le titre ; le titre et le résumé ne se coupent plus. */
+html[data-sz-theme="epure"] .tete{flex-wrap:wrap;row-gap:0}
+html[data-sz-theme="epure"] .tete h1{white-space:nowrap}
+html[data-sz-theme="epure"] .tete>:is(.ed-seg,.onglets){order:10;flex:1 1 100%;margin:4px 0 -1px!important;border-bottom:0!important}
+html[data-sz-theme="epure"] .tete>:is(.ed-seg,.onglets):empty{display:none}
+html[data-sz-theme="epure"] .tete .cx-resume{overflow:visible;text-overflow:clip;flex:0 1 auto}
+html[data-sz-theme="epure"] :is(.ed-seg,.onglets,.mo-vues,.vue-bascule) button{white-space:nowrap}
+html[data-sz-theme="epure"] .kb-vide *{color:inherit!important;text-decoration:none!important}
+/* (2026-11-18, « retire le texte inutile ici ») Les renvois « … : Configuration → … » en tête de liste (Réseaux sociaux, Chat). */
+html[data-sz-theme="epure"] :is(.so-renvoi,.ch-renvoi){display:none!important}
+/* Fenêtre DÉTACHÉE (cadre retiré, boutons _ □ ✕ dessinés par Windows dans la tête) : la tête tire la fenêtre et laisse la place
+   des boutons. La classe sz-wco n'est posée que si Windows dessine vraiment ces boutons (jamais dans le panneau ancré). */
+html.sz-wco .tete{-webkit-app-region:drag;min-height:44px;padding-right:calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw) + 12px)!important}
+html.sz-wco .tete :is(button,a,input,select,label,[role=button]){-webkit-app-region:no-drag}
 `;
 
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE,

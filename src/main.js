@@ -4955,6 +4955,11 @@ const PAGES_ANCRABLES = () => ({
    principale n'aurait qu'un fond vide — et sur l'écran de CONNEXION, ce fond vide
    serait la seule chose visible avant d'entrer. */
 const NON_DETACHABLES = new Set(['tableau', 'connexion']);
+/* ⚠⚠ (2026-11-18, sa demande : « retirer ce mode partout, ça doit être ancré permanent partout, sauf pour les écrans
+   obligatoires comme la vente de comptoir ») Le bouton « Détacher » n'existe plus que pour CES écrans-ci ; tous les autres
+   sont ancrés en permanence, et un état « détaché » retenu d'avant (poste ou profil) est ignoré. */
+const DETACHABLES = new Set(['caisse', 'explorateur', 'generations']);
+const _detachable = (c) => DETACHABLES.has(c) && !NON_DETACHABLES.has(c);
 /* ⚠ DETACHE PAR DEFAUT (#32). L explorateur de photos n a aucun sens ancre :
    c est justement parce qu il vivait dans la colonne du Studio — etroit,
    vignettes minuscules, aucune place pour l apercu — qu il a fallu l en
@@ -4962,7 +4967,7 @@ const NON_DETACHABLES = new Set(['tableau', 'connexion']);
    n empeche de l ancrer ensuite : le choix est retenu comme pour les autres. */
 const DETACHES_PAR_DEFAUT = new Set(['explorateur', 'generations']);
 const etatAncrage = (cle) => {
-  if (NON_DETACHABLES.has(cle)) return 'ancre';
+  if (!_detachable(cle)) return 'ancre';
   const retenu = (reglages.get('ancrage') || {})[cle];
   if (retenu === 'detache') return 'detache';
   if (retenu === 'ancre') return 'ancre';
@@ -5086,7 +5091,7 @@ const _dockOuvrir = async (cle, etat) => {
   /* L ETAT VOULU VIENT DU SITE depuis 1.56.0 (profil de la PERSONNE, Turso) :
      le reglages.json du poste n est plus que le repli des sites plus vieux
      qui n envoient pas le 2e argument. */
-  const etatVoulu = NON_DETACHABLES.has(c) ? 'ancre'
+  const etatVoulu = !_detachable(c) ? 'ancre'
     : (etat === 'detache' || etat === 'ancre') ? etat : etatAncrage(c);
   // Une fenetre SEPAREE du meme ecran existe (ouverte par le menu) : on la
   // ramene plutot que d empiler une deuxieme instance — deux inventaires,
@@ -5153,7 +5158,8 @@ const _dockOuvrir = async (cle, etat) => {
     view.webContents.on('did-finish-load', () => {
       // `a.fenetre` est lu AU MOMENT du chargement : la vue a pu etre ouverte
       // directement detachee (etat enregistre) — le bouton doit dire Ancrer.
-      view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(' + (a.fenetre ? 'false' : 'true') + ');', true).catch(() => {});
+      // Ancré en permanence : AUCUN bouton (szModeAncre n'est jamais appelé, le bouton ne naît pas).
+      if (a.fenetre || _detachable(c)) view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(' + (a.fenetre ? 'false' : 'true') + ');', true).catch(() => {});
       appliquerTheme(view.webContents);
       _zoomRattraper(view.webContents);
     });
@@ -5263,7 +5269,7 @@ ipcMain.handle('dock:detacher', (e) => {
   } catch (er) {}
   for (const [c, a] of ancrees) {
     if (!a.view || a.view.webContents !== e.sender || a.fenetre) continue;
-    if (NON_DETACHABLES.has(c)) return false;   // le tableau de bord reste ancre
+    if (!_detachable(c)) return false;   // ancré en permanence (seuls les écrans de DETACHABLES se détachent)
     try { mainWindow.contentView.removeChildView(a.view); } catch {}
     poserEnFenetre(c, a);
     etatAncragePoser(c, 'detache');   // l ecran rouvrira DETACHE desormais
@@ -5599,9 +5605,21 @@ const appliquerTheme = (wc) => {
 const _majThemeOS = () => {
   try { nativeTheme.themeSource = (_modele && _modele.sombre) ? 'dark' : 'light'; } catch (_) {}
 };
+/* La bande _ □ ✕ d'une fenêtre détachée sans cadre : la couleur de sa TÊTE (Épuré : blanc le jour, bleu nuit la nuit). */
+const _teteSansCadre = () => { try { return process.platform === 'win32' && _themeCouleur() === 'epure'; } catch (_) { return false; } };
+const _bandeTete = () => {
+  const s = _sombreCourant();
+  let t = ''; try { t = _themeCouleur(); } catch (_) { t = ''; }
+  const fond = t === 'epure' ? (s ? '#181e29' : '#ffffff') : _fondTheme(s);
+  return { color: fond, symbolColor: s ? '#e8ecf2' : '#1f2533', height: 44 };
+};
 const appliquerThemePartout = () => {
   _majThemeOS();
-  fenetresNatives.forEach((w) => { if (w && !w.isDestroyed()) appliquerTheme(w.webContents); });
+  fenetresNatives.forEach((w) => {
+    if (!w || w.isDestroyed()) return;
+    appliquerTheme(w.webContents);
+    if (w._szWco && typeof w.setTitleBarOverlay === 'function') { try { w.setTitleBarOverlay(_bandeTete()); } catch (_) {} }
+  });
   ancrees.forEach((a) => { if (a.view && !a.view.webContents.isDestroyed()) appliquerTheme(a.view.webContents); });
   // la petite fenêtre du suivi des générations (src/taches.js)
   try { const wt = taches.fenetreCourante(); if (wt) appliquerTheme(wt.webContents); } catch (e) {}
@@ -5860,11 +5878,15 @@ const ouvrirNative = (cle, titre, page, opts = {}) => {
     ...(Number.isFinite(b.x) && Number.isFinite(b.y) ? { x: b.x, y: b.y } : {}),
     minWidth: opts.minWidth || 520, minHeight: opts.minHeight || 420, show: false,
     title: titre, autoHideMenuBar: true, backgroundColor: _fondTheme(),
+    /* (2026-11-18, sa capture : « plein de modules non ancrés à vérifier ») En Épuré, plus de barre de titre grise de Windows :
+       _ □ ✕ se dessinent DANS la tête de la fenêtre, à sa couleur (socle : html.sz-wco .tete tire la fenêtre). */
+    ...(_teteSansCadre() ? { titleBarStyle: 'hidden', titleBarOverlay: _bandeTete() } : {}),
     webPreferences: {
       preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11,
       contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true,
     },
   });
+  if (_teteSansCadre()) win._szWco = true;
   fenetresNatives.set(cle, win);
   /* La recette, portée par la fenêtre : voir la fiche de `ouvrirNative`. */
   win._szRefaire = refaire;
@@ -5980,6 +6002,10 @@ const PORTE_BANDE = { color: '#faf8f5', symbolColor: '#1d2433' };
 const _bandePortePalette = () => {
   let p = null;
   try { p = _porteSansTheme ? null : _portePalette(); } catch (_) { p = null; }
+  /* (2026-11-18, sa capture : « c'est pas les mêmes couleurs ») En Épuré, _ □ ✕ tombent sur le côté DROIT de la porte (la
+     page, #11151d la nuit, #f4f5f9 le jour), pas sur le panneau de marque : la bande prend la couleur de la page. */
+  let t = ''; try { t = _themeCouleur(); } catch (_) { t = ''; }
+  if (p && t === 'epure') return { color: p.scheme === 'light' ? '#f4f5f9' : '#11151d', symbolColor: p.h1 };
   return p ? { color: p.panel, symbolColor: p.h1 } : PORTE_BANDE;
 };
 const _bandePorte = (dessus) => {
@@ -6303,7 +6329,14 @@ const _poserGardesDeSite = (wc) => {
      noir ») La bande des boutons gardait la couleur envoyée par la page PRÉCÉDENTE (la barre de titre
      blanche d'Épuré) pendant que la nouvelle se chargeait sur le fond sombre de la fenêtre. Au départ d'un
      chargement, elle prend la couleur de ce fond ; la page renvoie la sienne dès que sa barre est dessinée. */
-  wc.on('did-start-loading', () => {
+  /* ⚠ (2026-11-18, sa seconde capture) PAS « did-start-loading » : il part aussi pour un CADRE intérieur qui se charge
+     après le premier rendu — la bande retombait au fond de la fenêtre (#11151d) sous la barre de titre (#181e29), et le
+     site, déjà dessiné, ne la renvoyait pas. Seule une navigation de la PAGE ENTIÈRE remet la bande au fond. */
+  wc.on('did-start-navigation', (_e, _url, dansPage, cadrePrincipal) => {
+    // Electron récent porte ces deux faits sur l'événement ; les arguments positionnels restent le repli.
+    const principal = (_e && typeof _e.isMainFrame === 'boolean') ? _e.isMainFrame : cadrePrincipal;
+    const memePage = (_e && typeof _e.isSameDocument === 'boolean') ? _e.isSameDocument : dansPage;
+    if (memePage || !principal) return;
     try {
       if (!mainWindow || mainWindow.isDestroyed() || typeof mainWindow.setTitleBarOverlay !== 'function') return;
       if (wc !== mainWindow.webContents) return;
@@ -8915,8 +8948,7 @@ if (!app.requestSingleInstanceLock()) {
            faire la même chose finit toujours par en oublier un morceau. */
         ancrees.set('tableau', { view, fenetre: null, refaire: () => pageTableau() });
         view.webContents.on('did-finish-load', () => {
-          view.webContents.executeJavaScript('window.szModeAncre && window.szModeAncre(true);', true).catch(() => {});
-          appliquerTheme(view.webContents);
+          appliquerTheme(view.webContents);   // (2026-11-18) le tableau de bord ne se détache pas : pas de bouton
           _zoomRattraper(view.webContents);
         });
         view.webContents.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageTableau()));

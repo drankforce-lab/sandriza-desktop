@@ -170,6 +170,14 @@ button.mini.ligne-geste{height:2.4rem;padding:0 1rem;border-radius:10px;font-siz
 .liste.compacte .rf-sous{margin-top:0!important;white-space:nowrap}
 .liste.compacte .rf-pill{font-size:.6875rem;padding:.02rem .4rem}
 .liste.compacte .ligne-geste{min-height:0;height:1.75rem;padding:0 .55rem;font-size:.75rem}
+/* (2026-11-18) Épuré : rien de coupé — le nom entier, le numéro, la date et la ville sur UNE ligne. */
+html[data-sz-theme="epure"] .liste.compacte .rf-nom{overflow:visible;text-overflow:clip}
+html[data-sz-theme="epure"] .liste.compacte .rf-sous{display:flex;flex-wrap:nowrap;align-items:baseline;gap:.35rem}
+html[data-sz-theme="epure"] .liste.compacte .rf-sous span{white-space:nowrap}
+html[data-sz-theme="epure"] .kb-col>header b{overflow:visible;text-overflow:clip}
+html[data-sz-theme="epure"] .kb-carte .l1{flex-wrap:wrap;row-gap:.1rem}
+html[data-sz-theme="epure"] .kb-carte .l1 b{overflow:visible;text-overflow:clip}
+html[data-sz-theme="epure"] .kb-carte .l2{flex-wrap:nowrap;white-space:nowrap}
 .liste::-webkit-scrollbar{width:8px}
 .liste::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 table{width:100%;border-collapse:collapse;font-size:.85rem}
@@ -920,7 +928,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         if (!nP && !nE) p += '<div class="cx-bon"><span>${T("Rien ne presse.")}</span></div>';
       }
       p += '</div>';
-      h += MAQ() ? t : '<div class="cx-deux">' + t + p + '</div>';   // la maquette n'a pas de panneau d'appui
+      /* (2026-11-18, sa capture : « tout est trop pogné ») En Épuré, la liste compacte et le Kanban prennent toute la largeur :
+         le panneau d'appui répète ce que disent déjà « Filtrer » et les colonnes. */
+      h += MAQ() ? t : (EPD() && (COMPACT || KB()) ? t.replace('cx-carte cx-liste', 'cx-carte cx-liste seule') : '<div class="cx-deux">' + t + p + '</div>');   // la maquette n'a pas de panneau d'appui
     } else {
       h += t.replace('cx-carte cx-liste', 'cx-carte cx-liste seule');
     }

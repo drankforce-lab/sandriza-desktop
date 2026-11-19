@@ -659,6 +659,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     }
 
     var periode = function(x){
+      if (!x.debut && !x.fin) return '';   // (2026-11-18) plus de « — » seul sous la pastille
       return (x.debut ? esc(jour(x.debut)) : '—') + (x.fin ? ' → ' + esc(jour(x.fin)) : '');
     };
     var etat = function(x){

@@ -557,9 +557,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
             : '${T("Elle sera jointe comme reçu (lecture automatique indisponible sans clé).")}') + '</span></div>'
         + '<div class="cx-sep"></div>';
     }
-    h += '<div class="aide">${T("La ")}<strong>${T("fiscalité")}</strong>${T(" et la ")}<strong>${T("conciliation bancaire")}</strong>${T(" restent à ")}'
-      + '${T("l’écran Comptabilité de la fenêtre principale.")}</div>'
-      + '</div></div>';
+    // (2026-11-18) En Épuré, plus de phrase qui renvoie ailleurs (sa règle : pas de messages explicatifs).
+    if (document.documentElement.getAttribute('data-sz-theme') !== 'epure')
+      h += '<div class="aide">${T("La ")}<strong>${T("fiscalité")}</strong>${T(" et la ")}<strong>${T("conciliation bancaire")}</strong>${T(" restent à ")}'
+        + '${T("l’écran Comptabilité de la fenêtre principale.")}</div>';
+    h += '</div></div>';
 
     if (FORM) h += boiteForm();
     else if (DETAIL) h += boiteDetail();

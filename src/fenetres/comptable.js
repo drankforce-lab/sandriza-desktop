@@ -241,8 +241,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptable')}${JS_BROUILLON()}
               return '<span class="rf-pill' + (y === ETAT.annee ? ' bleu' : '') + '">' + esc(y) + '</span>';
             }).join('') + '</div>'
           : '<div class="vide">—</div>')
-      + '<div class="cx-sub">${T("Un seul lien pour tout l’exercice : le révoquer le coupe pour tous ses destinataires.")}</div>'
-      + '<div class="cx-sub">${T("Réservé au super-administrateur.")}</div>'
+      + (document.documentElement.getAttribute('data-sz-theme') === 'epure' ? '' :   // (2026-11-18) pas de phrases d'aide en Épuré
+        '<div class="cx-sub">${T("Un seul lien pour tout l’exercice : le révoquer le coupe pour tous ses destinataires.")}</div>'
+      + '<div class="cx-sub">${T("Réservé au super-administrateur.")}</div>')
       + '</div>';
   }
   function tuilePartage(p){

@@ -175,7 +175,7 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 .epinfo{font-size:.72rem;color:var(--tx2);text-align:center}
 .ep-enr{height:2.75rem;border-radius:12px;font-size:.88rem;font-weight:700}
 .ep-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
-.ep-2 button{height:2.35rem;border-radius:10px}
+.ep-2 button{height:2.35rem;border-radius:10px;white-space:nowrap;padding:0 .6rem}
 .epenv{padding:.75rem .9rem;border-radius:14px;background:var(--f-carte);border:1px solid var(--sz-bord);
   display:grid;grid-template-columns:1fr auto;gap:.45rem;align-items:end}
 .epenv label{grid-column:1/-1;font-size:.8rem;font-weight:650;color:var(--tx);display:block;margin-bottom:0}
@@ -581,7 +581,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     h += '</div><div class="ep-sep"></div>';
 
     // ── ③ Le texte, entierement modifiable ────────────────────────────────
-    h += '<div class="ep-et ep-texte">' + num(3, '${T("Le texte")}', '${T("tout se corrige à la main")}') + '<div class="ep-corps">';
+    h += '<div class="ep-et ep-texte">' + num(3, '${T("Le texte")}', '') + '<div class="ep-corps">';
     /* ⚠ LA BANDE DES DIAPOS N APPARAIT QUE LA OU IL Y EN A PLUSIEURS. Sur
        Pinterest, un bandeau << Diapo 1 sur 1 >> avec un bouton << ajouter >>
        ferait croire qu on peut publier une suite la ou le reseau n en veut pas. */
@@ -616,7 +616,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
 
     // ── L apercu, au format que CE reseau-la montre, et UN geste principal ──
     h += '<div class="cd"><div class="ep-apercu"><div class="epvue" id="ep-vue" style="aspect-ratio:' + F.largeur + '/' + F.hauteur + '"></div>'
-      + '<div class="epinfo">' + F.largeur + ' &times; ' + F.hauteur + ' ${T("px · le format que ")}' + esc(F.nom) + '${T(" montre en entier")}</div></div>'
+      + '<div class="epinfo">' + F.largeur + ' &times; ' + F.hauteur + ' px</div></div>'
       + '<button type="button" class="prim ep-enr" id="ep-enr"' + (EPIMG ? '' : ' disabled') + '>${T("Enregistrer la publication")}</button>'
       + '<div class="ep-2"><button type="button" id="ep-copier">${T("Copier le texte")}</button>'
       + '<button type="button" id="ep-dossier">${T("Dossier des exports")}</button></div>'
@@ -628,7 +628,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + '<button type="button" id="ep-envoi"' + ((EPIMG && !EPENVOI && !(EPD && EPD.resendPret === false)) ? '' : ' disabled') + '>${T("Envoyer")}</button>'
       + ((EPD && EPD.resendPret === false)
           ? '<div class="epinfo">${T("Aucune clé Resend : l’envoi de courriel n’est pas configuré.")}</div>'
-          : '<div class="epinfo">${T("Images en pièces jointes, texte prêt à coller.")}</div>')
+          : '')
       + '</div>'
       + '<textarea id="ep-presse" aria-hidden="true" tabindex="-1" style="position:absolute;left:-9999px;top:0;width:1px;height:1px"></textarea>'
       + '</div></div>';

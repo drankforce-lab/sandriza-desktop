@@ -385,3 +385,23 @@ contextBridge.exposeInMainWorld('szPont', {
      de la veille dans le menu Affichage (`veille-toggle`), et le retrait de
      l'ancienne entrée de démarrage `--veilleur` au lancement de main.js. */
 });
+
+/* (2026-11-18) Dans CHAQUE fenêtre native : (1) « sz-wco » sur <html> quand Windows dessine _ □ ✕ dans la tête (fenêtre
+   sans cadre — le socle fait alors de la tête la poignée de la fenêtre) ; (2) un nom coupé par « … » dans un tableau montre
+   son texte entier au survol. Ici et non dans la page : le préchargement est le seul code que TOUTES les fenêtres partagent. */
+try {
+  const _szWco = () => {
+    try { const o = navigator.windowControlsOverlay; document.documentElement.classList.toggle('sz-wco', !!(o && o.visible)); } catch (e) {}
+  };
+  window.addEventListener('DOMContentLoaded', () => {
+    _szWco();
+    try { const o = navigator.windowControlsOverlay; if (o && o.addEventListener) o.addEventListener('geometrychange', _szWco); } catch (e) {}
+    document.addEventListener('mouseover', (ev) => {
+      try {
+        const t = ev.target;
+        if (!t || !t.closest || t.title || !t.closest('tbody td')) return;
+        if (t.scrollWidth > t.clientWidth + 1) t.title = (t.textContent || '').trim();
+      } catch (e) {}
+    }, true);
+  });
+} catch (e) {}
