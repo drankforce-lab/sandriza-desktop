@@ -338,6 +338,7 @@ module.exports = {
   'Paiement en attente': 'Payment pending',
   'Préparer': 'Prepare',
   'Rien à préparer pour le moment.': 'Nothing to prepare right now.',
+  'Voir toutes les commandes': 'See all orders',
   '7 derniers jours · reçues': 'Last 7 days · received',
   'Chargement…': 'Loading…',
   '{0} à réassortir, dont {1} en rupture.': '{0} to restock, {1} out of stock.',

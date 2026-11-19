@@ -308,6 +308,8 @@ html.jour .voile{background:rgba(20,24,30,.35)}
 .tm-ct{display:flex;align-items:center;gap:10px}
 .tm-ct h2{margin-right:auto}
 .tm-pill{font-size:12px;font-weight:700;padding:3px 10px;border-radius:99px;background:var(--ep-neutre-f,var(--v08));color:var(--ep-neutre-t,var(--tx));white-space:nowrap}
+.tm-tout{flex:none;height:30px;padding:0 10px;border:0!important;border-radius:8px;background:transparent!important;color:var(--sz-btn-prim,#8a5a2b);font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer}
+.tm-tout:hover{background:var(--v05)!important}
 .tm-pill.a{background:var(--ep-ambre-f,rgba(245,158,11,.16));color:var(--ep-ambre-t,var(--tx-att))}
 .tm-pill.r{background:var(--ep-rouge-f,rgba(239,68,68,.16));color:var(--ep-rouge-t,var(--tx-err))}
 .tm-liste{flex:1 1 0;min-height:0;overflow:hidden;display:flex;flex-direction:column}
@@ -678,7 +680,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div>';
     var fil = (V.fil || []).filter(function(c){ return ['pending', 'confirmed', 'preparing', 'verification'].indexOf(c.statut) >= 0; });
     h += '<div class="tm-mil"><section class="tm-c l2"><div class="tm-ct"><h2>${T("À préparer maintenant")}</h2>'
-      + '<span class="tm-pill' + (aFaire ? ' a' : '') + '">' + aFaire + ' ' + (aFaire > 1 ? '${T("commandes")}' : '${T("commande")}') + '</span></div><div class="tm-liste">'
+      + '<span class="tm-pill' + (aFaire ? ' a' : '') + '">' + aFaire + ' ' + (aFaire > 1 ? '${T("commandes")}' : '${T("commande")}') + '</span>'
+      // (2026-11-18, sa capture : « il manque un lien pour voir toutes les commandes »)
+      + '<button type="button" class="tm-tout" data-ouvre="orders">${T("Voir toutes les commandes")} →</button></div><div class="tm-liste">'
       + (fil.length ? fil.map(function(c){
           var att = c.statut === 'pending';
           var a = c.article || {}, nom = (typeof a === 'string') ? a : (a.nom || '');
