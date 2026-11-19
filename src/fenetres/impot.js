@@ -37,6 +37,10 @@ const CSS = `
 /* (2026-11-19, banc des tableaux rognés : +123 px à 1080) « Par période » porte SIX colonnes de montants, « Taxe nette » trois avec un
    libellé qui passe à la ligne : la place va à celle qui en a besoin. */
 .cx-deux.moitie.imp-tps{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
+/* Et sur une fenêtre étroite (détachée, ou sous Linux où la police est plus large — travail « contrastes » : +111 px), les
+   deux tableaux de MONTANTS se resserrent : rien ne s'y abrège, un montant ne se coupe pas. */
+@media (max-width:1250px){.imp-tps :is(td,th){padding-left:.38rem!important;padding-right:.38rem!important}
+  .imp-tps td.arg,.imp-tps tr.total td{font-size:.8rem}.imp-tps th{font-size:.62rem;letter-spacing:.04em}}
 
 :root{color-scheme:dark}
 *{box-sizing:border-box}
