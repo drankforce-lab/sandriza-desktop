@@ -436,7 +436,7 @@ function main() {
         const fin = page.toLowerCase().lastIndexOf('</body>');
         if (fin >= 0) page = page.slice(0, fin) + epilogue(f.nom + (f.cas ? '_c' + f.cas : ''), mode, theme) + page.slice(fin);
         else page += epilogue(f.nom + (f.cas ? '_c' + f.cas : ''), mode, theme);
-        const nomF = `${f.nom}${f.cas ? '_c' + f.cas : ''}-${mode}${theme ? '-' + theme : ''}.html`;
+        const nomF = `${f.nom}${f.cas ? '_c' + f.cas : ''}-${mode}${theme ? '-' + theme.replace(/[^a-z0-9-]/gi, '-') : ''}.html`;   // « epure:sauge » : pas de « : » dans un nom de fichier
         fs.writeFileSync(path.join(tmp, nomF), page, 'utf8');
         adresses.push(nomF + '?m=' + mode + (theme ? '&t=' + theme : ''));
       }

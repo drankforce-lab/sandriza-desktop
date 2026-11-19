@@ -63,6 +63,15 @@ const IDS = TEINTES.map((t) => t.id);
 const teinteValide = (v) => (IDS.indexOf(String(v || '')) >= 0 ? String(v) : 'epure');
 const teinte = (id) => TEINTES.find((t) => t.id === teinteValide(id));
 
+/* La CARTE DE NUIT d'un thème (2026-11-19, sa demande : « corrige les cartes de nuit ») : le bleu nuit d'Épuré, mêlé d'une
+   pointe de l'accent — elle restait #181e29 dans tous les thèmes, bleutée sur un fond vert, rose ou orangé. */
+const _mix = (a, b, t) => {
+  const h = (x) => [1, 3, 5].map((i) => parseInt(String(x).slice(i, i + 2), 16));
+  const A = h(a), B = h(b);
+  return '#' + A.map((v, i) => Math.round(v * t + B[i] * (1 - t)).toString(16).padStart(2, '0')).join('');
+};
+const carteNuit = (t, n) => (t && t.primN ? _mix(t.primN, ['#181e29', '#1c2330', '#131822', '#222a38'][n || 0], 0.07) : null);
+
 /* La feuille : une règle jour et une règle nuit par thème, posées sur <html data-sz-theme="epure" data-sz-teinte="…">.
    Spécificité au-dessus des jetons d'Épuré (deux attributs + .jour) : le thème gagne sans !important. */
 const css = () => TEINTES.filter((t) => t.prim).map((t) => {
@@ -74,7 +83,11 @@ const css = () => TEINTES.filter((t) => t.prim).map((t) => {
     + s + ':not(.jour){--sz-accent:' + t.primN + ';--sz-accent-fort:' + t.primFortN + ';--sz-accent-doux:' + t.douxN
       + ';--sz-btn-prim:' + t.primN + ';--sz-btn-prim-fort:' + t.primFortN + ';--sz-repere:' + t.primN
       + ';--or:' + t.primN + ';--or-clair:' + t.primFortN + ';--tx-or:' + t.txOrN
-      + ';--f-page:' + t.pageN + ';--sz-fond:' + t.pageN + '}\n'
+      + ';--f-page:' + t.pageN + ';--sz-fond:' + t.pageN
+      + ';--f-carte:' + carteNuit(t, 0) + ';--sz-surface:' + carteNuit(t, 0) + ';--f-131c2b:' + carteNuit(t, 0) + ';--f-pied:' + carteNuit(t, 2)
+      + ';--f-carte2:' + carteNuit(t, 1) + ';--sz-surface2:' + carteNuit(t, 1) + ';--f-bande:' + carteNuit(t, 1)
+      + ';--f-champ:' + carteNuit(t, 2) + ';--f-0f1826:' + carteNuit(t, 2) + ';--f-0f172a:' + carteNuit(t, 2)
+      + ';--f-pill:' + carteNuit(t, 3) + ';--f-entete:' + carteNuit(t, 3) + '}\n'
     + s + '.jour body{background-color:var(--f-page);background-image:' + t.fond + ';background-attachment:fixed}\n'
     + s + ':not(.jour) body{background-color:var(--f-page);background-image:' + t.fondN + ';background-attachment:fixed}\n';
 }).join('');
@@ -82,4 +95,4 @@ const css = () => TEINTES.filter((t) => t.prim).map((t) => {
 /* La couleur de la page avant la première peinture (fond des fenêtres pendant qu'elles chargent). */
 const fondPage = (id, sombre) => { const t = teinte(id); return t.prim ? (sombre ? t.pageN : t.page) : (sombre ? '#11151d' : '#f4f5f9'); };
 
-module.exports = { TEINTES, IDS, teinteValide, teinte, css, fondPage };
+module.exports = { TEINTES, IDS, teinteValide, teinte, css, fondPage, carteNuit };

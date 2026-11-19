@@ -210,8 +210,10 @@ html.jour .voile{background:rgba(20,24,30,.35)}
 .pm .pm-st .h span.a{color:var(--ep-ambre-t)}
 .pm .pm-st .h span.r{color:var(--ep-rouge-t)}
 .pm .pm-st .j{height:6px;border-radius:99px;background:var(--v08);overflow:hidden}
-.pm .pm-st .j i{display:block;height:100%;border-radius:99px;background:var(--v30)}
-.pm .pm-st .j i.a{background:var(--ep-ambre-t)}
+/* (2026-11-19, sa demande : « corrige les barres de stock ») « Correct » prend l'ACCENT DU THÈME (elle restait grise, et l'ambre
+   foncé des deux autres lisait brun dans tous les thèmes) ; « À réassortir » un ambre franc ; « Rupture » reste rouge. */
+.pm .pm-st .j i{display:block;height:100%;border-radius:99px;background:var(--sz-btn-prim)}
+.pm .pm-st .j i.a{background:#e39a2d}
 .pm .pm-st .j i.r{background:var(--ep-rouge-t)}
 .pm .pm-badge{font-size:11px;font-weight:700;padding:2px 8px;border-radius:99px;margin-left:6px;background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
 

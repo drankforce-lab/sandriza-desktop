@@ -31,7 +31,8 @@
     var q = new URLSearchParams(location.search);
     if (q.get('m') === 'jour') document.documentElement.classList.add('jour');
     var t = q.get('t');
-    if (t) document.documentElement.setAttribute('data-sz-theme', t);
+    // (2026-11-19) « epure:sauge » : le look Épuré ET un de ses thèmes (src/teintes.js) — chaque thème se mesure au rendu.
+    if (t) { var tp = t.split(':'); document.documentElement.setAttribute('data-sz-theme', tp[0]); if (tp[1]) document.documentElement.setAttribute('data-sz-teinte', tp[1]); }
   } catch (e) {}
   var REP = __REPONSES__;
   var MANQUE = {};
