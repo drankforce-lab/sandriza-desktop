@@ -138,6 +138,17 @@ function mesurer(racine, contexte) {
       if (ac2.overflowX !== 'visible' || ac2.overflowY !== 'visible') { carte = null; break; }   // rogné : jugé ailleurs
       if (estCarte(an2)) { carte = an2; break; }
     }
+    /* (2026-11-19, Taxes : la TVQ du Québec passait sur la colonne de l'Ontario) Sortir de sa CELLULE de tableau, quand la
+       cellule ne rogne pas, c'est se poser sur la voisine : même défaut, même échec. */
+    var cel = fe.closest ? fe.closest('td,th') : null;
+    if (cel && cel !== fe) {
+      var cc = getComputedStyle(cel);
+      if (cc.overflowX === 'visible') {
+        var rf = fe.getBoundingClientRect(), rce = cel.getBoundingClientRect();
+        var dC = Math.round(rf.right - rce.right);
+        if (dC > 3) sort.push(_nomCourt(fe) + ' hors de sa cellule droite+' + dC);
+      }
+    }
     if (!carte) continue;
     vus2++;
     var rr = fe.getBoundingClientRect(), rc = carte.getBoundingClientRect();
@@ -145,6 +156,26 @@ function mesurer(racine, contexte) {
     if (dB > 2 || dR > 2) {
       var nomC = (carte.className && typeof carte.className === 'string' ? carte.className.split(' ')[0] : carte.tagName.toLowerCase());
       sort.push(_nomCourt(fe) + ' hors de .' + nomC + (dB > 2 ? ' bas+' + dB : '') + (dR > 2 ? ' droite+' + dR : ''));
+    }
+  }
+  /* ── LES VOISINS QUI SE CHEVAUCHENT (2026-11-19, Taxes : le tableau du Québec s'élargissait et passait SUR celui de l'Ontario,
+     sans sortir de sa carte ni de sa cellule). Dans une grille ou un conteneur souple, deux enfants posés dans le flux ne
+     doivent jamais se superposer. */
+  var conts = racine.querySelectorAll('*');
+  for (var ci = 0; ci < conts.length && sort.length < 40; ci++) {
+    var co = conts[ci], cco = getComputedStyle(co);
+    if (!/grid|flex/.test(cco.display) || co.children.length < 2 || co.children.length > 40) continue;
+    if (!_visible(co)) continue;
+    var enf = [];
+    for (var ei = 0; ei < co.children.length; ei++) {
+      var ch = co.children[ei], cch = getComputedStyle(ch);
+      if (cch.position === 'absolute' || cch.position === 'fixed' || !_visible(ch)) continue;
+      enf.push({ e: ch, r: ch.getBoundingClientRect() });
+    }
+    for (var a1 = 0; a1 < enf.length; a1++) for (var a2 = a1 + 1; a2 < enf.length; a2++) {
+      var A = enf[a1].r, B = enf[a2].r;
+      var ox = Math.min(A.right, B.right) - Math.max(A.left, B.left), oy = Math.min(A.bottom, B.bottom) - Math.max(A.top, B.top);
+      if (ox > 3 && oy > 3) sort.push(_nomCourt(enf[a1].e) + ' CHEVAUCHE ' + _nomCourt(enf[a2].e) + ' (' + Math.round(ox) + '×' + Math.round(oy) + ')');
     }
   }
   dit('SOR|' + contexte + '|' + sort.length + '|' + sort.slice(0, 4).join(' ; ').replace(/\|/g, ' '));

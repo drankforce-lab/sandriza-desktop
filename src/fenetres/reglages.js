@@ -63,8 +63,10 @@ html.jour .rg-ic{background:#3d4456}
 /* Une entrée trop longue pour sa demi-colonne prend toute la largeur de la carte : jamais coupée. */
 .rg-e.large{grid-column:1/-1}
 .rg-ch{grid-column:1/-1;display:flex;align-items:center;gap:8px;padding:4px 8px;font-size:13px;font-weight:500;min-width:0}
-.rg-ch span{flex:0 1 auto;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.rg-ch select{flex:1 1 auto;min-width:0;height:30px;font:inherit;font-size:12.5px}
+/* (2026-11-19) Le LIBELLÉ garde la priorité (entier, à la ligne s'il le faut) ; la liste prend ce qui reste, sans se
+   dimensionner sur sa plus longue option. */
+.rg-ch span{flex:0 1 auto;min-width:0;white-space:normal;line-height:1.25}
+.rg-ch select{flex:1 1 0;width:0;min-width:6.5rem;height:30px;font:inherit;font-size:12.5px}
 .rg-vide{font-size:13px;color:var(--tx2)}
 .msg{position:fixed;left:32px;bottom:10px;font-size:.79rem;color:var(--tx2)}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}

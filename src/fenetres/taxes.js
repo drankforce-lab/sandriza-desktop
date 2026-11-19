@@ -64,6 +64,10 @@ td.prov{font-weight:700;width:9rem}
 td.prov .n{font-weight:400;color:var(--tx3);font-size:.72rem;line-height:1.25;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:8.2rem}
 td.dr{text-align:right;white-space:nowrap}
 .comp{display:inline-flex;align-items:center;gap:.3rem;margin:.1rem .6rem .1rem 0}
+/* (2026-11-19, contrôle de jour : la TVQ du Québec passait sur l'Ontario) Une province à DEUX composantes les empile : chaque
+   composante reste entière, la cellule peut passer à la ligne (l'Épuré impose sinon une ligne par cellule). */
+html td.comps{white-space:normal!important}
+.comp{white-space:nowrap}
 .comp .org{font-size:.7rem;color:var(--tx3)}
 input[type=text],input[type=number]{font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:7px;padding:.25rem .4rem}
@@ -259,7 +263,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     provs.forEach(function(p, ip){
       if (ip === moitie && moitie > 0) h.push('</tbody></table>' + entete);
       var nomP = provNom(p);
-      h.push('<tr><td class="prov">' + esc(p.code) + '<div class="n" title="' + esc(nomP) + '">' + esc(nomP) + '</div></td><td>');
+      h.push('<tr><td class="prov">' + esc(p.code) + '<div class="n" title="' + esc(nomP) + '">' + esc(nomP) + '</div></td><td class="comps">');
       if (!p.composantes.length) h.push('<span style="color:var(--tx3)">—</span>');
       p.composantes.forEach(function(c, i){
         var prov = (p.nom || p.code);
