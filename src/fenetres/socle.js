@@ -3507,13 +3507,13 @@ html.jour .info b,html.jour .bien b,html.jour .avis b,
 html.jour .alerte b,html.jour .info strong,html.jour .bien strong,
 html.jour .avis strong,html.jour .alerte strong{color:inherit}
 html.jour .alerte{color:#845555}
-html.jour .aud{color:#6c675c}
+html.jour .aud{color:#5c574d}
 html.jour .avis.att{color:#73693e}
 html.jour .avis.bleu{color:#586980}
 html.jour .avis.bon{color:#287644}
-html.jour .avis.calme{color:#5a6573}
+html.jour .avis.calme{color:#4c5363}
 html.jour .avis.info{color:#4d6784}
-html.jour .avis.jaune{color:#72624b}
+html.jour .avis.jaune{color:#62533e}
 html.jour .avis.mal{color:#885858}
 html.jour .avis.non{color:#746845}
 html.jour .avis.ok{color:#476e57}
@@ -3535,9 +3535,9 @@ html.jour .garde.rouge{color:#855656}
 html.jour .gare{color:#885858}
 html.jour .jeton{color:#5e656b}
 html.jour .jeton.on{color:#686459}
-html.jour .note{color:#5a6573}
+html.jour .note{color:#4c5363}
 html.jour .pas button.on{color:#6b665b}
-html.jour .pas span.on{color:#6c675c}
+html.jour .pas span.on{color:#5c574d}
 html.jour .pastille.int{color:#71624d}
 html.jour .pastille.perso{color:#5b5c87}
 html.jour .permtb tr.grp td{color:#78654b}
@@ -3562,14 +3562,14 @@ html.jour .pill.maj{color:#6f5d22}
 html.jour .pill.mfa{color:#595b79}
 html.jour .pill.moi{color:#4a627e}
 html.jour .pill.mort{color:#7a4f4f}
-html.jour .pill.non{color:#865757}
+html.jour .pill.non{color:#764848}
 html.jour .pill.off{color:#7a4f4f}
 html.jour .pill.ok{color:#326a49}
 html.jour .pill.on{color:#285a3c}
 html.jour .pill.open{color:#4b6380}
 html.jour .pill.ouvert{color:#786426}
 html.jour .pill.recu{color:#3f7051}
-html.jour .pill.revoque{color:#865757}
+html.jour .pill.revoque{color:#764848}
 html.jour .pill.role{color:#5f666c}
 html.jour .pill.rup{color:#984545}
 html.jour .pill.sain{color:#326a49}
@@ -3580,18 +3580,18 @@ html.jour .pill.vfin{color:#7a4f4f}
 html.jour .pill.vif{color:#326a49}
 html.jour .pill.warn{color:#786426}
 html.jour .portee{color:#6a655a}
-html.jour .pt{color:#56606e}
+html.jour .pt{color:#4c5363}
 html.jour .rcbar button{color:#5e656b}
-html.jour .recap .jt{color:#6c675c}
+html.jour .recap .jt{color:#5c574d}
 html.jour .souso button.on{color:#6f6552}
 html.jour .sugg button{color:#6c675b}
 html.jour .suivi .lg .et.attente{color:#5c6672}
 html.jour .suivi .lg .et.cours{color:#6f634a}
 html.jour .suivi .lg .et.double{color:#7c650b}
-html.jour .suivi .lg .et.echec{color:#865757}
+html.jour .suivi .lg .et.echec{color:#764848}
 html.jour .suivi .lg .et.faite{color:#277342}
 html.jour .tete .env.bac{color:#7f670b}
-html.jour .tete .env.prod{color:#865757}
+html.jour .tete .env.prod{color:#764848}
 html.jour .tete .qlive{color:#7f670b}
 html.jour .vars code{color:#6a5e4a}
 html.jour button.arme{color:#72683e}

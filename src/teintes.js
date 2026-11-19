@@ -80,7 +80,10 @@ const css = () => TEINTES.filter((t) => t.prim).map((t) => {
   return s + '.jour{--sz-accent:' + t.prim + ';--sz-accent-fort:' + t.primFort + ';--sz-accent-doux:' + t.doux
       + ';--sz-btn-prim:' + t.prim + ';--sz-btn-prim-fort:' + t.primFort + ';--sz-repere:' + t.prim
       + ';--or:' + t.or + ';--or-rgb:' + t.orRgb + ';--or-clair:' + t.or + ';--tx-or:' + t.txOr + ';--tx-or2:' + t.txOr
-      + ';--f-page:' + t.page + ';--f-bande:' + t.page + ';--sz-fond:' + t.page + '}\n'
+      + ';--f-page:' + t.page + ';--f-bande:' + t.page + ';--sz-fond:' + t.page
+      /* (2026-11-19, banc des contrastes au rendu) Sur la page teintée et son halo, les gris secondaires d'Épuré tombaient à
+         4,1–4,4 : un cran plus foncés le jour, un cran plus clairs la nuit (plus bas). */
+      + ';--tx2:#4c5363;--tx3:#4c5363;--tx-gris:#4c5363;--sz-attenue:#4c5363;--tx-att:#6f5709;--tx-jaune:#6b5608}\n'
     + s + ':not(.jour){--sz-accent:' + t.primN + ';--sz-accent-fort:' + t.primFortN + ';--sz-accent-doux:' + t.douxN
       + ';--sz-btn-prim:' + t.primN + ';--sz-btn-prim-fort:' + t.primFortN + ';--sz-repere:' + t.primN
       + ';--or:' + t.primN + ';--or-clair:' + t.primFortN + ';--tx-or:' + t.txOrN
@@ -88,7 +91,8 @@ const css = () => TEINTES.filter((t) => t.prim).map((t) => {
       + ';--f-carte:' + carteNuit(t, 0) + ';--sz-surface:' + carteNuit(t, 0) + ';--f-131c2b:' + carteNuit(t, 0) + ';--f-pied:' + carteNuit(t, 2)
       + ';--f-carte2:' + carteNuit(t, 1) + ';--sz-surface2:' + carteNuit(t, 1) + ';--f-bande:' + carteNuit(t, 1)
       + ';--f-champ:' + carteNuit(t, 2) + ';--f-0f1826:' + carteNuit(t, 2) + ';--f-0f172a:' + carteNuit(t, 2)
-      + ';--f-pill:' + carteNuit(t, 3) + ';--f-entete:' + carteNuit(t, 3) + '}\n'
+      + ';--f-pill:' + carteNuit(t, 3) + ';--f-entete:' + carteNuit(t, 3)
+      + ';--tx2:#a9b2c1;--tx3:#a3acbb;--tx-gris:#a9b2c1;--tx-94a3b8:#a9b2c1;--sz-attenue:#a9b2c1}\n'
     + s + '.jour body{background-color:var(--f-page);background-image:' + t.fond + ';background-attachment:fixed}\n'
     + s + ':not(.jour) body{background-color:var(--f-page);background-image:' + t.fondN + ';background-attachment:fixed}\n';
 }).join('');
