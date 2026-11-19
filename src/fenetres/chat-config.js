@@ -78,6 +78,12 @@ textarea.t{min-height:4.2em;resize:vertical;line-height:1.5}
 input.t:focus,textarea.t:focus{outline:none;border-color:var(--or)}
 input.t:disabled,textarea.t:disabled{opacity:.45}
 .rang{display:flex;gap:.45rem;align-items:center}
+/* (2026-11-19, banc des champs : la photo de l'agent FIXE prenait sa taille naturelle — le champ changeait de largeur une fois
+   rempli) La vignette et le repère vide ont la même taille partout, pas seulement dans la liste des agents. */
+.rang .vign,.rang .sansph{width:32px;height:32px;border-radius:50%;flex:0 0 auto}
+.rang .vign{object-fit:cover;border:1px solid var(--v18)}
+.rang .sansph{background:var(--v08);display:flex;align-items:center;justify-content:center}
+.rang > input.t{flex:1 1 0;min-width:0}
 /* (2026-11-18) base nulle : le champ garde sa largeur vide ou rempli (banc-champs S_ETIRE, vu sous Épuré). */
 .rang>input.t{flex:1 1 0;min-width:0}
 .rang input.t{flex:1 1 auto;min-width:0}
