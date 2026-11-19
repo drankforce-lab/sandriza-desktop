@@ -286,7 +286,9 @@ select:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
   border-radius:999px;font-size:.6875rem;font-weight:600;letter-spacing:0.02em;
   color:#1f6b3d;background:#e9f5ee;border:1px solid rgba(79,154,106,0.35)}
 .cx-clepret .etat::before{content:'';width:6px;height:6px;border-radius:50%;background:#2f8a52}
-.cx-clepret.attente .em::after,.cx-embleme.attente::after{content:'';position:absolute;
+/* (2026-11-19, sa demande « retire le petit halo derrière le signe de doigt ») L'onde d'attente ne vit plus que sur
+   l'emblème de l'écran de création ; la carte « Clé d'accès active » garde son icône nette. */
+.cx-embleme.attente::after{content:'';position:absolute;
   inset:-5px;border-radius:inherit;border:2px solid rgba(196,154,108,0.55);
   animation:cx-onde 1.4s cubic-bezier(.2,.8,.2,1) infinite}
 .cx-bascule{display:block;margin:0.85rem auto 0}
@@ -314,7 +316,7 @@ select:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
   line-height:1.45;margin:0 0 1.05rem;padding:0.55rem 0.7rem;border-radius:9px;
   background:rgba(79,154,106,0.08);border:1px solid rgba(79,154,106,0.25)}
 .cx-cle-plus svg{flex:0 0 auto;color:#1f6b3d;margin-top:1px}
-@media (prefers-reduced-motion:reduce){.cx-clepret.attente .em::after,.cx-embleme.attente::after{animation:none}}
+@media (prefers-reduced-motion:reduce){.cx-embleme.attente::after{animation:none}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 

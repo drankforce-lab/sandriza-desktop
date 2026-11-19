@@ -2392,6 +2392,8 @@ const _porteEpure = (p) => {
   const page = te && te.prim ? (j ? te.page : te.pageN) : (j ? '#f4f5f9' : '#11151d');
   const tx = j ? '#1f2533' : '#e8ecf2', tx2 = j ? '#5b6273' : '#9aa4b5', brun = aT || (j ? '#8a5a2b' : '#c9a27a'), neutre = j ? '#eef0f4' : '#252d3b';
   const F = '"SzEpure","Segoe UI",system-ui,sans-serif';
+  const hx = String(brun).replace('#', '');
+  const rgbA = /^[0-9a-f]{6}$/i.test(hx) ? [0, 2, 4].map((i) => parseInt(hx.slice(i, i + 2), 16)).join(',') : (j ? '138,90,43' : '201,162,122');
   return police
     + 'body{background:' + page + '!important;font-family:' + F + '}'
     + '.orb,.brand::before,.brand::after,.plate::before{display:none!important}'
@@ -2407,7 +2409,15 @@ const _porteEpure = (p) => {
     + '.pg,.pulse{background:' + neutre + '!important}'
     + '.pg-in{background:' + brun + '!important}'
     + '.pulse::after{background:' + brun + '!important}'
-    + '.ver{border-top-color:' + filet + '!important}';
+    + '.ver{border-top-color:' + filet + '!important}'
+    /* (2026-11-19, sa capture de « Nouvelle version disponible » : « fidèle au thème ») La porte reprend ce que la connexion
+       fait du logo (connexion.js) : le halo adapté — lueur de l'accent du thème le jour, lumière claire teintée la nuit —
+       et, la nuit, le logo inversé pour rester lisible sur la carte bleu nuit. Sans quoi passer de la connexion à la mise
+       à jour fait disparaître le halo, et de nuit le logo noir lui-même. */
+    + '.plate::before{display:block!important;filter:blur(18px)!important;background:radial-gradient(60% 70% at 50% 50%,'
+    +   (j ? 'rgba(' + rgbA + ',.16) 0%,rgba(' + rgbA + ',.07) 45%' : 'rgba(255,255,255,.10) 0%,rgba(' + rgbA + ',.10) 40%')
+    +   ',transparent 75%)!important}'
+    + (j ? '' : '.plate-img{filter:invert(1) hue-rotate(180deg)}');
 };
 const portePage = (titre, message, progression) => {
   const b = porteMarque();
