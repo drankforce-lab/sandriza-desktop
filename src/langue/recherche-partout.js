@@ -20,6 +20,7 @@ module.exports = {
   'Clients': 'Customers',
   'Produits': 'Products',
   'Factures': 'Invoices',
+  'Dépenses': 'Expenses',
   'Fonctions du menu': 'Menu functions',
   'Commande, client, produit, SKU, facture ou fonction…': 'Order, customer, product, SKU, invoice or function…',
   'Rien ne correspond.': 'Nothing matches.',

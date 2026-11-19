@@ -115,6 +115,7 @@ module.exports = {
   'Mode de paiement': 'Payment method',
   'Montant (hors taxes)': 'Amount (before taxes)',
   'TPS · TVQ': 'GST · QST',
+  'Rechercher : description, fournisseur, montant…': 'Search: description, supplier, amount…',
   'Le montant doit être supérieur à 0.': 'The amount must be greater than 0.',
   'Saisissez d’abord le total payé (taxes incluses) dans « Montant ».':
     'First enter the total paid (taxes included) under « Amount ».',

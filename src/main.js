@@ -2085,6 +2085,9 @@ const createWindow = () => {
   mainWindow.on('unmaximize', suivreLeCadre);
   mainWindow.on('enter-full-screen', suivreLeCadre);
   mainWindow.on('leave-full-screen', suivreLeCadre);
+  // La coche « Plein écran » du panneau de menu suit (_cocherEtatsFenetre).
+  mainWindow.on('enter-full-screen', () => { panneauSale = true; });
+  mainWindow.on('leave-full-screen', () => { panneauSale = true; });
   /* ⚠⚠ (2026-10-20) LE RETOUR DE LA FENÊTRE : sa PAGE BLANCHE (seuls les boutons réduire / agrandir / fermer) après
      une mise à jour installée. Les vues étaient reposées au redimensionnement, à l'agrandissement et au plein
      écran — JAMAIS quand la fenêtre revient de la barre des tâches ou réapparaît. Posées pendant qu'elle était
@@ -3360,7 +3363,7 @@ const OPS_PONT = new Set([
   // ⚠ 'depenses:facture' LIT une facture par le service d IA : la cle, pdf.js, le
   // canevas et le taux de change restent au site. La fenetre envoie un fichier et
   // recoit des champs — rien n est enregistre sans confirmation.
-  'depenses:donnees', 'depenses:lire', 'depenses:taxes',
+  'depenses:donnees', 'depenses:ouvrir', 'depenses:aOuvrir', 'depenses:lire', 'depenses:taxes',
   'depenses:enregistrer',
   'depenses:supprimer', 'depenses:recu', 'depenses:recuOuvrir', 'depenses:facture',
   // Le BROUILLON : rien de ce qui est saisi ne doit pouvoir disparaitre, quelle
@@ -8209,6 +8212,21 @@ const _menusLangue = () => {
   return menusAvecLangue(_modele.menus || [], l);
 };
 
+/* (2026-11-19, sa capture : « le crochet ne se coche toujours pas ») « Plein écran » : c'est la COQUILLE qui sait si la fenêtre
+   l'est (isFullScreen). La page devinait d'après la taille de l'écran, et le zoom de la fenêtre faussait la comparaison. La coche
+   est donc posée ici, au moment de dessiner le panneau ; entrer ou sortir du plein écran marque le panneau à refaire. */
+const _cocherEtatsFenetre = (menus) => {
+  let pe = false; try { pe = !!(mainWindow && !mainWindow.isDestroyed() && mainWindow.isFullScreen()); } catch (e) {}
+  const voir = (items) => (items || []).map((it) => {
+    if (!it || typeof it !== 'object') return it;
+    let r = it;
+    if (it.app === 'fullscreen') r = Object.assign({}, it, { coche: pe });
+    if (it.items) r = Object.assign({}, r, { items: voir(it.items) });
+    if (it.sub) r = Object.assign({}, r, { sub: voir(it.sub) });
+    return r;
+  });
+  return voir(menus);
+};
 ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
   if (!_peutOuvrirPanneau(e)) return;
   /* ⚠⚠ ON RETROUVE LE MENU PAR SON INTITULÉ TRADUIT *OU* D ORIGINE, et ce
@@ -8329,7 +8347,7 @@ ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
        exactement le genre de défaut qu'on ne voit qu'en changeant de langue
        APRÈS avoir ouvert un menu. */
     panneauWin.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pagePanneau({
-      menus: _trItems(_menusLangue()),
+      menus: _trItems(_cocherEtatsFenetre(_menusLangue())),
       cssRail: _modele.cssRail || '', sombre: !!_modele.sombre, theme: _themeCouleur(), teinte: _teinte(),
     })));
   } else {

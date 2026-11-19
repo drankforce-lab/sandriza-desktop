@@ -69,6 +69,7 @@ const PICTO = {
   client: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="8" r="3.5"/><path d="M5 20c1.2-3.6 4-5.5 7-5.5s5.8 1.9 7 5.5"/></svg>',
   produit: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round"><path d="M3 12V4h8l10 10-8 8z"/><circle cx="7.5" cy="7.5" r="1.3"/></svg>',
   facture: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7M9 7h4"/></svg>',
+  depense: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M3 10h18M7 15h4"/></svg>',
 };
 
 function pageRecherchePartout(menu) {
@@ -95,7 +96,7 @@ function pageRecherchePartout(menu) {
   /* (2026-10-27) szArgent vient des MESURES du socle : cette palette ne charge pas JS_DIRE (qui les porte), il faut
      les poser ici — sans elles, « Rechercher partout » tombait au premier resultat chiffre (construction 40608387952). */
 ${JS_MESURES()}
-  var GROUPES = { commande: '${T("Commandes")}', client: '${T("Clients")}', produit: '${T("Produits")}', facture: '${T("Factures")}', menu: '${T("Fonctions du menu")}' };
+  var GROUPES = { commande: '${T("Commandes")}', client: '${T("Clients")}', produit: '${T("Produits")}', facture: '${T("Factures")}', depense: '${T("Dépenses")}', menu: '${T("Fonctions du menu")}' };
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function argent(n){ return szArgent(Number(n) || 0); }   // la monnaie du socle, dans la langue du poste
@@ -162,6 +163,8 @@ ${JS_MESURES()}
     }
     if (!r.ouvrir) return;
     appeler(r.ouvrir, [r.id]).then(function(x){
+      // Un résultat qui vit dans un MODULE (une dépense) : le pont l'a retenu, la coquille ouvre le module, qui l'affiche.
+      if (x && x.ok && x.module) { try { if (P && P.ouvrirModule) P.ouvrirModule(x.module); } catch (e) {} }
       if (x && x.ok) fermer();
       else dessiner(x && x.motif === 'droit' ? '${T("Votre rôle ne permet pas d’ouvrir ce résultat.")}' : '${T("Ce résultat n’a pas pu s’ouvrir.")}');
     });

@@ -33,8 +33,15 @@ const LANGUE = require('../langue');
 const CSS = `
 /* (2026-11-19) La catégorie cède la place comme le nom : bornée, « … », le numéro de ligne fiscale toujours visible. */
 td.dp-cat{max-width:0;width:30%;min-width:7rem;overflow:hidden;white-space:nowrap}
-td.dp-cat .dp-cat-l{display:inline-block;max-width:calc(100% - 3.4rem);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;vertical-align:middle}
-td.dp-cat .cx-code{vertical-align:middle;margin-left:6px}
+/* Le libellé s'abrège, le numéro de ligne fiscale reste ENTIER (il finissait en « … » isolé quand la cellule rognait). */
+td.dp-cat .dp-cat-in{display:flex!important;align-items:center;gap:6px;min-width:0;max-width:100%;overflow:visible!important}
+td.dp-cat .dp-cat-l{flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+td.dp-cat .cx-code{flex:none;display:inline-block!important;max-width:none!important;overflow:visible!important}
+/* (2026-11-19, sa demande : « je dois voir toutes mes colonnes, ou réduis l'autre section ») La colonne « Lire une facture » se
+   resserre (une zone de dépôt n'a pas besoin de 22 rem) et le tableau passe d'un cran plus petit. */
+.cx-deux{grid-template-columns:minmax(0,1fr) clamp(13rem,19vw,17rem)!important}
+[data-pages="depenses-liste"] table{font-size:.84rem}
+.cx-barre #d-q{flex:1 1 14rem;min-width:12rem;max-width:26rem}
 td.num .rf-pill.usd{margin:0 .35rem 0 0}
 .dp-tx{white-space:nowrap;color:var(--tx2)}
 :root{color-scheme:dark}
@@ -228,7 +235,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
   var corps = document.getElementById('corps');
 
   var D = null;
-  var ANNEE = 0, MOIS = 0, CAT = '';
+  var ANNEE = 0, MOIS = 0, CAT = '', Q = '', Q_T = null, Q_FOCUS = false;
   function fmtArgent(n){
     return szArgent(n);   /* voir szArgent (socle) : le repli aussi place le symbole */
   }
@@ -487,7 +494,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       + kpi('', '${T("Dépenses")}', D.nombre, D.periode)
       + '</div>');
 
+    /* (2026-11-19, sa demande : « il me manque un outil de recherche dans mes dépenses ») En tête des filtres, comme ailleurs. */
     h += '<div class="cx-barre">' + ongletsVue()
+      + '<input type="search" id="d-q" placeholder="${T("Rechercher : description, fournisseur, montant…")}" value="' + esc(Q) + '" autocomplete="off">'
       + '<select id="d-mois"><option value="0"' + (!D.mois ? ' selected' : '') + '>${T("Tous les mois")}</option>'
       + (D.moisNoms || []).map(function(m, i){
           return '<option value="' + (i + 1) + '"' + (D.mois === i + 1 ? ' selected' : '') + '>' + esc(m) + '</option>';
@@ -526,8 +535,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
               /* (2026-11-19, sa capture : « clairement c'est pas fait ») Une catégorie longue (« Frais de gestion et
                  administration ») refusait de se couper : le tableau devenait plus large que sa carte, qui rognait Taxes
                  et Reçu sans rien dire. La catégorie CÈDE elle aussi (« … », entière au survol) ; le numéro de ligne reste. */
-              + '<td class="dp-cat" title="' + esc(catLbl(r.categorie, r.categorieLbl)) + '"><span class="dp-cat-l">' + esc(catLbl(r.categorie, r.categorieLbl)) + '</span>'
-              + (r.ligne ? '<span class="cx-code">' + esc(r.ligne) + '</span>' : '') + '</td>'
+              + '<td class="dp-cat" title="' + esc(catLbl(r.categorie, r.categorieLbl)) + '"><div class="dp-cat-in"><span class="dp-cat-l">' + esc(catLbl(r.categorie, r.categorieLbl)) + '</span>'
+              + (r.ligne ? '<span class="cx-code">' + esc(r.ligne) + '</span>' : '') + '</div></td>'
               + '<td class="dt" style="white-space:nowrap">' + esc(szJour(r.date) || r.dateFr) + '</td>'
               /* (2026-11-19) « USD » suit le MONTANT : dans la cellule du nom, qui se coupe, la pastille finissait en « ··· ». */
               + '<td class="num">' + (r.usd ? '<span class="rf-pill bleu usd">USD</span>' : '') + '<b>' + esc(r.montant) + '</b></td>'
@@ -1242,6 +1251,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     lie('d-annee', function(){ ANNEE = parseInt(this.value, 10) || 0; PAGE = 0; charger(); });
     lie('d-mois', function(){ MOIS = parseInt(this.value, 10) || 0; PAGE = 0; charger(); });
     lie('d-cat', function(){ CAT = this.value; PAGE = 0; charger(); });
+    var dq = document.getElementById('d-q');
+    if (dq) {
+      dq.oninput = function(){
+        var v = this.value; clearTimeout(Q_T);
+        Q_T = setTimeout(function(){ if (v === Q) return; Q = v; PAGE = 0; Q_FOCUS = true; charger(); }, 250);
+      };
+      // Le redessin remplace le champ : on y remet le curseur, à la fin du texte, si on était en train de taper.
+      if (Q_FOCUS) { Q_FOCUS = false; dq.focus(); try { dq.setSelectionRange(dq.value.length, dq.value.length); } catch (e) {} }
+    }
     var bp = document.getElementById('d-prec');
     if (bp) bp.onclick = function(){ PAGE = Math.max(0, (D.page || 0) - 1); charger(); };
     var bs = document.getElementById('d-suiv');
@@ -1572,12 +1590,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
   function charger(){
     if (enCours) { RELANCE = true; return Promise.resolve(); }
     enCours = true;
-    return appeler('depenses:donnees', [{ annee: ANNEE, mois: MOIS, categorie: CAT,
+    return appeler('depenses:donnees', [{ annee: ANNEE, mois: MOIS, categorie: CAT, q: Q,
       page: PAGE, taille: TAILLE }]).then(function(r){
       enCours = false;
       if (RELANCE) { RELANCE = false; return charger(); }
       if (!r || !r.ok) { vide('${T("Dépenses indisponibles")}', expliquer(r)); return; }
       D = r;
+      /* (2026-11-19) Une dépense choisie dans la recherche partout (Ctrl K) : le pont l'a retenue, on ouvre sa fiche. */
+      appeler('depenses:aOuvrir', []).then(function(o){ if (o && o.ok && o.id) ouvrirDetail(o.id); }).catch(function(){});
       ANNEE = D.annee; MOIS = D.mois; CAT = D.categorie;
       var s = document.getElementById('sous');
       if (s) s.textContent = D.periode + ' · ' + D.nombre + ' '

@@ -419,7 +419,11 @@ html.jour .vue .x:hover:not(:disabled),html.jour .vign .x:hover:not(:disabled){b
 .pv-t{font-size:.76rem;font-weight:650;color:var(--tx2);margin:0 0 .4rem}
 .pv-opt{font-weight:400;color:var(--tx3);margin-left:.3rem}
 .pv-fibre{margin-top:1rem;padding-top:.9rem;border-top:1px solid var(--v08)}
-.pv-fibre-l{display:flex;gap:1rem;align-items:center;flex-wrap:wrap}
+.pv-fibre-l{display:flex;gap:1rem;align-items:center;flex-wrap:nowrap}
+/* (2026-11-19, « repasse toutes les fenêtres ») Le bouton et son explication passaient SOUS la case, puis sous la carte : ils
+   restent À CÔTÉ d'elle, en colonne, et l'explication se coupe en lignes au lieu de pousser. */
+.pv-fibre-l > :not(.cadre-fibre){min-width:0;flex:1 1 auto}
+.pv-fibre-g{flex-direction:column;align-items:flex-start!important}
 .cadre-fibre{width:var(--pv-w,7.5rem);aspect-ratio:1/1;border-radius:12px;border:1.5px dashed var(--v16);display:flex;align-items:center;
   justify-content:center;overflow:hidden;font-size:.72rem;color:var(--tx3);flex:0 0 auto}
 .cadre-fibre.pleine{border-style:solid;border-color:var(--v16)}
@@ -1364,6 +1368,8 @@ function pageProduit(id, importId) {
     if (CAB.charge) h += '<div class="cab-l">${T("Lecture au serveur…")}</div>';
     if (z.getAttribute('data-h') === h) return;   // rien de changé, rien de réécrit (voir majFiche)
     z.setAttribute('data-h', h); z.innerHTML = h;
+    // La carte change de hauteur : les cases photo se recalculent (sinon elles sortent de la carte).
+    try { requestAnimationFrame(ajusterPhotos); } catch (e) {}
     var b = document.getElementById('p-cab-go'); if (b) b.onclick = preparerCabine;
     var br = document.getElementById('p-cab-rep'); if (br) br.onclick = reprendreCabine;
     Array.prototype.forEach.call(z.querySelectorAll('.cab-rej'), function(x){ x.onclick = function(){ rejeterCabine(x.getAttribute('data-angle')); }; });
@@ -3094,7 +3100,7 @@ function pageProduit(id, importId) {
     var variantes = cs.slice(1);
     if (bg) bg.style.display = (auto && variantes.length && IMAGE) ? '' : 'none';
     if (!cs.length) {
-      p.innerHTML = '<div class="aide">${T("Choisissez d’abord des couleurs à l’étape « Tailles et couleurs ».")}</div>';
+      p.innerHTML = '<div class="aide" style="grid-column:1/-1;max-width:none">${T("Choisissez d’abord des couleurs à l’étape « Tailles et couleurs ».")}</div>';
       return;
     }
     if (!variantes.length) {
@@ -3577,7 +3583,9 @@ function pageProduit(id, importId) {
     lp.style.setProperty('--pv-main-w', Math.floor(mw) + 'px');
     lp.style.setProperty('--pv-main-h', Math.floor(mh) + 'px');
     var rw = W - mw - 21, haut = 0;
-    ['p-studio-attente', 'p-3d-carte'].forEach(function(id){ var e = document.getElementById(id); if (e && e.offsetParent) haut += e.offsetHeight + 13; });
+    // ⚠ (2026-11-19, sa capture : « Photo 4 » sortie sous la carte) La carte Cabine d'essayage n'était pas comptée : les cases
+    // se croyaient de la place qu'elles n'avaient pas.
+    ['p-studio-attente', 'p-3d-carte', 'p-cab-carte'].forEach(function(id){ var e = document.getElementById(id); if (e && e.offsetParent) haut += e.offsetHeight + 13; });
     var n = Math.max(1, document.querySelectorAll('#p-vues .vue').length);
     var demarquer = document.querySelector('.pv-demarquer') ? 32 : 0;
     var fibre = document.getElementById('p-fibre-bloc'), fibreTete = fibre ? 64 : 0;
@@ -3586,6 +3594,8 @@ function pageProduit(id, importId) {
       var cols = Math.max(1, Math.floor((rw + 10) / (w + 10))), rangs = Math.ceil(n / cols);
       var besoin = haut + 24 + rangs * (w * 4 / 3 + 24) + (rangs - 1) * 10 + demarquer + (fibre ? fibreTete + w : 0);
       if (besoin <= H) { meilleur = w; break; }
+      // Rien ne tient même à 88 px : toutes les cases sur UNE rangée, plus petites, plutôt qu'une rangée qui sort de la carte.
+      if (w <= 88) { meilleur = Math.max(56, Math.min(88, Math.floor((rw + 10) / n - 10))); }
     }
     lp.style.setProperty('--pv-w', meilleur + 'px');
   }

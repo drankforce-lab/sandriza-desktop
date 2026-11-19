@@ -452,6 +452,19 @@ function rapport(lignes, nbFenetres, rates, lotsMorts, noms) {
   console.log('   TABLEAUX ROGNES (plus larges que leur carte — colonnes coupees sans rien dire) : ' + rn.length + ' fenetre(s)');
   for (const n of rn) console.log('   ✗ ' + n.padEnd(21) + ' ' + rogs[n].detail.slice(0, 150));
   if (rn.length) process.exitCode = 1;
+  // (2026-11-19) CE QUI SORT DE SA CARTE (voir debordement-coeur.js). Échec franc, sans dette.
+  const sors = {};
+  for (const l of lignes) {
+    if (!l.startsWith('SOR|')) continue;
+    const p = l.split('|'); const nom = String(p[1]).split('@')[0]; const n = +p[2] || 0;
+    if (nom === '_temoin' || !n) continue;
+    if (!sors[nom] || n > sors[nom].n) sors[nom] = { n, detail: p.slice(3).join('|') };
+  }
+  const sn = Object.keys(sors).sort();
+  console.log('');
+  console.log('   SORT DE SA CARTE (un texte, un champ ou un bouton depasse le cadre qui le contient) : ' + sn.length + ' fenetre(s)');
+  for (const n of sn) console.log('   ✗ ' + n.padEnd(21) + ' ' + String(sors[n].n).padStart(3) + '   ' + sors[n].detail.slice(0, 170));
+  if (sn.length) process.exitCode = 1;
   if (lotsMorts) console.log('⚠ ' + lotsMorts + ' lot(s) muet(s) : leurs fenetres manquent a la mesure.');
   if (ECRIRE_DETTE) {
     let tout = {};

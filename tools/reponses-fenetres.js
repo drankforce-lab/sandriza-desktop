@@ -4419,6 +4419,7 @@ const JEU = {
               aTaxes: false, recu: false, usd: false },
           ],
         },
+        'depenses:aOuvrir': { ok: true, id: '' },
         'depenses:lire': {
           ok: true, id: 'exp1', date: '2026-08-04', dateFr: '2026-08-04',
           categorie: 'pub', categorieLbl: 'Publicité', ligne: '8521',

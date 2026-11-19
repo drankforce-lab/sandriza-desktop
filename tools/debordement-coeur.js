@@ -111,6 +111,43 @@ function mesurer(racine, contexte) {
       break;
     }
   }
+  /* ── CE QUI SORT DE SA CARTE (2026-11-19, sa capture de Nouveau produit : « Photo 4 » passée à la ligne, sous la carte —
+     « repasse toutes les fenêtres, il y a plein de déformations »). Une carte (bordure ou fond, coins arrondis) qui NE rogne
+     pas laisse son contenu déborder à la vue : rien ci-dessus ne le voyait. On prend chaque élément visible qui porte du
+     texte, un champ, un bouton ou une image, et sa carte la plus proche ; dépasser de plus de 2 px est un défaut. */
+  var sort = [], vus2 = 0;
+  var feuilles = racine.querySelectorAll('button,input,select,textarea,img,label,span,b,strong,a,p,h1,h2,h3,td,th,li,div');
+  var estCarte = function(e){
+    var c = getComputedStyle(e);
+    if (!(parseFloat(c.borderTopLeftRadius) > 0)) return false;
+    var bord = parseFloat(c.borderTopWidth) > 0 || parseFloat(c.borderLeftWidth) > 0;
+    var fond = c.backgroundColor && !/rgba\(0, 0, 0, 0\)|transparent/.test(c.backgroundColor);
+    return (bord || fond) && e.offsetWidth > 120 && e.offsetHeight > 60;
+  };
+  for (var fi = 0; fi < feuilles.length; fi++) {
+    var fe = feuilles[fi];
+    if (fe.tagName === 'DIV' && fe.children.length) continue;               // une boîte : on juge son contenu
+    if (fe.tagName !== 'INPUT' && fe.tagName !== 'IMG' && fe.tagName !== 'SELECT' && !(fe.textContent || '').trim()) continue;
+    if (!_visible(fe)) continue;
+    var fc = getComputedStyle(fe);
+    if (fc.position === 'absolute' || fc.position === 'fixed') continue;    // pastilles et bulles posées exprès
+    var carte = null;
+    for (var an2 = fe.parentElement; an2 && an2 !== document.body; an2 = an2.parentElement) {
+      var ac2 = getComputedStyle(an2);
+      if (ac2.position === 'fixed') { carte = null; break; }
+      if (ac2.overflowX !== 'visible' || ac2.overflowY !== 'visible') { carte = null; break; }   // rogné : jugé ailleurs
+      if (estCarte(an2)) { carte = an2; break; }
+    }
+    if (!carte) continue;
+    vus2++;
+    var rr = fe.getBoundingClientRect(), rc = carte.getBoundingClientRect();
+    var dB = Math.round(rr.bottom - rc.bottom), dR = Math.round(rr.right - rc.right);
+    if (dB > 2 || dR > 2) {
+      var nomC = (carte.className && typeof carte.className === 'string' ? carte.className.split(' ')[0] : carte.tagName.toLowerCase());
+      sort.push(_nomCourt(fe) + ' hors de .' + nomC + (dB > 2 ? ' bas+' + dB : '') + (dR > 2 ? ' droite+' + dR : ''));
+    }
+  }
+  dit('SOR|' + contexte + '|' + sort.length + '|' + sort.slice(0, 4).join(' ; ').replace(/\|/g, ' '));
   dit('ROG|' + contexte + '|' + rog.length + '|' + rog.slice(0, 4).join(' ; ').replace(/\|/g, ' '));
   dit('ZON|' + contexte + '|' + zones.length + '|' + zones.slice(0, 6).join(' ; ').replace(/\|/g, ' '));
   dit('DEB|' + contexte + '|' + vw + 'x' + vh + '|' + pageH + '|' + pageW + '|' + n + '|' + defilants + '|' + vus + '|' + hors.join(' ; '));
