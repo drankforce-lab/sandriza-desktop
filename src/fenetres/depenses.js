@@ -496,7 +496,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
 
     /* (2026-11-19, sa demande : « il me manque un outil de recherche dans mes dépenses ») En tête des filtres, comme ailleurs. */
     h += '<div class="cx-barre">' + ongletsVue()
-      + '<input type="search" id="d-q" placeholder="${T("Rechercher : description, fournisseur, montant…")}" value="' + esc(Q) + '" autocomplete="off">'
+      + '<input type="search" id="d-q" aria-label="${T("Rechercher dans les dépenses")}" placeholder="${T("Rechercher : description, fournisseur, montant…")}" value="' + esc(Q) + '" autocomplete="off">'
       + '<select id="d-mois"><option value="0"' + (!D.mois ? ' selected' : '') + '>${T("Tous les mois")}</option>'
       + (D.moisNoms || []).map(function(m, i){
           return '<option value="' + (i + 1) + '"' + (D.mois === i + 1 ? ' selected' : '') + '>' + esc(m) + '</option>';
