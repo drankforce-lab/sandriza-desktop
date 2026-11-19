@@ -50,12 +50,12 @@ body{background:var(--f-page);color:var(--tx);
 .carte.edit{border-color:var(--or)}
 .ged{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.1rem;align-items:start}
 .ged .apercu,.ged .gifwrap{max-width:none}
-@media (max-width:900px){.ged{grid-template-columns:1fr}}
+@media (max-width:900px){.ged{grid-template-columns:minmax(0,1fr)}}
 /* Le titre suit son icone (2026-09-29) : << space-between >> l envoyait a l autre bout de la carte. */
 .stitre{font-size:.9rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .1rem;display:flex;align-items:center;gap:.45rem}
 .sdesc{font-size:.76rem;color:var(--tx2);margin:.1rem 0 .8rem}
-.gr2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
-@media (max-width:640px){.gr2{grid-template-columns:1fr}}
+.gr2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.7rem}
+@media (max-width:640px){.gr2{grid-template-columns:minmax(0,1fr)}}
 .ch{margin:0 0 .7rem}
 .ch:last-child{margin-bottom:0}
 .ch label{display:block;margin-bottom:.22rem;font-size:.75rem;color:var(--tx2)}

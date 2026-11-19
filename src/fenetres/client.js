@@ -79,7 +79,7 @@ input,select{font:inherit;color:var(--tx);background:var(--f-0f1826);
   width:100%;min-width:0}
 input:focus,select:focus{outline:none;border-color:var(--or)}
 input[type=checkbox]{width:auto}
-.r2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .8rem}
+.r2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.5rem .8rem}
 .ch{display:flex;flex-direction:column;gap:.18rem;min-width:0}
 .ch label{font-size:.7rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.04em}
 .ch.large{grid-column:1/-1}

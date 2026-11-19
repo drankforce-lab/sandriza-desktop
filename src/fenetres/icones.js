@@ -68,13 +68,13 @@ body{background:var(--f-page);color:var(--tx);
 .bascule input{width:1rem;height:1rem;accent-color:var(--or);cursor:pointer}
 .bascule:has(input:disabled){cursor:default;color:var(--tx3)}  /* le texte reste lisible ; seul le curseur s estompe (socle) — 2026-10-04 */
 /* Le bloc de depot : vignette a gauche, formulaire a droite. */
-.pose{display:grid;grid-template-columns:7rem 1fr;gap:1rem;align-items:start}
+.pose{display:grid;grid-template-columns:7rem minmax(0,1fr);gap:1rem;align-items:start}
 /* (2026-11-19, contrôle visuel) Le libellé « Retirer le fond de l’image » passait SOUS le bouton voisin : la colonne du
    formulaire empile ses éléments, chacun sur sa ligne, et le libellé peut se couper. */
 .pose > div:last-child{display:flex;flex-direction:column;align-items:flex-start;gap:.65rem;min-width:0}
 .pose > div:last-child > .ch{width:100%;margin:0}
 .pose .bascule{margin:0!important;white-space:normal!important;max-width:100%}
-@media (max-width:620px){.pose{grid-template-columns:1fr}}
+@media (max-width:620px){.pose{grid-template-columns:minmax(0,1fr)}}
 .vig{height:7rem;border-radius:10px;background:#f5f2ec;display:flex;align-items:center;
   justify-content:center;padding:.6rem;overflow:hidden;border:1px dashed var(--v18);
   cursor:pointer;-webkit-user-select:none;user-select:none}
@@ -93,7 +93,7 @@ body{background:var(--f-page);color:var(--tx);
 /* ⚠ CLASSE .icone, PAS .ico (2026-10-25, audit) : .ico est le pictogramme d en-tete du socle. La regle
    locale habillait aussi l icone du titre (bordure, fond), et celle du socle (CSS_JOUR, placee apres)
    rendait aux cartes un display:inline-flex centre et un nom gris — la grille des cartes se defaisait. */
-.icone{display:grid;grid-template-columns:3.4rem 1fr;gap:.7rem;align-items:center;min-width:0;
+.icone{display:grid;grid-template-columns:3.4rem minmax(0,1fr);gap:.7rem;align-items:center;min-width:0;
   border:1px solid var(--v07);border-radius:10px;padding:.6rem .7rem;background:var(--f-pill)}
 .icone .im{width:3.4rem;height:3.4rem;border-radius:8px;background:#f5f2ec;display:flex;
   align-items:center;justify-content:center;padding:.3rem;overflow:hidden}

@@ -59,8 +59,8 @@ button.mini{padding:.16rem .5rem;font-size:.76rem}
 .tuile .z{font-size:.6875rem;color:var(--tx2);margin-top:.1rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:.75rem .85rem}
 .carte h2{margin:0 0 .6rem;font-size:.78rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700}
-.deux{display:grid;grid-template-columns:1fr 1fr;gap:1rem;align-items:start}
-@media(max-width:720px){.deux{grid-template-columns:1fr}}
+.deux{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1rem;align-items:start}
+@media(max-width:720px){.deux{grid-template-columns:minmax(0,1fr)}}
 table{width:100%;border-collapse:collapse;font-size:.83rem}
 thead th{text-align:left;padding:.28rem .4rem;font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.34rem .4rem;border-top:1px solid var(--v055)}

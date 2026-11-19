@@ -66,7 +66,7 @@ body{background:var(--f-page);color:var(--tx);
 .vit .bar{height:16%;background:#ffffff;display:flex;align-items:center;gap:6%;padding:0 7%;border-bottom:1px solid rgba(0,0,0,.08)}
 .vit .bar i{display:block;height:28%;border-radius:3px;background:#1d2433;opacity:.75}
 .vit .bar i:first-child{width:22%}.vit .bar i:nth-child(2){width:9%;opacity:.25;margin-left:auto}.vit .bar i:nth-child(3){width:9%;opacity:.25}
-.vit .bas{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:6%;padding:6% 7%}
+.vit .bas{flex:1;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:6%;padding:6% 7%}
 .vit .prod{display:flex;flex-direction:column;gap:7%}
 .vit .photo{flex:1;border-radius:6px;background:rgba(0,0,0,.08)}
 .vit .l1{height:7%;width:70%;border-radius:3px;background:rgba(0,0,0,.35)}

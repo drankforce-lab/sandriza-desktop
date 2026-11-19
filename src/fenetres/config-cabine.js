@@ -72,7 +72,7 @@ html.jour .etat.e6{color:#1d5c34}html.jour .etat.efd{color:#1f4f8a}html.jour .et
 .onglets button:hover{background:var(--v05);color:var(--tx)}
 .onglets button.actif{color:var(--tx-creme);border-bottom-color:var(--or)}
 textarea{width:100%;font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.4rem .5rem;min-height:3.4em;resize:vertical}
-.gr2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .7rem}
+.gr2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.5rem .7rem}
 .gr2 label{font-size:.76rem;color:var(--tx2);display:block;margin-bottom:.2rem}
 .gr2 input[type=text]{width:100%}
 .vign{width:64px;height:48px;border-radius:7px;background:var(--v06) center/cover no-repeat;border:1px solid var(--v10)}

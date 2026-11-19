@@ -94,7 +94,7 @@ input:focus{outline:none;border-color:var(--or)}
   max-width:34rem;width:100%;max-height:84vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .5rem;font:700 .98rem/1.3 Georgia,serif}
 .boite .grp{border:1px solid var(--v10);border-radius:9px;padding:.5rem .6rem;margin:.4rem 0}
-.boite .champs{display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-top:.6rem}
+.boite .champs{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.5rem;margin-top:.6rem}
 .boite .champs .l{font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin-bottom:.2rem}
 .boite .pied-boite{display:flex;gap:.5rem;justify-content:flex-end;margin-top:.7rem}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}

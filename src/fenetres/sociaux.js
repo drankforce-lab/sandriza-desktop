@@ -177,7 +177,7 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 .ep-2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.5rem}
 .ep-2 button{height:2.35rem;border-radius:10px;white-space:nowrap;padding:0 .6rem}
 .epenv{padding:.75rem .9rem;border-radius:14px;background:var(--f-carte);border:1px solid var(--sz-bord);
-  display:grid;grid-template-columns:1fr auto;gap:.45rem;align-items:end}
+  display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.45rem;align-items:end}
 .epenv label{grid-column:1/-1;font-size:.8rem;font-weight:650;color:var(--tx);display:block;margin-bottom:0}
 .epenv input{width:100%;font-size:.82rem;padding:.45rem .7rem;height:2.3rem;border-radius:9px}
 .epenv button{height:2.3rem;border-radius:9px}

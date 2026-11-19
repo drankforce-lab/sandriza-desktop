@@ -130,7 +130,7 @@ button.lien:hover:not(:disabled){background:transparent;text-decoration:underlin
 .rc .pv{display:flex;align-items:baseline;justify-content:space-between;gap:.5rem}
 .rc .pv-l{font-size:.62rem;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2)}
 .rc .pv-v{font:700 1.2rem/1 system-ui;color:var(--tx);font-variant-numeric:tabular-nums;letter-spacing:-.01em}
-.rc .kv{display:grid;grid-template-columns:1fr auto;gap:.25rem .75rem}
+.rc .kv{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.25rem .75rem}
 .rc .kv span:nth-child(even){color:var(--tx);text-align:right;font-weight:550;font-variant-numeric:tabular-nums;white-space:nowrap}
 .rc .qte{font-size:.7rem;font-weight:650;color:var(--tx-ok);background:rgba(34,197,94,.10);border-radius:7px;padding:.32rem .55rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 html.jour .rc .qte{color:#1d5e33}

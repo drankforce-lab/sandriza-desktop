@@ -158,7 +158,7 @@ body{background:var(--f-page);color:var(--tx);
    texte filait en colonnes vers la droite (843 px hors cadre). Il prend plus de place sous 1240 px, et sa barre
    d outils peut passer sur deux lignes plutot que sortir du cadre. */
 @media (max-width:1240px){.insp{flex-basis:clamp(340px,54%,620px)}.outils{flex-wrap:wrap!important}
-  .insp .prop.grillee{columns:auto;display:grid;grid-template-columns:1fr 1fr;gap:.55rem 1rem;align-content:start}}
+  .insp .prop.grillee{columns:auto;display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.55rem 1rem;align-content:start}}
 .el{display:flex;align-items:center;gap:.45rem;padding:.34rem .7rem;cursor:pointer;
   border-bottom:1px solid var(--v04);font-size:.79rem}
 .el:hover{background:var(--v04)}

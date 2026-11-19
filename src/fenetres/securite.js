@@ -256,7 +256,7 @@ html.jour .ctx button.dgr{color:#b91c1c}
 .vol.on{display:block}
 .aideOng{font-size:.78rem;color:var(--tx2);line-height:1.55;margin:0 0 1rem}
 .cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1rem}
-@media(max-width:760px){.cols2{grid-template-columns:1fr}}
+@media(max-width:760px){.cols2{grid-template-columns:minmax(0,1fr)}}
 label.champ{display:block;margin:0 0 .9rem}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.25rem 0 0;line-height:1.5}
@@ -329,7 +329,7 @@ label.case .quoi{color:var(--tx2);font-size:.75rem;display:block}
    ⚠ IL EXISTE PARCE QUE LA DERNIÈRE ÉTAPE EST LA SEULE OÙ L'ON RELIT. Un
    assistant sans récapitulatif fait créer un compte dont personne ne sait ce
    qu'il ouvre — on se souvient d'avoir cliqué, pas de ce qu'on a coché. */
-.recap{display:grid;grid-template-columns:auto 1fr;gap:.4rem .9rem;font-size:.84rem;align-items:baseline}
+.recap{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.4rem .9rem;font-size:.84rem;align-items:baseline}
 .recap dt{color:var(--tx2);font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;white-space:nowrap}
 .recap dd{margin:0}
 .sens{margin:.9rem 0 0;padding:.7rem .85rem;border-radius:9px;font-size:.79rem;line-height:1.6;

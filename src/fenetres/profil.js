@@ -211,7 +211,7 @@ input.t:focus,select.t:focus{outline:none;border-color:var(--or);box-shadow:0 0 
 .cle input.t{padding-right:.8rem;max-width:20rem}
 .cle-vide{font-size:.86rem;color:var(--tx2);margin:0 0 1.35rem}
 .cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem}
-@media(max-width:760px){.cols2{grid-template-columns:1fr}}
+@media(max-width:760px){.cols2{grid-template-columns:minmax(0,1fr)}}
 .vide{padding:2.4rem 1rem;text-align:center;color:var(--tx2);font-size:.86rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;
   border-top:1px solid var(--v08);background:var(--f-pied)}

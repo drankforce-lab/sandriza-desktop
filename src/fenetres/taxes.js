@@ -95,7 +95,7 @@ button.dgr{color:var(--tx-err);border-color:rgba(248,113,113,.4)}
 .deuxT{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem;align-items:start}
 .deuxC{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem;align-items:start}
 .deuxC > .carte{margin:0}
-@media (max-width:1000px){.deuxT,.deuxC{grid-template-columns:1fr}}
+@media (max-width:1000px){.deuxT,.deuxC{grid-template-columns:minmax(0,1fr)}}
 
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}
 .voile .boite{max-width:44rem;width:100%;max-height:88vh;overflow:auto;margin:0}

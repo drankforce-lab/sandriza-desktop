@@ -88,7 +88,7 @@ body{background:var(--f-page);color:var(--tx);
 .carte .bascule input{accent-color:var(--or);cursor:pointer}
 .info{background:rgba(80,120,190,.1);border:1px solid rgba(120,160,220,.28);color:#bcd2f0;
   border-radius:8px;padding:.5rem .65rem;font-size:.74rem;line-height:1.5;margin:0 0 .7rem}
-.gr2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
+.gr2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.6rem}
 .ch{margin:0 0 .6rem}
 .ch:last-child{margin-bottom:0}
 .ch label{display:block;margin-bottom:.22rem;font-size:.75rem;color:var(--tx2)}

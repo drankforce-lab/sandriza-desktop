@@ -72,9 +72,9 @@ body{background:var(--f-page);color:var(--tx);
 .ch input[type=text]{width:100%;box-sizing:border-box;font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
 .ch input[type=text]:focus{outline:none;border-color:var(--or)}
-.deux{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
-.trois{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.8rem}
-@media (max-width:620px){.deux,.trois{grid-template-columns:1fr}}
+.deux{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem}
+.trois{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:.8rem}
+@media (max-width:620px){.deux,.trois{grid-template-columns:minmax(0,1fr)}}
 select{font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);
   border-radius:8px;padding:.4rem .5rem;width:100%}
 input[type=color]{width:100%;height:2.1rem;padding:0;border:1px solid var(--v12);
@@ -86,9 +86,9 @@ input[type=color]:disabled,input[type=text]:disabled,select:disabled{opacity:.55
 /* Un logo : sa vignette, son bouton de choix, son retrait. Les six se
    repartissent en colonnes plutot qu en une pile etiree. */
 .logos{display:grid;grid-template-columns:repeat(auto-fit,minmax(24rem,1fr));gap:.9rem}
-.logo{display:grid;grid-template-columns:9.5rem 1fr;gap:.9rem;align-items:start;min-width:0;
+.logo{display:grid;grid-template-columns:9.5rem minmax(0,1fr);gap:.9rem;align-items:start;min-width:0;
   border:1px solid var(--v07);border-radius:10px;padding:.7rem .8rem;background:var(--f-pill)}
-@media (max-width:620px){.logo{grid-template-columns:1fr}}
+@media (max-width:620px){.logo{grid-template-columns:minmax(0,1fr)}}
 .vig{height:5rem;border-radius:9px;display:flex;align-items:center;justify-content:center;
   padding:.5rem;overflow:hidden;border:1px solid var(--v08)}
 .vig img{max-width:100%;max-height:100%;object-fit:contain;display:block}

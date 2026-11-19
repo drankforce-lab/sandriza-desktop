@@ -55,8 +55,8 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .lcard .nmedit{width:100%;font:inherit;font-size:.8rem;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:6px;padding:.25rem .4rem}
 .vide{padding:2rem 1rem;text-align:center;color:var(--tx2);font-size:.85rem}
 /* Import / recadrage */
-.imp{display:grid;grid-template-columns:minmax(16rem,22rem) 1fr;gap:1.2rem;max-width:60rem}
-@media (max-width:680px){.imp{grid-template-columns:1fr}}
+.imp{display:grid;grid-template-columns:minmax(16rem,22rem) minmax(0,1fr);gap:1.2rem;max-width:60rem}
+@media (max-width:680px){.imp{grid-template-columns:minmax(0,1fr)}}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:1rem 1.1rem}
 .h{font-size:.74rem;font-weight:700;color:var(--tx-bleute);text-transform:uppercase;letter-spacing:.04em;margin:.2rem 0 .5rem}
 .det .row{display:flex;justify-content:space-between;gap:.6rem;font-size:.8rem;padding:.15rem 0}

@@ -113,7 +113,7 @@ html.jour .afaire.urgent b{color:inherit}
 .obj-barre i{position:absolute;left:0;top:0;bottom:0;border-radius:99px;background:var(--tx-or)}
 .obj-barre b{position:absolute;top:-3px;width:2px;height:12px;background:var(--tx2);transform:translateX(-1px)}
 .szc-boite.bilan{max-width:34rem}
-.bl-g{display:grid;grid-template-columns:1fr 1fr;gap:1.2rem;margin:.4rem 0 .2rem}
+.bl-g{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.2rem;margin:.4rem 0 .2rem}
 .bl-g h4{margin:0 0 .35rem;font-size:.66rem;text-transform:uppercase;letter-spacing:.08em;color:var(--tx2)}
 .bl-l{display:flex;justify-content:space-between;gap:1rem;padding:.22rem 0;border-bottom:1px solid var(--v07);font-size:.86rem}
 .bl-l b{font-variant-numeric:tabular-nums}

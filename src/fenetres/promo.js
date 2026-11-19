@@ -143,8 +143,8 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
   border-radius:9px;padding:.45rem .65rem;font-size:.79rem;line-height:1.5}
 
 /* Le volet d impression : deux colonnes, et une seule barre de progression. */
-.deux{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
-@media (max-width:860px){.deux{grid-template-columns:1fr}}
+.deux{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.7rem}
+@media (max-width:860px){.deux{grid-template-columns:minmax(0,1fr)}}
 .champ{display:flex;flex-direction:column;gap:.2rem;margin-bottom:.55rem}
 .champ label{font-size:.7rem;color:var(--tx2)}
 .rapide{display:flex;gap:.28rem;flex-wrap:wrap;margin-top:.3rem}
@@ -176,7 +176,7 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
 .gapercu img{max-width:100%;max-height:100%;object-fit:contain}
 .barre{height:9px;background:var(--v08);border-radius:99px;overflow:hidden;margin:.45rem 0}
 .barre i{display:block;height:100%;width:0;background:var(--or);transition:width .18s}
-.cal3{display:grid;grid-template-columns:repeat(3,1fr);gap:.4rem}
+.cal3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;

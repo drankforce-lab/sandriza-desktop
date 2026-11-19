@@ -56,7 +56,7 @@ h1{font-size:1rem;margin:0;font-weight:650}
 .ic-info svg{width:15px;height:15px}
 .bien{background:rgba(60,160,110,.1);border-color:rgba(90,200,140,.3);color:#a9e6c6}
 .bien b{color:#d3f6e4}
-.chiffres{display:grid;grid-template-columns:repeat(3,1fr);gap:.7rem;margin:0 0 .9rem}
+.chiffres{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem;margin:0 0 .9rem}
 .kpi{background:var(--f-champ);border:1px solid var(--v12);border-radius:9px;padding:.6rem .7rem;text-align:center}
 .kpi .n{font-size:1.35rem;font-weight:700;line-height:1.15;font-variant-numeric:tabular-nums}
 .kpi .l{font-size:.6875rem;color:var(--tx2);margin-top:.15rem}

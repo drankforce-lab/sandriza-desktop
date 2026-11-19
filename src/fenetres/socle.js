@@ -2473,7 +2473,9 @@ const JS_CEDER = () => `
       if (c.overflowX === 'visible') continue;
       return /(auto|scroll)/.test(c.overflowX) ? null : a;
     }
-    return null;
+    /* (2026-11-19, Véhicules avec de vrais textes : « Supprimer » hors de la carte) Aucun ancêtre ne rogne : le tableau
+       DÉBORDE à la vue. Sa borne est alors son conteneur direct (la carte ne le contient plus). */
+    return t.parentElement || null;
   }
   function _szCdAjuster(){
     var tabs = document.querySelectorAll('table');
@@ -2489,9 +2491,15 @@ const JS_CEDER = () => `
       var a = _szCdRogneur(t); if (!a) continue;
       var ra = a.getBoundingClientRect(), rt = t.getBoundingClientRect();
       if (rt.right - ra.right <= 1) continue;
-      var r0 = t.tBodies[0].rows[0], n = r0.cells.length, fus = false;
-      for (var f = 0; f < n; f++) if (r0.cells[f].colSpan > 1) fus = true;
-      if (fus || t.querySelector('colgroup')) continue;      // fusions ou largeurs déjà posées : on ne devine pas
+      // La RÉFÉRENCE est la première ligne SANS cellule fusionnée (une ligne de groupe ou de total en tête n'en est pas une).
+      var r0 = null, rs = t.tBodies[0].rows;
+      for (var ri = 0; ri < rs.length && !r0; ri++) {
+        var sansFus = true;
+        for (var f = 0; f < rs[ri].cells.length; f++) if (rs[ri].cells[f].colSpan > 1) sansFus = false;
+        if (sansFus && rs[ri].cells.length > 1) r0 = rs[ri];
+      }
+      if (!r0 || t.querySelector('colgroup')) continue;      // rien de sûr, ou largeurs déjà posées : on ne devine pas
+      var n = r0.cells.length;
       var larg = [], texte = [], fixe = 0, souple = 0;
       for (var k = 0; k < n; k++) {
         var c0 = r0.cells[k], w = c0.offsetWidth;
@@ -2553,6 +2561,9 @@ const JS_CEDER = () => `
 })();
 `;
 const CSS_CEDER = `
+/* (2026-11-19, banc --long : Réglages et Centre d'impression) Une liste déroulante prenait la largeur de sa plus LONGUE option
+   et sortait de sa carte : elle ne dépasse plus jamais son conteneur. */
+select{max-width:100%;min-width:0;text-overflow:ellipsis}
 td.sz-cede-auto,th.sz-cede-auto{max-width:none!important;min-width:0!important;overflow:hidden!important;text-overflow:ellipsis;white-space:nowrap}
 td.sz-cede-auto > div{max-width:100%;min-width:0;overflow:hidden}
 td.sz-cede-auto > div > *{min-width:0}
@@ -4904,7 +4915,7 @@ const CSS_RESPIRE = `
   border:1px solid var(--sz-bord-fort);box-shadow:0 28px 70px rgba(0,0,0,.5)}
 .szc-boite h3{margin:0 0 .6rem;font-size:1.08rem;font-weight:700;line-height:1.35}
 .szc-boite p{margin:0;font-size:.88rem;line-height:1.6;color:var(--tx2)}
-.szc-details{display:grid;grid-template-columns:auto 1fr;gap:.35rem 1rem;margin:1rem 0 0;padding:.8rem 1rem;border-radius:10px;
+.szc-details{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.35rem 1rem;margin:1rem 0 0;padding:.8rem 1rem;border-radius:10px;
   background:var(--f-champ);border:1px solid var(--sz-bord);font-size:.84rem}
 .szc-details dt{color:var(--tx2)}
 .szc-details dd{margin:0;color:var(--tx);font-weight:600;min-width:0;overflow-wrap:anywhere}

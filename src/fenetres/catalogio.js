@@ -171,7 +171,7 @@ code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 
 .rap2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem;align-items:start}
-@media (max-width:1000px){.rap2{grid-template-columns:1fr}}
+@media (max-width:1000px){.rap2{grid-template-columns:minmax(0,1fr)}}
 `;
 
 /**

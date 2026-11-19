@@ -221,7 +221,7 @@ html.jour .trouve span{color:#1b5631}
 .soin svg{width:17px;height:17px;flex:0 0 auto}
 .soin span{text-align:left}
 .soin[aria-pressed=true]{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:600}
-.deux{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.deux{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.5rem}
 .res{display:flex;flex-direction:column;gap:.2rem;max-height:11rem;overflow:auto;border:1px solid var(--v10);border-radius:8px;padding:.25rem}
 .res button{text-align:left;border-color:transparent;background:transparent;font-size:.78rem}
 .res button:hover{background:var(--v08)}
@@ -253,7 +253,7 @@ html.jour .trouve span{color:#1b5631}
 /* ⚠ .et-deux GARDE SES DEUX COLONNES sous 1100 px : empilées, la photo et la lecture sortaient par le bas (banc à 1080 × 700). */
 /* ⚠ .et-compo AUSSI reste côte à côte sous 1100 px (empilées, la composition poussait l entretien hors de la fenêtre) ;
    les colonnes de l entretien s équilibrent d elles-mêmes (columns), et ajusterEtape2 resserre au besoin. */
-@media (max-width:1100px){.assist{grid-template-columns:minmax(0,1fr) 21rem}.et-compo{grid-template-columns:minmax(14rem,.85fr) minmax(0,1.3fr)}.duo{grid-template-columns:1fr}}
+@media (max-width:1100px){.assist{grid-template-columns:minmax(0,1fr) 21rem}.et-compo{grid-template-columns:minmax(14rem,.85fr) minmax(0,1.3fr)}.duo{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 

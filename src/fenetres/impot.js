@@ -103,7 +103,7 @@ tbody tr.credit td{color:var(--tx-ok)}
 .mois span{flex:1 1 0;text-align:center;font-size:.6875rem;color:var(--tx3)}
 .aide{font-size:.75rem;color:var(--tx2);line-height:1.45}
 /* ── Onglets « Mon entreprise » et « Aide-mémoire » (#33) ── */
-.deux{display:grid;grid-template-columns:1fr 1fr;gap:0 .7rem}
+.deux{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:0 .7rem}
 label.champ{display:block;margin:0 0 .7rem}
 label.champ .lbl{display:block;font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;
   color:var(--tx2);margin:0 0 .22rem}
@@ -214,7 +214,7 @@ html.jour .ent-etat.manque{color:#6e4308;background:#fbf0dc}
 .docs{grid-template-columns:repeat(2,minmax(0,1fr))}
 .docs-col{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;align-items:start}
 .cx-tuile{padding:.9rem 1rem;gap:.55rem}
-@media (max-width:1180px){.ent-grille{grid-template-columns:1fr}.docs-col{grid-template-columns:1fr 1fr}}
+@media (max-width:1180px){.ent-grille{grid-template-columns:minmax(0,1fr)}.docs-col{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
 `;
 
 /**

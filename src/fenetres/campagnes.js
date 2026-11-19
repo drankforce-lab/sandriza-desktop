@@ -132,7 +132,7 @@ tbody tr:hover td{background:var(--v04)}
   padding-top:.5rem;margin-top:.2rem}
 .vide{padding:1.4rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 /* ── Formulaires de creation / modification (campagne et chaine) ─────────── */
-.form .rang{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.form .rang{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.55rem}
 .form .champ{display:flex;flex-direction:column;gap:.18rem;margin-bottom:.55rem}
 .form .champ .lbl{font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2)}
 .form .champ .aide{font-size:.71rem;color:var(--tx2);line-height:1.5}
@@ -161,8 +161,8 @@ tbody tr:hover td{background:var(--v04)}
 .bloc .bt .bi{font-size:.82rem;opacity:.85;width:1.3rem;text-align:center}
 .bloc .bt b{font:700 .78rem/1.2 system-ui;flex:1 1 auto;min-width:0}
 .bloc .bt button{font-size:.7rem;padding:.1rem .35rem;border-radius:6px}
-.bloc .bg{display:grid;grid-template-columns:1fr;gap:.3rem}
-.bloc .bg .duo2{display:grid;grid-template-columns:1fr 1fr;gap:.3rem}
+.bloc .bg{display:grid;grid-template-columns:minmax(0,1fr);gap:.3rem}
+.bloc .bg .duo2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.3rem}
 .bloc label{font-size:.7rem;color:var(--tx2);display:block;margin-bottom:.1rem}
 .bloc input,.bloc select,.bloc textarea{width:100%;font-size:.8rem;padding:.24rem .4rem}
 .bloc textarea{min-height:3.4rem;font-family:inherit}

@@ -132,7 +132,7 @@ span.szk-c{display:inline-flex;align-items:center;justify-content:center;width:1
 .mdl .n{font-size:.71rem;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 
 /* ── Le formulaire ───────────────────────────────────────────────────────── */
-.form2{display:grid;grid-template-columns:1fr 1fr;gap:.42rem .65rem}
+.form2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.42rem .65rem}
 .champ{display:flex;flex-direction:column;gap:.16rem;min-width:0}
 .champ label{font-size:.71rem;color:var(--tx2)}
 .champ input,.champ select,.champ textarea{width:100%;min-width:0}
@@ -148,7 +148,7 @@ span.szk-c{display:inline-flex;align-items:center;justify-content:center;width:1
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
-@media (max-width:980px){.duo{grid-template-columns:1fr}}
+@media (max-width:980px){.duo{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 

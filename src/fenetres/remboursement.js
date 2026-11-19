@@ -84,7 +84,7 @@ button.paie:hover:not(:disabled){background:#8f74ff;border-color:#8f74ff}
    ce que ca donne et ce qui manque encore. */
 .grid2{display:grid;grid-template-columns:minmax(0,1.55fr) minmax(0,1fr);gap:.55rem;align-items:start}
 .grid2 > div{display:flex;flex-direction:column;gap:.55rem;min-width:0}
-@media (max-width:860px){.grid2{grid-template-columns:1fr}}
+@media (max-width:860px){.grid2{grid-template-columns:minmax(0,1fr)}}
 .reste .t{font-size:.72rem;font-weight:700;color:var(--tx2);margin-bottom:.3rem}
 .reste .r{display:flex;align-items:center;gap:.45rem;font-size:.8rem;padding:.12rem 0}
 .reste .r .o{flex:0 0 auto;width:.9rem;height:.9rem;border-radius:50%;border:1.5px solid var(--tx-att)}

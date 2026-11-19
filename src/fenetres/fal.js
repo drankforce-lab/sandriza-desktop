@@ -149,7 +149,7 @@ html.jour .jours .b{background:rgba(168,128,78,.55)}html.jour .jours .b:hover{ba
 .part{display:inline-block;width:5rem;height:.4rem;border-radius:99px;background:var(--v08);overflow:hidden;vertical-align:middle;margin-right:.45rem}
 .part i{display:block;height:100%;background:rgba(var(--or-rgb),.75)}
 tr.aller{cursor:pointer}
-@media (max-width:1000px){.rang2{grid-template-columns:1fr}}
+@media (max-width:1000px){.rang2{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:980px){.fl-deux{grid-template-columns:minmax(13rem,17rem) minmax(0,1fr)}}
 `;
 

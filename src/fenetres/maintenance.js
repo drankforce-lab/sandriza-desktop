@@ -82,8 +82,8 @@ button.prim:hover:not(:disabled){background:rgba(var(--or-rgb),.14)}
 .carte h3{margin:0 0 .45rem;font:700 .95rem/1.2 Georgia,serif;
   display:flex;align-items:center;gap:.5rem}
 .expl{font-size:.82rem;line-height:1.6;color:var(--tx2)}
-.grille{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;margin:.85rem 0 0}
-@media (max-width:620px){.grille{grid-template-columns:1fr}}
+.grille{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.7rem;margin:.85rem 0 0}
+@media (max-width:620px){.grille{grid-template-columns:minmax(0,1fr)}}
 label{display:block;font-size:.75rem;color:var(--tx2);margin:0 0 .28rem}
 input{width:100%;padding:.52rem .65rem;border-radius:9px;
   border:1px solid var(--v12);background:var(--f-champ);color:var(--tx);

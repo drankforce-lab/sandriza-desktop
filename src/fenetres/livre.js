@@ -139,18 +139,18 @@ tbody tr.ligne td:first-child{padding-left:1.4rem}
 /* ── Le formulaire d'écriture ────────────────────────────────────────────── */
 /* Date et libelle sur UNE rangee (2026-10-04) : empiles, la saisie faisait
    defiler l onglet. */
-.form{display:grid;grid-template-columns:auto 11rem auto 1fr;gap:.45rem .7rem;align-items:center}
+.form{display:grid;grid-template-columns:auto 11rem auto minmax(0,1fr);gap:.45rem .7rem;align-items:center}
 .form label{font-size:.74rem;color:var(--tx2)}
 .lignes{margin-top:.55rem}
-.lignes .l{display:grid;grid-template-columns:1fr 7rem 7rem auto;gap:.35rem;margin-bottom:.3rem}
+.lignes .l{display:grid;grid-template-columns:minmax(0,1fr) 7rem 7rem auto;gap:.35rem;margin-bottom:.3rem}
 .lignes .l select{min-width:0}
 .vide{padding:1.3rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 /* ── AUCUNE BARRE DE DEFILEMENT (sa regle, 2026-09-26) — mesuree au jeu d essai
    du 2026-09-29 : Journal +34 000 px, Grand livre +1 300, Balance +800, Bilan +300.
    Deux colonnes la ou un ecran de 1400 px en tient deux ; le journal se PAGINE
    par ecriture entiere (jamais une ecriture coupee entre deux pages). */
-.duo{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:start}
-.trio{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.7rem;align-items:start}
+.duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.7rem;align-items:start}
+.trio{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:.7rem;align-items:start}
 .trio>div>.cx-carte+.cx-carte{margin-top:.9rem}
 .duo,.trio{gap:.9rem}
 .voile{position:fixed;inset:0;background:rgba(6,10,18,.72);display:flex;align-items:center;justify-content:center;z-index:50;padding:1rem}

@@ -43,7 +43,7 @@ const CSS = `
 .amb-sous .ls-onglets .n{margin-left:.4rem}
 .amb-sous .droite{margin-left:auto}
 .amb-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:.7rem 1rem}
-.amb-deux{display:grid;grid-template-columns:1fr 1fr;gap:.7rem 1rem;margin-top:.7rem}
+.amb-deux{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.7rem 1rem;margin-top:.7rem}
 .amb-grille label,.amb-deux label{display:flex;flex-direction:column;gap:.3rem;font-size:.8rem;color:var(--tx2)}
 .amb-grille input,.amb-grille select,.amb-deux input,.amb-deux textarea{font:inherit;font-size:.85rem;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:.4rem .55rem}
 .amb-deux textarea{resize:vertical;min-height:5.2rem;line-height:1.45}
@@ -182,7 +182,7 @@ tbody tr[data-sondage]{cursor:pointer}
 .boite:has(.ed2){max-width:min(74rem,96vw)}
 .ed2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);gap:1rem;align-items:start}
 .ed2 .qs{margin-top:0}
-@media (max-width:900px){.ed2{grid-template-columns:1fr}}
+@media (max-width:900px){.ed2{grid-template-columns:minmax(0,1fr)}}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 Georgia,serif;display:flex;
   align-items:center;gap:.5rem;flex-wrap:wrap}
 .q{border-top:1px solid var(--v07);padding:.5rem 0}

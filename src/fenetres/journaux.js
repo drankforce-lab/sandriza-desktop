@@ -47,8 +47,8 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .carte{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1rem 1.1rem;margin:0 0 1.1rem}
 .barre{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;margin:0 0 .9rem}
 .barre .pousse{flex:1}
-.stat-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:.8rem;margin:0 0 1rem}
-@media(max-width:820px){.stat-grid{grid-template-columns:repeat(2,1fr)}}
+.stat-grid{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.8rem;margin:0 0 1rem}
+@media(max-width:820px){.stat-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 /* ══ LA REFONTE DE L INVENTAIRE, APPLIQUEE AUX JOURNAUX (2026-09-25) ════════
    Dix vues, trois pieces communes : on refait les PIECES, pas les dix
    gabarits — les compteurs (.stat, .kpi) prennent les mesures des tuiles, le

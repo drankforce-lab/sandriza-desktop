@@ -52,8 +52,8 @@ body{background:var(--f-page);color:var(--tx);
 .ch input{width:100%;box-sizing:border-box;font:inherit;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
 .ch input:focus{outline:none;border-color:var(--or)}
-.deux{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
-@media (max-width:560px){.deux{grid-template-columns:1fr}}
+.deux{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem}
+@media (max-width:560px){.deux{grid-template-columns:minmax(0,1fr)}}
 .apercu{background:var(--f-champ);border:1px solid var(--v07);border-radius:9px;
   padding:.6rem .75rem;font-size:.82rem;color:var(--tx2);line-height:1.5}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;

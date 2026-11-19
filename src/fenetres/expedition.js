@@ -84,8 +84,8 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 .adresse .nom{font-weight:600}
 .adresse .det{color:var(--tx2)}
 
-.r2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
-.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+.r2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.5rem}
+.r3{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:.5rem}
 .ch{display:flex;flex-direction:column;gap:.2rem;min-width:0}
 .ch label{font-size:.72rem;color:var(--tx2)}
 
@@ -93,7 +93,7 @@ button.mini{padding:.14rem .5rem;font-size:.76rem}
 /* La comparaison des transporteurs (2026-10-05) : une ligne par transporteur,
    le moins cher en tete et marque. Une ligne se choisit d un clic. */
 .cmp{display:flex;flex-direction:column;gap:.3rem}
-.cmp .l{display:grid;grid-template-columns:1fr auto auto;gap:.6rem;align-items:center;padding:.45rem .65rem;
+.cmp .l{display:grid;grid-template-columns:minmax(0,1fr) auto auto;gap:.6rem;align-items:center;padding:.45rem .65rem;
   border:1px solid var(--v08);border-radius:9px;cursor:pointer;font-size:.82rem;background:transparent;color:inherit;text-align:left;font:inherit}
 .cmp .l:hover{border-color:var(--v20)}
 .cmp .l.sel{border-color:var(--tx-or);background:rgba(var(--or-rgb),.08)}

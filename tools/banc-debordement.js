@@ -82,7 +82,24 @@ const LARGEURS = [Number(process.env.SZ_DEB_L) || (DETACHE ? 1080 : 1400)];
    ➡ On gonfle donc les tableaux du jeu en repetant leurs entrees, avec des
    identifiants distincts pour que rien ne se confonde. */
 const GROS = OPT('--gros') ? 120 : 0;   // --gros : liste pleine (les 13 provinces de taxes)
-function gonfler(v, prof) {
+/* --long (2026-11-19, « il y a plein de déformations » — avec SES données, plus longues que celles des essais) : chaque
+   TEXTE du jeu est allongé (≈ ×2,5). Les identifiants, dates, montants, courriels, adresses et codes ne bougent pas. */
+const LONG = OPT('--long');
+const _CLES_FIXES = /^(id|cle|ref|sku|code|date|.*At|.*Le|email|courriel|url|adresse.*Web|src|image|photo.*|statut|etat|mode|type|categorie|ligne|devise|currency|lang.*|op|motif|ton|sorte|ouvrir|role|token|jeton|.*Id)$/i;
+function allonger(v, cle) {
+  if (!LONG || typeof v !== 'string') return v;
+  if (cle && _CLES_FIXES.test(cle)) return v;
+  if (v.length < 3 || v.length > 80) return v;
+  if (/^[\d\s.,:$%+\-\/#()]+$/.test(v) || /@|https?:|^data:|^#[0-9a-f]{3,8}$|^[A-Z0-9_\-]{2,}$/i.test(v) && !/\s/.test(v)) return v;
+  if (!/[a-zà-ÿ]/i.test(v)) return v;
+  return v + ' — ' + v + ' ' + v.split(' ')[0];
+}
+function gonfler(v, prof, cle) {
+  if (LONG && typeof v === 'string') return allonger(v, cle);
+  if (LONG && v && typeof v === 'object' && !Array.isArray(v) && (!GROS || prof > 4)) {
+    const o = {}; for (const k of Object.keys(v)) o[k] = gonfler(v[k], prof + 1, k); return o;
+  }
+  if (LONG && Array.isArray(v) && (!GROS || prof > 4)) return v.map((x) => gonfler(x, prof + 1, cle));
   if (!GROS || prof > 4) return v;
   if (Array.isArray(v)) {
     if (!v.length || v.length >= GROS) return v.map((x) => gonfler(x, prof + 1));
@@ -103,7 +120,7 @@ function gonfler(v, prof) {
   }
   if (v && typeof v === 'object') {
     const o = {};
-    for (const k of Object.keys(v)) o[k] = gonfler(v[k], prof + 1);
+    for (const k of Object.keys(v)) o[k] = gonfler(v[k], prof + 1, k);
     return o;
   }
   return v;
@@ -128,7 +145,24 @@ const prologue = (jeu) =>
 /* ⚠ REMPLACEMENT PAR FONCTION, ET CE N'EST PAS UN DETAIL : dans une chaine de
    remplacement, `$&` et consorts sont des motifs. Un coeur qui en contiendrait
    un seul serait recopie de travers, sans un mot. */
+/* --onglets (2026-11-19, sa demande : « repasse toutes les fenêtres, il y a plein de déformations ») : le banc ne voyait que le
+   PREMIER onglet de chaque fenêtre. Avec --onglets, la page clique chaque onglet visible (10 au plus), laisse le temps de
+   dessiner, et remesure ; chaque onglet a son propre contexte (« fenetre/mode#2:Libellé »). */
+const ONGLETS = OPT('--onglets');
+const MARCHE_ONGLETS = "(function(){\n"
+  + "  var sel='.onglets button,.ls-onglets button,.ed-seg button,.rf-tb > .rf-jet[data-onglet],button[data-onglet],a[data-onglet],button[data-vue],button[data-per]';\n"
+  + "  var vus=[], tabs=[].slice.call(document.querySelectorAll(sel)).filter(function(b){ if(!b.offsetParent||b.disabled||vus.indexOf(b)>=0) return false; vus.push(b); return true; }).slice(0,10);\n"
+  + "  var k=0;\n"
+  + "  function suite(){\n"
+  + "    if(k>=tabs.length){ try{ parent.postMessage('sz-fini','*'); }catch(e){} return; }\n"
+  + "    var b=tabs[k++], lib=String(b.textContent||'').replace(/\s+/g,' ').trim().slice(0,16);\n"
+  + "    try{ if(document.contains(b)) b.click(); }catch(e){}\n"
+  + "    setTimeout(function(){ try{ poserLesAnimations(); mesurer(document.body, __CONTEXTE__ + '#' + k + ':' + lib); }catch(e){} suite(); }, 400);\n"
+  + "  }\n"
+  + "  suite();\n"
+  + "})();";
 const epilogue = (nom, mode) => EPILOGUE_BRUT
+  .replace("try { parent.postMessage('sz-fini', '*'); } catch (e) {}", () => (ONGLETS ? MARCHE_ONGLETS : "try { parent.postMessage('sz-fini', '*'); } catch (e) {}"))
   .replace('__COEUR__', () => COEUR)
   .split('__CONTEXTE__').join(JSON.stringify(nom + '/' + mode))
   .split('__NOM__').join(JSON.stringify(nom));
@@ -261,7 +295,7 @@ function pagePilote(adresses, largeur) {
     + '  minuterie = setTimeout(function () {\n'
     + '    console.log("ELG-CR|MUETTE " + LISTE[i]);\n'
     + '    suivant();\n'
-    + '  }, 4500);\n'
+    + '  }, ' + (ONGLETS ? 15000 : 4500) + ');\n'
     + '}\n'
     + 'window.addEventListener("message", function (e) { if (e.data === "sz-fini") suivant(); });\n'
     + 'suivant();\n'

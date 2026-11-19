@@ -65,7 +65,7 @@ body{background:var(--f-page);color:var(--tx);
 .carte h2 .note{font-weight:400;text-transform:none;letter-spacing:0;color:var(--tx3)}
 
 /* ⚠ PAS << .info >> : le socle peint ce nom en panneau BLEU en mode jour (2026-09-29). */
-.dinfo{display:grid;grid-template-columns:1fr 1fr;gap:.5rem 1.2rem;font-size:.86rem}
+.dinfo{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.5rem 1.2rem;font-size:.86rem}
 .dinfo .k{font-size:.7rem;color:var(--tx2)}
 .dinfo .v{font-weight:500}
 .dinfo .large{grid-column:1/-1}
@@ -75,8 +75,8 @@ input,select,textarea{font:inherit;color:var(--tx);background:var(--f-0f1826);
   width:100%;min-width:0}
 input:focus,select:focus,textarea:focus{outline:none;border-color:var(--or)}
 textarea{resize:none}
-.r2{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
-.r3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.5rem}
+.r2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.5rem}
+.r3{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:.5rem}
 .ch{display:flex;flex-direction:column;gap:.2rem;min-width:0}
 .ch label{font-size:.72rem;color:var(--tx2)}
 
@@ -147,7 +147,7 @@ button.mini{padding:.12rem .5rem;font-size:.75rem}
 .cols-dem{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem;align-items:start}
 .cols-dem > .col{display:flex;flex-direction:column;gap:.7rem;min-width:0}
 .cols-dem .carte{margin:0}
-@media (max-width:1000px){.cols-dem{grid-template-columns:1fr}}
+@media (max-width:1000px){.cols-dem{grid-template-columns:minmax(0,1fr)}}
 `;
 
 /** Page complète de la fenêtre native « Demande de retour ». */

@@ -47,7 +47,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .grpH{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);margin:0 0 .55rem}
 .cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem}
 .cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem}
-@media(max-width:760px){.cols3,.cols2{grid-template-columns:1fr}}
+@media(max-width:760px){.cols3,.cols2{grid-template-columns:minmax(0,1fr)}}
 label.champ{display:block;margin:0 0 .75rem}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
 label.champ .sub{display:block;font-size:.72rem;color:var(--tx-gris);margin:.2rem 0 0}

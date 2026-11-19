@@ -394,7 +394,7 @@ html.jour .kb-ct{color:#454f5c}
 .pagi select{width:auto;padding:.14rem .35rem;font-size:.76rem}
 
 /* ── Le detail d une commande ── */
-.det2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:.55rem}
+.det2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem;margin-top:.55rem}
 .bloc h3{margin:0 0 .25rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.08em;color:var(--tx2);font-weight:700}
 .bloc .l{font-size:.85rem}

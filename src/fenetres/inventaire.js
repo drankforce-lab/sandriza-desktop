@@ -188,7 +188,7 @@ td.e select{min-width:8rem}
 .onglets button:hover:not(.actif){background:var(--v05);color:var(--tx)}
 
 /* ── Tuiles de statistiques (onglet Produits) ─────────────────────────────── */
-.tuiles{display:grid;grid-template-columns:repeat(5,1fr);gap:.6rem;flex:0 0 auto}
+.tuiles{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.6rem;flex:0 0 auto}
 .tuile{background:var(--f-carte);border:1px solid var(--v07);
   border-radius:13px;padding:.75rem .95rem;min-width:0}
 .tuile .lbl{font-size:.76rem;font-weight:600;

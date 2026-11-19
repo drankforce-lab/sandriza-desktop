@@ -56,8 +56,8 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .quoi{font-size:.79rem;color:var(--tx2);line-height:1.6;margin:0;max-width:62rem}
 .quoi b{color:var(--tx)}
 .outils{display:flex;gap:.5rem;flex-wrap:wrap}
-.stat-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1rem;margin:0 0 1.2rem}
-@media(max-width:760px){.stat-grid{grid-template-columns:1fr}}
+.stat-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1rem;margin:0 0 1.2rem}
+@media(max-width:760px){.stat-grid{grid-template-columns:minmax(0,1fr)}}
 .stat{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1rem 1.1rem}
 .stat .l{font-size:.74rem;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em}
 .stat .v{font:700 1.5rem/1.15 Georgia,serif;margin-top:.25rem}

@@ -121,6 +121,9 @@ table{width:100%;border-collapse:collapse;font-size:.79rem}
 thead th{text-align:left;padding:.22rem .35rem;font-size:.6875rem;text-transform:uppercase;
   letter-spacing:.06em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 thead th.n,tbody td.n{text-align:right;font-family:ui-monospace,Consolas,monospace;white-space:nowrap}
+table.vh-reg{table-layout:fixed;width:100%}
+table.vh-reg td{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:none!important;min-width:0!important}
+table.vh-reg td :is(b,span){display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .bilan td.n small{white-space:normal}
 tbody td{padding:.42rem .5rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr.ligne{cursor:default}
@@ -162,7 +165,7 @@ tbody tr.ligne.mod{cursor:pointer}
 .appel .aide{max-width:34rem}
 
 /* ── Formulaires ─────────────────────────────────────────────────────────── */
-.form2{display:grid;grid-template-columns:1fr 1fr;gap:.42rem .65rem}
+.form2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.42rem .65rem}
 /* Fenetre basse (detachee, 2026-10-12 : le formulaire depassait de 21 px) : champs et ecarts resserres. */
 @media (max-height:820px){.form2{gap:.3rem .65rem}.form2 input,.form2 select{padding-top:.28rem!important;padding-bottom:.28rem!important;min-height:0!important}}
 .champ{display:flex;flex-direction:column;gap:.16rem;min-width:0}
@@ -184,7 +187,7 @@ tbody tr.ligne.mod{cursor:pointer}
 .vcarte .meta{font-size:.74rem;color:var(--tx2)}
 .odo{border-top:1px solid var(--v08);padding-top:.45rem;margin-top:.15rem}
 .odo .ot{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;margin-bottom:.3rem}
-.odo .og{display:grid;grid-template-columns:4.6rem 1fr;gap:.3rem .5rem;align-items:center}
+.odo .og{display:grid;grid-template-columns:4.6rem minmax(0,1fr);gap:.3rem .5rem;align-items:center}
 .odo .og label{font-size:.74rem;color:var(--tx2)}
 .odo .src{grid-column:2;font-size:.6875rem;color:var(--tx3);margin-top:-.15rem}
 .kv{display:flex;gap:.9rem;flex-wrap:wrap;font-size:.78rem}
@@ -209,7 +212,7 @@ tbody tr.ligne.mod{cursor:pointer}
   max-width:44rem;width:100%;max-height:92vh;overflow:hidden;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 system-ui}
 .boite.large{max-width:66rem}
-.deuxcol{display:grid;grid-template-columns:1fr 1fr;gap:1.1rem;align-items:start}
+.deuxcol{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:1.1rem;align-items:start}
 .ot2{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;margin-bottom:.35rem}
 .coches{flex-direction:row;gap:1.1rem;flex-wrap:wrap}
 .dpa-l{display:grid;grid-template-columns:auto minmax(0,1fr) auto auto;gap:.35rem;align-items:center;margin:.2rem 0}
@@ -224,7 +227,7 @@ tbody tr.ligne.mod{cursor:pointer}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
-@media (max-width:980px){.duo{grid-template-columns:1fr}}
+@media (max-width:980px){.duo{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* Un « Supprimer » par ligne : neutre au repos, rouge au survol et quand il
    demande confirmation — douze boutons rouges faisaient une liste en alerte
@@ -766,7 +769,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
         + (PA ? '${T("Chaque sortie pour affaires s’inscrit à droite : la date, la destination, la raison et les kilomètres.")}' : '')
         + '</div></div>';
     }
-    h += '<table><thead><tr><th>${T("Date")}</th><th>${T("Trajet et raison")}</th><th>${T("Véhicule")}</th>'
+    /* (2026-11-19, banc --long : « Supprimer » sortait de la carte avec de vrais noms de véhicules et de trajets) Largeurs
+       DÉCIDÉES : la date, les km et l'action gardent la leur ; le trajet et le véhicule se partagent le reste et s'abrègent. */
+    h += '<table class="vh-reg"><colgroup><col style="width:6.6rem"><col><col style="width:28%"><col style="width:5.6rem"><col style="width:6.8rem"></colgroup>'
+      + '<thead><tr><th>${T("Date")}</th><th>${T("Trajet et raison")}</th><th>${T("Véhicule")}</th>'
       + '<th class="n">${T("Km")}</th><th></th></tr></thead><tbody>';
     h += t.vue.map(function(d){
       var parOdo = d.odoDebut != null && d.odoFin != null;

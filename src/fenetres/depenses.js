@@ -168,7 +168,7 @@ td .rf-pill.usd{margin-left:.35rem}
 .det-duo .recu img{max-height:24rem}
 
 /* Le formulaire : deux colonnes, et le bloc des montants mis en evidence. */
-.form{display:grid;grid-template-columns:1fr 1fr;gap:.5rem .8rem}
+.form{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.5rem .8rem}
 .form .aide-veh{align-self:end;font-size:.72rem;line-height:1.35}
 .form .large{grid-column:1/-1}
 .champ{display:flex;flex-direction:column;gap:.2rem}
@@ -176,11 +176,11 @@ td .rf-pill.usd{margin-left:.35rem}
 .champ input,.champ select{width:100%}
 .bloc-montants{grid-column:1/-1;background:var(--f-carte);
   border:1px solid var(--sz-bord,var(--v09));border-radius:14px;padding:.55rem .7rem}
-.trois{display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:.5rem;align-items:end}
+.trois{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) auto;gap:.5rem;align-items:end}
 /* La part d affaires (usage mixte, 2026-10-02) entre dans le MEME rang que les
    montants : une colonne etroite, pas une ligne de plus (aucune barre de
    defilement). */
-.trois.avec-part{grid-template-columns:1fr 1fr 1fr 6.5rem auto}
+.trois.avec-part{grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr) 6.5rem auto}
 /* LISIBILITÉ, ÉTAPE 2 (2026-10-11) : la fiche s élargit (la fenêtre a la place), les montants
    prennent des colonnes égales et « Calc. taxes » quitte le rang des champs pour sa propre ligne,
    à droite — il écrasait la part d affaires dans une colonne de 6,5 rem. */
@@ -190,7 +190,7 @@ td .rf-pill.usd{margin-left:.35rem}
 .trois,.trois.avec-part{grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem 1rem}
 .trois.avec-part{grid-template-columns:repeat(4,minmax(0,1fr))}
 .trois > #f-taxes{grid-column:1 / -1;justify-self:end}
-@media (max-width:620px){.form,.trois{grid-template-columns:1fr}}
+@media (max-width:620px){.form,.trois{grid-template-columns:minmax(0,1fr)}}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;

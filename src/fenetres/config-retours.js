@@ -53,7 +53,7 @@ body{background:var(--f-page);color:var(--tx);
   border:1px solid var(--v12);border-radius:8px;padding:.42rem .55rem}
 .ch input:focus{outline:none;border-color:var(--or)}
 .ch input:disabled{opacity:.55}
-.gr{display:grid;grid-template-columns:1fr 1fr;gap:.6rem .7rem}
+.gr{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.6rem .7rem}
 .gr .ch{margin:0}
 .gr .plein{grid-column:1/-1}
 .bascule,.ch label.bascule{display:flex;align-items:flex-start;gap:.6rem;font-size:.86rem;cursor:pointer;

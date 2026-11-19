@@ -77,17 +77,17 @@ body{background:var(--f-page);color:var(--tx);
 .tuile .val.bon{color:var(--tx-ok)}.tuile .val.att{color:var(--tx-att)}.tuile .val.err{color:var(--tx-err)}
 .tuile .sub{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .carte + .carte,.duo + .carte{margin-top:.8rem}
-.duo{display:grid;grid-template-columns:1.5fr 1fr;gap:.8rem;align-items:stretch}
+.duo{display:grid;grid-template-columns:1.5fr minmax(0,1fr);gap:.8rem;align-items:stretch}
 .trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem;align-items:stretch}
 .trio > .carte{margin:0}
-@media (max-width:1100px){.trio{grid-template-columns:1fr 1fr}}
+@media (max-width:1100px){.trio{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
 /* Tuiles COMPACTES : le bandeau est repete sur chaque onglet, il ne doit pas
    manger la hauteur des reglages (sa demande : pas de barre de defilement). */
 .tuiles .tuile{padding:.45rem .75rem}
 .tuiles .tuile .val{font-size:1.2rem;margin:.05rem 0 0}
 .tuiles .tuile .sub{margin-top:0}
 .duo > .carte{margin:0}
-@media (max-width:900px){.duo{grid-template-columns:1fr}}
+@media (max-width:900px){.duo{grid-template-columns:minmax(0,1fr)}}
 .carte > h2{margin:0 0 .2rem}
 .carte > h2 + .aide{margin:0 0 .8rem}
 .ch .etat{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap;margin-top:.35rem}
@@ -96,8 +96,8 @@ body{background:var(--f-page);color:var(--tx);
 .info code{background:var(--f-champ);border:1px solid var(--v12);border-radius:5px;padding:1px 6px;font-size:.72rem}
 .note{background:var(--v03);border:1px solid var(--v07);color:var(--tx2);
   border-radius:8px;padding:.45rem .7rem;font-size:.73rem;line-height:1.5;margin:0 0 .7rem}
-.gr2{display:grid;grid-template-columns:1fr 1fr;gap:.6rem}
-@media (max-width:640px){.gr2{grid-template-columns:1fr}}
+.gr2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.6rem}
+@media (max-width:640px){.gr2{grid-template-columns:minmax(0,1fr)}}
 .ch{margin:0 0 .6rem}
 .ch:last-child{margin-bottom:0}
 .ch label{display:block;margin-bottom:.22rem;font-size:.75rem;color:var(--tx2)}

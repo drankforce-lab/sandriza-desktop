@@ -83,7 +83,7 @@ button:focus{outline:none;border-color:var(--or)}
 .tab .d{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
 .ach{grid-template-columns:minmax(0,1fr) 3.4rem 3.4rem 5.2rem 5.8rem}
 .art{grid-template-columns:minmax(0,1.4fr) 6.4rem minmax(0,.9fr) 3rem 6rem}
-@media (max-width:1100px){.duo{grid-template-columns:1fr}}
+@media (max-width:1100px){.duo{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 

@@ -67,7 +67,7 @@ button.bsc:disabled{opacity:.5;cursor:default}
 .vip{margin:1.4rem 0 0;border:1px solid var(--v12);border-radius:12px;padding:1rem 1.1rem;background:var(--v04)}
 .vip .bascule{display:flex;align-items:center;gap:.6rem;font-size:.86rem;margin:0 0 .9rem;cursor:pointer}
 .vip .bascule input{width:1.05rem;height:1.05rem}
-.vip .grille{display:grid;grid-template-columns:1fr 1fr;gap:.7rem .9rem}
+.vip .grille{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.7rem .9rem}
 .vip label.ch{display:flex;flex-direction:column;gap:.25rem;font-size:.74rem;color:var(--tx2)}
 .vip input[type=text],.vip input[type=number],.vip textarea{font:inherit;font-size:.84rem;color:var(--tx);background:var(--f-champ);
   border:1px solid var(--v12);border-radius:7px;padding:.4rem .55rem}
@@ -78,7 +78,7 @@ button.bsc:disabled{opacity:.5;cursor:default}
 .vip .pourquoi{font-size:.78rem;color:var(--tx2);margin:.5rem 0 0}
 .vip .resultat{font-size:.8rem;margin:.5rem 0 0;color:var(--tx)}
 .vip .note{font-size:.76rem;color:var(--tx2);margin:.7rem 0 0;line-height:1.55}
-@media (max-width:640px){.vip .grille{grid-template-columns:1fr}}
+@media (max-width:640px){.vip .grille{grid-template-columns:minmax(0,1fr)}}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* « Épuré » : le lancement au public et l'enregistrement de la liste VIP prennent le bouton principal brun (pas de vert, pas de marine) ;

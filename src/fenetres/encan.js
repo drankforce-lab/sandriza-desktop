@@ -41,7 +41,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.45 system-ui,-apple-sy
 
 .grille{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(250px,300px) minmax(0,1fr) minmax(270px,340px);
   gap:.75rem;padding:.75rem 1rem}
-@media (max-width:1000px){.grille{grid-template-columns:1fr;overflow:auto}}
+@media (max-width:1000px){.grille{grid-template-columns:minmax(0,1fr);overflow:auto}}
 .col{min-width:0;min-height:0;display:flex;flex-direction:column;gap:.75rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:.85rem .95rem;min-height:0}
 h2{margin:0;font-size:.72rem;text-transform:uppercase;letter-spacing:.1em;color:var(--tx2);font-weight:700}
@@ -99,7 +99,7 @@ button.mini{padding:.12rem .45rem;font-size:.74rem;border-radius:6px}
 .qui{font-weight:700;color:var(--tx-or);min-height:1.2em}
 .barre{height:6px;border-radius:4px;background:var(--v08);overflow:hidden;margin-top:.35rem}
 .barre i{display:block;height:100%;width:0;background:var(--or);transition:width .2s linear}
-.actions{display:grid;grid-template-columns:2fr 1fr 1fr;gap:.55rem}
+.actions{display:grid;grid-template-columns:2fr minmax(0,1fr) minmax(0,1fr);gap:.55rem}
 .actions button{padding:.8rem .6rem;font-weight:700;font-size:.95rem}
 .actions-sec{display:flex;flex-wrap:wrap;gap:.2rem;justify-content:space-between;border-top:1px solid var(--v08);padding-top:.55rem}
 .gagnant{border:1px solid var(--or);border-radius:11px;padding:.75rem .9rem;display:flex;flex-direction:column;gap:.45rem}

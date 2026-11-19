@@ -306,7 +306,7 @@ select:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
 .cx-embleme.bon svg{animation:cx-apparait .35s cubic-bezier(.2,.8,.2,1)}
 .cx-cle-tete{text-align:center;margin-bottom:1.15rem}
 .cx-cle-tete .cx-sous{max-width:330px;margin-left:auto;margin-right:auto}
-.cx-methodes{display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem;margin:0 0 1.15rem}
+.cx-methodes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:0.5rem;margin:0 0 1.15rem}
 .cx-methode{text-align:center;padding:0.7rem 0.4rem 0.6rem;border-radius:11px;background:#fff;
   border:1px solid rgba(196,154,108,0.3);color:#7d5f3c}
 .cx-methode svg{display:block;margin:0 auto 0.35rem}

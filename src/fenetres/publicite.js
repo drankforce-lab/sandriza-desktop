@@ -71,9 +71,9 @@ button.actif{border-color:var(--or);background:rgba(var(--or-rgb),.14)}
 .tuile .z{font-size:.72rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:12px;padding:.7rem .8rem}
 .carte h2{margin:0 0 .55rem;font-size:.76rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;display:flex;justify-content:space-between;align-items:center}
-.deux{display:grid;grid-template-columns:2fr 1fr;gap:1rem;align-items:start}
-.deuxb{display:grid;grid-template-columns:1fr 340px;gap:1rem;align-items:start}
-@media(max-width:760px){.deux,.deuxb{grid-template-columns:1fr}}
+.deux{display:grid;grid-template-columns:2fr minmax(0,1fr);gap:1rem;align-items:start}
+.deuxb{display:grid;grid-template-columns:minmax(0,1fr) 340px;gap:1rem;align-items:start}
+@media(max-width:760px){.deux,.deuxb{grid-template-columns:minmax(0,1fr)}}
 table{width:100%;border-collapse:collapse;font-size:.82rem}
 thead th{text-align:left;padding:.26rem .4rem;font-size:.6875rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);font-weight:700;border-bottom:1px solid var(--v10)}
 tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055)}

@@ -83,7 +83,7 @@ const CSS_PROPRE = `
 .ch.a-puces>label:first-child{position:absolute;top:.2rem;left:.1rem;font-size:.68rem;font-weight:600;color:var(--tx2)}
 .pf-sw{margin-top:.8rem;padding-top:.75rem;border-top:1px solid var(--v08)}
 .sans-solde .prixgrille .ch:has(#p-solde),.sans-solde #p-rabais{display:none!important}
-.sans-solde .prixgrille{grid-template-columns:repeat(2,1fr)!important}
+.sans-solde .prixgrille{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 .pf-marge-barre{height:.45rem;border-radius:99px;background:var(--v10);overflow:hidden;margin-top:.4rem}
 .pf-marge-barre i{display:block;height:100%;border-radius:99px;background:#6fae73}
 .pf-marge-barre i.perte{background:var(--tx-err)}
@@ -249,7 +249,7 @@ html.jour .vue .depl button{background:rgba(255,255,255,.92);color:#1d2433;borde
 .mini-decor:hover:not(:disabled){border-color:var(--or)}
 .mini-decor:disabled{opacity:.35;cursor:default}
 /* Le gros plan sur la fibre (2026-10-17) */
-.gp-deux{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin:.6rem 0}
+.gp-deux{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem;margin:.6rem 0}
 .gp-photo{position:relative;border-radius:10px;overflow:hidden;background:var(--f-0f1826);cursor:crosshair;align-self:start}
 .gp-photo img{display:block;width:100%;height:auto}
 .gp-cadre{position:absolute;border:2px solid #F59E0B;box-shadow:0 0 0 9999px rgba(0,0,0,.35);pointer-events:none}
@@ -499,12 +499,12 @@ html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
 .voile .boite.alerte h3{color:var(--tx-err2)}
 .voile p{margin:0 0 .7rem;font-size:.86rem;line-height:1.5;color:var(--tx-bleute)}
 .voile .pied2{display:flex;justify-content:flex-end;gap:.45rem;margin-top:.8rem}
-.cote{display:grid;grid-template-columns:1fr 1fr;gap:.7rem;align-items:start}
+.cote{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.7rem;align-items:start}
 .cote .grille{grid-template-columns:repeat(2,minmax(0,1fr))}
 .pf-duo{margin-top:0;align-items:stretch}
 .pf-duo>.carte{margin:0}
-.prixgrille{display:grid;grid-template-columns:repeat(3,1fr);gap:.65rem .9rem;align-items:start}
-@media (max-width:980px){.cote{grid-template-columns:1fr}}
+.prixgrille{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.65rem .9rem;align-items:start}
+@media (max-width:980px){.cote{grid-template-columns:minmax(0,1fr)}}
 /* ALIGNEMENT (2026-10-04, sa capture) : le libelle etait un flex — l etoile partait au bout de la colonne et un libelle sur deux lignes descendait son champ. Libelle en texte, et les trois champs partagent leurs RANGEES (subgrid) : les cases restent sur une meme ligne. */
 .prixgrille{grid-template-rows:auto auto}
 .prixgrille .ch{display:grid;grid-row:span 2;grid-template-rows:subgrid;row-gap:.3rem}
@@ -517,7 +517,7 @@ html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
 .rabais{display:flex;gap:.2rem;flex-wrap:nowrap;margin-top:.35rem}
 .rabais button{padding:.14rem .3rem;font-size:.7rem;border-radius:6px;white-space:nowrap}
 .rabais button.on{background:var(--or);border-color:var(--or);color:#17202c;font-weight:600}
-@media (max-width:700px){.prixgrille{grid-template-columns:1fr}}
+@media (max-width:700px){.prixgrille{grid-template-columns:minmax(0,1fr)}}
 .paire{display:flex;gap:.4rem;align-items:center}
 .paire input{flex:1 1 auto}
 .paire select{flex:0 0 5rem}

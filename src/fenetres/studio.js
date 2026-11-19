@@ -416,10 +416,10 @@ html.jour .choixph .ico{color:#6a5840}
    ⚠ ELLE AVAIT UNE COLONNE DE GAUCHE POUR L EMOJI. Les pictogrammes sont
    retires depuis le 2026-09-05, et la colonne est partie AVEC : la garder
    aurait laisse un retrait vide devant chaque titre, que plus rien n explique. */
-.tuiles{display:grid;grid-template-columns:1fr;gap:.4rem}
+.tuiles{display:grid;grid-template-columns:minmax(0,1fr);gap:.4rem}
 .tuile{background:var(--f-pill);border:1px solid var(--v09);border-radius:10px;
   padding:.58rem .7rem;cursor:pointer;-webkit-user-select:none;user-select:none;
-  display:grid;grid-template-columns:1fr;row-gap:.08rem;
+  display:grid;grid-template-columns:minmax(0,1fr);row-gap:.08rem;
   align-items:center;text-align:left;transition:border-color .12s,background .12s}
 .tuile:hover{border-color:rgba(var(--or-rgb),.5)}
 .tuile.on{border-color:var(--or);background:rgba(var(--or-rgb),.14)}

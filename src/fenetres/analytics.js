@@ -46,8 +46,8 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .info{background:rgba(80,120,190,.1);border:1px solid rgba(120,160,220,.28);color:#bcd2f0;
   border-radius:9px;padding:.7rem .85rem;font-size:.78rem;line-height:1.6;margin:0 0 1rem}
 .info b{color:#dbe7fb}
-.gr2{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
-@media (max-width:640px){.gr2{grid-template-columns:1fr}}
+.gr2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.7rem}
+@media (max-width:640px){.gr2{grid-template-columns:minmax(0,1fr)}}
 .ch{margin:0 0 .8rem}.ch:last-child{margin-bottom:0}
 .ch label{display:block;margin-bottom:.25rem;font-size:.76rem;color:var(--tx2)}
 .ch input,.ch textarea{width:100%;font:inherit;font-size:.83rem;color:var(--tx);background:var(--f-champ);

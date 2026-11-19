@@ -91,8 +91,8 @@ input.t,textarea.t,select.t{width:100%;background:var(--f-champ);border:1px soli
   font:inherit;padding:.5rem .65rem}
 textarea.t{resize:vertical;min-height:3.2rem;line-height:1.5}
 input.t:focus,textarea.t:focus{outline:none;border-color:var(--or)}
-.grille2{display:grid;grid-template-columns:1fr 1fr;gap:.8rem}
-@media(max-width:640px){.grille2{grid-template-columns:1fr}}
+.grille2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.8rem}
+@media(max-width:640px){.grille2{grid-template-columns:minmax(0,1fr)}}
 button.prim{font:inherit;font-weight:700;background:var(--or);color:#1a1408;border:none;border-radius:8px;padding:.5rem 1rem;cursor:pointer}
 button.prim:disabled{opacity:.5;cursor:default}
 button.b{font:inherit;font-size:.82rem;background:var(--v05);border:1px solid var(--v16);

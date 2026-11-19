@@ -120,7 +120,7 @@ html.jour .col{background:rgba(168,128,78,.55)}html.jour .col:hover{background:r
 .tuiles.sept{grid-template-columns:repeat(auto-fit,minmax(130px,1fr))}
 .rang2{display:grid;grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);gap:.7rem;align-items:start}
 .rang2 > .carte{margin:0}
-@media (max-width:1000px){.rang2{grid-template-columns:1fr}}
+@media (max-width:1000px){.rang2{grid-template-columns:minmax(0,1fr)}}
 /* La tête refaite (2026-10-15, lot F). */
 .st-tete .st-lu{font-size:.76rem;color:var(--tx2)}
 .corps{padding:1rem 1.6rem .9rem}

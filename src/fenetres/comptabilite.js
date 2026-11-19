@@ -124,7 +124,7 @@ tbody tr.msans td{color:var(--tx3)}
 .limite{font-size:.75rem;color:var(--tx2);line-height:1.5;
   border-left:2px solid var(--v16);padding-left:.6rem}
 /* ── Le budget ───────────────────────────────────────────────────────────── */
-.mois12{display:grid;grid-template-columns:repeat(12,1fr);gap:.25rem;margin-top:.3rem}
+.mois12{display:grid;grid-template-columns:repeat(12,minmax(0,1fr));gap:.25rem;margin-top:.3rem}
 .mois12 label{display:block;font-size:.6875rem;color:var(--tx3);text-align:center}
 .mois12 input{width:100%;padding:.18rem .2rem;font-size:.7rem}
 #corps td.n input{padding:.12rem .45rem;min-height:0;height:auto}
