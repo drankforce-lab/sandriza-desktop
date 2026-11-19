@@ -393,8 +393,39 @@ try {
   const _szWco = () => {
     try { const o = navigator.windowControlsOverlay; document.documentElement.classList.toggle('sz-wco', !!(o && o.visible)); } catch (e) {}
   };
+  /* (2026-11-18, sa capture : bande _ □ ✕ restée blanche sur une fenêtre voilée par une boîte de dialogue) La bande prend
+     la couleur RÉELLEMENT peinte en haut à droite : on empile les fonds des éléments sous ce point (voile compris, avec
+     sa transparence) et on l'envoie à la coquille. Refaite à chaque changement de la page (boîte ouverte, thème…). */
+  const _szCouleurCoin = () => {
+    try {
+      const pile = document.elementsFromPoint(Math.max(0, innerWidth - 8), 8) || [];
+      let c = [255, 255, 255];
+      for (let i = pile.length - 1; i >= 0; i--) {
+        const m = (getComputedStyle(pile[i]).backgroundColor || '').match(/[\d.]+/g);
+        if (!m || m.length < 3) continue;
+        const a = m.length > 3 ? parseFloat(m[3]) : 1;
+        if (!(a > 0)) continue;
+        c = c.map((v, k) => v * (1 - a) + parseFloat(m[k]) * a);
+      }
+      const hex = '#' + c.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
+      const clair = (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) > 140;
+      return { couleur: hex, symbole: clair ? '#1f2533' : '#e8ecf2' };
+    } catch (e) { return null; }
+  };
+  let _szBandeT = 0, _szBandeDer = '';
+  const _szBande = () => {
+    if (!document.documentElement.classList.contains('sz-wco')) return;
+    clearTimeout(_szBandeT);
+    _szBandeT = setTimeout(() => {
+      const r = _szCouleurCoin(); if (!r) return;
+      const k = r.couleur + r.symbole; if (k === _szBandeDer) return; _szBandeDer = k;
+      try { ipcRenderer.send('fenetre:bande', r.couleur, r.symbole); } catch (e) {}
+    }, 120);
+  };
   window.addEventListener('DOMContentLoaded', () => {
     _szWco();
+    _szBande();
+    try { new MutationObserver(_szBande).observe(document.documentElement, { subtree: true, childList: true, attributes: true, attributeFilter: ['class', 'style', 'hidden', 'data-sz-teinte', 'data-sz-theme'] }); } catch (e) {}
     try { const o = navigator.windowControlsOverlay; if (o && o.addEventListener) o.addEventListener('geometrychange', _szWco); } catch (e) {}
     document.addEventListener('mouseover', (ev) => {
       try {

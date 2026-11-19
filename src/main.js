@@ -727,6 +727,20 @@ const _poserApresRetour = (w, bornes) => {
   }, 60));
   w.unmaximize();
 };
+/* ⚠⚠ (2026-11-18, son signalement : « le bug de rapetissage est généralisé partout où une fenêtre popup s'ouvre ou qu'un
+   verrou s'applique » — la FENÊTRE ELLE-MÊME rapetisse, plein écran ou pas). Une fenêtre sans cadre qui couvre toute la
+   zone de travail (notre « pleine zone ») est lue par Electron comme AGRANDIE : chaque recoloration de la bande _ □ ✕
+   (setTitleBarOverlay — elle suit chaque redessin de la barre : surcouche, verrou, thème) peut lui faire émettre un FAUX
+   « maximize ». Le gestionnaire ci-dessous le prenait pour le clic « restaurer » : la fenêtre retombait à sa taille d'avant.
+   ➡ Toute recoloration passe par _overlay : elle est DATÉE, et ne part pas si la couleur n'a pas changé ; un « maximize »
+   qui la suit de près n'est plus un « restaurer » — la fenêtre garde sa pleine zone. */
+const _overlay = (w, o) => {
+  if (!w || w.isDestroyed() || typeof w.setTitleBarOverlay !== 'function') return;
+  const k = JSON.stringify(o || {});
+  if (w._szOvl === k) return;
+  w._szOvl = k; w._szOvlT = Date.now();
+  w.setTitleBarOverlay(o);
+};
 function _pleineZoneQuitter(w) {
   const avant = w._szPleineZone && w._szPleineZone.avant;
   w._szPleineZone = null;
@@ -742,6 +756,8 @@ const _pleineZoneArmer = (w) => {
       /* Déjà en pleine zone ET toujours à sa place : c'est un « restaurer ».
          Si la personne a entre-temps redimensionné ou déplacé la fenêtre, la
          pleine zone n'est plus vraie — on traite comme un nouvel agrandissement. */
+      // Un « maximize » juste après une recoloration de la bande : faux, émis par Electron — on garde la pleine zone.
+      if (pz && (Date.now() - (w._szOvlT || 0)) < 900) { _poserApresRetour(w, pz.zone); return; }
       if (pz && _pleineZoneSeuil(pz.zone, w.getNormalBounds())) {
         w._szPleineZone = null;
         _poserApresRetour(w, pz.avant);
@@ -5676,7 +5692,7 @@ const appliquerThemePartout = () => {
   fenetresNatives.forEach((w) => {
     if (!w || w.isDestroyed()) return;
     appliquerTheme(w.webContents);
-    if (w._szWco && typeof w.setTitleBarOverlay === 'function') { try { w.setTitleBarOverlay(_bandeTete()); } catch (_) {} }
+    if (w._szWco) { try { _overlay(w, _bandeTete()); } catch (_) {} }
   });
   ancrees.forEach((a) => { if (a.view && !a.view.webContents.isDestroyed()) appliquerTheme(a.view.webContents); });
   // la petite fenêtre du suivi des générations (src/taches.js)
@@ -5983,7 +5999,22 @@ const ouvrirNative = (cle, titre, page, opts = {}) => {
   win.webContents.on('did-finish-load', () => appliquerTheme(win.webContents));
   // `maximiser` (2026-10-19) : la préparation de commande s'ouvre en plein écran de TRAVAIL (agrandie,
   // pas le mode kiosque).
-  win.once('ready-to-show', () => { if (opts.maximiser) { try { win.maximize(); } catch {} } win.show(); });
+  /* Sans cadre (Épuré), « agrandir » se défait tout seul (même défaut que la principale) : la fenêtre prend la PLEINE ZONE
+     de son écran, et les gestes d'agrandissement de Windows passent par la même parade que la principale. */
+  if (win._szWco) _pleineZoneArmer(win);
+  win.once('ready-to-show', () => {
+    if (opts.maximiser) {
+      try {
+        if (win._szWco) {
+          const { screen } = require('electron');
+          const zone = screen.getDisplayMatching(win.getBounds()).workArea;
+          win._szPleineZone = { avant: win.getBounds(), zone: { ...zone } };
+          win.setBounds(zone);
+        } else win.maximize();
+      } catch {}
+    }
+    win.show();
+  });
   win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html));
   return win;
 };
@@ -6070,7 +6101,7 @@ const _bandePorte = (dessus) => {
   if (!mainWindow || mainWindow.isDestroyed()) return;
   if (typeof mainWindow.setTitleBarOverlay !== 'function') return;
   try {
-    mainWindow.setTitleBarOverlay(dessus
+    _overlay(mainWindow, dessus
       ? _bandePortePalette()
       // ⚠ On REMET le défaut sombre en quittant la porte : le site reprendra la
       // main dès son premier rendu (chrome:titlebar), mais entre les deux il ne
@@ -6403,7 +6434,7 @@ const _poserGardesDeSite = (wc) => {
       const fond = _hexOuRien(bg.length === 9 ? '#' + bg.slice(3) : bg) || _fondTheme();
       const h = fond.replace('#', ''), r = parseInt(h.slice(0, 2), 16), g = parseInt(h.slice(2, 4), 16), b = parseInt(h.slice(4, 6), 16);
       const clair = (0.299 * r + 0.587 * g + 0.114 * b) > 140;
-      mainWindow.setTitleBarOverlay({ color: fond, symbolColor: clair ? '#2e2b27' : '#e8edf5' });
+      _overlay(mainWindow, { color: fond, symbolColor: clair ? '#2e2b27' : '#e8edf5' });
     } catch (_) {}
   });
   wc.on('did-finish-load', () => {
@@ -8355,11 +8386,20 @@ const _hexOuRien = (v) => {
   }
   return /^#([0-9a-fA-F]{3}|[0-9a-fA-F]{6}|[0-9a-fA-F]{8})$/.test(s) ? s : '';
 };
+// (2026-11-18) Une fenêtre à part SANS CADRE envoie la couleur réellement peinte sous ses boutons (voile compris).
+ipcMain.on('fenetre:bande', (e, color, symbol) => {
+  try {
+    const w = BrowserWindow.fromWebContents(e.sender);
+    if (!w || w.isDestroyed() || !w._szWco || w === mainWindow) return;
+    const c = _hexOuRien(color); if (!c) return;
+    _overlay(w, { color: c, symbolColor: _hexOuRien(symbol) || '#1f2533', height: 44 });
+  } catch (_) {}
+});
 ipcMain.on('chrome:titlebar', (e, color, symbol) => {
   try {
     if (!_deLaPrincipale(e)) return;
     if (typeof mainWindow.setTitleBarOverlay !== 'function') return;
-    mainWindow.setTitleBarOverlay({
+    _overlay(mainWindow, {
       color: _hexOuRien(color) || _fondTheme(),
       symbolColor: _hexOuRien(symbol) || '#e8edf5',
     });
