@@ -68,6 +68,7 @@ button.dang{color:var(--tx-err2)}
 .pill.enavance{background:rgba(96,165,250,.14);color:var(--tx-bleu)}
 .pill.enretard{background:rgba(251,191,36,.14);color:var(--tx-att)}
 .pill.manque{background:rgba(248,113,113,.14);color:var(--tx-err2)}
+html.jour .pill{color:#47505e} html.jour .pill.defi{color:#5b3fa0} html.jour .pill.enavance{color:#2f5f96} html.jour .pill.atteint{color:#1d6a3b}
 .ob-v{display:flex;align-items:baseline;gap:.4rem;flex-wrap:wrap}
 .ob-v .n{font-size:1.55rem;font-weight:800;letter-spacing:-.02em;font-variant-numeric:tabular-nums}
 .ob-v .c{color:var(--tx2);font-size:.85rem;font-variant-numeric:tabular-nums}
@@ -177,7 +178,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function nombre(v, unite){
     var n = Number(v) || 0;
-    if (unite === '$') { try { return n.toLocaleString(LIEU, { style: 'currency', currency: 'CAD', maximumFractionDigits: n >= 1000 ? 0 : 2 }); } catch (e) { return n.toFixed(2) + ' $'; } }
+    if (unite === '$') return szArgent(n);
     try { return n.toLocaleString(LIEU, { maximumFractionDigits: 1 }); } catch (e) { return String(n); }
   }
   function jour(s){

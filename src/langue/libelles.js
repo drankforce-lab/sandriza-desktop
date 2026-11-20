@@ -50,6 +50,9 @@
 
 const LIBELLES_EN = {
   /* ── Statuts de commande (ORDER_STATUS) ─────────────────────────────── */
+  // Objectifs et défis (2026-11-20) : le genre d'un objectif (assets/js/objectifs.js, GENRES[…].cle).
+  'objectif': 'goal',
+  'defi': 'challenge',
   'En attente': 'Pending',
   'Confirmée': 'Confirmed',
   'En préparation': 'Preparing',

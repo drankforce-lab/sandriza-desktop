@@ -91,5 +91,6 @@ module.exports = {
   "#f6bdbd": 1,           // 1.45  1 fenetre(s) : images.js
   "#fbe3b0": 1,           // 1.12  1 fenetre(s) : fal.js
   "#ffd9d9": 1,           // 1.16  1 fenetre(s) : images.js
+  "#c9b8fa": 1,           // 1.60  objectifs.js — pastille « Défi », nuit seulement : html.jour .pill.defi la reprend en #5b3fa0
   },
 };
