@@ -401,11 +401,15 @@ try {
       const pile = document.elementsFromPoint(Math.max(0, innerWidth - 8), 8) || [];
       let c = [255, 255, 255];
       for (let i = pile.length - 1; i >= 0; i--) {
-        const m = (getComputedStyle(pile[i]).backgroundColor || '').match(/[\d.]+/g);
+        const bg = getComputedStyle(pile[i]).backgroundColor || '';
+        const m = bg.match(/[\d.]+/g);
         if (!m || m.length < 3) continue;
+        /* ⚠ (2026-11-20, la bande _ □ ✕ NOIRE partout) Un fond fait de color-mix() se rend « color(srgb 0.09 0.12 0.16) » :
+           des valeurs de 0 à 1, lues ici comme du 0-255 → du NOIR envoyé à la coquille. On remet à l'échelle. */
+        const k255 = bg.indexOf('color(') === 0 ? 255 : 1;
         const a = m.length > 3 ? parseFloat(m[3]) : 1;
         if (!(a > 0)) continue;
-        c = c.map((v, k) => v * (1 - a) + parseFloat(m[k]) * a);
+        c = c.map((v, k) => v * (1 - a) + parseFloat(m[k]) * k255 * a);
       }
       const hex = '#' + c.map((v) => Math.max(0, Math.min(255, Math.round(v))).toString(16).padStart(2, '0')).join('');
       const clair = (0.299 * c[0] + 0.587 * c[1] + 0.114 * c[2]) > 140;

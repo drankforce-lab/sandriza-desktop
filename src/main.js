@@ -6285,8 +6285,9 @@ const poserVueConnexion = () => {
    l'écran est la PAGE (#11151d), pas la barre (#181e29). On lit ce qui est réellement peint en haut à droite de la vue
    (voile et barre compris), maintenant puis quand la barre arrive. */
 const _JS_COIN = '(function(){try{var p=document.elementsFromPoint(Math.max(0,innerWidth-8),8)||[],c=[255,255,255];'
-  + 'for(var i=p.length-1;i>=0;i--){var m=(getComputedStyle(p[i]).backgroundColor||"").match(/[0-9.]+/g);if(!m||m.length<3)continue;'
-  + 'var a=m.length>3?parseFloat(m[3]):1;if(!(a>0))continue;c=c.map(function(v,k){return v*(1-a)+parseFloat(m[k])*a;});}'
+  + 'for(var i=p.length-1;i>=0;i--){var s=getComputedStyle(p[i]).backgroundColor||"",m=s.match(/[0-9.]+/g);if(!m||m.length<3)continue;'
+  /* (2026-11-20) « color(srgb …) » (color-mix) est en 0-1 : remis à l'échelle, sinon c'est du NOIR. */
+  + 'var e=s.indexOf("color(")===0?255:1;var a=m.length>3?parseFloat(m[3]):1;if(!(a>0))continue;c=c.map(function(v,k){return v*(1-a)+parseFloat(m[k])*e*a;});}'
   + 'return "#"+c.map(function(v){return Math.max(0,Math.min(255,Math.round(v))).toString(16).padStart(2,"0");}).join("");}catch(e){return "";}})()';
 const _bandeConnexion = () => {
   const poser = (fond) => {
