@@ -63,6 +63,13 @@ button.lien:hover:not(:disabled){background:transparent;text-decoration:underlin
 .carte h2{margin:0;font:700 .74rem/1.3 system-ui;color:var(--tx2);text-transform:uppercase;letter-spacing:.06em}
 .aide{font-size:.75rem;color:var(--tx2);line-height:1.45}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
+.accueil-vide{flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7rem;text-align:center;padding:2rem}
+.accueil-vide .ic{width:64px;height:64px;border-radius:18px;display:inline-flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb,var(--vv,#5fd4a4) 16%,transparent);color:var(--vv,#5fd4a4);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--vv,#5fd4a4) 40%,transparent)}
+.accueil-vide .ic svg{width:32px;height:32px}
+.accueil-vide h2{margin:.4rem 0 0;font-size:1.25rem;color:var(--tx)}
+.accueil-vide p{margin:0;max-width:30rem;color:var(--tx2);font-size:.9rem;line-height:1.5}
+.accueil-vide .prim{margin-top:.6rem;padding:.65rem 1.4rem;border-radius:11px;font-size:.92rem}
 
 /* ── LES FOURNISSEURS (colonne de gauche) ── */
 .cote input.filtre{width:100%}
@@ -360,7 +367,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function vuePrincipale(){
     var f = fournisseur();
-    if (!f) return '<div class="carte" style="flex:1 1 0"><div class="vide">${T("Choisissez un fournisseur à gauche.")}</div></div>';
+    // (2026-11-20, sa capture : une immense carte vide et une phrase grise) Un accueil, pas un cadre vide : sans
+    // aucun fournisseur, on invite à créer le premier ; sinon, on montre où choisir.
+    if (!f) {
+      var aucun = !(CTX.fournisseurs || []).length;
+      return '<div class="accueil-vide"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></span>'
+        + (aucun
+          ? '<h2>${T("Ajoutez votre premier fournisseur")}</h2><p>${T("Donnez le site d’un fournisseur : vous pourrez ensuite chercher ses produits par leur nom et en préparer les fiches en quelques secondes.")}</p>'
+            + (CTX.peutAjouterFournisseur ? '<button type="button" class="prim" data-a="nouveauF">${T("+ Nouveau fournisseur")}</button>' : '')
+          : '<h2>${T("Choisissez un fournisseur")}</h2><p>${T("Choisissez un fournisseur à gauche.")}</p>')
+        + '</div>';
+    }
     var nA = fichesDe(f.id, 'attente').length, nC = fichesDe(f.id, 'creees').length;
     var h = '<div class="entete"><span class="mono">' + esc(initiales(f.nom)) + '</span><div class="nom"><h2>' + esc(f.nom) + '</h2>'
       + '<div class="site">' + (f.configure ? esc(domaine(f.site)) + ' <span class="badge">' + esc(familleLib(f.type)) + '</span>' : '${T("Aucun site configuré")}') + '</div></div>'
