@@ -5782,6 +5782,8 @@ const _zoomPartout = (win, on) => {
   if (!win || win.isDestroyed()) return;
   _zoomFenetre(win.webContents, on);
   if (win === mainWindow) {
+    // (2026-11-20) Le site peut vivre dans sa propre vue (cadre natif) : il doit savoir lui aussi qu'il est en plein écran.
+    try { const s = siteWC(); if (s && s !== win.webContents) _zoomFenetre(s, on); } catch (e) {}
     ancrees.forEach((a) => { if (a.view) _zoomFenetre(a.view.webContents, on); });
   }
 };

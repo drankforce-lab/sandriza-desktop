@@ -539,7 +539,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
               + (r.ligne ? '<span class="cx-code">' + esc(r.ligne) + '</span>' : '') + '</div></td>'
               + '<td class="dt" style="white-space:nowrap">' + esc(szJour(r.date) || r.dateFr) + '</td>'
               /* (2026-11-19) « USD » suit le MONTANT : dans la cellule du nom, qui se coupe, la pastille finissait en « ··· ». */
-              + '<td class="num">' + (r.usd ? '<span class="rf-pill bleu usd">USD</span>' : '') + '<b>' + esc(r.montant) + '</b></td>'
+              /* (2026-11-20, sa demande : « retire l'étiquette USD, mais garde les montants en CAD ») Le montant est déjà en
+                 dollars canadiens (converti à la saisie) : la pastille ne faisait que charger la colonne. */
+              + '<td class="num"><b>' + esc(r.montant) + '</b></td>'
               + '<td class="num" style="font-weight:400">'
               /* Une seule ligne : « 0,72 · 1,43 » sous l'en-tête « TPS · TVQ » (deux lignes par taxe doublaient la hauteur). */
               + (r.aTaxes ? '<span class="dp-tx">' + esc(r.tps) + ' · ' + esc(r.tvq) + '</span>'
