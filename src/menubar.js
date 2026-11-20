@@ -383,6 +383,14 @@ ${PAN}
     }
   }
   var EP_EN = (document.documentElement.lang || 'fr') === 'en';
+  var _IC_BOUT='<path d="M6 7h12l1 13H5z"/><path d="M9 7a3 3 0 0 1 6 0"/>',
+      _IC_CAT='<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
+      _IC_MKT='<path d="M3 11v3a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6.5a8 8 0 0 1 0 11"/>',
+      _IC_CPT='<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h2M12 11h2M8 15h2M12 15h2M8 18h2M12 18h2"/><path d="M16 15v3"/>',
+      _IC_AFF='<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
+      _IC_CONF='<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>';
+  var ICO_SECTION={ 'Boutique':_IC_BOUT, 'Shop':_IC_BOUT, 'Catalogue':_IC_CAT, 'Marketing':_IC_MKT, 'Comptabilité':_IC_CPT, 'Accounting':_IC_CPT,
+    'Affichage':_IC_AFF, 'View':_IC_AFF, 'Configuration':_IC_CONF };
   function panneauMaquette(pan, m){
     pan.classList.add('ep-pan'); pan.dataset.aff='block';
     // (2026-11-18, « trop d'options ») epCache : gardée dans le modèle (raccourcis, Ctrl K), absente du panneau Épuré.
@@ -400,7 +408,11 @@ ${PAN}
     }
     var n = 0; cols.forEach(function(c){ n += c.items.length; });
     var tete=document.createElement('div'); tete.className='ep-tete';
-    var ic=document.createElement('span'); ic.className='ic'; ic.textContent=String(m.label||'?').trim().charAt(0).toUpperCase(); tete.appendChild(ic);
+    /* (2026-11-20, sa demande) Une icône au trait, la même que la colonne du site (appbar.js ICO_SECTION) ; la lettre reste le repli. */
+    var ic=document.createElement('span'); ic.className='ic'; var _sv=ICO_SECTION[String(m.label||'').trim()];
+    if(_sv){ ic.className='ic svg'; ic.innerHTML='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+_sv+'</svg>'; }
+    else ic.textContent=String(m.label||'?').trim().charAt(0).toUpperCase();
+    tete.appendChild(ic);
     var b=document.createElement('b'); b.textContent=m.label; tete.appendChild(b);
     var nb=document.createElement('span'); nb.className='nb'; nb.textContent=n + ' ' + (EP_EN ? (n > 1 ? 'entries' : 'entry') : (n > 1 ? 'entrées' : 'entrée')); tete.appendChild(nb);
     var x=document.createElement('button'); x.type='button'; x.className='x'; x.textContent='\u2715';

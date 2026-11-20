@@ -8176,7 +8176,33 @@ let panneauSurvole = false;
 let panneauFermeT = null;
 let panneauPret = false;    // la page (TOUS les menus) est chargee
 let panneauSale = true;     // le modele a change depuis le dernier chargement
+/* ⚠ (2026-11-20, sa capture : « quand ma souris sort du menu, le menu devrait se fermer ») La fermeture reposait sur deux
+   annonces : la colonne du site (« la souris part », mais PAS si elle part vers la droite, réputée aller au panneau) et le
+   panneau (« la souris me quitte », mais seulement s'il l'a d'abord RECUE). Une souris qui file sur le tableau de bord sans
+   toucher le panneau ne déclenchait ni l'une ni l'autre : il restait ouvert. On regarde donc le CURSEUR lui-même tant que le
+   panneau est visible : hors de la colonne d'origine ET hors du panneau deux relevés de suite (~0,3 s) → on ferme. */
+let panneauGardeT = null, panneauGardeHors = 0;
+const _panneauGardeArreter = () => { clearInterval(panneauGardeT); panneauGardeT = null; panneauGardeHors = 0; };
+const _panneauGardeArmer = () => {
+  _panneauGardeArreter();
+  panneauGardeT = setInterval(() => {
+    try {
+      if (!panneauWin || panneauWin.isDestroyed() || !panneauWin.isVisible() || !mainWindow || mainWindow.isDestroyed()) { _panneauGardeArreter(); return; }
+      const { screen } = require('electron');
+      const c = screen.getCursorScreenPoint();
+      const dans = (r, m) => c.x >= r.x - m && c.x <= r.x + r.width + m && c.y >= r.y - m && c.y <= r.y + r.height + m;
+      const pb = panneauWin.getBounds(), cb = mainWindow.getContentBounds();
+      let origine = null;
+      if (panneauPose.mode === 'droite') origine = { x: cb.x, y: cb.y, width: Math.max(0, panneauPose.x - cb.x), height: cb.height };
+      else if (panneauPose.mode === 'gauche') origine = { x: panneauPose.x, y: cb.y, width: Math.max(0, cb.x + cb.width - panneauPose.x), height: cb.height };
+      else origine = { x: cb.x, y: cb.y, width: cb.width, height: Math.max(0, panneauPose.y - cb.y) };
+      if (dans(pb, 6) || dans(origine, 4)) { panneauGardeHors = 0; return; }
+      if (++panneauGardeHors >= 2) fermerPanneauMenu();
+    } catch (e) {}
+  }, 150);
+};
 const fermerPanneauMenu = () => {
+  _panneauGardeArreter();
   clearTimeout(panneauFermeT); panneauFermeT = null; panneauSurvole = false;
   if (panneauWin && !panneauWin.isDestroyed()) { try { panneauWin.hide(); } catch {} }
 };
@@ -8332,6 +8358,7 @@ ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
     panneauWin.webContents.executeJavaScript(
       'window.montrer && window.montrer(' + JSON.stringify(_pourLePanneau) + ');', true).catch(() => {});
     try { panneauWin.showInactive(); } catch {}
+    _panneauGardeArmer();
   };
   /* ⚠ LA PAGE (tous les menus) N EST CHARGEE QU UNE FOIS — la recharger a
      chaque survol etait le << lag >> releve le 2026-08-09. `montrer` ne fait
