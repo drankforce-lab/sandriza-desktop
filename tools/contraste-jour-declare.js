@@ -35,7 +35,7 @@ module.exports = {
   "#d9a86c": 8,           // 1.92  encan-ecran.js — le caramel Sandriza, sur noir
   "#c9c2b8": 7,           // 1.58  encan-ecran.js — libellés secondaires, sur noir
   "#f8f6f3": 3,           // 1.04  encan-ecran.js — le crème, sur noir
-  "#e4ded5": 2,           // 1.19  encan-ecran.js — consignes de l adjudication, sur noir
+  "#e4ded5": 1,           // 1.19  encan-ecran.js — consignes de l adjudication, sur noir
   /* ⚠ LE BLANC DU PLAN DE TRAVAIL DE L EDITEUR, ET IL NE SE CONVERTIRA JAMAIS :
      ce n est pas une couleur d interface, c est du PAPIER. Une etiquette sort
      blanche de l imprimante de jour comme de nuit ; teinter la scene ferait
@@ -64,41 +64,32 @@ module.exports = {
      TOUJOURS SOMBRE (rgba(8,9,12,.97)), jour comme nuit — la photo seule. Le banc mesure
      son encre contre le fond de jour, qu elle ne touche jamais (contraste reel : > 14). */
   "#e2e8f0": 5,           // 1.10  1 fenetre : photos.js (.visio)
-  "#86efac": 4,           // 1.25  5 fenetre(s) : catalogio.js, newsletter.js, produit.js…
+  "#86efac": 3,           // 1.25  5 fenetre(s) : catalogio.js, newsletter.js, produit.js…
   "#bcd2f0": 6,           // 1.38  6 fenetre(s) : analytics.js, images.js, paiements-config.js…
   "#dcc39b": 5,           // 1.52  4 fenetre(s) : campagnes.js, studio.js, telephonie.js…
   "#fcd34d": 3,           // 1.29  5 fenetre(s) : banque.js, catalogio.js, newsletter.js…
   "#fde68a": 5,           // 1.11  3 fenetre(s) : campagnes.js, commandes.js, statistiques.js
   "#86e5a8": 3,           // 1.36  3 fenetre(s) : expedition.js, remboursement.js, retour.js
-  "#8a6a3e": 2,           // 4.45  2 fenetre(s) : socle.js, tableau.js
-  "#9fb0c4": 3,           // 1.98  1 fenetre(s) : affichage.js
-  "#e08a8a": 3,           // 2.30  2 fenetre(s) : fal.js, studio.js
+  "#e08a8a": 1,           // 2.30  2 fenetre(s) : fal.js, studio.js
   "#6b7280": 1,           // 4.32  2 fenetre(s) : produit.js, promo.js
   "#dbe7fb": 2,           // 1.11  2 fenetre(s) : analytics.js, images.js
   "#93e6b5": 1,           // 1.32  1 fenetre(s) : chat-config.js
-  "#9a8f7d": 1,           // 2.84  1 fenetre(s) : newsletter.js
   "#a67c4e": 1,           // 3.34  1 fenetre(s) : pages.js
   "#a6a8f6": 1,           // 1.96  1 fenetre(s) : pages.js
   "#a9c9f7": 1,           // 1.51  1 fenetre(s) : retour.js
   "#a9e6c6": 1,           // 1.27  1 fenetre(s) : images.js
   "#b45309": 1,           // 4.49  1 fenetre(s) : promo.js
-  "#b9c6d6": 1,           // 1.55  1 fenetre(s) : affichage.js
-  "#c9ead6": 1,           // 1.16  1 fenetre(s) : studio.js
   "#cfe0f5": 1,           // 1.20  1 fenetre(s) : icones.js
   "#d3f6e4": 1,           // 1.04  1 fenetre(s) : images.js
   "#d9bd94": 1,           // 1.61  1 fenetre(s) : pages.js
   "#dcfce7": 1,           // 1.02  1 fenetre(s) : commandes.js
-  "#e0b93a": 1,           // 1.68  1 fenetre(s) : pages.js
   "#e0c49a": 1,           // 1.50  1 fenetre(s) : pages.js
   "#e2c79b": 1,           // 1.46  1 fenetre(s) : securite.js
-  "#e79a9a": 1,           // 1.98  1 fenetre(s) : studio.js
   "#e8d08a": 1,           // 1.36  1 fenetre(s) : chat-config.js
   "#f0a05a": 1,           // 1.90  1 fenetre(s) : explorateur.js
   "#f4b4b4": 1,           // 1.56  1 fenetre(s) : config-navigation.js
-  "#f5d18a": 1,           // 1.31  1 fenetre(s) : affichage.js
   "#f6bdbd": 1,           // 1.45  1 fenetre(s) : images.js
   "#fbe3b0": 1,           // 1.12  1 fenetre(s) : fal.js
-  "#fdba74": 1,           // 1.51  1 fenetre(s) : commande.js
   "#ffd9d9": 1,           // 1.16  1 fenetre(s) : images.js
   },
 };
