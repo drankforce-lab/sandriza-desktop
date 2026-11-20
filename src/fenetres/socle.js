@@ -5501,6 +5501,51 @@ html.sz-wco .tete{-webkit-app-region:drag;min-height:44px;padding-right:calc(100
 html.sz-wco .tete :is(button,a,input,select,label,[role=button]){-webkit-app-region:no-drag}
 `;
 
+const CSS_VIVANT = `
+/* ══ LE LOOK « VIVANT » — MÉLANGE C + D (2026-11-20, sa demande : « je trouve ça mort », puis « fais-moi un mixte de
+   C et D partout ») · maquette : https://claude.ai/artifact/PD7Nop2EV99kbdXr5mTtyZ
+   C (profondeur et chaleur) : une lueur dorée et bleutée sur la page du thème Épuré (les autres thèmes ont déjà la leur),
+   des cartes en relief (reflet en haut, ombre), les en-têtes de tableau dorés.
+   D (tableau de bord vivant) : les tuiles de chiffres prennent une couleur chacune, en dégradé doux (vert, bleu, lilas,
+   rose, dans l'ordre) ; ce qui va bien redevient VERT. L'ambre et le rouge gardent leur sens : une tuile en état
+   (.on, .att, .err, .ok…) n'est pas recolorée.
+   ⚠ Les teintes de tuile : 20 % la nuit, 14 % le jour, au coin le plus coloré. Les gris secondaires du thème Épuré sont
+     montés d'un cran (comme les autres thèmes) : ils gardent 5 de contraste à cet endroit, les deux modes.
+   ⚠ Seulement sous le look Épuré (son look) ; les anciens jeux ne voient rien de ce bloc. */
+:root{--vv:#5fd4a4;--vv-1:#5fd4a4;--vv-2:#7cb4f5;--vv-3:#b49cf7;--vv-4:#f08fb8;--vv-pct:20%;
+  --ep-vert-f:#173326;--ep-vert-t:#86e0a8}
+html[data-sz-theme="epure"].jour{--vv-1:#1f7a57;--vv-2:#2f6aa8;--vv-3:#6a4fb0;--vv-4:#a8436f;--vv-pct:14%;
+  --ep-vert-f:#e2f4e8;--ep-vert-t:#1d6a3b}
+/* C — la lueur de la page (thème Épuré seul : les autres thèmes en ont une) ; gris secondaires d'un cran, comme les thèmes. */
+html[data-sz-theme="epure"][data-sz-teinte="epure"]:not(.jour){--tx2:#a9b2c1;--tx3:#a3acbb;--tx-gris:#a9b2c1;--sz-attenue:#a9b2c1}
+html[data-sz-theme="epure"][data-sz-teinte="epure"].jour{--tx2:#4c5363;--tx3:#4c5363;--tx-gris:#4c5363;--sz-attenue:#4c5363}
+html[data-sz-theme="epure"][data-sz-teinte="epure"]:not(.jour) body{background-color:var(--f-page);background-attachment:fixed;
+  background-image:radial-gradient(55% 45% at 8% 0%,rgba(201,162,122,.17),transparent 70%),radial-gradient(45% 45% at 100% 0%,rgba(124,180,245,.11),transparent 70%),radial-gradient(50% 50% at 90% 100%,rgba(180,156,247,.08),transparent 70%)}
+html[data-sz-theme="epure"][data-sz-teinte="epure"].jour body{background-color:var(--f-page);background-attachment:fixed;
+  background-image:radial-gradient(55% 45% at 8% 0%,rgba(201,162,122,.12),transparent 70%),radial-gradient(45% 45% at 100% 0%,rgba(124,180,245,.10),transparent 70%)}
+/* C — les cartes en relief : un reflet en haut, une ombre portée. */
+html[data-sz-theme="epure"]:not(.jour) :is(.carte,.tm-c,.tm-a){background-image:linear-gradient(180deg,rgba(255,255,255,.035),transparent 55%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 8px 22px rgba(0,0,0,.22)}
+html[data-sz-theme="epure"].jour :is(.carte,.tm-c,.tm-a,.tm-k){box-shadow:0 1px 2px rgba(16,24,40,.05),0 6px 18px rgba(16,24,40,.06)}
+/* C — les en-têtes de tableau à l'accent du thème. */
+html[data-sz-theme="epure"] thead th{color:var(--tx-or);border-bottom-color:rgba(var(--or-rgb),.35)}
+/* D — les tuiles de chiffres, une couleur chacune. */
+html[data-sz-theme="epure"] :is(.tuiles>.tuile,.cx-kpis>.cx-kpi,.inv>div,.tm-kpi>.tm-k):not(.on,.ok,.att,.err,.alerte,.rouge,.ambre,.danger,.warn,.bas,.rup){
+  --vv:var(--vv-1);background-image:linear-gradient(140deg,color-mix(in srgb,var(--vv) var(--vv-pct),transparent) 0%,transparent 85%);
+  border-color:color-mix(in srgb,var(--vv) 42%,transparent)}
+html[data-sz-theme="epure"] :is(.tuiles>.tuile,.cx-kpis>.cx-kpi,.inv>div,.tm-kpi>.tm-k):nth-child(4n+2){--vv:var(--vv-2)}
+html[data-sz-theme="epure"] :is(.tuiles>.tuile,.cx-kpis>.cx-kpi,.inv>div,.tm-kpi>.tm-k):nth-child(4n+3){--vv:var(--vv-3)}
+html[data-sz-theme="epure"] :is(.tuiles>.tuile,.cx-kpis>.cx-kpi,.inv>div,.tm-kpi>.tm-k):nth-child(4n+4){--vv:var(--vv-4)}
+html[data-sz-theme="epure"]:not(.jour) :is(.tuiles>.tuile,.cx-kpis>.cx-kpi,.inv>div,.tm-kpi>.tm-k){box-shadow:0 6px 16px rgba(0,0,0,.18)}
+/* D — ce qui va bien redevient vert (doux) ; le bleu « info » reste neutre. */
+html[data-sz-theme="epure"] :is(.pill.ok,.pill.bon,.rf-pill.vert,.badge.ok,.etq.fini),
+html[data-sz-theme="epure"].jour :is(.pill.ok,.pill.bon,.rf-pill.vert,.badge.ok,.etq.fini){background:var(--ep-vert-f);color:var(--ep-vert-t)}
+html[data-sz-theme="epure"] :is(.cx-bon),html[data-sz-theme="epure"].jour :is(.cx-bon){background:var(--ep-vert-f);color:var(--ep-vert-t);border-color:color-mix(in srgb,var(--ep-vert-t) 30%,transparent)}
+html[data-sz-theme="epure"] :is(.cx-kpi.ok>b),html[data-sz-theme="epure"].jour :is(.cx-kpi.ok>b){color:var(--ep-vert-t)}
+html[data-sz-theme="epure"] tbody td:has(> .rf-pill.vert:only-child){background:var(--ep-vert-f)!important}
+html[data-sz-theme="epure"] tbody td > .rf-pill.vert:only-child{color:var(--ep-vert-t)!important}
+`;
+
 /* Les THÈMES du look Épuré (src/teintes.js) : en dernier, ils surchargent l'accent et la page d'Épuré. */
 const CSS_TEINTES = require('../teintes').css();
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE + CSS_TEINTES,
@@ -5511,3 +5556,6 @@ module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + C
 /* Le garde des tableaux (JS_CEDER) : sa feuille en DERNIER dans les deux feuilles que chargent les fenêtres. */
 module.exports.CSS_SOCLE += CSS_CEDER;
 module.exports.CSS_JOUR += CSS_CEDER;
+/* Le look « vivant » (2026-11-20) : tout en dernier, après les thèmes. */
+module.exports.CSS_SOCLE += CSS_VIVANT;
+module.exports.CSS_JOUR += CSS_VIVANT;

@@ -410,6 +410,9 @@ ${PAN}
     var tete=document.createElement('div'); tete.className='ep-tete';
     /* (2026-11-20, sa demande) Une icône au trait, la même que la colonne du site (appbar.js ICO_SECTION) ; la lettre reste le repli. */
     var ic=document.createElement('span'); ic.className='ic'; var _sv=ICO_SECTION[String(m.label||'').trim()];
+    /* (2026-11-20, look « vivant ») Le carré prend la couleur de la section, la même que la colonne du site. */
+    var _COUL={ 'Boutique':'#2f6aa8','Shop':'#2f6aa8','Catalogue':'#6a4fb0','Marketing':'#a8436f','Comptabilité':'#1f7a57','Accounting':'#1f7a57' };
+    var _cl=_COUL[String(m.label||'').trim()]; if(_cl) ic.style.background=_cl;
     if(_sv){ ic.className='ic svg'; ic.innerHTML='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+_sv+'</svg>'; }
     else ic.textContent=String(m.label||'?').trim().charAt(0).toUpperCase();
     tete.appendChild(ic);
