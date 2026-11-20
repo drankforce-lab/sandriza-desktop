@@ -8419,7 +8419,11 @@ ipcMain.on('menu:panneau:fermer', (e) => {
 // (2026-11-18, maquette) Le ✕ de l'en-tête du panneau Épuré : seul le panneau lui-même peut le demander.
 ipcMain.on('panneau:fermer', (e) => {
   if (!panneauWin || panneauWin.isDestroyed() || e.sender !== panneauWin.webContents) return;
-  fermerPanneauBientot();
+  /* (2026-11-20, sa capture : « le X des menus ne marche pas ») Le ✕ passait par fermerPanneauBientot, qui
+     ne ferme QUE si la souris a quitté le panneau — or on clique le ✕ la souris DANS le panneau : rien ne
+     se fermait jamais. Le ✕ est un ordre explicite : on ferme tout de suite. */
+  clearTimeout(panneauFermeT);
+  fermerPanneauMenu();
 });
 // Le panneau annonce sa taille reelle : la fenetre s ajuste, position gardee
 // (bornee a l ecran — un panneau coupe par le bord ne se lit pas).

@@ -2571,9 +2571,65 @@ td.sz-cede-auto > :is(b,strong,a,span:not(.rf-pill):not(.cx-code)){display:inlin
 td.sz-cede-auto div :is(b,strong,a,span:not(.rf-pill):not(.cx-code):not(.rf-av)),td.sz-cede-auto div > div{min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 td.sz-cede-auto div :is(b,strong){display:block}
 `;
+
+/* === (2026-11-20) JS_VIVANT — idées 7 et 8 qu'il a cochées ===
+   7 — Un compteur d'onglet (un chiffre seul dans un onglet) prend la couleur de l'onglet : rouge pour un retard,
+       ambre pour ce qui attend une action.
+   8 — Une liste vide (« Aucun… », « Rien… ») assez haute reçoit l'icône de la fenêtre dans un carré coloré, et le
+       bouton « + Nouveau… » de la fenêtre s'il existe : un clic sur la copie clique l'original. */
+const JS_VIVANT = () => `
+(function(){
+  if (typeof document === 'undefined' || window.__szVivant) return; window.__szVivant = true;
+  var ROUGE = /retard|échu|echu|expir|urgent|rupture|overdue|late|expired/i;
+  var AMBRE = /attente|à compléter|à traiter|à répondre|à confirmer|à faire|à analyser|à commander|à vérifier|à approuver|pending|to review/i;
+  function compteurs(){
+    var bs = document.querySelectorAll('.onglets button, .etats button, [role="tab"]');
+    for (var i = 0; i < bs.length; i++) {
+      var b = bs[i], sp = b.querySelectorAll('span');
+      for (var k = 0; k < sp.length; k++) {
+        var c = sp[k]; if (c.children.length || !/^\\s*\\d+\\s*$/.test(c.textContent)) continue;
+        var lib = b.textContent.replace(c.textContent, '');
+        var ton = (+c.textContent > 0) ? (ROUGE.test(lib) ? 'rouge' : (AMBRE.test(lib) ? 'ambre' : '')) : '';
+        c.classList.toggle('sz-cpt-rouge', ton === 'rouge'); c.classList.toggle('sz-cpt-ambre', ton === 'ambre');
+      }
+    }
+  }
+  var VIDE = /^(aucun|aucune|rien|pas encore|no |nothing)/i;
+  var NOUV = /^(\\+\\s*)?(nouveau|nouvelle|ajouter|créer|new |add )/i;
+  function accueils(){
+    var vs = document.querySelectorAll('.vide:not(.sz-accueil), .ls-vide:not(.sz-accueil)');
+    for (var i = 0; i < vs.length; i++) {
+      var v = vs[i]; if (v.children.length || !VIDE.test((v.textContent || '').trim())) continue;
+      if (!v.offsetParent) continue;
+      var boite = v.parentElement; if (!boite || boite.getBoundingClientRect().height < 150) continue;
+      var ico = document.querySelector('.tete .ico svg');
+      var txt = (v.textContent || '').trim(); v.textContent = '';
+      v.classList.add('sz-accueil');
+      var sq = document.createElement('span'); sq.className = 'sz-acc-ic'; sq.setAttribute('aria-hidden', 'true');
+      if (ico) sq.appendChild(ico.cloneNode(true));
+      v.appendChild(sq);
+      var p = document.createElement('span'); p.textContent = txt; v.appendChild(p);
+      var orig = null, cands = document.querySelectorAll('button');
+      for (var k = 0; k < cands.length; k++) {
+        var t = (cands[k].textContent || '').trim();
+        if (!cands[k].disabled && cands[k].offsetParent && NOUV.test(t) && !v.contains(cands[k])) { orig = cands[k]; break; }
+      }
+      if (orig) {
+        var b = document.createElement('button'); b.type = 'button'; b.className = 'prim sz-acc-b'; b.textContent = (orig.textContent || '').trim();
+        b.addEventListener('click', (function(o){ return function(){ o.click(); }; })(orig));
+        v.appendChild(b);
+      }
+    }
+  }
+  var minu = null;
+  function bientot(){ clearTimeout(minu); minu = setTimeout(function(){ try { compteurs(); accueils(); } catch (e) {} }, 60); }
+  function go(){ bientot(); try { new MutationObserver(bientot).observe(document.body, { childList: true, subtree: true, characterData: true }); } catch (e) {} }
+  if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', go); else go();
+})();
+`;
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
   + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_PAGES() + JS_COMPTE() + JS_MESURES()
-  + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX() + JS_CONFIRMER() + JS_COCHES() + JS_CEDER();
+  + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX() + JS_CONFIRMER() + JS_COCHES() + JS_CEDER() + JS_VIVANT();
 
 const JS_SOCLE = () => `
 var P = window.szPont;
@@ -5553,6 +5609,37 @@ html[data-sz-theme="epure"] .tete::after{content:"";position:absolute;left:0;rig
 html[data-sz-theme="epure"] .tete>.ico{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;
   background:rgba(var(--or-rgb),.16);box-shadow:inset 0 0 0 1px rgba(var(--or-rgb),.32);opacity:1}
 html[data-sz-theme="epure"].jour .tete{background:linear-gradient(90deg,rgba(var(--or-rgb),.22),rgba(var(--or-rgb),.08) 38%,transparent 72%),var(--f-carte)!important}
+
+/* === (2026-11-20) LES IDEES QU'IL A COCHEES (page « Dix idées pour ton nouveau look ») === */
+/* 4 — La ligne survolée s'allume : léger fond, liseré doré à gauche. Les cellules d'état pleines gardent leur couleur. */
+html[data-sz-theme="epure"] tbody tr:hover>td:not(:has(>.rf-pill:only-child)){background-color:var(--v04)}
+html[data-sz-theme="epure"] tbody tr:hover>td:first-child{box-shadow:inset 3px 0 0 var(--or)}
+html[data-sz-theme="epure"].jour tbody tr:hover>td:not(:has(>.rf-pill:only-child)){background-color:rgba(var(--or-rgb),.07)}
+/* 5 — Des états vivants : le point des pastilles brille ; ce qui est EN COURS (bleu) pulse doucement. */
+html[data-sz-theme="epure"] .rf-pill::before{box-shadow:0 0 0 2px color-mix(in srgb,currentColor 22%,transparent),0 0 7px currentColor}
+html[data-sz-theme="epure"] .rf-pill.bleu::before{animation:sz-pouls 1.8s ease-in-out infinite}
+@keyframes sz-pouls{50%{box-shadow:0 0 0 5px color-mix(in srgb,currentColor 0%,transparent),0 0 12px currentColor}}
+/* 6 — Le bouton principal en relief (dégradé, ombre de sa couleur) ; les secondaires des barres d'action en verre. */
+html[data-sz-theme="epure"] button.prim:not(:disabled){background-image:linear-gradient(180deg,color-mix(in srgb,var(--sz-btn-prim) 70%,#ffffff),var(--sz-btn-prim) 55%,var(--sz-btn-prim-fort));
+  box-shadow:inset 0 1px 0 color-mix(in srgb,var(--sz-btn-prim) 45%,#ffffff),0 6px 16px color-mix(in srgb,var(--sz-btn-prim) 35%,transparent)}
+html[data-sz-theme="epure"] button.prim:not(:disabled):hover{filter:brightness(1.05)}
+html[data-sz-theme="epure"]:not(.jour) :is(.rf-tb,.barre,.pied,.cx-barre,.tm-tete,.tete,.actions,.bas,.entete) button:not(.prim):not(:disabled):not(.x):not([role="tab"]){
+  background-image:linear-gradient(180deg,var(--v06),var(--v02));box-shadow:inset 0 1px 0 var(--v08)}
+html[data-sz-theme="epure"].jour :is(.rf-tb,.barre,.pied,.cx-barre,.tm-tete,.tete,.actions,.bas,.entete) button:not(.prim):not(:disabled):not(.x):not([role="tab"]){
+  box-shadow:0 1px 2px rgba(15,23,42,.08)}
+/* Prime — Le champ actif s'éclaire d'un halo doré. */
+html[data-sz-theme="epure"] :is(input:not([type=checkbox]):not([type=radio]):not([type=range]),select,textarea):focus{border-color:var(--or)!important;
+  box-shadow:0 0 0 4px rgba(var(--or-rgb),.18)!important;outline:none}
+/* 7 — Les compteurs d'onglets prennent la couleur de ce qu'ils annoncent (classe posée par JS_VIVANT). */
+html[data-sz-theme="epure"] .sz-cpt-ambre{background:var(--ep-ambre-f)!important;color:var(--ep-ambre-t)!important}
+html[data-sz-theme="epure"] .sz-cpt-rouge{background:var(--ep-rouge-f)!important;color:var(--ep-rouge-t)!important}
+/* 8 — Une liste vide devient un accueil : icône de la fenêtre dans un carré coloré, phrase, bouton pour commencer. */
+html[data-sz-theme="epure"] .sz-accueil{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;padding:28px 16px;font-size:14px}
+html[data-sz-theme="epure"] .sz-accueil .sz-acc-ic{width:52px;height:52px;border-radius:15px;display:inline-flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb,var(--vv) 16%,transparent);color:var(--vv);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--vv) 40%,transparent)}
+html[data-sz-theme="epure"] .sz-accueil .sz-acc-ic svg{width:26px;height:26px}
+html[data-sz-theme="epure"] .sz-accueil .sz-acc-b{margin-top:4px}
+@media (prefers-reduced-motion:reduce){html[data-sz-theme="epure"] .rf-pill.bleu::before{animation:none}}
 `;
 
 /* Les THÈMES du look Épuré (src/teintes.js) : en dernier, ils surchargent l'accent et la page d'Épuré. */

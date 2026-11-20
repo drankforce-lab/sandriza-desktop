@@ -300,6 +300,24 @@ html.jour .voile{background:rgba(20,24,30,.35)}
 .tm-k .l{font-size:12px;font-weight:600;color:var(--tx2)}
 .tm-k .v{font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--tx)}
 .tm-k .s{font-size:12px;font-weight:600;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-tend{display:inline-flex;align-items:center;margin-left:8px;vertical-align:middle;font-size:11.5px;font-weight:800;letter-spacing:0;padding:2px 8px;border-radius:999px}
+.tm-tend.h{color:var(--ep-vert-t,#86e0a8);background:var(--ep-vert-f,#173326)}
+.tm-tend.b{color:var(--tx-err2);background:rgba(248,113,113,.14)}
+.tm-courbe{display:block;width:100%;height:26px;margin-top:2px;overflow:visible}
+.tm-courbe .a{fill:color-mix(in srgb,var(--vv,#5fd4a4) 20%,transparent)}
+.tm-courbe .l{fill:none;stroke:var(--vv,#5fd4a4);stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
+.tm-courbe circle{fill:var(--vv,#5fd4a4)}
+.tm-anneau{display:flex;align-items:center;gap:10px;margin-left:auto;margin-right:12px;position:relative}
+.tm-anneau svg{width:52px;height:52px;flex:0 0 auto}
+.tm-anneau .fd{fill:none;stroke:var(--v10);stroke-width:4}
+.tm-anneau .pl{fill:none;stroke:var(--or);stroke-width:4;stroke-linecap:round;transition:stroke-dashoffset .8s cubic-bezier(.2,.7,.2,1)}
+.tm-anneau .n{position:absolute;left:0;width:52px;text-align:center;font-size:13px;font-weight:800;color:var(--tx)}
+.tm-anneau .n small{font-size:10px;color:var(--tx2);font-weight:700}
+.tm-anneau .t{display:flex;flex-direction:column;font-size:12px;color:var(--tx2);line-height:1.3}
+.tm-anneau .t b{color:var(--tx);font-size:13px}
+html[data-sz-theme="epure"] .tm-tete{border-radius:16px;padding:14px 16px;border:1px solid rgba(var(--or-rgb),.28);
+  background:linear-gradient(120deg,rgba(var(--or-rgb),.20),color-mix(in srgb,var(--vv-2,#7cb4f5) 12%,transparent) 55%,transparent),var(--f-carte)}
+@media (prefers-reduced-motion:reduce){.tm-anneau .pl{transition:none}}
 .tm-mil{flex:1 1 0;min-height:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
 .tm-c{background:var(--f-carte);border:1px solid var(--v08);border-radius:16px;padding:16px 18px;display:flex;flex-direction:column;gap:12px;min-height:0;min-width:0;overflow:hidden}
 .tm-c.l2{grid-column:span 2}
@@ -661,6 +679,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!MAQ()) return;
     appeler('tableau:lire', ['all', '7j', false]).then(function(r){ if (r && r.ok) { D7 = r; if (MAQ()) dessiner(); } });
   }
+  /* (2026-11-20, idées 2 et 9 qu'il a cochées) Le salut suit l'heure ; l'anneau montre la journée de préparation
+     (parties aujourd'hui sur parties + à préparer) ; la mini-courbe dessine les 7 derniers jours de commandes reçues. */
+  function salut(){
+    var hr = new Date().getHours();
+    return hr < 12 ? '${T("Bonjour, voici le bilan du jour")}' : (hr < 18 ? '${T("Bon après-midi, voici le bilan du jour")}' : '${T("Bonsoir, voici le bilan du jour")}');
+  }
+  function anneau(fait, total){
+    if (!total) return '';
+    var p = Math.max(0, Math.min(1, fait / total)), C = 94.25, reste = total - fait;
+    return '<div class="tm-anneau" title="' + esc(fait + ' / ' + total) + '"><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" class="fd"></circle>'
+      + '<circle cx="18" cy="18" r="15" class="pl" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - p)).toFixed(2) + '" transform="rotate(-90 18 18)"></circle></svg>'
+      + '<span class="n">' + fait + '<small>/' + total + '</small></span>'
+      + '<span class="t"><b>' + (reste ? '${T("{0} à préparer").split("{0}").join("' + reste + '")}' : '${T("Tout est parti")}') + '</b><span>${T("parties aujourd’hui")}</span></span></div>';
+  }
+  function courbe(v){
+    var max = Math.max.apply(null, v.concat([1])), n = v.length, pts = v.map(function(x, i){ return [Math.round(i / (n - 1) * 100), Math.round(26 - x / max * 22)]; });
+    var ligne = pts.map(function(q){ return q[0] + ' ' + q[1]; }).join(' L');
+    var der = pts[n - 1];
+    return '<svg class="tm-courbe" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><path class="a" d="M' + ligne + ' L100 28 L0 28Z"></path><path class="l" d="M' + ligne + '"></path>'
+      + '<circle cx="' + Math.min(98, der[0]) + '" cy="' + der[1] + '" r="2.4"></circle></svg>';
+  }
   function vueMaquette(){
     var V = D.vivant || {}, pc = V.parcours || {}, af = D.aFaire || {}, iv = V.inventaire || {}, tu = D.tuiles || {}, k = V.kpi || {};
     var langue = document.documentElement.lang || 'fr';
@@ -668,13 +707,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     date = date.charAt(0).toUpperCase() + date.slice(1);
     var aFaire = af.aTraiter || 0;
     var h = '<div class="tm"><header class="tm-tete"><div class="g"><span class="d">' + esc(date) + ' · ${T("Boutique en ligne")}</span>'
-      + '<h1>${T("Bonjour, voici le bilan du jour")}</h1></div>'
+      + '<h1>' + salut() + '</h1></div>' + anneau(pc.parties || 0, (pc.parties || 0) + aFaire)
       + (D.peutPreparer && aFaire ? '<button type="button" class="prim" id="tm-file"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"></path></svg>${T("Lancer la préparation")} (' + aFaire + ')</button>' : '')
       + '</header>';
     var ecartTxt = (typeof k.ecartCommandes === 'number') ? ((k.ecartCommandes >= 0 ? '+' : '') + k.ecartCommandes + ' % ${T("sur hier")}') : '';
-    var tuile = function(l, v, sous, cible){ return '<button type="button" class="tm-k" data-ouvre="' + cible + '"><span class="l">' + l + '</span><span class="v">' + v + '</span><span class="s">' + esc(sous) + '</span></button>'; };
+    var tuile = function(l, v, sous, cible, extra){ return '<button type="button" class="tm-k" data-ouvre="' + cible + '"><span class="l">' + l + '</span><span class="v">' + v + (extra && extra.tend || '') + '</span>' + (extra && extra.courbe || '<span class="s">' + esc(sous) + '</span>') + '</button>'; };
+    // (2026-11-20, idée 2 qu'il a cochée) La tuile « Commandes reçues » : pastille de tendance sur hier + mini-courbe des 7 jours.
+    var c7k = D7 && D7.vivant && D7.vivant.courbe, serie = (c7k && c7k.actuel) ? c7k.actuel.slice(-7) : [];
+    var tend = (typeof k.ecartCommandes === 'number' && k.ecartCommandes !== 0)
+      ? '<span class="tm-tend ' + (k.ecartCommandes > 0 ? 'h' : 'b') + '" title="' + esc(ecartTxt) + '">' + (k.ecartCommandes > 0 ? '▲ ' : '▼ ') + Math.abs(k.ecartCommandes) + ' %</span>' : '';
     h += '<div class="tm-kpi">'
-      + tuile('${T("Commandes reçues")}', pc.recues || 0, ecartTxt, 'orders')
+      + tuile('${T("Commandes reçues")}', pc.recues || 0, ecartTxt, 'orders', { tend: tend, courbe: (serie.length > 1 && Math.max.apply(null, serie) > 0) ? courbe(serie) : '' })
       + tuile('${T("En préparation")}', pc.preparation || 0, '${T("en cours")}', 'orders')
       + tuile('${T("Expédiées aujourd’hui")}', pc.parties || 0, '${T("parties aujourd’hui")}', 'orders')
       + tuile('${T("Délai moyen avant envoi")}', (V.delaiMoyenH != null ? delai(V.delaiMoyenH) : '—'), '${T("de la commande au départ")}', 'orders')
