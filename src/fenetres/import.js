@@ -64,9 +64,9 @@ button.lien:hover:not(:disabled){background:transparent;text-decoration:underlin
 .aide{font-size:.75rem;color:var(--tx2);line-height:1.45}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .accueil-vide{flex:1 1 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.7rem;text-align:center;padding:2rem}
-.accueil-vide .ic{width:64px;height:64px;border-radius:18px;display:inline-flex;align-items:center;justify-content:center;
+.accueil-vide .av-ic{width:64px;height:64px;border-radius:18px;display:inline-flex;align-items:center;justify-content:center;
   background:color-mix(in srgb,var(--vv,#5fd4a4) 16%,transparent);color:var(--vv,#5fd4a4);box-shadow:inset 0 0 0 1px color-mix(in srgb,var(--vv,#5fd4a4) 40%,transparent)}
-.accueil-vide .ic svg{width:32px;height:32px}
+.accueil-vide .av-ic svg{width:32px;height:32px}
 .accueil-vide h2{margin:.4rem 0 0;font-size:1.25rem;color:var(--tx)}
 .accueil-vide p{margin:0;max-width:30rem;color:var(--tx2);font-size:.9rem;line-height:1.5}
 .accueil-vide .prim{margin-top:.6rem;padding:.65rem 1.4rem;border-radius:11px;font-size:.92rem}
@@ -361,7 +361,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (f.configure ? esc(familleLib(f.type)) : '${T("site à configurer")}') + '</small></span>'
         + (n ? '<span class="cpt" title="${T("Fiches à compléter")}">' + n + '</span>' : '<span></span>') + '</div>';
     }).join('') + '</div>';
-    h += '<div class="bas">' + (CTX.peutAjouterFournisseur ? '<button type="button" data-a="nouveauF">${T("+ Nouveau fournisseur")}</button>' : '') + '</div></div>';
+    // (2026-11-20, sa capture : « deux boutons Nouveau fournisseur ») Liste vide : le bouton vit au centre, dans l'accueil.
+    h += '<div class="bas">' + (CTX.peutAjouterFournisseur && (CTX.fournisseurs || []).length ? '<button type="button" data-a="nouveauF">${T("+ Nouveau fournisseur")}</button>' : '') + '</div></div>';
     return h;
   }
 
@@ -371,7 +372,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // aucun fournisseur, on invite à créer le premier ; sinon, on montre où choisir.
     if (!f) {
       var aucun = !(CTX.fournisseurs || []).length;
-      return '<div class="accueil-vide"><span class="ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></span>'
+      return '<div class="accueil-vide"><span class="av-ic" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3z"/><path d="M14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.8"/><circle cx="17" cy="17.5" r="1.8"/></svg></span>'
         + (aucun
           ? '<h2>${T("Ajoutez votre premier fournisseur")}</h2><p>${T("Donnez le site d’un fournisseur : vous pourrez ensuite chercher ses produits par leur nom et en préparer les fiches en quelques secondes.")}</p>'
             + (CTX.peutAjouterFournisseur ? '<button type="button" class="prim" data-a="nouveauF">${T("+ Nouveau fournisseur")}</button>' : '')
