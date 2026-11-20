@@ -753,6 +753,17 @@ const _pleineZoneArmer = (w) => {
     try {
       const { screen } = require('electron');
       const pz = w._szPleineZone;
+      /* ⚠⚠ (2026-11-20, « ça le fait toujours : dès que le verrou s'applique, la fenêtre se réduit ») La parade des 900 ms
+         ne couvrait qu'un faux « maximize » qui suit DE PRÈS une recoloration de la bande. Ceux qui arrivent plus tard (retour
+         du focus, fenêtre parente réactivée par un verrou) passaient pour un clic « restaurer » et rapetissaient la fenêtre.
+         ➡ Le critère sûr : un VRAI agrandissement de Windows met la fenêtre dans l'état agrandi (IsZoomed) — isMaximized()
+         est vrai. Un faux n'y met rien : on l'ignore. Chaque événement est journalisé (fenetre.log) pour le prochain signalement. */
+      let vrai = true; try { vrai = w.isMaximized(); } catch (e) {}
+      try {
+        require('fs').appendFileSync(path.join(app.getPath('userData'), 'fenetre.log'),
+          new Date().toISOString() + ' maximize vrai=' + vrai + ' pz=' + !!pz + ' depuisBande=' + (Date.now() - (w._szOvlT || 0)) + 'ms bornes=' + JSON.stringify(w.getBounds()) + '\n');
+      } catch (e) {}
+      if (!vrai) return;
       /* Déjà en pleine zone ET toujours à sa place : c'est un « restaurer ».
          Si la personne a entre-temps redimensionné ou déplacé la fenêtre, la
          pleine zone n'est plus vraie — on traite comme un nouvel agrandissement. */

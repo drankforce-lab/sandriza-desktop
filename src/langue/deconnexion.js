@@ -42,5 +42,16 @@ module.exports = {
   /* ⚠ Il dit QUOI FAIRE, pas seulement que ça a rate. */
   'La réponse n’a pas pu partir (': 'The answer could not be sent (',
   ') — fermez cette fenêtre et réessayez.':
-    ') — close this window and try again.'
+    ') — close this window and try again.',
+  /* Les rôles, par leur NOM (2026-11-20). */
+  'Super-administrateur': 'Super administrator',
+  'Administrateur': 'Administrator',
+  'Gérant de boutique': 'Store manager',
+  'Comptable': 'Accountant',
+  'Commis à la livraison': 'Delivery clerk',
+  'Commis à la préparation de commandes': 'Order picker',
+  'Commis à l’inventaire': 'Inventory clerk',
+  'Service à la clientèle': 'Customer service',
+  'Marketing': 'Marketing',
+  'Consultation seulement': 'Read only'
 };

@@ -44,7 +44,7 @@ const CSS = `
 *{box-sizing:border-box}
 html,body{margin:0;height:100%;overflow:hidden}
 body{background:radial-gradient(ellipse at 50% 0%,rgba(var(--or-rgb),0.10),transparent 60%),var(--f-page);color:var(--tx);
-  font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
   display:flex;flex-direction:column}
 /* (2026-10-18, sa capture : « refais cette fenêtre, c est pas beau ») UNE CARTE CENTRÉE : qui l on est, la question,
    ce qui se passe. Plus de bandeau de titre (la barre de la fenêtre le dit déjà), plus de texte flottant à gauche. */
@@ -55,27 +55,31 @@ body{background:radial-gradient(ellipse at 50% 0%,rgba(var(--or-rgb),0.10),trans
   background:var(--f-carte);color:var(--tx);border:2px solid var(--or);
   font:500 1.25rem/1 Georgia,"Times New Roman",serif;letter-spacing:.04em;box-shadow:0 6px 18px rgba(0,0,0,.35)}
 .avatar svg{width:24px;height:24px;color:var(--tx-or2)}
-.q{margin:0;font-weight:700;font-size:1.08rem;line-height:1.35;font-family:inherit;color:var(--tx)}
-.qui{margin:.35rem 0 0;display:flex;align-items:center;justify-content:center;gap:.5rem;flex-wrap:wrap;font-size:.86rem;color:var(--tx2)}
+/* (2026-11-20, sa capture : « c'est trop écrit petit et les boutons ne sont pas beaux ») Texte agrandi, boutons en pilule. */
+.q{margin:0;font-weight:750;font-size:1.42rem;line-height:1.3;font-family:inherit;color:var(--tx);letter-spacing:-.005em}
+.qui{margin:.5rem 0 0;display:flex;align-items:center;justify-content:center;gap:.55rem;flex-wrap:wrap;font-size:1.06rem;color:var(--tx2)}
 .qui b{color:var(--tx);font-weight:600}
-.role{font-size:.7rem;font-weight:600;letter-spacing:.05em;text-transform:uppercase;padding:.08rem .55rem;border-radius:999px;
-  border:1px solid var(--v16);color:var(--tx2)}
+.role{font-size:.82rem;font-weight:600;padding:.15rem .7rem;border-radius:999px;
+  background:rgba(var(--or-rgb),.14);color:var(--tx-or2);border:0}
 .note{margin:.85rem 0 0;max-width:30rem;display:flex;gap:.5rem;align-items:flex-start;text-align:left;
-  font-size:.79rem;line-height:1.45;color:var(--tx2);padding:.55rem .75rem;border-radius:10px;background:var(--v05);border:1px solid var(--v08)}
-.note svg{flex:0 0 auto;width:15px;height:15px;margin-top:.1rem;color:var(--tx-or2)}
+  font-size:1rem;line-height:1.5;color:var(--tx2);padding:.75rem 1rem;border-radius:12px;background:var(--v05);border:1px solid var(--v08)}
+.note svg{flex:0 0 auto;width:18px;height:18px;margin-top:.12rem;color:var(--tx-or2)}
 html.jour .note svg,html.jour .avatar svg{color:#6f5535}
-.pied{flex:0 0 auto;display:flex;flex-direction:column;gap:.35rem;padding:.2rem 1.6rem 1.1rem}
-.btns{display:flex;gap:.6rem;justify-content:center}
-.btns button{flex:1 1 0;max-width:13rem}
+.pied{flex:0 0 auto;display:flex;flex-direction:column;gap:.35rem;padding:.4rem 1.6rem 1.3rem;background:transparent!important;border:0!important;box-shadow:none!important}
+.btns{display:flex;gap:.75rem;justify-content:center}
+.btns button{flex:0 0 auto;min-width:10.5rem}
 /* ⚠ LA LIGNE DE MESSAGE N'EST PAS UNE ANCRE DÉCORATIVE : elle dit pourquoi la réponse n'a pas pu partir. */
-.msg{font-size:.78rem;color:var(--tx2);min-height:1em;text-align:center}
+.msg{font-size:.88rem;color:var(--tx2);min-height:1em;text-align:center}
 button{font:inherit;color:var(--tx);background:var(--v05);display:inline-flex;align-items:center;justify-content:center;gap:.45rem;
-  border:1px solid var(--v16);border-radius:10px;padding:.6rem 1rem;cursor:pointer;
-  transition:background-color .13s ease,border-color .13s ease}
-button svg{width:16px;height:16px}
-button:hover{background:var(--v10)}
-button:focus-visible{outline:2px solid var(--or);outline-offset:2px}
-button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+  border:1px solid var(--v16);border-radius:999px;height:2.6rem;padding:0 1.4rem;cursor:pointer;font-size:.98rem;font-weight:600;
+  transition:background-color .13s ease,border-color .13s ease,transform .13s ease}
+button svg{width:17px;height:17px}
+button:hover{background:var(--v10);border-color:var(--v20,var(--v16))}
+button#non{background:transparent}
+button:active{transform:translateY(1px)}
+html body button:focus-visible{outline:0!important;box-shadow:0 0 0 3px rgba(var(--or-rgb),.35)!important}
+html body button:focus:not(:focus-visible){outline:0!important}
+button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700;box-shadow:0 6px 16px -8px rgba(var(--or-rgb),.7)}
 button.prim:hover{background:var(--or-clair)}
 @media (prefers-reduced-motion:reduce){button{transition:none}}
 `;
@@ -106,6 +110,11 @@ ${JS_DIRE()}
   var P = window.szPont;
   var repondu = false;
   var D = ${JSON.stringify({ nom, role })};
+  /* Le NOM du rôle, jamais son code (« SUPERADMIN » dans sa capture). */
+  var ROLES = { superadmin: '${T("Super-administrateur")}', admin: '${T("Administrateur")}', gerant: '${T("Gérant de boutique")}',
+    comptable: '${T("Comptable")}', expediteur: '${T("Commis à la livraison")}', preparateur: '${T("Commis à la préparation de commandes")}',
+    magasinier: '${T("Commis à l’inventaire")}', service: '${T("Service à la clientèle")}', marketing: '${T("Marketing")}', lecture: '${T("Consultation seulement")}' };
+  if (D.role && ROLES[String(D.role).toLowerCase()]) D.role = ROLES[String(D.role).toLowerCase()];
 
   /* ⚠⚠ LE CORPS SE DESSINE ICI, IL N EST PAS ECRIT EN DUR DANS LA PAGE. Premier
      jet : tout le balisage etait statique, et le banc << verifier-fenetres >> n a
