@@ -2088,6 +2088,20 @@ const createWindow = () => {
   // La coche « Plein écran » du panneau de menu suit (_cocherEtatsFenetre).
   mainWindow.on('enter-full-screen', () => { panneauSale = true; });
   mainWindow.on('leave-full-screen', () => { panneauSale = true; });
+  /* (2026-11-20) Plein écran, réduire/restaurer (PAS maximize/unmaximize : repeindre la bande émet un faux « maximize », la boucle serait possible) : Windows peut repeindre la bande _ □ ✕ à son défaut NOIR sans
+     qu'Electron le sache — et _overlay, qui ne renvoie pas une couleur « déjà posée », ne la repeignait plus. On oublie la
+     dernière couleur et on la repose ; sur la connexion, c'est la sienne, relue dans la page. */
+  const _bandeReposer = () => {
+    setTimeout(() => {
+      try {
+        if (!mainWindow || mainWindow.isDestroyed()) return;
+        const k = mainWindow._szOvl; mainWindow._szOvl = null;
+        if (vueConnexion) { _bandeConnexion(); return; }
+        if (k) _overlay(mainWindow, JSON.parse(k));
+      } catch (e) {}
+    }, 120);
+  };
+  ['enter-full-screen', 'leave-full-screen', 'restore', 'show'].forEach((ev) => mainWindow.on(ev, _bandeReposer));
   /* ⚠⚠ (2026-10-20) LE RETOUR DE LA FENÊTRE : sa PAGE BLANCHE (seuls les boutons réduire / agrandir / fermer) après
      une mise à jour installée. Les vues étaient reposées au redimensionnement, à l'agrandissement et au plein
      écran — JAMAIS quand la fenêtre revient de la barre des tâches ou réapparaît. Posées pendant qu'elle était
@@ -6494,6 +6508,7 @@ const _poserGardesDeSite = (wc) => {
     try {
       if (!mainWindow || mainWindow.isDestroyed() || typeof mainWindow.setTitleBarOverlay !== 'function') return;
       if (wc !== mainWindow.webContents) return;
+      if (vueConnexion) { _bandeConnexion(); return; }
       // getBackgroundColor rend #RRGGBB, ou #AARRGGBB quand une transparence est posée : on garde la couleur.
       const bg = String(mainWindow.getBackgroundColor() || '');
       const fond = _hexOuRien(bg.length === 9 ? '#' + bg.slice(3) : bg) || _fondTheme();
@@ -8448,6 +8463,10 @@ ipcMain.on('chrome:titlebar', (e, color, symbol) => {
   try {
     if (!_deLaPrincipale(e)) return;
     if (typeof mainWindow.setTitleBarOverlay !== 'function') return;
+    /* ⚠ (2026-11-20, ses deux captures : bande _ □ ✕ NOIRE sur la connexion, en plein écran puis après réduire/restaurer)
+       Le site reste chargé SOUS la vue de connexion : chaque redimensionnement lui fait renvoyer la couleur de SA barre,
+       qui écrasait celle de la connexion. Tant que la connexion est posée, c'est elle qui décide. */
+    if (vueConnexion) { _bandeConnexion(); return; }
     _overlay(mainWindow, {
       color: _hexOuRien(color) || _fondTheme(),
       symbolColor: _hexOuRien(symbol) || '#e8edf5',
