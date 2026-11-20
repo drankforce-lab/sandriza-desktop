@@ -5524,8 +5524,8 @@ html[data-sz-theme="epure"][data-sz-teinte="epure"]:not(.jour) body{background-c
 html[data-sz-theme="epure"][data-sz-teinte="epure"].jour body{background-color:var(--f-page);background-attachment:fixed;
   background-image:radial-gradient(55% 45% at 8% 0%,rgba(201,162,122,.12),transparent 70%),radial-gradient(45% 45% at 100% 0%,rgba(124,180,245,.10),transparent 70%)}
 /* C — les cartes en relief : un reflet en haut, une ombre portée. */
-html[data-sz-theme="epure"]:not(.jour) :is(.carte,.tm-c,.tm-a){background-image:linear-gradient(180deg,rgba(255,255,255,.035),transparent 55%);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,.045),0 8px 22px rgba(0,0,0,.22)}
+html[data-sz-theme="epure"]:not(.jour) :is(.carte,.tm-c,.tm-a){background-image:linear-gradient(180deg,var(--v035),transparent 55%);
+  box-shadow:inset 0 1px 0 var(--v045),0 8px 22px rgba(0,0,0,.22)}
 html[data-sz-theme="epure"].jour :is(.carte,.tm-c,.tm-a,.tm-k){box-shadow:0 1px 2px rgba(16,24,40,.05),0 6px 18px rgba(16,24,40,.06)}
 /* C — les en-têtes de tableau à l'accent du thème. */
 html[data-sz-theme="epure"] thead th{color:var(--tx-or);border-bottom-color:rgba(var(--or-rgb),.35)}
