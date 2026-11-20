@@ -391,6 +391,20 @@ module.exports = {
   'Rapports et budget': 'Reports and budget',
   'Factures': 'Invoices',
   'Saisir les dépenses de la semaine': 'Enter this week’s expenses',
+  // Objectifs et défis (assets/js/objectifs.js : MESURES[…].nom, GENRES, CATEGORIES, propositions[…].titre) — op objectifs:donnees.
+  // ⚠ Lecture seule : ce qui repart au site est la CLE (ventes, defi, accessoires…), jamais ce texte.
+  'Ventes (avant taxes)': 'Sales (before taxes)',
+  'Nombre de commandes': 'Number of orders',
+  'Ventes au comptoir': 'In-store sales',
+  'Nouveaux clients': 'New customers',
+  'Objectif': 'Goal',
+  'Défi d’équipe': 'Team challenge',
+  'Ventes du mois': 'Sales this month',
+  'Commandes de la semaine': 'Orders this week',
+  '10 accessoires vendus': '10 accessories sold',
+  'Toutes les catégories': 'All categories',
+  'Hauts': 'Tops',
+  'Manteaux': 'Coats',
   'Factures, reçus, relevés : une dépense saisie tout de suite garde sa pièce et ses taxes.':
     'Invoices, receipts, statements: an expense entered right away keeps its receipt and its taxes.',
   'Inscrire les déplacements de la semaine': 'Log this week’s trips',

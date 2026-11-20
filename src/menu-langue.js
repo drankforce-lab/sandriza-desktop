@@ -194,6 +194,8 @@ const MENU_APP_EN = {
   'Ramassages et rapport': 'Pickups and report',
   // Rappels (2026-10-02).
   'Rappels': 'Reminders',
+  // Objectifs et défis (2026-11-20).
+  'Objectifs et défis': 'Goals and challenges',
   'Recherches sans résultat': 'Searches with no result',
   'Recommandations': 'Recommendations',
   'Remboursements': 'Refunds',

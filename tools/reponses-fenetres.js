@@ -4194,6 +4194,47 @@ const JEU = {
     ];
   })(),
 
+  /* (2026-11-20) Objectifs et défis : mesures, genres et catégories copiés mot pour mot de assets/js/objectifs.js. */
+  'objectifs.js': (function(){
+    var MES = [ { cle: 'ventes', nom: 'Ventes (avant taxes)', unite: '$' }, { cle: 'commandes', nom: 'Nombre de commandes', unite: '' },
+      { cle: 'articles', nom: 'Articles vendus', unite: '' }, { cle: 'comptoir', nom: 'Ventes au comptoir', unite: '$' },
+      { cle: 'panier', nom: 'Panier moyen', unite: '$' }, { cle: 'clients', nom: 'Nouveaux clients', unite: '' } ];
+    var GEN = [ { cle: 'objectif', nom: 'Objectif' }, { cle: 'defi', nom: 'Défi d’équipe' } ];
+    var CAT = [ { cle: '', nom: 'Toutes les catégories' }, { cle: 'robes', nom: 'Robes' }, { cle: 'hauts', nom: 'Hauts' }, { cle: 'pantalons', nom: 'Pantalons' },
+      { cle: 'jupes', nom: 'Jupes' }, { cle: 'manteaux', nom: 'Manteaux' }, { cle: 'chaussures', nom: 'Chaussures' }, { cle: 'accessoires', nom: 'Accessoires' } ];
+    var PROPS = [ { cle: 'mois', titre: 'Ventes du mois', genre: 'objectif', mesure: 'ventes', cible: 25000, debut: '2026-11-01', fin: '2026-11-30' },
+      { cle: 'semaine', titre: 'Commandes de la semaine', genre: 'objectif', mesure: 'commandes', cible: 20, debut: '2026-11-16', fin: '2026-11-22' },
+      { cle: 'accessoires', titre: '10 accessoires vendus', genre: 'defi', mesure: 'articles', categorie: 'accessoires', cible: 10, debut: '2026-11-16', fin: '2026-11-22' } ];
+    var jours = function(n, v){ var a = []; for (var i = 0; i < n; i++) a.push(v[i % v.length]); return a; };
+    var LISTE = [
+      { id: 'obj_a1', titre: 'Ventes de novembre', genre: 'objectif', mesure: 'ventes', cible: 25000, debut: '2026-11-01', fin: '2026-11-30', categorie: '', note: '', epingle: true, actif: true,
+        valeur: 18400, parJour: jours(30, [820, 1040, 640, 900, 1210, 980, 760]), pct: 73.6, statut: 'enavance', joursTotal: 30, joursEcoules: 20, joursRestants: 10, reste: 6600, rythme: 660, attendu: 16666.67 },
+      { id: 'obj_a2', titre: 'Commandes de la semaine', genre: 'objectif', mesure: 'commandes', cible: 20, debut: '2026-11-16', fin: '2026-11-22', categorie: '', note: '', epingle: false, actif: true,
+        valeur: 9, parJour: [2, 1, 3, 2, 1, 0, 0], pct: 45, statut: 'enretard', joursTotal: 7, joursEcoules: 5, joursRestants: 2, reste: 11, rythme: 5.5, attendu: 14.29 },
+      { id: 'obj_a3', titre: '10 accessoires en ajout à une robe', genre: 'defi', mesure: 'articles', cible: 10, debut: '2026-11-16', fin: '2026-11-22', categorie: 'accessoires', note: 'Proposer un foulard ou une ceinture à chaque robe vendue.', epingle: false, actif: true,
+        valeur: 10, parJour: [2, 3, 1, 2, 2, 0, 0], pct: 100, statut: 'atteint', joursTotal: 7, joursEcoules: 5, joursRestants: 2, reste: 0, rythme: 0, attendu: 7.14 },
+      { id: 'obj_a4', titre: 'Panier moyen des fêtes', genre: 'objectif', mesure: 'panier', cible: 180, debut: '2026-12-01', fin: '2026-12-24', categorie: '', note: '', epingle: false, actif: true,
+        valeur: 0, parJour: [], pct: 0, statut: 'avenir', joursTotal: 24, joursEcoules: 0, joursRestants: 24, reste: 180, rythme: 0, attendu: 0 },
+      { id: 'obj_a5', titre: 'Ventes d’octobre', genre: 'objectif', mesure: 'ventes', cible: 22000, debut: '2026-10-01', fin: '2026-10-31', categorie: '', note: '', epingle: false, actif: true,
+        valeur: 20480, parJour: jours(31, [640, 720, 580, 700]), pct: 93.1, statut: 'manque', joursTotal: 31, joursEcoules: 31, joursRestants: 0, reste: 1520, rythme: 0, attendu: 22000 } ];
+    var donnees = function(liste, droits){
+      return Object.assign({ ok: true, aujourdhui: '2026-11-20', objectifs: liste, mesures: MES, genres: GEN, categories: CAT, propositions: PROPS, peutEcrire: true }, droits || {});
+    };
+    var rep = function(d){
+      return { 'objectifs:donnees': d, identite: IDENTITE,
+        'objectifs:etat': { ok: true, aujourdhui: '2026-11-20', principal: LISTE[0], mesures: MES },
+        'objectifs:ecrire': { ok: true, id: 'obj_a9' }, 'objectifs:supprimer': { ok: true, id: '' } };
+    };
+    var cas = function(nom, id, d, exige){ return { nom: nom, id: id, reponses: rep(d), exige: exige }; };
+    return [
+      cas('objectifs en cours, à venir et terminés', '', donnees(LISTE), ['data-ob="obj_a1"', 'data-modif="obj_a2"', 'data-epingle="obj_a3"', 'class="rep"']),
+      cas('aucun objectif — objectifs proposés', '', donnees([]), ['data-prop="mois"', 'data-prop="accessoires"']),
+      cas('formulaire — nouvel objectif', 'nouveau', donnees(LISTE), ['id="o-titre"', 'id="o-cible"', 'id="o-ok"']),
+      cas('formulaire — modification', 'modifier', donnees(LISTE), ['id="o-epingle"', 'id="o-debut"']),
+      cas('lecture seule', '', donnees(LISTE, { peutEcrire: false }), ['class="avis"']),
+      { nom: 'module des objectifs absent', id: '', reponses: { 'objectifs:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
+    ];
+  })(),
   'rappels.js': (function(){
     var FREQ = [
       { cle: 'unique', nom: 'Une seule fois' }, { cle: 'quotidien', nom: 'Chaque jour' },

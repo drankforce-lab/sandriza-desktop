@@ -300,6 +300,18 @@ html.jour .voile{background:rgba(20,24,30,.35)}
 .tm-k .l{font-size:12px;font-weight:600;color:var(--tx2)}
 .tm-k .v{font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--tx)}
 .tm-k .s{font-size:12px;font-weight:600;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tm-obj{display:flex;flex-direction:column;gap:8px;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;margin:0;
+  background:var(--f-carte);border:1px solid rgba(var(--or-rgb),.35);border-radius:14px;padding:12px 16px}
+.tm-obj .h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.tm-obj .h b{font-size:14px}
+.tm-obj .h .v{margin-left:auto;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
+.tm-obj .h .v small{font-size:12px;color:var(--tx2);font-weight:600}
+.tm-obj .h .p{font-weight:800;font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+.tm-obj .j{position:relative;height:9px;border-radius:99px;background:var(--v08)}
+.tm-obj .j i{display:block;height:100%;border-radius:99px;background:var(--or);max-width:100%}
+.tm-obj.atteint .j i{background:var(--vv,#5fd4a4)} .tm-obj.enretard .j i{background:#f2c26b} .tm-obj.enavance .j i{background:var(--vv-2,#7cb4f5)}
+.tm-obj .j em{position:absolute;top:-3px;bottom:-3px;width:2px;border-radius:2px;background:var(--tx)}
+.tm-obj .t{font-size:12px;color:var(--tx2)}
 .tm-tend{display:inline-flex;align-items:center;margin-left:8px;vertical-align:middle;font-size:11.5px;font-weight:800;letter-spacing:0;padding:2px 8px;border-radius:999px}
 .tm-tend.h{color:var(--ep-vert-t,#86e0a8);background:var(--ep-vert-f,#173326)}
 .tm-tend.b{color:var(--tx-err2);background:rgba(248,113,113,.14)}
@@ -675,6 +687,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ══ LA VUE DE LA MAQUETTE (Épuré) ════════════════════════════════════════════════════════════════════ */
   function MAQ(){ return document.documentElement.getAttribute('data-sz-theme') === 'epure'; }
   var D7 = null;   // la même lecture, sur 7 jours : l'histogramme de l'activité
+  /* (2026-11-20) L'objectif épinglé (ou en cours) : une bande sous les tuiles, qui ouvre la fenêtre Objectifs.
+     Une coquille sans le module des objectifs répond operation_inconnue : la bande ne s'affiche simplement pas. */
+  var OBJ = null;
+  function chargerObjectif(){
+    if (!MAQ()) return;
+    appeler('objectifs:etat').then(function(r){ var n = (r && r.ok) ? r : null; var avant = JSON.stringify(OBJ), apres = JSON.stringify(n); OBJ = n; if (avant !== apres && MAQ()) dessiner(); });
+  }
+  function bandeObjectif(){
+    var o = OBJ && OBJ.principal; if (!o) return '';
+    var u = ''; (OBJ.mesures || []).forEach(function(m){ if (m.cle === o.mesure) u = m.unite; });
+    var val = function(v){ return u === '$' ? fmt(v) : String(Math.round((Number(v) || 0) * 10) / 10); };
+    var pct = Math.max(0, Math.min(100, Number(o.pct) || 0));
+    var rep = (o.joursTotal > 0 && o.mesure !== 'panier') ? Math.max(0, Math.min(100, o.joursEcoules / o.joursTotal * 100)) : -1;
+    var txt = o.statut === 'atteint' ? '${T("Objectif atteint !")}'
+      : (o.rythme > 0 ? '${T("{0} par jour pour y arriver · {1} jours restants")}'.split('{0}').join(val(o.rythme)).split('{1}').join(String(o.joursRestants)) : '');
+    return '<button type="button" class="tm-obj ' + esc(o.statut || '') + '" data-ouvre="objectifs"><span class="h"><b>' + esc(o.titre) + '</b>'
+      + '<span class="v">' + esc(val(o.valeur)) + ' <small>/ ' + esc(val(o.cible)) + '</small></span><span class="p">' + esc(String(Math.round(pct))) + ' %</span></span>'
+      + '<span class="j"><i style="width:' + pct + '%"></i>' + (rep >= 0 ? '<em style="left:calc(' + rep.toFixed(1) + '% - 1px)"></em>' : '') + '</span>'
+      + (txt ? '<span class="t">' + esc(txt) + '</span>' : '') + '</button>';
+  }
   function chargerSemaine(){
     if (!MAQ()) return;
     appeler('tableau:lire', ['all', '7j', false]).then(function(r){ if (r && r.ok) { D7 = r; if (MAQ()) dessiner(); } });
@@ -721,7 +753,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + tuile('${T("En préparation")}', pc.preparation || 0, '${T("en cours")}', 'orders')
       + tuile('${T("Expédiées aujourd’hui")}', pc.parties || 0, '${T("parties aujourd’hui")}', 'orders')
       + tuile('${T("Délai moyen avant envoi")}', (V.delaiMoyenH != null ? delai(V.delaiMoyenH) : '—'), '${T("de la commande au départ")}', 'orders')
-      + '</div>';
+      + '</div>' + bandeObjectif();
     var fil = (V.fil || []).filter(function(c){ return ['pending', 'confirmed', 'preparing', 'verification'].indexOf(c.statut) >= 0; });
     h += '<div class="tm-mil"><section class="tm-c l2"><div class="tm-ct"><h2>${T("À préparer maintenant")}</h2>'
       + '<span class="tm-pill' + (aFaire ? ' a' : '') + '">' + aFaire + ' ' + (aFaire > 1 ? '${T("commandes")}' : '${T("commande")}') + '</span>'
@@ -765,7 +797,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var _tmJeu = document.documentElement.getAttribute('data-sz-theme');
     new MutationObserver(function(){
       var j = document.documentElement.getAttribute('data-sz-theme');
-      if (j !== _tmJeu) { _tmJeu = j; if (D) { dessiner(); chargerSemaine(); } }
+      if (j !== _tmJeu) { _tmJeu = j; if (D) { dessiner(); chargerSemaine(); chargerObjectif(); } }
     }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-sz-theme'] });
     if (window.ResizeObserver) new ResizeObserver(function(){ if (MAQ()) tmAjuste(); }).observe(corps);
   } catch (e) {}
@@ -1134,6 +1166,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       bilanDuSoir();
       chargerSauvegarde();
       chargerSemaine();
+      chargerObjectif();
     });
   }
   /* Il se relit seul toutes les 12 s, meme derriere un autre module (sa demande) — sauf pendant que

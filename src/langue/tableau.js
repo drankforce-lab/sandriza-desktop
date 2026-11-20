@@ -331,6 +331,8 @@ module.exports = {
   'Bonsoir, voici le bilan du jour': 'Good evening, here is today’s summary',
   '{0} à préparer': '{0} to prepare',
   'Tout est parti': 'Everything has shipped',
+  'Objectif atteint !': 'Goal reached!',
+  '{0} par jour pour y arriver · {1} jours restants': '{0} per day to get there · {1} days left',
   'sur hier': 'vs yesterday',
   'en cours': 'in progress',
   'Expédiées aujourd’hui': 'Shipped today',
