@@ -6865,7 +6865,7 @@ const majEtat = (etat) => {
    demandé), une vente, une étiquette achetée, un remboursement, un envoi… lancé à ce moment serait coupé net par le
    redémarrage : à moitié fait chez Square, chez le transporteur ou dans la base.
    ➡ (1) Ces opérations sont REFUSÉES (motif « maj_en_cours », expliqué dans chaque fenêtre) ; (2) celles déjà parties
-   sont ATTENDUES avant de quitter (90 s au plus) ; (3) un bandeau ambre le dit dans toutes les fenêtres. */
+   sont ATTENDUES avant de quitter (90 s au plus) ; (3) [retiré le 2026-11-20, sa demande] le bandeau ambre. */
 const OPS_CRITIQUES = new Set([
   'caisse:vendre', 'caisse:verifierPaiement', 'encan:vendre', 'encan:annuler', 'stock:vendre', 'stock:vendreLot',
   'commande:etiquette', 'commande:expedier', 'commande:statut', 'commandes:expedier', 'commandes:statutEcrire', 'commandes:rembourser',
@@ -6897,7 +6897,8 @@ const _majBandeau = (on) => {
 const majVerrouiller = () => {
   if (_majVerrou) return;
   _majVerrou = true;
-  _majBandeau(true);
+  /* (2026-11-20, sa capture de l'écran « Installation » : « retire ce message dans le bas ») Plus de bandeau : l'écran
+     d'installation dit déjà ce qui se passe, et chaque opération refusée l'explique dans sa fenêtre (maj_en_cours). */
 };
 // Attend que les opérations critiques déjà parties aient fini (au plus `max` ms).
 const _attendreOpsCritiques = (max) => new Promise((res) => {

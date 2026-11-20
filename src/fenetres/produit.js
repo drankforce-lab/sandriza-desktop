@@ -3598,6 +3598,15 @@ function pageProduit(id, importId) {
       if (w <= 88) { meilleur = Math.max(56, Math.min(88, Math.floor((rw + 10) / n - 10))); }
     }
     lp.style.setProperty('--pv-w', meilleur + 'px');
+    /* ⚠ (2026-11-20, sa capture : « Fibre agrandie » sortie sous la carte Photos) Le calcul ci-dessus DEVINE des hauteurs
+       fixes (64 px d'en-tête de fibre, 24 px de légende) : avec une police plus grande, la vraie hauteur les dépasse. On
+       MESURE donc ce qui est réellement posé, et l'on rapetisse les cases tant que le bas de la colonne sort de la carte. */
+    var bas = rc.bottom - (parseFloat(getComputedStyle(carte).paddingBottom) || 0) - 2;
+    var basReel = function(){ var m = 0; ['p-vues', 'p-fibre-bloc'].forEach(function(id){ var e = document.getElementById(id); if (e && e.offsetParent) { var r = e.getBoundingClientRect(); var d = e.scrollHeight - e.clientHeight; m = Math.max(m, r.bottom + (d > 0 ? d : 0)); } }); return m; };
+    for (var essai = 0; essai < 60 && meilleur > 48 && basReel() > bas; essai++) {
+      meilleur -= 4;
+      lp.style.setProperty('--pv-w', meilleur + 'px');
+    }
   }
   window.addEventListener('resize', function(){ clearTimeout(window.__pvT); window.__pvT = setTimeout(ajusterPhotos, 80); });
   /* La case FIBRE (2026-10-26). FIBRE : l'image (data: neuve, ou adresse déjà en ligne) — vide, rien n'est envoyé. */
