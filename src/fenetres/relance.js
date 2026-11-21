@@ -66,7 +66,7 @@ button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weigh
 table{width:100%;border-collapse:collapse;font-size:.84rem}
 thead th{text-align:left;font-size:.7rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);padding:.45rem .5rem;border-bottom:1px solid var(--v08);font-weight:700}
 tbody td{padding:.5rem .5rem;border-bottom:1px solid var(--v05);vertical-align:middle}
-tbody tr.non td{opacity:.62}
+/* Les lignes non cochables ne sont PAS estompées (le contraste tomberait sous 4,5) : la pastille et l absence de case suffisent. */
 .cl{display:flex;align-items:center;gap:.55rem;min-width:0}
 .rl-av{width:28px;height:28px;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;font-size:.68rem;font-weight:800;flex:0 0 auto;
   background:var(--v08);color:var(--tx2)}
