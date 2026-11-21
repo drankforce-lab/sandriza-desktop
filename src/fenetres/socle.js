@@ -5603,14 +5603,14 @@ html[data-sz-theme="epure"] :is(.cx-kpi.ok>b),html[data-sz-theme="epure"].jour :
 html[data-sz-theme="epure"] tbody td:has(> .rf-pill.vert:only-child){background:var(--ep-vert-f)!important}
 html[data-sz-theme="epure"] tbody td > .rf-pill.vert:only-child{color:var(--ep-vert-t)!important}
 
-/* (2026-11-20, sa demande : « des séparations ou dégradés avec les titres des modules ») L'en-tête de chaque fenêtre : un dégradé
-   doux qui part du titre, un filet en dégradé dessous (or → bleu → rien), l'icône dans un carré teinté. */
-html[data-sz-theme="epure"] .tete{position:relative;background:linear-gradient(90deg,rgba(var(--or-rgb),.15),rgba(var(--or-rgb),.05) 38%,transparent 72%),linear-gradient(180deg,var(--v035),transparent),var(--f-carte)!important;border-bottom-color:transparent!important}
-html[data-sz-theme="epure"] .tete::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:2px;pointer-events:none;
-  background:linear-gradient(90deg,rgba(var(--or-rgb),.85),color-mix(in srgb,var(--vv-2) 70%,transparent) 42%,transparent 85%)}
+/* (2026-11-20, sa capture : « ça ne doit pas être carré, je veux que ça se fonde à l'application ») L'en-tête garde la
+   couleur EXACTE de la bande de titre de la fenêtre : aucun dégradé, aucun bord — il se fond. La séparation n'est plus
+   qu'un filet fin qui naît et s'éteint en fondu, sans angle ; l'icône garde son carré teinté. */
+html[data-sz-theme="epure"] .tete{position:relative;background:var(--f-carte)!important;border-bottom-color:transparent!important;box-shadow:none!important}
+html[data-sz-theme="epure"] .tete::after{content:"";position:absolute;left:0;right:0;bottom:-1px;height:1px;pointer-events:none;
+  background:linear-gradient(90deg,transparent,rgba(var(--or-rgb),.55) 12%,color-mix(in srgb,var(--vv-2) 45%,transparent) 55%,transparent 92%)}
 html[data-sz-theme="epure"] .tete>.ico{display:inline-flex;align-items:center;justify-content:center;width:30px;height:30px;border-radius:9px;
   background:rgba(var(--or-rgb),.16);box-shadow:inset 0 0 0 1px rgba(var(--or-rgb),.32);opacity:1}
-html[data-sz-theme="epure"].jour .tete{background:linear-gradient(90deg,rgba(var(--or-rgb),.22),rgba(var(--or-rgb),.08) 38%,transparent 72%),var(--f-carte)!important}
 
 /* === (2026-11-20) LES IDEES QU'IL A COCHEES (page « Dix idées pour ton nouveau look ») === */
 /* 4 — La ligne survolée s'allume : léger fond, liseré doré à gauche. Les cellules d'état pleines gardent leur couleur. */

@@ -49,12 +49,12 @@ button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.45;cursor:default}
 button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
 button.dang{color:var(--tx-err2)}
-#corps{flex:1 1 auto;overflow:auto;padding:1rem 1.1rem 1.4rem}
+#corps{flex:1 1 auto;min-height:0;overflow:hidden;padding:1rem 1.1rem .8rem;display:flex;flex-direction:column}
 .pied{flex:0 0 auto;padding:.35rem 1.1rem;border-top:1px solid var(--v08);min-height:1.9rem;font-size:.8rem}
 .msg.bon{color:var(--tx-ok)} .msg.err{color:var(--tx-err)}
 .grp{margin:0 0 1.2rem}
 .grp>h2{margin:0 0 .6rem;font-size:.74rem;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2)}
-.ob-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:.85rem}
+.ob-l{display:grid;grid-template-columns:repeat(auto-fill,minmax(330px,1fr));gap:.85rem;flex:1 1 auto;min-height:0;align-content:start}
 .ob{background:var(--f-carte);border:1px solid var(--v08);border-radius:14px;padding:.95rem 1rem;display:flex;flex-direction:column;gap:.55rem;min-width:0}
 .ob.epingle{border-color:rgba(var(--or-rgb),.55)}
 .ob-h{display:flex;align-items:flex-start;gap:.6rem}
@@ -313,8 +313,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       corps.innerHTML = h + '</div>';
       return;
     }
-    var grp = function(titre, liste){ return liste.length ? '<section class="grp"><h2>' + titre + '</h2><div class="ob-l">' + liste.map(carte).join('') + '</div></section>' : ''; };
-    h += grp('${T("En cours")}', enCours) + grp('${T("À venir")}', avenir) + grp('${T("Terminés")}', finis);
+    /* ⚠ AUCUNE GLISSIÈRE (sa règle) : une seule grille, PAGINÉE par le socle (data-pages) — en cours, puis à venir,
+       puis terminés ; la pastille de chaque carte dit où elle en est. */
+    h += '<div class="ob-l" data-pages="objectifs">' + enCours.concat(avenir, finis).map(carte).join('') + '</div>';
     corps.innerHTML = h;
     if (FORM) { var t = document.getElementById('o-titre'); if (t && !t.value) t.focus(); }
   }
