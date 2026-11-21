@@ -65,7 +65,9 @@ button.danger{border-color:rgba(248,113,113,.45);color:var(--tx-err2)}
 button.aconf{background:rgba(248,113,113,.16);color:var(--tx-err2)}
 html.jour button.aconf{color:#7f1d1d}
 button.fait{border-color:rgba(74,222,128,.45);color:var(--tx-ok)}
-.duo{display:grid;grid-template-columns:minmax(0,1fr) 22rem;gap:.9rem}
+/* (2026-11-21, sa capture : « agrandis cette zone pour que ça entre correctement ») La colonne des rappels proposés
+   passe de 22 à 30 rem, et la ligne d échéance se lit en entier (retour à la ligne au lieu des points de suite). */
+.duo{display:grid;grid-template-columns:minmax(0,1fr) minmax(24rem,30rem);gap:.9rem}
 .duo>div{display:flex;flex-direction:column;gap:.9rem;min-width:0}
 /* 2026-10-12 (<< aucun scroll bar >>) : la colonne des rappels PROPOSES depassait en bas en fenetre basse — et
    comme la page de << Mes rappels >> se reduit tant que le corps deborde, elle tombait a UN rappel par page.
@@ -129,7 +131,7 @@ span.szk-c{display:inline-flex;align-items:center;justify-content:center;width:1
   padding:.32rem 0;border-bottom:1px solid var(--v055)}
 .mdl:last-child{border-bottom:0}
 .mdl .t{font-weight:600;font-size:.82rem}
-.mdl .n{font-size:.71rem;color:var(--tx2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.mdl .n{font-size:.71rem;color:var(--tx2);line-height:1.35}
 
 /* ── Le formulaire ───────────────────────────────────────────────────────── */
 .form2{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.42rem .65rem}

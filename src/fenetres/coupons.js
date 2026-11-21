@@ -120,7 +120,7 @@ tbody tr:hover td{background:var(--v04)}
   padding:.15rem .55rem;border-radius:6px;background:var(--v06)}
 .cp-apercu .cp-fl{color:var(--tx3)}
 /* La liste refaite (2026-10-15, lot B) : un rang par coupon, qui commence par le coupon lui-meme (son code sur un ticket). */
-.cp-rang{grid-template-columns:1.4rem minmax(0,1.6fr) minmax(0,1fr) 8rem minmax(0,1.1fr) 17rem}
+.cp-rang{grid-template-columns:1.4rem minmax(0,2.3fr) minmax(0,.9fr) 7rem minmax(0,1fr) auto}
 /* Les cases a cocher (gestes groupes, 2026-10-29) : la liste est en RANGS, pas en tableau — la case est une
    cellule de la grille, et « tout cocher » se pose a gauche de la barre d actions. */
 .ls-rang .szk-c{display:flex;align-items:center;justify-content:center;cursor:pointer;min-height:2rem}

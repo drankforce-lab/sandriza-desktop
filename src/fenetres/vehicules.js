@@ -148,6 +148,7 @@ tbody tr.ligne.mod{cursor:pointer}
 
 /* ── Mises en page ───────────────────────────────────────────────────────── */
 .duo{display:grid;grid-template-columns:minmax(0,1.65fr) minmax(19rem,1fr);gap:.7rem;align-items:start}
+.duo.inv{grid-template-columns:minmax(19rem,1fr) minmax(0,1.65fr)}
 .duo>div{display:flex;flex-direction:column;gap:.7rem;min-width:0}
 .aide{font-size:.76rem;color:var(--tx2);line-height:1.45}
 .aide strong{color:var(--tx)}
@@ -181,18 +182,38 @@ tbody tr.ligne.mod{cursor:pointer}
 
 /* ── Les cartes de vehicule ──────────────────────────────────────────────── */
 .vgrille{display:grid;grid-template-columns:repeat(auto-fill,minmax(21rem,1fr));gap:.7rem;align-items:start}
-.vcarte{display:flex;flex-direction:column;gap:.35rem}
-.vcarte .vt{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
-.vcarte .vt strong{font-size:.95rem}
-.vcarte .meta{font-size:.74rem;color:var(--tx2)}
-.odo{border-top:1px solid var(--v08);padding-top:.45rem;margin-top:.15rem}
+.vcarte{display:flex;flex-direction:column;gap:.45rem;padding:.85rem .95rem}
+.vcarte .vt{display:flex;align-items:center;gap:.7rem}
+.vcarte .vic{width:38px;height:38px;border-radius:11px;display:inline-flex;align-items:center;justify-content:center;flex:0 0 auto;
+  background:rgba(var(--or-rgb),.14);color:var(--or);box-shadow:inset 0 0 0 1px rgba(var(--or-rgb),.3)}
+.vcarte .vic svg{width:21px;height:21px}
+.vcarte .vn{flex:1;min-width:0;display:flex;flex-direction:column}
+.vcarte .vn strong{font-size:1rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vcarte .meta{font-size:.76rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vcarte .vid{display:flex;gap:1rem;flex-wrap:wrap;font-size:.76rem;color:var(--tx2)}
+.vcarte .vid b{color:var(--tx);font-weight:600}
+.vstats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem;margin-top:.4rem}
+.vstats div{background:var(--v04);border:1px solid var(--v08);border-radius:10px;padding:.3rem .5rem;display:flex;flex-direction:column;min-width:0}
+.vstats span{font-size:.68rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.vstats b{font-size:.92rem;font-variant-numeric:tabular-nums}
+.lv{display:flex;align-items:baseline;justify-content:space-between;gap:.6rem;font-size:.8rem;padding:.08rem 0}
+.lv>span{color:var(--tx2);min-width:0}
+.lv>b{font-variant-numeric:tabular-nums;white-space:nowrap;font-weight:600}
+.lv.fort{border-top:1px solid var(--v08);margin-top:.15rem;padding-top:.35rem}
+.lv.fort>span,.lv.fort>b{color:var(--tx);font-weight:800}
+.odo{border-top:1px solid var(--v08);padding-top:.55rem;margin-top:0}
+.odo .ot{display:flex;align-items:center;justify-content:space-between;gap:.5rem}
+.odo .ot .mini{text-transform:none;letter-spacing:0;font-weight:600}
 .odo .ot{font-size:.6875rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;margin-bottom:.3rem}
-.odo .og{display:grid;grid-template-columns:4.6rem minmax(0,1fr);gap:.3rem .5rem;align-items:center}
-.odo .og label{font-size:.74rem;color:var(--tx2)}
-.odo .src{grid-column:2;font-size:.6875rem;color:var(--tx3);margin-top:-.15rem}
+.odo .og{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:.6rem}
+.odo .of{display:flex;flex-direction:column;gap:.2rem;min-width:0}
+.odo .of input{width:100%}
+.odo .og label{font-size:.74rem;color:var(--tx2);font-weight:600}
+.odo .src{font-size:.6875rem;color:var(--tx3)}
 .kv{display:flex;gap:.9rem;flex-wrap:wrap;font-size:.78rem}
-.kv b{font-family:ui-monospace,Consolas,monospace}
-.vact{display:flex;gap:.4rem;justify-content:flex-end;margin-top:.2rem}
+.kv b{font-variant-numeric:tabular-nums}
+.vact{display:flex;gap:.4rem;justify-content:flex-end;margin-top:.2rem;padding-top:.5rem;border-top:1px solid var(--v08)}
+.odo .vact{border-top:0;padding-top:0}
 
 /* ── Bilan ───────────────────────────────────────────────────────────────── */
 .bilan td:first-child{color:var(--tx2)}
@@ -227,7 +248,7 @@ tbody tr.ligne.mod{cursor:pointer}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;
   text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
-@media (max-width:980px){.duo{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:980px){.duo,.duo.inv{grid-template-columns:minmax(0,1fr)}}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* Un « Supprimer » par ligne : neutre au repos, rouge au survol et quand il
    demande confirmation — douze boutons rouges faisaient une liste en alerte
@@ -745,7 +766,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
   function vueRegistre(){
     /* Les chiffres sont poses par rendu() AVANT la barre des onglets (kpisRegistre). */
     if (!(D.vehicules || []).length) return appelPremierVehicule();
-    return '<div class="duo"><div>' + listeDeplacements() + '</div><div>' + formDeplacement() + '</div></div>';
+    /* (2026-11-21, sa capture : « l’entrée de déplacement doit se faire à gauche et le tableau à droite ») */
+    return '<div class="duo inv"><div>' + formDeplacement() + '</div><div>' + listeDeplacements() + '</div></div>';
   }
   function appelPremierVehicule(){
     return '<div class="carte appel"><strong>${T("Aucun véhicule inscrit")}</strong>'
@@ -766,7 +788,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     if (!L.length) {
       return h + '<div class="vide"><strong>${T("Aucun déplacement inscrit")}</strong>'
         + (FVEH ? '${T("pour ce véhicule en")} ' : '${T("en")} ') + ANNEE + '.<br>'
-        + (PA ? '${T("Chaque sortie pour affaires s’inscrit à droite : la date, la destination, la raison et les kilomètres.")}' : '')
+        + (PA ? '${T("Chaque sortie pour affaires s’inscrit à gauche : la date, la destination, la raison et les kilomètres.")}' : '')
         + '</div></div>';
     }
     /* (2026-11-19, banc --long : « Supprimer » sortait de la carte avec de vrais noms de véhicules et de trajets) Largeurs
@@ -894,16 +916,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     }
     var l = ligneDpa(v);
     var plaf = d.plafond && d.plafond.montant != null && (d.classe === '10.1' || d.classe === '54');
-    h += '<div class="kv"><span>${T("Coût en capital")} <b>' + argent(d.cout) + '</b>'
-      + (plaf ? ' <span class="pill g" title="' + esc(plafondTexte(d.plafond)) + '">${T("plafonné")}</span>' : '') + '</span>'
-      + (d.plafond && d.plafond.aConfirmer ? '<span class="pill att" title="' + esc(plafondTexte(d.plafond)) + '">${T("plafond à confirmer")}</span>' : '')
-      + '</div>';
+    h += '<div class="lv"><span>${T("Coût en capital")}'
+      + (plaf ? ' <span class="pill g" title="' + esc(plafondTexte(d.plafond)) + '">${T("plafonné")}</span>' : '')
+      + (d.plafond && d.plafond.aConfirmer ? ' <span class="pill att" title="' + esc(plafondTexte(d.plafond)) + '">${T("plafond à confirmer")}</span>' : '')
+      + '</span><b>' + argent(d.cout) + '</b></div>';
     if (!l) {
       return h + '<div class="sous2">${T("Aucune DPA en")} ' + ANNEE + ' (${T("mise en service le")} ' + esc(szJour(d.miseEnService)) + ').</div></div>';
     }
-    h += '<div class="kv"><span>${T("FNACC")} <b>' + argent(l.fnaccDebut + (l.ajout || 0)) + '</b> → <b>' + argent(l.fnaccFin) + '</b></span>'
-      + '<span>${T("max.")} <b>' + argent(l.dpaMax) + '</b></span>'
-      + '<span class="gris">' + esc(regle(l.regle)) + '</span></div>';
+    h += '<div class="lv"><span>${T("FNACC")}</span><b>' + argent(l.fnaccDebut + (l.ajout || 0)) + ' → ' + argent(l.fnaccFin) + '</b></div>'
+      + '<div class="lv"><span>${T("DPA maximale")} <span class="gris">' + esc(regle(l.regle)) + '</span></span><b>' + argent(l.dpaMax) + '</b></div>';
     if (l.vendu) {
       h += '<div class="sous2">' + (l.recuperation
         ? '${T("Vendu : récupération de")} <b class="attn">' + argent(l.recuperation) + '</b> ${T("(un revenu, ligne 8230)")}'
@@ -920,11 +941,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
         + (l.reduite ? '<button type="button" class="mini" data-dpa-max="' + esc(v.id) + '">${T("Maximum")}</button>' : '')
         + '</div>';
     } else {
-      h += '<div class="kv"><span>${T("DPA demandée")} <b>' + argent(l.dpaDemandee) + '</b></span></div>';
+      h += '<div class="lv"><span>${T("DPA demandée")}</span><b>' + argent(l.dpaDemandee) + '</b></div>';
     }
-    h += '<div class="kv"><span>${T("part")} <b>' + (l.partEtablie ? pct(l.part) : '<span class="attn">${T("non établie")}</span>') + '</b></span>'
-      + '<span>${T("DPA déductible")} <b>' + argent(l.deductible) + '</b></span>'
-      + (l.reduite ? '<span class="pill g">${T("réduite")}</span>' : '') + '</div>';
+    h += '<div class="lv"><span>${T("Part d’affaires")}</span><b>' + (l.partEtablie ? pct(l.part) : '<span class="attn">${T("non établie")}</span>') + '</b></div>'
+      + '<div class="lv fort"><span>${T("DPA déductible")}' + (l.reduite ? ' <span class="pill g">${T("réduite")}</span>' : '') + '</span><b>' + argent(l.deductible) + '</b></div>';
     return h + '</div>';
   }
   /* Le tableau annee par annee, dans une boite — la carte n a de place que pour
@@ -999,11 +1019,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     var aideAuto = '${T("Relevé automatique au 31 décembre, 23 h 59 (dernier odomètre connu) — corrigez s’il diffère du compteur.")}';
     var note = auto ? '' : ((saisi == null && deduit != null) ? source(src)
       : (saisi != null ? '' : (champ === 'debut' ? '${T("à saisir : le compteur au 1er janvier")}' : '${T("à saisir : le compteur au 31 décembre")}')));
-    return '<label for="' + esc(id) + '">' + lbl + '</label>'
+    return '<div class="of"><label for="' + esc(id) + '">' + lbl + '</label>'
       + '<input type="text" inputmode="decimal" class="n" id="' + esc(id) + '" data-odo="' + esc(v.id) + '" data-champ="' + champ + '"'
       + ' data-orig="' + esc(val) + '" value="' + esc(val) + '" placeholder="' + esc(ph) + '"' + (auto ? ' title="' + aideAuto + '"' : '') + (PM ? '' : ' disabled') + '>'
       + (auto ? '<div class="src"><span class="pill g" title="' + aideAuto + '">${T("auto · 31 déc.")}</span></div>' : '')
-      + (note ? '<div class="src">' + esc(note) + '</div>' : '');
+      + (note ? '<div class="src">' + esc(note) + '</div>' : '') + '</div>';
   }
   function carteVehicule(v){
     var o = v.odometre || {};
@@ -1011,23 +1031,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     var meta = [v.marque, v.modele, v.annee].filter(Boolean).join(' ');
     var h = '<div class="carte vcarte' + (PM ? ' mod' : '') + '" data-veh="' + esc(v.id) + '"'
       + (PM ? ' title="${T("Double-cliquez pour modifier la fiche")}"' : '') + '>'
-      + '<div class="vt"><strong>' + esc(v.nom) + '</strong>' + etatVehicule(v) + '</div>'
-      + '<div class="meta">' + esc(meta || '${T("Marque et modèle non précisés")}') + (v.plaque ? ' · ${T("plaque")} ' + esc(v.plaque) : '') + '</div>'
-      + (v.acquisLe ? '<div class="meta">${T("Acquis le")} ' + esc(szJour(v.acquisLe))
-          + (v.odometreAcquis != null ? ' — ' + km(v.odometreAcquis) : '') + '</div>' : '')
-      + (v.retireLe ? '<div class="meta">${T("Retiré le")} ' + esc(szJour(v.retireLe))
-          + (v.odometreRetrait != null ? ' — ' + km(v.odometreRetrait) : '') + '</div>' : '');
+      /* (2026-11-21, sa capture : « améliore l’affichage des véhicules, ça doit faire professionnel ») Une fiche : icône,
+         nom et état, puis UNE ligne d’identité ; odomètre en deux champs côte à côte et trois chiffres-clés ; DPA en
+         lignes libellé / montant alignées ; les gestes au pied. */
+      + '<div class="vt"><span class="vic" aria-hidden="true">${ICO.vehicule}</span><div class="vn"><strong>' + esc(v.nom) + '</strong>'
+      + '<span class="meta">' + esc(meta || '${T("Marque et modèle non précisés")}') + (v.plaque ? ' · ${T("plaque")} ' + esc(v.plaque) : '') + '</span>'
+      + ((v.acquisLe || v.retireLe) ? '<span class="meta">'
+          + (v.acquisLe ? '${T("Acquis le")} ' + esc(szJour(v.acquisLe)) + (v.odometreAcquis != null ? ' · ' + km(v.odometreAcquis) : '') : '')
+          + (v.retireLe ? (v.acquisLe ? ' — ' : '') + '${T("Retiré le")} ' + esc(szJour(v.retireLe)) + (v.odometreRetrait != null ? ' · ' + km(v.odometreRetrait) : '') : '')
+          + '</span>' : '')
+      + '</div>' + etatVehicule(v) + '</div>';
     if (v.enService) {
       var manque = (o.manque || []);
-      h += '<div class="odo"><div class="ot">${T("Odomètre")} ' + ANNEE + '</div><div class="og">'
+      h += '<div class="odo"><div class="ot"><span>${T("Odomètre")} ' + ANNEE + '</span>'
+        + (PM ? '<button type="button" class="mini" data-odo-enr="' + esc(v.id) + '">${T("Enregistrer l’odomètre")}</button>' : '') + '</div><div class="og">'
         + champOdo(v, 'debut') + champOdo(v, 'fin') + '</div>'
-        + '<div class="kv" style="margin-top:.35rem"><span>${T("Km de l’année")} <b>'
-        + (o.km != null ? km(o.km) : '—') + '</b></span>'
-        + (b ? '<span>${T("d’affaires")} <b>' + km(b.kmAffaires) + '</b></span>'
-             + '<span>${T("part")} <b>' + (b.part == null ? '—' : pct(b.part)) + '</b></span>' : '')
-        + '</div>'
+        + '<div class="vstats"><div><span>${T("Km de l’année")}</span><b>' + (o.km != null ? km(o.km) : '—') + '</b></div>'
+        + '<div><span>${T("Km d’affaires")}</span><b>' + (b ? km(b.kmAffaires) : '—') + '</b></div>'
+        + '<div><span>${T("Part d’affaires")}</span><b>' + (b && b.part != null ? pct(b.part) : '—') + '</b></div></div>'
         + (manque.indexOf('incoherent') >= 0 ? '<div class="sous2 mauvais">${T("La fin est inférieure au début : corrigez l’un des deux.")}</div>' : '')
-        + (PM ? '<div class="vact"><button type="button" class="mini" data-odo-enr="' + esc(v.id) + '">${T("Enregistrer l’odomètre")}</button></div>' : '')
         + '</div>';
     } else {
       h += '<div class="odo"><div class="aide">${T("Ce véhicule n’était pas en service en")} ' + ANNEE + '${T(" : aucun odomètre à relever cette année-là.")}</div></div>';
@@ -1234,7 +1256,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
   function vueChangements(){
     var L = (D.changements || []);
     var t = tranche(L, 'chg');
-    var h = '<div class="duo"><div><div class="carte"><h2>${T("Historique des changements")}' + nav('chg', t.nbp) + '</h2>';
+    /* (2026-11-21, sa capture : « même chose ici, ça doit être inversé ») Le formulaire à gauche, l’historique à droite. */
+    var h = '<div class="duo inv"><div>' + formChangement() + '</div><div><div class="carte"><h2>${T("Historique des changements")}' + nav('chg', t.nbp) + '</h2>';
     if (!L.length) {
       h += '<div class="vide"><strong>${T("Aucun changement inscrit")}</strong>'
         + '${T("Un changement de véhicule (vente, fin de location, remplacement) se note ici, avec l’odomètre des deux véhicules ce jour-là.")}</div>';
@@ -1249,7 +1272,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
           }).join('')
         + '</tbody></table>';
     }
-    h += '</div></div><div>' + formChangement() + '</div></div>';
+    h += '</div></div></div>';
     return h;
   }
   function formChangement(){

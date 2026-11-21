@@ -185,8 +185,8 @@ input[type=checkbox]{accent-color:var(--or)}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* La liste refaite (2026-10-15, lot B) : un rang par offre ; une annonce montre son bandeau ou son badge en petit. */
-.pr-rang{grid-template-columns:minmax(0,1.8fr) minmax(0,1fr) minmax(0,1.1fr) 17rem}
-.pr-rang-an{grid-template-columns:minmax(0,1.1fr) minmax(0,1.6fr) minmax(0,1fr) 17rem}
+.pr-rang{grid-template-columns:minmax(0,1.8fr) minmax(0,1fr) minmax(0,1.1fr) auto}
+.pr-rang-an{grid-template-columns:minmax(0,1.1fr) minmax(0,1.6fr) minmax(0,1fr) auto}
 .pr-rang .ou b.pr-red{font-size:1.05rem;font-weight:700}
 .pr-vu{min-width:0;display:flex}
 .pr-mini{flex:1 1 auto;min-width:0;display:flex;align-items:center;justify-content:center;gap:.6rem;height:2.3rem;padding:0 .9rem;

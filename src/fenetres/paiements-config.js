@@ -164,6 +164,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     droit:              '${T("Votre rôle ne donne pas accès aux paiements.")}',
     lecture_seule:      '${T("Votre rôle est en lecture seule : les paiements ne peuvent pas être modifiés.")}',
     sans_jeton:         '${T("Entrez d’abord un jeton d’accès, puis enregistrez.")}',
+    jeton_masque:       '${T("Rien n’a été enregistré : la clé contient un caractère qui n’existe pas dans une clé Square, souvent le masque ●●●● du tableau de bord Square. Cliquez « Show » à côté du jeton, copiez-le, puis recollez-le ici.")}',
     api:                '${T("Square a refusé la connexion.")}',
     rien_a_ecrire:      '${T("Aucun changement à enregistrer.")}',
     indisponible:       '${T("Le module de paiement n’est pas prêt dans la fenêtre principale.")}',

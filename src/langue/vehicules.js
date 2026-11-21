@@ -127,8 +127,8 @@ module.exports = {
   'Aucun déplacement inscrit': 'No trip logged',
   'pour ce véhicule en': 'for this vehicle in',
   'en': 'in',
-  'Chaque sortie pour affaires s’inscrit à droite : la date, la destination, la raison et les kilomètres.':
-    'Log each business trip on the right: the date, the destination, the purpose and the kilometres.',
+  'Chaque sortie pour affaires s’inscrit à gauche : la date, la destination, la raison et les kilomètres.':
+    'Log each business trip on the left: the date, the destination, the purpose and the kilometres.',
   'Date': 'Date',
   'Véhicule': 'Vehicle',
   'Trajet et raison': 'Route and purpose',

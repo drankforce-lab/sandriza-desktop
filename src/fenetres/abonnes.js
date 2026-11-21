@@ -96,11 +96,11 @@ tbody tr:hover td{background:var(--v04)}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* La liste refaite (2026-10-15, lot C) : un rang par abonne. */
-.ab-rang{grid-template-columns:minmax(0,1.8fr) minmax(0,1.1fr) minmax(0,1fr) 15rem}
+.ab-rang{grid-template-columns:minmax(0,1.8fr) minmax(0,1.1fr) minmax(0,1fr) auto}
 .ab-rang.eteint .bico{color:var(--tx2)}
 /* LES CASES À COCHER (2026-10-29, gestes groupés) : la liste est faite de rangs, pas d un tableau — la case
    du socle (szCoches) y est posée dans un span, et le rang coché se repère par :has. */
-.ab-rang{grid-template-columns:auto minmax(0,1.8fr) minmax(0,1.1fr) minmax(0,1fr) 15rem}
+.ab-rang{grid-template-columns:auto minmax(0,1.8fr) minmax(0,1.1fr) minmax(0,1fr) auto}
 span.szk-c{display:inline-flex;align-items:center;justify-content:center;width:1.4rem;cursor:pointer}
 .ls-rang:has(input[data-szk]:checked){background:rgba(var(--or-rgb),.10);border-color:rgba(var(--or-rgb),.45)}
 `;

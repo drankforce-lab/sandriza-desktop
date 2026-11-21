@@ -2602,7 +2602,11 @@ const JS_VIVANT = () => `
   }
   var VIDE = /^(aucun|aucune|rien|pas encore|no |nothing)/i;
   var NOUV = /^(\\+\\s*)?(nouveau|nouvelle|ajouter|créer|new |add )/i;
+  /* (2026-11-21, sa capture de l Import : « ça ne doit pas être en double ») Une fenêtre qui a DÉJÀ son propre
+     accueil n en reçoit pas un second ; et le bouton n est recopié QUE s il n est visible nulle part ailleurs. */
+  function visible(e){ var r = e.getBoundingClientRect(); return r.width > 0 && r.height > 0 && r.bottom > 0 && r.top < innerHeight; }
   function accueils(){
+    if (document.querySelector('.accueil-vide, .vide-ob, .vide-r')) return;
     var vs = document.querySelectorAll('.vide:not(.sz-accueil), .ls-vide:not(.sz-accueil)');
     for (var i = 0; i < vs.length; i++) {
       var v = vs[i]; if (v.children.length || !VIDE.test((v.textContent || '').trim())) continue;
@@ -2620,6 +2624,7 @@ const JS_VIVANT = () => `
         var t = (cands[k].textContent || '').trim();
         if (!cands[k].disabled && cands[k].offsetParent && NOUV.test(t) && !v.contains(cands[k])) { orig = cands[k]; break; }
       }
+      if (orig && visible(orig)) orig = null;
       if (orig) {
         var b = document.createElement('button'); b.type = 'button'; b.className = 'prim sz-acc-b'; b.textContent = (orig.textContent || '').trim();
         b.addEventListener('click', (function(o){ return function(){ o.click(); }; })(orig));
@@ -4932,8 +4937,10 @@ const CSS_RESPIRE = `
 .ls-rang{display:grid;align-items:center;gap:1.4rem;min-height:4.6rem;padding:.75rem 1rem .75rem .9rem;margin-bottom:.55rem;
   border-radius:14px;background:var(--f-carte);border:1px solid var(--sz-bord)}
 .ls-rang:hover{border-color:var(--sz-bord-fort)}
-.ls-camp{grid-template-columns:minmax(0,1.7fr) minmax(0,1.15fr) 8.5rem 9.5rem 23.5rem}
-.ls-ch{grid-template-columns:minmax(0,1.25fr) minmax(0,1.6fr) 10.5rem 9rem 20rem}
+/* (2026-11-21, sa capture : « agrandis la zone du titre pour maximiser l’affichage du nom ») Le nom prend la place ;
+   la colonne des gestes ne prend que ce qu’il faut à ses boutons. */
+.ls-camp{grid-template-columns:minmax(0,2.4fr) minmax(0,1.1fr) 7.5rem 7.5rem auto}
+.ls-ch{grid-template-columns:minmax(0,1.6fr) minmax(0,1.4fr) 9.5rem 8rem auto}
 .ls-seg{grid-template-columns:minmax(0,1.8fr) minmax(10rem,1fr) 10rem 12rem}
 .ls-rang .qui{display:flex;align-items:center;gap:.85rem;min-width:0}
 .ls-rang .bico{width:2.5rem;height:2.5rem;border-radius:11px;background:var(--f-pill);color:var(--tx-or);display:flex;
@@ -5581,8 +5588,13 @@ html[data-sz-theme="epure"].jour{--vv-1:#1f7a57;--vv-2:#2f6aa8;--vv-3:#6a4fb0;--
 /* C — la lueur de la page (thème Épuré seul : les autres thèmes en ont une) ; gris secondaires d'un cran, comme les thèmes. */
 html[data-sz-theme="epure"][data-sz-teinte="epure"]:not(.jour){--tx2:#a9b2c1;--tx3:#a3acbb;--tx-gris:#a9b2c1;--sz-attenue:#a9b2c1}
 html[data-sz-theme="epure"][data-sz-teinte="epure"].jour{--tx2:#4c5363;--tx3:#4c5363;--tx-gris:#4c5363;--sz-attenue:#4c5363}
-html[data-sz-theme="epure"][data-sz-teinte="epure"]:not(.jour) body{background-color:var(--f-page);background-attachment:fixed;
-  background-image:radial-gradient(55% 45% at 8% 0%,rgba(201,162,122,.17),transparent 70%),radial-gradient(45% 45% at 100% 0%,rgba(124,180,245,.11),transparent 70%),radial-gradient(50% 50% at 90% 100%,rgba(180,156,247,.08),transparent 70%)}
+/* (2026-11-21, sa capture : « je ne dois pas voir de démarcation, on voit clairement que c'est un tableau ») Le fond du
+   module prend la couleur EXACTE de ce qui l'entoure dans la fenêtre principale (bande de titre, colonne : --ep-carteN
+   #181e29) : aucune lueur, aucun angle — le module ne se lit plus comme un rectangle posé dessus. Les cartes montent
+   d'un cran pour rester distinctes du fond. */
+html[data-sz-theme="epure"][data-sz-teinte="epure"]:not(.jour){--f-page:#181e29;--f-carte:#1f2633;--f-carte2:#252d3b}
+html[data-sz-theme="epure"][data-sz-teinte="epure"]:not(.jour) body{background-color:var(--f-page);background-image:none}
+html[data-sz-theme="epure"][data-sz-teinte="epure"]:not(.jour) .tete{background:var(--f-page)!important}
 html[data-sz-theme="epure"][data-sz-teinte="epure"].jour body{background-color:var(--f-page);background-attachment:fixed;
   background-image:radial-gradient(55% 45% at 8% 0%,rgba(201,162,122,.12),transparent 70%),radial-gradient(45% 45% at 100% 0%,rgba(124,180,245,.10),transparent 70%)}
 /* C — les cartes en relief : un reflet en haut, une ombre portée. */
@@ -5646,6 +5658,14 @@ html[data-sz-theme="epure"] .sz-accueil .sz-acc-ic{width:52px;height:52px;border
 html[data-sz-theme="epure"] .sz-accueil .sz-acc-ic svg{width:26px;height:26px}
 html[data-sz-theme="epure"] .sz-accueil .sz-acc-b{margin-top:4px}
 @media (prefers-reduced-motion:reduce){html[data-sz-theme="epure"] .rf-pill.bleu::before{animation:none}}
+
+/* (2026-11-21, sa capture des campagnes : « mets des petits boutons ici, avec label ») Les gestes d'une ligne de liste ne
+   sont plus du texte nu : de petits boutons encadrés, le geste principal doré, la suppression en rouge. */
+html[data-sz-theme="epure"] .ls-rang .gestes button,html[data-sz-theme="epure"] .ls-rang button.geste{border:1px solid var(--v14)!important;background:var(--v04)!important;
+  color:var(--tx)!important;height:28px;padding:0 10px;font-size:12px;border-radius:8px}
+html[data-sz-theme="epure"] .ls-rang .gestes button:hover:not(:disabled),html[data-sz-theme="epure"] .ls-rang button.geste:hover:not(:disabled){background:var(--v10)!important}
+html[data-sz-theme="epure"] .ls-rang .gestes button.prim,html[data-sz-theme="epure"] .ls-rang button.geste.prim{background:var(--sz-btn-prim)!important;border-color:var(--sz-btn-prim)!important;color:var(--sz-btn-prim-txt)!important}
+html[data-sz-theme="epure"] .ls-rang .gestes button.danger,html[data-sz-theme="epure"] .ls-rang button.geste.danger{color:var(--ep-rouge-t)!important;border-color:color-mix(in srgb,var(--ep-rouge-t) 35%,transparent)!important;background:transparent!important}
 `;
 
 /* Les THÈMES du look Épuré (src/teintes.js) : en dernier, ils surchargent l'accent et la page d'Épuré. */

@@ -62,7 +62,20 @@ body{background:var(--f-page);color:var(--tx);
 .cx-col{display:flex;flex-direction:column;gap:.9rem;min-height:0;min-width:0;overflow:hidden}
 .cx-col>.cx-carte{flex:0 1 auto}
 .cx-col>.cx-carte.sz-pagee{flex:1 1 0;min-height:0}
-.cx-grille{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem;align-content:start}
+.cx-grille{display:grid;grid-template-columns:repeat(auto-fill,minmax(20rem,1fr));gap:.7rem;align-content:start}
+.cx-tuile.lg{padding:.75rem .85rem;gap:.5rem}
+.cx-trio{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.4rem}
+.cx-trio div{background:var(--v04);border:1px solid var(--v08);border-radius:9px;padding:.3rem .5rem;display:flex;flex-direction:column;min-width:0}
+.cx-trio span{font-size:.68rem;color:var(--tx2)}
+.cx-trio b{font-size:.88rem;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cx-trio .ec.ok{background:rgba(74,222,128,.10);border-color:rgba(74,222,128,.28)} .cx-trio .ec.ok b{color:var(--tx-ok)}
+.cx-trio .ec.non{background:rgba(248,113,113,.10);border-color:rgba(248,113,113,.28)} .cx-trio .ec.non b{color:var(--tx-err2)}
+html.jour .cx-trio .ec.ok b{color:#1d6a3b} html.jour .cx-trio .ec.non b{color:#a3302b}
+.cx-tuile.lg .cx-gestes{border-top:1px solid var(--v08);padding-top:.45rem}
+.cx-tuile.lg .t1{flex-wrap:wrap;row-gap:.1rem}
+.cx-tuile.lg .t1 b{flex:0 1 auto}
+.cx-tuile.lg .t1 .cx-sub{margin-left:0;flex-basis:100%;font-size:.72rem}
+.cx-tuile.lg .cx-ligne{grid-template-columns:auto minmax(0,1fr) auto;gap:.5rem;font-size:.74rem}
 .cx-tuile.lg:hover{border-color:rgba(var(--or-rgb),.55)}
 .cx-tuile .t1{display:flex;align-items:center;gap:.6rem;min-width:0}
 .cx-tuile .t1 b{font-size:.95rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -408,14 +421,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
         h.push('<div class="cx-tuile lg' + (s.isBalanced ? '' : ' att') + '" data-ouvrir="' + esc(r.id) + '">'
           + '<div class="t1"><b>' + esc(r.label || '—') + '</b>' + pilStatut(r.status)
           + '<span class="cx-sub">' + r.nbBanque + ' / ' + r.nbVersements + ' ${T("lignes")} · ' + jour(r.updatedAt) + '</span></div>'
-          + '<div class="cx-champs"><div><span class="cx-sub">${T("Relevé")}</span><b>' + sou(s.bankTotal) + '</b></div>'
-          + '<div><span class="cx-sub">${T("Dépôts")}</span><b>' + sou(s.squareTotal) + '</b></div></div>'
+          /* (2026-11-21, sa capture : « les tuiles sont trop grosses, zéro professionnel ») Trois chiffres sur une ligne,
+             l’écart en dernier et coloré ; la piste d’appariement dessous ; les gestes au pied, petits. */
+          + '<div class="cx-trio"><div><span>${T("Relevé")}</span><b>' + sou(s.bankTotal) + '</b></div>'
+          + '<div><span>${T("Dépôts")}</span><b>' + sou(s.squareTotal) + '</b></div>'
+          + '<div class="ec ' + (s.isBalanced ? 'ok' : 'non') + '"><span>${T("Écart")}</span><b>' + sou(s.difference) + '</b></div></div>'
           + ((nb && app >= 0)
               ? '<div class="cx-ligne"><span>${T("Lignes du relevé appariées")}</span><div class="cx-piste"><i class="'
                 + (pct >= 100 ? 'ok' : '') + '" style="width:' + pct + '%"></i></div><span>' + app + ' / ' + nb + '</span></div>'
               : '')
-          + '<div class="cx-ecart"><span class="cx-sub">${T("Écart")}</span><b class="' + (s.isBalanced ? 'cx-pos' : 'cx-neg') + '">'
-          + sou(s.difference) + '</b></div>'
           + '<div class="cx-gestes">'
             + '<button class="mini" data-pdf="' + esc(r.id) + '">${T("Rapport")}</button>'
             + (D.peutEcrire

@@ -174,4 +174,5 @@ module.exports = {
   // 2026-10-25, audit : tarifs mis en forme, test des identifiants enregistrés.
   'max.': 'max.',
   'Enregistrez d’abord : le test éprouve les identifiants enregistrés, pas ceux affichés.': 'Save first: the test checks the saved credentials, not the ones shown.',
+  'Rien n’a été enregistré : la clé contient un caractère qui n’existe pas dans une clé Square, souvent le masque ●●●● du tableau de bord Square. Cliquez « Show » à côté du jeton, copiez-le, puis recollez-le ici.': 'Nothing was saved: the key contains a character that does not exist in a Square key, often the ●●●● mask of the Square dashboard. Click “Show” next to the token, copy it, then paste it here again.',
 };

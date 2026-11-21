@@ -146,14 +146,14 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 .reg-grille .champ{margin:0}
 .reg-grille .champ select,.reg-grille .champ input{width:100%;min-height:2.2rem}
 /* Refaite (2026-10-15, lot E) : un rang par regle, son numero d ordre en tete. */
-.reco-rang{grid-template-columns:minmax(0,1.5fr) minmax(0,1.2fr) 7rem 6.5rem 27rem}
+.reco-rang{grid-template-columns:minmax(0,1.5fr) minmax(0,1.2fr) 7rem 6.5rem auto}
 .reco-no{font-size:.95rem!important;color:var(--tx)!important}
 .reco-ou{flex-direction:row!important;flex-wrap:wrap;gap:.3rem!important;align-items:center}
 .reco-rang .gestes button[data-monter],.reco-rang .gestes button[data-descendre]{width:2.1rem;padding:0}
 /* Les cases a cocher (gestes groupes, 2026-10-29) : les rangs sont des <div> en grille, pas un tableau. La case
    est la premiere colonne, dans un <span class="szk-c"> (le socle la reconnait a cette classe) ; la surbrillance
    du rang coche est posee ici (lotSurligner), le socle ne la pose que sur un <tr>. */
-.reco-rang.lot{grid-template-columns:1.3rem minmax(0,1.5fr) minmax(0,1.2fr) 7rem 6.5rem 27rem}
+.reco-rang.lot{grid-template-columns:1.3rem minmax(0,1.5fr) minmax(0,1.2fr) 7rem 6.5rem auto}
 .reco-rang .lot-c,.reco-sup .lot-c{display:flex;align-items:center;justify-content:center;align-self:stretch;cursor:pointer}
 .reco-rang .lot-c{margin-right:-.7rem}
 .reco-rang.coche{border-color:rgba(var(--or-rgb),.6);background:rgba(var(--or-rgb),.1)}
