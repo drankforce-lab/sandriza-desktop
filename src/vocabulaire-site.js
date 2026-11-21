@@ -402,6 +402,9 @@ module.exports = {
   'Ventes du mois': 'Sales this month',
   'Commandes de la semaine': 'Orders this week',
   '10 accessoires vendus': '10 accessories sold',
+  // Fermeture de caisse (assets/js/fermeture.js : MODES[…].nom) — op fermeture:donnees.
+  'Terminal Square': 'Square terminal',
+  'Interac': 'Interac',
   'Toutes les catégories': 'All categories',
   'Hauts': 'Tops',
   'Manteaux': 'Coats',

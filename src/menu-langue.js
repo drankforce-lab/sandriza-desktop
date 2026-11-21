@@ -197,6 +197,7 @@ const MENU_APP_EN = {
   // Objectifs et défis (2026-11-20).
   'Objectifs et défis': 'Goals and challenges',
   'Relance des clients endormis': 'Win back sleeping customers',
+  'Fermeture de caisse': 'Cash register closing',
   'Recherches sans résultat': 'Searches with no result',
   'Recommandations': 'Recommendations',
   'Remboursements': 'Refunds',

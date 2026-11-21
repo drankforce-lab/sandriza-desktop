@@ -3464,6 +3464,8 @@ const OPS_PONT = new Set([
   'objectifs:donnees', 'objectifs:etat', 'objectifs:ecrire', 'objectifs:supprimer',
   // Relance des clients endormis (fenetre Relance, 2026-11-20). `relance:envoyer` passe par Resend (infolettre).
   'relance:donnees', 'relance:apercu', 'relance:envoyer', 'relance:reglages',
+  // Fermeture de caisse (fenetre Fermeture, 2026-11-21) : journee de comptoir, tiroir, rapport Z.
+  'fermeture:donnees', 'fermeture:fermer', 'fermeture:imprimer',
   // Bons de commande fournisseurs (2026-10-27). ⚠ `bc:donnees` est l op de LECTURE ; `bc:voeu` lit (ou pose,
   // depuis l Inventaire) l onglet d ouverture.
   'bc:donnees', 'bc:propositions', 'bc:chercher', 'bc:ecrire', 'bc:creerGroupes', 'bc:envoyer',
@@ -4203,6 +4205,7 @@ const LIMITES_PONT = {
   'objectifs:donnees': 15000, 'objectifs:etat': 15000, 'objectifs:ecrire': 30000, 'objectifs:supprimer': 30000,
   /* La relance croise clients, commandes et abonnes (lecture locale) ; l envoi attend Resend, un courriel apres l autre. */
   'relance:donnees': 20000, 'relance:apercu': 15000, 'relance:envoyer': 180000, 'relance:reglages': 30000,
+  'fermeture:donnees': 15000, 'fermeture:fermer': 30000, 'fermeture:imprimer': 20000,
   /* Les bons de commande fournisseurs : lecture locale ; chaque geste est UNE operation serveur (la reception fait
      monter le stock de chaque ligne dans le meme lot) ; « Creer tous les bons » en enchaine une par fournisseur. */
   'bc:donnees': 15000, 'bc:propositions': 15000, 'bc:chercher': 15000, 'bc:voeu': 15000,
@@ -4947,6 +4950,7 @@ const PAGES_ANCRABLES = () => ({
   rappels: ['Rappels', () => pageRappels()],
   objectifs: ['Objectifs et défis', () => pageObjectifs()],
   relance: ['Relance des clients endormis', () => pageRelance()],
+  fermeture: ['Fermeture de caisse', () => pageFermeture()],
   // Le calendrier (2026-11-18, relooking) : précommandes, ramassages, échéances fiscales et rappels sur un mois.
   calendrier: ['Calendrier', () => pageCalendrier()],
   // La page Réglages (2026-11-18, maquette) : le menu Configuration mis en page, ouvert par la barre Épuré.
@@ -7526,6 +7530,7 @@ const { pageReglages } = require('./fenetres/reglages');
 const { pageRappels } = require('./fenetres/rappels');
 const { pageObjectifs } = require('./fenetres/objectifs');
 const { pageRelance } = require('./fenetres/relance');
+const { pageFermeture } = require('./fenetres/fermeture');
 const { pageAtelier } = require('./fenetres/atelier');
 const { pageFibres } = require('./fenetres/fibres');
 const { pageEncanRapports } = require('./fenetres/encan-rapports');
@@ -7794,6 +7799,7 @@ const actionApp = (nom, arg) => {
     // Objectifs et défis (2026-11-20) : meme cas, section hote cote site sans autre corps que la zone.
     case 'objectifs':
     case 'relance':
+    case 'fermeture':
     // Calendrier (2026-11-18) : meme cas, ne natif ; sa section hote cote site ne porte que la zone.
     case 'calendrier':
     case 'reglages':

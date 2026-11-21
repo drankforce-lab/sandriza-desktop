@@ -4272,6 +4272,31 @@ const JEU = {
       { nom: 'module de relance absent', id: '', reponses: { 'relance:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
     ];
   })(),
+  /* (2026-11-21) Fermeture de caisse : formes copiées de assets/js/fermeture.js (journee, historique). */
+  'fermeture.js': (function(){
+    var MODES = [ { cle: 'comptant', nom: 'Comptant' }, { cle: 'terminal', nom: 'Terminal Square' }, { cle: 'interac', nom: 'Interac' }, { cle: 'autre', nom: 'Autre' } ];
+    var COUP = [100, 50, 20, 10, 5, 2, 1, 0.25, 0.10, 0.05];
+    var J = { jour: '2026-11-21', nbVentes: 14, articles: 23, total: 1696.35, tps: 73.77, tvq: 147.17, rabais: 42.5,
+      parMode: { comptant: { nb: 4, total: 412.5 }, terminal: { nb: 9, total: 1184.1 }, interac: { nb: 1, total: 99.75 }, autre: { nb: 0, total: 0 } },
+      liens: 1, liensTotal: 129.99, nbRemb: 1, rembComptant: 20, rembAutres: 0, panier: 121.17 };
+    var HIST = [
+      { id: 'fer_2026-11-20', jour: '2026-11-20', par: 'Claire Fortin', total: 1420.4, attendu: 612.5, compte: 607.5, ecart: -5, ecartTerminal: 0 },
+      { id: 'fer_2026-11-19', jour: '2026-11-19', par: 'Bob Brousseau', total: 988.1, attendu: 455, compte: 455, ecart: 0, ecartTerminal: null },
+      { id: 'fer_2026-11-18', jour: '2026-11-18', par: 'Claire Fortin', total: 1210, attendu: 530.25, compte: 532.25, ecart: 2, ecartTerminal: 0 } ];
+    var DEJA = { id: 'fer_2026-11-21', jour: '2026-11-21', par: 'Bob Brousseau', fermeLe: '2026-11-21T18:04:00.000Z', fond: 200, coupures: { '100': 2, '50': 4, '20': 9, '0.25': 2 },
+      sorties: [ { motif: 'Café', montant: 4.5 } ], totSorties: 4.5, attendu: 588, compte: 580.5, ecart: -7.5, terminalRapport: 1184.1, ecartTerminal: 0, fondSuivant: 200, note: 'Écart : un remboursement comptant mal saisi.', journee: J };
+    var donnees = function(deja, extra){ return Object.assign({ ok: true, aujourdhui: '2026-11-21', jour: '2026-11-21', journee: J, fondPropose: 200, deja: deja,
+      historique: HIST, modes: MODES, coupures: COUP, peutFermer: true }, extra || {}); };
+    var rep = function(d){ return { 'fermeture:donnees': d, identite: IDENTITE, 'fermeture:fermer': { ok: true, id: 'fer_2026-11-21', ecart: 0 }, 'fermeture:imprimer': { ok: true } }; };
+    var cas = function(nom, id, d, exige){ return { nom: nom, id: id, reponses: rep(d), exige: exige }; };
+    return [
+      cas('journée à fermer : ventes par mode, tiroir à compter', '', donnees(null), ['data-coup="100"', 'id="t-fond"', 'id="t-term"', 'id="t-fermer"']),
+      cas('journée déjà fermée (rapport Z)', 'fermee', donnees(DEJA), ['id="t-refaire"', 'data-imprimer="fer_2026-11-21"']),
+      cas('journées fermées', 'historique', donnees(null), ['data-pages="fermetures"', 'data-imprimer="fer_2026-11-20"']),
+      cas('lecture seule', '', donnees(null, { peutFermer: false }), ['class="avis"']),
+      { nom: 'module de fermeture absent', id: '', reponses: { 'fermeture:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
+    ];
+  })(),
   'rappels.js': (function(){
     var FREQ = [
       { cle: 'unique', nom: 'Une seule fois' }, { cle: 'quotidien', nom: 'Chaque jour' },
