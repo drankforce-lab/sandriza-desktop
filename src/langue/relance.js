@@ -82,4 +82,7 @@ module.exports = {
   'État': 'Status',
   '⚓ Ancrer': '⚓ Dock',
   '⧉ Détacher': '⧉ Detach',
+  'Envoi automatique : chaque jour, l’application relance elle-même les clients prêts': 'Automatic sending: every day, the application reaches out to ready customers by itself',
+  'À partir de 10 h, les plus fidèles d’abord. Seulement les abonnés à l’infolettre, jamais deux fois dans le délai ci-dessus. Un seul poste envoie par jour.': 'From 10 a.m., most loyal first. Only newsletter subscribers, never twice within the delay above. Only one computer sends per day.',
+  'Au plus, par jour': 'At most, per day',
 };

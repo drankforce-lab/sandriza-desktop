@@ -203,6 +203,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="ch l3"><label for="g-sujet">${T("Objet du courriel")}</label><input id="g-sujet" maxlength="140" value="' + esc(r.sujet) + '"><small>${T("{prenom} est remplacé par le prénom du client.")}</small></div>'
       + '<div class="ch l3"><label for="g-mot">${T("Le mot d’introduction")}</label><textarea id="g-mot" rows="2" maxlength="600">' + esc(r.mot) + '</textarea></div>'
       + '<div class="ch"><label for="g-code">${T("Code promo offert (facultatif)")}</label><input id="g-code" maxlength="30" value="' + esc(r.code) + '"></div>'
+      /* (2026-11-22, la fidélisation automatique) L ENVOI AUTOMATIQUE — éteint tant qu il n est pas coché. */
+      + '<div class="ch l3"><label class="bascule"><input type="checkbox" id="g-auto"' + (r.auto ? ' checked' : '') + '> ${T("Envoi automatique : chaque jour, l’application relance elle-même les clients prêts")}</label>'
+      + '<small>${T("À partir de 10 h, les plus fidèles d’abord. Seulement les abonnés à l’infolettre, jamais deux fois dans le délai ci-dessus. Un seul poste envoie par jour.")}</small></div>'
+      + '<div class="ch"><label for="g-parjour">${T("Au plus, par jour")}</label><input id="g-parjour" inputmode="numeric" value="' + esc(r.parJour == null ? 5 : r.parJour) + '"></div>'
       + '</div><div class="f-act"><button type="button" id="g-annuler">${T("Annuler")}</button><button type="button" class="prim" id="g-ok">${T("Enregistrer")}</button></div></form>';
   }
   function ligne(c){
@@ -317,6 +321,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((x = v('g-sujet')) != null) REG.sujet = x;
     if ((x = v('g-mot')) != null) REG.mot = x;
     if ((x = v('g-code')) != null) REG.code = x;
+    if ((x = v('g-parjour')) != null) REG.parJour = x;
+    var ga = document.getElementById('g-auto'); if (ga) REG.auto = !!ga.checked;
   }
 
   document.addEventListener('click', function(ev){
