@@ -82,6 +82,20 @@ button.danger{border-color:rgba(239,68,68,.5);color:var(--tx-err2)}
   color:var(--tx2);font-weight:700}
 /* « .rang » et non « .ligne » : le socle habille .ligne en CARTE de jour (fond blanc, bordure). */
 .rang{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+/* LE RÉASSORT INTELLIGENT (2026-11-22) : « selon le seuil » ou « selon la prévision des ventes ». */
+.ra-base{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin:0 0 .55rem}
+.ra-seg{display:inline-flex;border:1px solid var(--v16);border-radius:9px;overflow:hidden}
+.ra-seg button{border:0;border-radius:0;background:transparent;padding:.3rem .75rem;font-size:.8rem}
+.ra-seg button.on{background:#8f6f42;color:var(--tx-sur-accent);font-weight:700}
+.ra-base label{font-size:.76rem;color:var(--tx2);font-weight:600}
+.ra-base select,.ra-base input{font:inherit;font-size:.8rem;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:.22rem .4rem}
+.ra-base input{width:4.6rem}
+.ra-urg{display:inline-block;font-size:.68rem;font-weight:700;border-radius:99px;padding:.02rem .45rem;margin-left:.35rem}
+.ra-urg.maintenant{background:rgba(239,68,68,.16);color:var(--tx-err2)}
+.ra-urg.bientot{background:rgba(217,119,6,.16);color:var(--tx-fcd9a6)}
+html.jour .ra-urg.bientot{color:#8a4b06}
+html.jour .ra-seg button.on{background:#7a5c34;color:#ffffff}
+html.jour .ra-urg.maintenant{color:#8a1f1f}
 .num-bc{font:700 .95rem/1.2 Consolas,monospace;color:var(--tx-creme)}
 .four{font-weight:600}
 .sku{font:.76rem/1.3 Consolas,monospace;color:var(--tx2)}
@@ -146,6 +160,9 @@ function pageBonsCommande(ouverture) {
 
   var D = null;              // reponse de bc:donnees
   var PROP = null;           // reponse de bc:propositions (onglet A commander)
+  /* LE RÉASSORT INTELLIGENT (2026-11-22) : la base des propositions — le seuil d alerte, ou la prévision des ventes
+     (horizon en semaines, délai du fournisseur en jours). Gardée pendant la vie de la fenêtre. */
+  var RA = { mode: 'prevision', semaines: 12, delai: 21 };
   var TAB = ${JSON.stringify(ouv)};   // cours | proposer | histo
   var OUVERT = '';           // id du bon dont un volet est ouvert
   var VOLET = '';            // recevoir | clore
@@ -403,7 +420,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   }
   function chargerPropositions(){
-    return appeler('bc:propositions', []).then(function(r){
+    PROP = null; if (TAB === 'proposer') dessiner();
+    return appeler('bc:propositions', [{ mode: RA.mode, semaines: RA.semaines, delai: RA.delai }]).then(function(r){
       if (!r || !r.ok) { PROP = { groupes: [] }; dessiner(); dire(expliquer(r), 'err'); return false; }
       PROP = r; dessiner(); return true;
     });
@@ -615,17 +633,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (D.fournisseurs || []).map(function(f){
           return '<option value="' + esc(f.id) + '"' + (choisi === f.id ? ' selected' : '') + '>' + esc(f.nom) + '</option>'; }).join('');
   }
+  function jourCourt(iso){
+    var d = new Date(String(iso || '') + 'T12:00:00'); if (isNaN(d)) return String(iso || '');
+    try { return d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short' }); } catch (e) { return String(iso); }
+  }
+  function baseRa(){
+    var prev = RA.mode === 'prevision';
+    return '<div class="ra-base"><span class="ra-seg" role="group" aria-label="${T("Base des quantités proposées")}">'
+      + '<button type="button" data-ramode="prevision" class="' + (prev ? 'on' : '') + '">${T("Selon la prévision des ventes")}</button>'
+      + '<button type="button" data-ramode="seuil" class="' + (prev ? '' : 'on') + '">${T("Selon le seuil d’alerte")}</button></span>'
+      + (prev ? '<label for="ra-sem">${T("Couvrir")}</label><select id="ra-sem">'
+          + [4, 8, 12, 26].map(function(s){ return '<option value="' + s + '"' + (RA.semaines === s ? ' selected' : '') + '>' + '${T("{0} semaines")}'.split('{0}').join(String(s)) + '</option>'; }).join('')
+          + '</select><label for="ra-delai">${T("Délai du fournisseur (jours)")}</label><input id="ra-delai" type="number" min="1" max="120" value="' + RA.delai + '">' : '')
+      + '</div>';
+  }
   function vuePropositions(){
-    if (!PROP) return '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>';
+    if (!PROP) return baseRa() + '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>';
     var g = PROP.groupes || [];
+    var prev = PROP.mode === 'prevision';
     if (!g.length) {
-      return '<div class="vide">${T("Rien à commander : toutes les variantes sont au-dessus de leur seuil, ou déjà en commande.")}</div>';
+      return baseRa() + '<div class="vide">' + (prev ? '${T("Rien à commander : selon la prévision, le stock et les commandes en cours couvrent la période choisie.")}'
+        : '${T("Rien à commander : toutes les variantes sont au-dessus de leur seuil, ou déjà en commande.")}') + '</div>';
     }
-    var haut = '<div class="rang"><span class="dt">${T("Quantité proposée : de quoi revenir au double du seuil, moins ce qui est déjà en commande. Coût : celui de la fiche produit.")}</span>'
+    var haut = baseRa() + '<div class="rang"><span class="dt">' + (prev
+        ? '${T("Quantité proposée : ce qui se vendra pendant la période et le délai du fournisseur, réparti entre les tailles selon leurs ventes, moins le stock et ce qui est déjà en commande.")}'
+          + (PROP.avecSaison ? '' : ' ${T("Moins d’un an d’historique : la saison n’est pas encore prise en compte.")}')
+        : '${T("Quantité proposée : de quoi revenir au double du seuil, moins ce qui est déjà en commande. Coût : celui de la fiche produit.")}') + '</span>'
       + '<span class="gestes"><button class="prim" data-act="tousbons"' + (BUSY ? ' disabled' : '') + '>${T("Créer tous les bons (brouillons)")}</button></span></div>';
     /* ⚠ UN SEUL TABLEAU, une rangee d en-tete par fournisseur : la liste paginee coupe par RANGEES, et un groupe
        de trente lignes dans une carte depassait la page (la carte entiere etait l element a placer). */
-    return haut + '<div class="carte sz-pagee"><div data-pages="bc-proposer"><table><thead><tr><th></th><th>${T("Article")}</th><th class="num">${T("Stock")}</th><th class="num">${T("Seuil")}</th>'
+    return haut + '<div class="carte sz-pagee"><div data-pages="bc-proposer"><table><thead><tr><th></th><th>${T("Article")}</th><th class="num">${T("Stock")}</th><th class="num">' + (prev ? '${T("Prévu")}' : '${T("Seuil")}') + '</th>'
       + '<th class="num">${T("En commande")}</th><th class="num">${T("Quantité")}</th><th class="num">${T("Coût unitaire")}</th></tr></thead><tbody>'
       + g.map(function(gr, i){
       var sel = (gr.fournisseurId && !gr.inconnu) ? gr.fournisseurId : (gr.choix || '');
@@ -641,8 +678,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             var id = i + ':' + j;
             return '<tr>'
               + '<td><input type="checkbox" data-gpris="' + id + '"' + (l.exclu ? '' : ' checked') + ' aria-label="' + esc('${T("Commander ")}' + l.nom + ' ' + l.cle) + '"></td>'
-              + '<td class="art"><span class="nom">' + esc(l.nom) + '</span> · ' + esc(l.cle) + '<br><span class="sku">' + esc(l.sku || '') + '</span></td>'
-              + '<td class="num">' + l.stock + '</td><td class="num">' + l.seuil + '</td>'
+              + '<td class="art"><span class="nom">' + esc(l.nom) + '</span> · ' + esc(l.cle)
+              +   (prev && (l.urgence === 'maintenant' || l.urgence === 'bientot') ? '<span class="ra-urg ' + l.urgence + '">' + (l.urgence === 'maintenant' ? '${T("à commander maintenant")}' : '${T("avant le {0}")}'.split('{0}').join(esc(jourCourt(l.commanderAvant)))) + '</span>' : '')
+              +   '<br><span class="sku">' + esc(l.sku || '') + '</span></td>'
+              + '<td class="num">' + l.stock + '</td><td class="num">' + (prev ? l.prevu : l.seuil) + '</td>'
               + '<td class="num">' + (l.enCommande || '—') + '</td>'
               + '<td class="num"><input class="q" type="number" min="1" data-gq="' + id + '" value="' + esc(l.quantite) + '" aria-label="${T("Quantité")}"></td>'
               + '<td class="num"><input class="c" type="number" min="0" step="0.01" data-gc="' + id + '" value="' + esc(deux(l.cout)) + '" aria-label="${T("Coût unitaire")}"></td>'
@@ -870,6 +909,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       });
       return;
     }
+    var ram = b.getAttribute('data-ramode');
+    if (ram) { if (RA.mode !== ram) { RA.mode = ram; chargerPropositions(); } return; }
     if (act === 'tousbons') { creerGroupes(PROP.groupes.map(function(x, i){ return i; }), true); return; }
     if (act === 'rien') { var qs = document.querySelectorAll('[data-rq]'); for (var i = 0; i < qs.length; i++) qs[i].value = '0'; return; }
     var v;
@@ -917,6 +958,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return;
     }
     if ((a = t.getAttribute('data-gfour')) !== null) { PROP.groupes[+a].choix = t.value; return; }
+    if (t.id === 'ra-sem') { RA.semaines = parseInt(t.value, 10) || 12; chargerPropositions(); return; }
+    if (t.id === 'ra-delai') { RA.delai = Math.max(1, Math.min(120, parseInt(t.value, 10) || 21)); chargerPropositions(); return; }
   });
   document.addEventListener('keydown', function(e){
     if (e.key === 'Enter' && e.target && e.target.id === 'e-q') {
