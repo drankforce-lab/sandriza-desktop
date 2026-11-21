@@ -202,6 +202,7 @@ const MENU_APP_EN = {
   'Trésorerie des 90 jours': '90-day cash flow',
   'Prévision des ventes': 'Sales forecast',
   'Démarque intelligente': 'Smart markdowns',
+  'Demande à ta boutique': 'Ask your store',
   'Modules': 'Modules',
   'Infolettre (Resend et expéditeurs)': 'Newsletter (Resend and senders)',
   'Fidélité (points, parrainage, paliers)': 'Loyalty (points, referrals, tiers)',
