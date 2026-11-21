@@ -35,7 +35,7 @@ body{background:var(--f-page);color:var(--tx);
   background:linear-gradient(180deg,#131c2b,#0e1522)}
 .tete .av{width:36px;height:36px;border-radius:50%;flex:0 0 auto;
   display:flex;align-items:center;justify-content:center;font-weight:700;
-  background:linear-gradient(135deg,var(--or),#8a6f4d);color:#17202c}
+  background:linear-gradient(135deg,var(--or),#b08a5c)   /* (2026-11-22) fin du dégradé éclaircie : les initiales foncées y tenaient sous 4,5 */;color:#17202c}
 .tete .mail{font-size:.72rem;color:var(--tx2)}
 .tete .sous{font-size:.73rem;color:var(--tx2);margin-left:auto}
 .tete .pill{font-size:.6875rem;padding:.12rem .55rem;border-radius:99px;
