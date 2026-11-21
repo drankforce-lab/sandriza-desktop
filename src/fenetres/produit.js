@@ -790,6 +790,14 @@ function pageProduit(id, importId) {
       + '<button type="button" id="p-3d-refaire" >${T("Refaire le rendu")}</button>'
       + '<button type="button" id="p-3d-retirer">${T("Retirer l’aperçu 3D")}</button></div>'
       + '</div>'
+      /* LA VIDÉO PAR L'IA (2026-11-22, sa demande : « SUR DEMANDE SEULEMENT, coût affiché dans la fiche ») : la photo
+         principale → 5 secondes animées (Kling, par fal.ai). Le prix est montré AVANT le clic ; la génération continue
+         si la fiche se ferme (suivie par la page principale) ; la vidéo prête attend « Ajouter à la fiche ». */
+      + '<div class="pf-3d" id="p-vidia-carte" aria-live="polite">'
+      + '<div class="pf-med-l"><button type="button" id="p-vidia-gen"><span class="ic">🎬</span> ${T("Générer une vidéo")}</button>'
+      + '<span class="aide" id="p-vidia-etat"></span></div>'
+      + '<div class="pf-med-l" id="p-vidia-l" style="display:none"></div>'
+      + '</div>'
       + '<div class="vues" id="p-vues"></div>'
       /* LA FIBRE AGRANDIE (2026-10-26, sa demande) : une case à part, FACULTATIVE, sous les photos ; un bouton qui
          génère TOUJOURS le rendu le plus précis (la macro professionnelle) — pas de choix à faire. La boutique
@@ -4113,8 +4121,100 @@ function pageProduit(id, importId) {
       .replace('{pi}', Math.floor(po / 12) + '′' + (po % 12) + '″') + ' »';
   }
 
+  /* ══ LA VIDÉO PAR L'IA (2026-11-22) ══ État lu dans la page principale (produit:videoEtat) ; sondé toutes les 8 s tant
+     qu'une génération est en cours. */
+  var VIDIA = { etat: 'aucune', prix: 0.42 }, VIDIA_T = null, VIDIA_LU = false;
+  function vidiaCharger(){
+    VIDIA_LU = true;
+    if (!ID) { dessinerVidia(); return; }
+    P.appeler('produit:videoEtat', [String(ID)]).then(function(r){
+      if (r && r.ok) VIDIA = r;
+      dessinerVidia();
+      clearTimeout(VIDIA_T);
+      if (VIDIA.etat === 'en_cours') VIDIA_T = setTimeout(vidiaCharger, 8000);
+    });
+  }
+  function dessinerVidia(){
+    var b = document.getElementById('p-vidia-gen'), e = document.getElementById('p-vidia-etat'), l = document.getElementById('p-vidia-l');
+    if (!b || !e || !l) return;
+    var prix = prixUS(VIDIA.prix || 0.42);
+    b.innerHTML = '<span class="ic">🎬</span> ' + (VIDEO ? '${T("Regénérer la vidéo")}' : '${T("Générer une vidéo")}') + ' (' + esc(prix) + ')';
+    b.disabled = !ID || !IMAGE || VIDIA.etat === 'en_cours';
+    l.style.display = 'none'; l.innerHTML = '';
+    if (!ID) { e.textContent = '${T("Enregistrez d’abord la fiche.")}'; return; }
+    if (!IMAGE) { e.textContent = '${T("Ajoutez une photo principale : la vidéo part d’elle.")}'; return; }
+    if (VIDIA.etat === 'en_cours') {
+      e.textContent = '${T("Vidéo en préparation (1 à 3 minutes). Vous pouvez fermer la fiche : elle vous attendra ici.")}'
+        + (VIDIA.position ? ' ' + '${T("Rang dans la file : {0}.")}'.split('{0}').join(String(VIDIA.position)) : '');
+      return;
+    }
+    if (VIDIA.etat === 'prete') {
+      e.textContent = '${T("La vidéo est prête. Regardez-la avant de l’ajouter.")}';
+      l.style.display = '';
+      l.innerHTML = '<video src="' + esc(VIDIA.url) + '" muted loop playsinline autoplay controls preload="metadata"></video>'
+        + '<button type="button" class="prim" id="p-vidia-ajouter">${T("Ajouter à la fiche")}</button>'
+        + '<button type="button" id="p-vidia-ignorer">${T("Ignorer")}</button>';
+      return;
+    }
+    if (VIDIA.etat === 'echec') {
+      e.textContent = '${T("La vidéo n’a pas pu être produite :")} ' + (VIDIA.erreur || '');
+      l.style.display = ''; l.innerHTML = '<button type="button" id="p-vidia-ignorer">${T("Fermer")}</button>';
+      return;
+    }
+    if (VIDEO) {
+      e.textContent = '${T("Une vidéo est sur la fiche : la boutique la montre dans la galerie.")}';
+      l.style.display = '';
+      l.innerHTML = '<video src="' + esc(VIDEO) + '" muted loop playsinline controls preload="metadata"></video>'
+        + '<button type="button" id="p-vidia-retirer">${T("Retirer la vidéo")}</button>';
+      return;
+    }
+    e.textContent = '${T("5 secondes animées à partir de la photo principale, sans son. Rien n’est lancé sans votre clic.")}';
+  }
+  function vidiaLancer(forcer){
+    var prix = VIDIA.prix || 0.42;
+    szConfirmer({ titre: '${T("Générer une vidéo du produit")}',
+      texte: '${T("La photo principale part chez fal.ai, qui en fait une vidéo de 5 secondes. Le montant est facturé au lancement, même si vous n’ajoutez pas la vidéo.")}',
+      details: [['${T("Coût")}', prixUS(prix)], ['${T("Durée")}', '${T("5 secondes, sans son")}'], ['${T("Délai")}', '${T("1 à 3 minutes")}']],
+      oui: '${T("Générer la vidéo")}' }).then(function(ok){
+      if (!ok) return;
+      var e = document.getElementById('p-vidia-etat'); if (e) e.textContent = '${T("Envoi de la photo…")}';
+      P.appeler('produit:videoLancer', [String(ID), IMAGE, prix, !!forcer]).then(function(r){
+        if (r && r.ok) { vidiaCharger(); return; }
+        if (r && r.motif === 'avertir') {
+          szConfirmer({ titre: '${T("Une vidéo existe déjà pour cet article")}', prudent: true,
+            texte: '${T("Cet article a déjà {0} vidéo(s) générée(s), pour {1}. En générer une autre coûtera de nouveau {2}.")}'
+              .split('{0}').join(String(r.deja)).split('{1}').join(prixUS(r.dejaCout || 0)).split('{2}').join(prixUS(prix)),
+            oui: '${T("Générer quand même")}' }).then(function(ok2){ if (ok2) vidiaLancer(true); else dessinerVidia(); });
+          return;
+        }
+        if (r && r.motif === 'prix_change' && r.prixReel != null) {
+          VIDIA.prix = Number(r.prixReel); dessinerVidia();
+          dire('${T("Le prix a changé : ")}' + prixUS(VIDIA.prix) + '${T(". Rien n’a été lancé — cliquez de nouveau pour confirmer au nouveau prix.")}', 'att');
+          return;
+        }
+        dessinerVidia();
+        dire(r && r.motif === 'limite' ? '${T("Trois vidéos déjà générées pour cet article dans les dernières 24 heures : réessayez demain.")}'
+          : (r && r.motif === 'deja_en_cours' ? '${T("Une vidéo est déjà en préparation pour cet article.")}'
+          : '${T("La vidéo n’a pas pu être lancée")}' + (r && r.detail ? ' : ' + r.detail : '.')), 'err');
+      });
+    });
+  }
+  document.addEventListener('click', function(ev){
+    var t = ev.target && ev.target.closest ? ev.target.closest('button') : null; if (!t) return;
+    if (t.id === 'p-vidia-gen') { vidiaLancer(false); return; }
+    if (t.id === 'p-vidia-ajouter') {
+      VIDEO = VIDIA.url; VIDEO_OCTETS = 0;
+      P.appeler('produit:videoOublier', [String(ID)]).then(function(){ VIDIA = { etat: 'aucune', prix: VIDIA.prix }; dessinerMedias(); majFicheBientot();
+        dire('${T("Vidéo ajoutée : enregistrez la fiche pour la publier.")}', 'bon'); });
+      return;
+    }
+    if (t.id === 'p-vidia-ignorer') { P.appeler('produit:videoOublier', [String(ID)]).then(function(){ VIDIA = { etat: 'aucune', prix: VIDIA.prix }; dessinerVidia(); }); return; }
+    if (t.id === 'p-vidia-retirer') { VIDEO = ''; VIDEO_OCTETS = 0; dessinerMedias(); majFicheBientot(); return; }
+  });
+
   function dessinerMedias(){
     dessiner3d();
+    if (!VIDIA_LU) vidiaCharger(); else dessinerVidia();
     // La taille portée suit les tailles COCHÉES à l étape 2 ; une taille retirée
     // depuis vide le choix plutôt que d annoncer une taille que la fiche ne vend pas.
     var s = document.getElementById('p-mq-taille');
