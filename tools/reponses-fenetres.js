@@ -944,6 +944,11 @@ const JEU = {
            C est l état de tous les jours, et celui que voit un poste ordinaire. */
         'maintenance:etat': { ok: true, actif: false, debut: '', fin: '', message: '',
           moi: false, dureeMaxJ: 30, nipMin: 6, nipMax: 12, phrase: '' },
+        // (2026-11-22) « À faire aujourd'hui » : un point de chaque ton, pour que les bancs de rendu mesurent la bande.
+        'tableau:attention': { ok: true, points: [
+          { cle: 'retard', n: 2, cible: 'orders', ton: 'r' }, { cle: 'donnees', n: 3, cible: 'fiabilite', ton: 'r' },
+          { cle: 'reassort', n: 4, cible: 'bons-commande', ton: 'a' }, { cle: 'vocaux', n: 1, cible: 'config-telephonie', ton: 'a' },
+          { cle: 'brouillons', n: 2, cible: 'bons-commande', ton: '' } ] },
         'tableau:lire': {
           ok: true,
           annee: 'all',

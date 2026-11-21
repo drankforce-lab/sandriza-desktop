@@ -310,6 +310,20 @@ html.jour .voile{background:rgba(20,24,30,.35)}
 /* (2026-11-22, sa capture : « la barre ne se remplit pas, je suis à 15 % ») Les morceaux du bouton S'ÉTIRENT : rétrécis à leur
    contenu (alignement du look Épuré), la piste n'avait plus de largeur et la barre ne montrait que le repère du jour. */
 .tm-obj>span{align-self:stretch;width:100%}
+/* (2026-11-22, le tableau de bord du matin) « À FAIRE AUJOURD'HUI » : une pastille par geste qui attend — elle ouvre
+   l'écran qui le règle. Rien à faire : une seule ligne calme. */
+.tm-att{display:flex;align-items:center;gap:8px;flex-wrap:wrap;background:var(--f-carte);border:1px solid var(--v08);border-radius:14px;padding:10px 14px}
+.tm-att .tt{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--tx2);margin-right:4px}
+.tm-att button{display:inline-flex;align-items:center;gap:7px;font:inherit;font-size:13px;font-weight:600;color:var(--tx);cursor:pointer;
+  background:var(--v04);border:1px solid var(--v12);border-radius:99px;padding:5px 12px 5px 6px}
+.tm-att button:hover{background:var(--v08)}
+.tm-att button b{min-width:22px;height:22px;border-radius:99px;display:inline-flex;align-items:center;justify-content:center;padding:0 6px;
+  font-size:12px;font-weight:800;background:var(--v10);color:var(--tx)}
+.tm-att button.r b{background:rgba(239,68,68,.18);color:var(--tx-err)}
+.tm-att button.a b{background:rgba(217,119,6,.18);color:var(--tx-att)}
+.tm-att .calme{font-size:13px;color:var(--tx2)}
+html.jour .tm-att button.a b{color:#8a4b06}
+html.jour .tm-att button.r b{color:#a11d1d}
 .tm-obj .j{display:block;position:relative;height:9px;border-radius:99px;background:var(--v08)}
 .tm-obj .j i{display:block;height:100%;border-radius:99px;background:var(--or);max-width:100%}
 .tm-obj.atteint .j i{background:var(--vv,#5fd4a4)} .tm-obj.enretard .j i{background:#f2c26b} .tm-obj.enavance .j i{background:var(--vv-2,#7cb4f5)}
@@ -710,6 +724,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="j"><i style="width:' + pct + '%"></i>' + (rep >= 0 ? '<em style="left:calc(' + rep.toFixed(1) + '% - 1px)"></em>' : '') + '</span>'
       + (txt ? '<span class="t">' + esc(txt) + '</span>' : '') + '</button>';
   }
+  /* ══ « À FAIRE AUJOURD'HUI » (2026-11-22) ══ Lu dans la page principale (tableau:attention) : chaque point a son compte
+     et l'écran qui le règle. Une coquille sans ce cœur (ou un site plus ancien) : la bande ne paraît pas. */
+  var ATT = null, ATT_T = 0;
+  function chargerAttention(){
+    if (!MAQ()) return;
+    appeler('tableau:attention').then(function(r){ var n = (r && r.ok) ? r : null; var avant = JSON.stringify(ATT), apres = JSON.stringify(n); ATT = n; if (avant !== apres && MAQ()) dessiner(); });
+  }
+  var ATT_TXT = {
+    retard:     ['${T("commande payée en retard d’envoi")}', '${T("commandes payées en retard d’envoi")}'],
+    paiement:   ['${T("paiement en attente depuis plus d’un jour")}', '${T("paiements en attente depuis plus d’un jour")}'],
+    reassort:   ['${T("article à commander maintenant")}', '${T("articles à commander maintenant")}'],
+    brouillons: ['${T("bon de commande en brouillon")}', '${T("bons de commande en brouillon")}'],
+    horsligne:  ['${T("vente hors ligne pas encore envoyée")}', '${T("ventes hors ligne pas encore envoyées")}'],
+    donnees:    ['${T("écart dans les données")}', '${T("écarts dans les données")}'],
+    vocaux:     ['${T("message vocal non écouté")}', '${T("messages vocaux non écoutés")}']
+  };
+  function bandeAttention(){
+    if (!ATT) return '';
+    var l = ATT.points || [];
+    var h = '<div class="tm-att" role="group" aria-label="${T("À faire aujourd’hui")}"><span class="tt">${T("À faire aujourd’hui")}</span>';
+    if (!l.length) return h + '<span class="calme">${T("Rien d’urgent : tout est à jour.")}</span></div>';
+    return h + l.map(function(p){
+      var t = ATT_TXT[p.cle] || [p.cle, p.cle];
+      return '<button type="button" class="' + esc(p.ton || '') + '" data-ouvre="' + esc(p.cible) + '"><b>' + esc(String(p.n)) + '</b>' + esc(p.n > 1 ? t[1] : t[0]) + '</button>';
+    }).join('') + '</div>';
+  }
   function chargerSemaine(){
     if (!MAQ()) return;
     appeler('tableau:lire', ['all', '7j', false]).then(function(r){ if (r && r.ok) { D7 = r; if (MAQ()) dessiner(); } });
@@ -758,7 +798,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + tuile('${T("En préparation")}', pc.preparation || 0, '${T("en cours")}', 'orders')
       + tuile('${T("Expédiées aujourd’hui")}', pc.parties || 0, '${T("parties aujourd’hui")}', 'orders')
       + tuile('${T("Délai moyen avant envoi")}', (V.delaiMoyenH != null ? delai(V.delaiMoyenH) : '—'), '${T("de la commande au départ")}', 'orders')
-      + '</div>' + bandeObjectif();
+      + '</div>' + bandeAttention() + bandeObjectif();
     var fil = (V.fil || []).filter(function(c){ return ['pending', 'confirmed', 'preparing', 'verification'].indexOf(c.statut) >= 0; });
     h += '<div class="tm-mil"><section class="tm-c l2"><div class="tm-ct"><h2>${T("À préparer maintenant")}</h2>'
       + '<span class="tm-pill' + (aFaire ? ' a' : '') + '">' + aFaire + ' ' + (aFaire > 1 ? '${T("commandes")}' : '${T("commande")}') + '</span>'
@@ -801,7 +841,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var _tmJeu = document.documentElement.getAttribute('data-sz-theme');
     new MutationObserver(function(){
       var j = document.documentElement.getAttribute('data-sz-theme');
-      if (j !== _tmJeu) { _tmJeu = j; if (D) { dessiner(); chargerSemaine(); chargerObjectif(); } }
+      if (j !== _tmJeu) { _tmJeu = j; if (D) { dessiner(); chargerSemaine(); chargerObjectif(); chargerAttention(); } }
     }).observe(document.documentElement, { attributes: true, attributeFilter: ['data-sz-theme'] });
     if (window.ResizeObserver) new ResizeObserver(function(){ if (MAQ()) tmAjuste(); }).observe(corps);
   } catch (e) {}
@@ -1171,6 +1211,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       chargerSauvegarde();
       chargerSemaine();
       chargerObjectif();
+      // « À faire aujourd'hui » : pas à chaque relecture de 12 s (il lit la santé des données et la messagerie vocale au
+      // serveur) — toutes les 2 minutes, ou tout de suite après un retour dans la fenêtre (ATT_T remis à 0).
+      if (Date.now() - ATT_T > 120000) { ATT_T = Date.now(); chargerAttention(); }
     });
   }
   /* Il se relit seul toutes les 12 s, meme derriere un autre module (sa demande) — sauf pendant que
@@ -1296,7 +1339,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      relire les chiffres sans attendre le prochain battement. */
   window.szActualiser = function(){ if (!ZEROS) charger(); };
   window.szRevenir = function(){
-    SAUV_QUAND = 0;
+    SAUV_QUAND = 0; ATT_T = 0;   // au retour, « À faire aujourd'hui » se relit tout de suite
     var p = charger();
     mxLire();
     return p;
