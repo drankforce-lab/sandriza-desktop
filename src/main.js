@@ -1183,6 +1183,17 @@ ipcMain.handle('recherche:menu:agir', (e, brut) => {
    ⚠ Le rappel ne prend JAMAIS le focus (focusable: false, showInactive) : le relâchement doit arriver à la page
      qui a vu l'appui. */
 let _ckMinut = null, _ckBas = false, _ckRappel = null;
+/* ⚠ (2026-11-22, sa capture : « quand on relâche Ctrl+K, ça ne ferme pas ») LE RELÂCHEMENT NE NOUS PARVIENT PAS
+   TOUJOURS (la page qui avait le focus ne reçoit pas le keyUp quand une fenêtre paraît par-dessus). Le vrai signal
+   d une touche TENUE, c est la RÉPÉTITION AUTOMATIQUE du système (~30 fois par seconde, après 250 à 1000 ms) : on
+   note chaque répétition, et une veille ferme le rappel dès qu elle s arrête (350 ms sans répétition, ou 1,2 s
+   sans aucune après l appui). Le keyUp, quand il arrive, ferme tout de suite. */
+let _ckT0 = 0, _ckDernier = 0, _ckVeille = null;
+const _ckFinir = () => {
+  _ckBas = false; clearTimeout(_ckMinut); _ckMinut = null;
+  if (_ckVeille) { clearInterval(_ckVeille); _ckVeille = null; }
+  cacherRappelRaccourcis();
+};
 const _ckListe = () => {
   const out = [];
   const tr = (x) => { try { return _trMenu(x); } catch (e) { return x; } };
@@ -1206,18 +1217,15 @@ const montrerRappelRaccourcis = () => {
     const { pageRaccourcis } = require('./fenetres/raccourcis');
     const b = parent.getContentBounds();
     const liste = _ckListe();
-    const nbSec = new Set(liste.map((x) => x.s)).size + 1, nbLig = liste.length + 4;
-    const L = Math.min(900, Math.max(420, b.width - 80));
-    // La hauteur suit le contenu : colonnes de ~270 px, ~22 px par ligne, ~36 px par titre de groupe.
-    const cols = Math.max(1, Math.floor((L - 40) / 270));
-    const H = Math.min(Math.max(300, b.height - 80), Math.max(220, 110 + Math.ceil((nbLig * 22 + nbSec * 36) / cols)));
+    // (2026-11-22, « trop petit ») Toute la fenêtre : le voile en fondu la couvre, la carte se centre dedans.
     const win = new BrowserWindow({
-      parent, x: Math.round(b.x + (b.width - L) / 2), y: Math.round(b.y + (b.height - H) / 2), width: L, height: H,
+      parent, x: b.x, y: b.y, width: b.width, height: b.height,
       frame: false, transparent: true, resizable: false, movable: false, minimizable: false, maximizable: false,
       fullscreenable: false, skipTaskbar: true, show: false, focusable: false, hasShadow: true,
       webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: false },
     });
     _ckRappel = win;
+    try { win.setIgnoreMouseEvents(true); } catch (e) {}   // un coup d'œil : la souris passe au travers
     win.on('closed', () => { if (_ckRappel === win) _ckRappel = null; });
     win.webContents.on('will-navigate', (ev) => ev.preventDefault());
     win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
@@ -1232,22 +1240,30 @@ app.on('web-contents-created', (_e, wc) => {
     const k = String(i.key || '').toLowerCase();
     if (i.type === 'keyDown' && k === 'k' && (i.control || i.meta) && !i.shift && !i.alt) {
       ev.preventDefault();
-      if (i.isAutoRepeat || _ckBas) return;
-      _ckBas = true;
+      if (_ckBas) { if (i.isAutoRepeat) _ckDernier = Date.now(); return; }
+      if (i.isAutoRepeat) return;
+      _ckBas = true; _ckT0 = Date.now(); _ckDernier = 0;
       clearTimeout(_ckMinut);
-      _ckMinut = setTimeout(() => { _ckMinut = null; if (_ckBas) montrerRappelRaccourcis(); }, 350);
+      _ckMinut = setTimeout(() => {
+        _ckMinut = null;
+        if (!_ckBas) return;
+        montrerRappelRaccourcis();
+        if (!_ckVeille) _ckVeille = setInterval(() => {
+          const n = Date.now();
+          if (n > (_ckDernier ? _ckDernier + 350 : _ckT0 + 1200)) _ckFinir();
+        }, 80);
+      }, 350);
       return;
     }
     if (i.type === 'keyUp' && _ckBas && (k === 'k' || k === 'control' || k === 'meta')) {
-      _ckBas = false;
-      if (_ckMinut) { clearTimeout(_ckMinut); _ckMinut = null; ouvrirRecherchePartout(); }
-      else cacherRappelRaccourcis();
+      if (_ckMinut) { clearTimeout(_ckMinut); _ckMinut = null; _ckBas = false; ouvrirRecherchePartout(); }
+      else _ckFinir();
     }
   });
 });
 // Le focus quitte l'application pendant l'appui : le relâchement ne nous parviendra pas — on range tout.
 app.on('browser-window-blur', () => {
-  setTimeout(() => { try { if (!BrowserWindow.getFocusedWindow()) { _ckBas = false; clearTimeout(_ckMinut); _ckMinut = null; cacherRappelRaccourcis(); } } catch {} }, 120);
+  setTimeout(() => { try { if (!BrowserWindow.getFocusedWindow()) _ckFinir(); } catch {} }, 120);
 });
 
 ipcMain.on('session:fermee', (e) => {

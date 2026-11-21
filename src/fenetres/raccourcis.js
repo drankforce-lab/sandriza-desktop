@@ -18,20 +18,26 @@ const T = require('../langue').tr('raccourcis');
 const CSS = `
 :root{color-scheme:dark}
 *{box-sizing:border-box}
+/* (2026-11-22, sa capture : « trop petit » et « je veux un fondu transparent derrière ») L écran couvre TOUTE la
+   fenêtre : un voile sombre semi-transparent qui apparaît en fondu, la carte au centre, en grand. */
 html,body{margin:0;height:100%;background:transparent;overflow:hidden}
-body{color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
-.rc{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--f-carte);border:1px solid var(--v14);
-  border-radius:16px;overflow:hidden}
-.rc-t{flex:0 0 auto;display:flex;align-items:baseline;gap:.8rem;padding:.9rem 1.2rem .7rem;border-bottom:1px solid var(--v10)}
-.rc-t h1{margin:0;font-size:1.02rem;font-weight:750}
-.rc-t .aide{color:var(--tx2);font-size:.8rem}
-.rc-c{flex:1 1 auto;min-height:0;overflow:hidden;padding:.7rem 1.2rem 1rem;column-width:15.5rem;column-gap:1.6rem}
-.grp{break-inside:avoid;margin:0 0 .8rem}
-.grp h2{margin:0 0 .3rem;font-size:.66rem;font-weight:750;text-transform:uppercase;letter-spacing:.08em;color:var(--tx2)}
-.l{display:flex;align-items:center;justify-content:space-between;gap:.7rem;padding:.16rem 0;font-size:.84rem}
+body{color:var(--tx);font:17px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  display:flex;align-items:center;justify-content:center;background:rgba(6,10,18,.62);animation:rcFondu .18s ease-out both}
+html.jour body{background:rgba(29,36,51,.42)}
+@keyframes rcFondu{from{opacity:0}to{opacity:1}}
+@keyframes rcCarte{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
+.rc{display:flex;flex-direction:column;width:min(1180px,90vw);max-height:88vh;background:var(--f-carte);border:1px solid var(--v14);
+  border-radius:22px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45);animation:rcCarte .2s ease-out both}
+.rc-t{flex:0 0 auto;display:flex;align-items:baseline;gap:1rem;padding:1.3rem 1.8rem 1rem;border-bottom:1px solid var(--v10)}
+.rc-t h1{margin:0;font-size:1.45rem;font-weight:750}
+.rc-t .aide{color:var(--tx2);font-size:.95rem}
+.rc-c{flex:1 1 auto;min-height:0;overflow:hidden;padding:1.1rem 1.8rem 1.5rem;column-width:17.5rem;column-gap:2.4rem}
+.grp{break-inside:avoid;margin:0 0 1.2rem}
+.grp h2{margin:0 0 .5rem;font-size:.8rem;font-weight:750;text-transform:uppercase;letter-spacing:.09em;color:var(--tx2)}
+.l{display:flex;align-items:center;justify-content:space-between;gap:1rem;padding:.3rem 0;font-size:1.02rem}
 .l span{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-kbd{flex:0 0 auto;font:650 .72rem system-ui,sans-serif;color:var(--tx);border:1px solid var(--v16);border-bottom-width:2px;
-  border-radius:6px;padding:.08rem .4rem;background:var(--f-page);white-space:nowrap}
+kbd{flex:0 0 auto;font:650 .88rem system-ui,sans-serif;color:var(--tx);border:1px solid var(--v16);border-bottom-width:3px;
+  border-radius:8px;padding:.14rem .55rem;background:var(--f-page);white-space:nowrap}
 `;
 
 function esc(s) { return String(s == null ? '' : s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
