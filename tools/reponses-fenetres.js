@@ -9785,6 +9785,16 @@ for (const c of CAS_REPRISE) {
       commit: 'deploy-2026-10-28-a1b2c3', note: '8.12.0', r2Objects: 271, blobBytes: 288768, totalBytes: 248512000, tailleBase: '282 Ko', tailleApp: '236 Mo', taille: '237 Mo',
       appVersion: '8.12.0', appFichiers: 3, total: 200, produits: 3, commandes: 0, factures: 0 });
   })();
+  /* (2026-11-22) Clientèle 360 : la vue réelle du moteur (assets/js/clientele.js, client fictif complet), un cas par onglet. */
+  (function(){
+    var L = JEU['client.js']; if (!Array.isArray(L) || !L[0]) return;
+    var V = {"ok":true,"id":"u1","segment":"fidele","valeur":{"total":960,"total12":880,"commandes":6,"annulees":1,"panierMoyen":160,"premiere":"2025-10-17T15:49:28.386Z","derniere":"2026-10-22T15:49:28.386Z","joursDepuis":30,"intervalle":74,"rembourse":89,"net":871},"commandes":[{"id":"o0","numero":"C-0002-22400","date":"2026-10-22T15:49:28.386Z","total":150,"statut":"delivered","articles":2,"comptoir":false,"coupon":""},{"id":"o1","numero":"C-0002-22401","date":"2026-09-07T15:49:28.386Z","total":160,"statut":"delivered","articles":2,"comptoir":false,"coupon":"BIENVENUE"},{"id":"o2","numero":"C-0002-22402","date":"2026-07-24T15:49:28.386Z","total":170,"statut":"cancelled","articles":2,"comptoir":false,"coupon":""},{"id":"o3","numero":"C-0002-22403","date":"2026-06-09T15:49:28.386Z","total":180,"statut":"delivered","articles":2,"comptoir":false,"coupon":""},{"id":"o4","numero":"C-0002-22404","date":"2026-04-25T15:49:28.386Z","total":190,"statut":"delivered","articles":2,"comptoir":false,"coupon":""},{"id":"o5","numero":"C-0002-22405","date":"2026-03-11T15:49:28.386Z","total":200,"statut":"delivered","articles":2,"comptoir":false,"coupon":""},{"id":"g1","numero":"C-0002-22300","date":"2025-10-17T15:49:28.386Z","total":80,"statut":"delivered","articles":1,"comptoir":false,"coupon":""}],"retours":[{"id":"ret_1","date":"2026-11-01T15:49:28.386Z","commande":"C-0002-22412","statut":"refunded","articles":1,"motif":"Taille"}],"remboursements":[{"id":"rf1","date":"2026-10-16","montant":89,"commande":"C-0002-22412","moyen":""}],"credits":[],"fidelite":{"points":420,"pointsGeles":0,"palier":"","journal":[{"date":"2026-10-01","points":150,"motif":"commande livrée"}],"parrainCode":"SZ-7K3P9Q","parrainees":1,"ambassadrice":false},"echanges":{"support":[{"id":"sup_1","date":"2026-11-16T15:49:28.386Z","sujet":"Livraison","commande":"","statut":"answered","repondu":true}],"avis":[{"id":"rv1","date":"2026-11-12T15:49:28.386Z","produit":"Robe Mila","note":5,"statut":"approved"}],"questions":[]},"marketing":{"infolettre":"abonne","abonneLe":"2025-01-01","desabonneLe":"","sms":false,"relances":[],"coupons":[{"code":"BIENVENUE","fois":1}]},"comptes":{"commandes":7,"retours":2,"echanges":2,"relances":0}};
+    L.forEach(function(c){ c.reponses['client:vue360'] = V; });
+    var base = L[0];
+    ['commandes', 'retours', 'fidelite', 'echanges', 'marketing'].forEach(function(o){
+      L.push({ nom: 'Clientèle 360 — onglet ' + o, id: base.id + '#' + o, reponses: base.reponses, exige: ['class="c3-ong"'] });
+    });
+  })();
   cloner('newsletter.js', 'réglages seuls (Configuration › Modules › Infolettre)', function(c){ return c.reponses && c.reponses['newsletter:cfgDonnees']; });
 })();
 

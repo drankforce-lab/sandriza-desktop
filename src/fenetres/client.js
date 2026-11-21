@@ -111,6 +111,25 @@ button.mini{padding:.14rem .5rem;font-size:.75rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* La fiche en deux colonnes (2026-10-04). */
 .duo-fiche{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.5fr);gap:.7rem;align-items:start}
+/* ── CLIENTÈLE 360 (2026-11-22) : les onglets de la fiche, et ce qu ils montrent ── */
+.c3-ong{display:flex;gap:.25rem;flex-wrap:wrap;flex:0 0 auto;border-bottom:1px solid var(--v08);padding-bottom:.1rem}
+.c3-ong button{background:transparent;border:0;border-bottom:2px solid transparent;border-radius:6px 6px 0 0;color:var(--tx2);font:inherit;font-weight:600;font-size:.84rem;padding:.4rem .65rem;cursor:pointer}
+.c3-ong button:hover{color:var(--tx);background:var(--v05)}
+.c3-ong button.on{color:var(--tx);border-bottom-color:var(--or)}
+.c3-ong button .n{font-size:.7rem;color:var(--tx2);margin-left:.3rem}
+.c3-seg{display:inline-block;font-size:.72rem;font-weight:700;padding:.16rem .6rem;border-radius:99px;background:var(--v08);color:var(--tx)}
+.c3-seg.vip{background:rgba(var(--or-rgb),.22);color:var(--tx-or)} .c3-seg.fidele{background:rgba(74,222,128,.16);color:var(--tx-ok)}
+.c3-seg.a-risque,.c3-seg.endormi{background:rgba(242,194,107,.16);color:var(--tx-att)} .c3-seg.nouveau{background:rgba(124,180,245,.16);color:var(--tx-bleu)}
+.c3-grille{display:grid;grid-template-columns:repeat(auto-fit,minmax(18rem,1fr));gap:.7rem;align-items:start}
+.c3-t{width:100%;border-collapse:collapse;font-size:.83rem}
+.c3-t th{text-align:left;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);padding:.35rem .4rem;border-bottom:1px solid var(--v08);font-weight:700;white-space:nowrap}
+.c3-t td{padding:.4rem .4rem;border-bottom:1px solid var(--v05);vertical-align:middle}
+.c3-t td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.c3-t tr[data-cmd]{cursor:pointer} .c3-t tr[data-cmd]:hover td{background:var(--v04)}
+.c3-vide{font-size:.82rem;color:var(--tx2);padding:.3rem 0}
+.c3-etoiles{font-weight:700;white-space:nowrap}
+html.jour .c3-seg.fidele{color:#1f6337} html.jour .c3-seg.nouveau{color:#3d5674}
+html.jour .c3-seg.a-risque,html.jour .c3-seg.endormi{color:#7a4f00} html.jour .c3-seg.vip{color:#7a5420}
 .duo-fiche > .carte{margin:0}
 .coord .ligne{flex-direction:column;align-items:flex-start;gap:.12rem;padding:.42rem 0}
 .col-g{display:flex;flex-direction:column;gap:.7rem;min-width:0}
@@ -131,14 +150,17 @@ button.mini{padding:.14rem .5rem;font-size:.75rem}
  *  `intention` (2026-10-14, le clic droit de la liste) = « modifier »,
  *  « supprimer » ou « purger » : la fiche lance elle-même ce geste. */
 function pageClient(id, intention) {
-  const depart = JSON.stringify(String(id || ''));
+  /* (2026-11-22, Clientèle 360) « id#onglet » ouvre la fiche sur un onglet (commandes, retours, fidelite, echanges, marketing). */
+  const brut = String(id || ''), diese = brut.indexOf('#');
+  const ongDepart = diese >= 0 && /^(commandes|retours|fidelite|echanges|marketing)$/.test(brut.slice(diese + 1)) ? brut.slice(diese + 1) : 'apercu';
+  const depart = JSON.stringify(diese >= 0 ? brut.slice(0, diese) : brut);
   const intDepart = JSON.stringify(/^(modifier|supprimer|purger)$/.test(String(intention || '')) ? String(intention) : '');
   return `${TETE()}
 <title>${T("Fiche client — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="av" id="t-av">?</span>
   <div><h1 id="titre">${T("Fiche client")}</h1><div class="mail" id="t-mail"></div></div>
-  <span class="pill gris" id="pill" style="display:none"></span>
+  <span class="pill gris" id="pill" style="display:none"></span><span class="c3-seg" id="t-seg" style="display:none;margin-left:.4rem"></span>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
@@ -153,6 +175,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
   /* Une commande recente s ouvre dans SA fenetre de detail — la meme porte que
      la liste Commandes et le tableau de bord (commandes:ouvrirDetail). */
   corps.addEventListener('click', function(ev){
+    // Clientèle 360 : changer d onglet (la vue 360 se charge à la première ouverture).
+    var og = ev.target && ev.target.closest ? ev.target.closest('[data-c3]') : null;
+    if (og) { ONG = og.getAttribute('data-c3'); chargerV(); dessinerFiche(); return; }
     var li = ev.target && ev.target.closest ? ev.target.closest('[data-cmd]') : null;
     if (!li) return;
     appeler('commandes:ouvrirDetail', [li.getAttribute('data-cmd')]).then(function(r){
@@ -169,6 +194,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
   var INTENTION = ${intDepart};
   var R = null;
   var EDITION = false;
+  var ONG = '${ongDepart}';   // Clientèle 360 : apercu | commandes | retours | fidelite | echanges | marketing
+  var V = null, V_CHARGE = false;   // la vue 360 (client:vue360), lue une fois par ouverture
   var enCours = false;
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -249,15 +276,96 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     if (EDITION) dessinerEdition(); else dessinerFiche();
   }
 
+  /* ══ CLIENTÈLE 360 (2026-11-22, grand chantier) ══ Une fiche, six onglets. L aperçu est la fiche d avant ; les autres
+     viennent de client:vue360 (assets/js/clientele.js), chargé à la première ouverture d un onglet — la fiche s ouvre
+     aussi vite qu avant. */
+  var SEGMENTS = { prospect: '${T("Prospect")}', nouveau: '${T("Nouveau")}', vip: '${T("VIP")}', endormi: '${T("Endormi")}',
+    'a-risque': '${T("À risque")}', fidele: '${T("Fidèle")}', occasionnel: '${T("Occasionnel")}' };
+  function ongletsHtml(){
+    var n = function(k){ return V && V.comptes && V.comptes[k] ? '<span class="n">' + V.comptes[k] + '</span>' : ''; };
+    var b = function(k, lib, cpt){ return '<button type="button" data-c3="' + k + '" class="' + (ONG === k ? 'on' : '') + '">' + lib + (cpt || '') + '</button>'; };
+    return '<div class="c3-ong" role="tablist">' + b('apercu', '${T("Aperçu")}') + b('commandes', '${T("Commandes")}', n('commandes'))
+      + b('retours', '${T("Retours et crédits")}', n('retours')) + b('fidelite', '${T("Fidélité")}') + b('echanges', '${T("Échanges")}', n('echanges'))
+      + b('marketing', '${T("Marketing")}') + '</div>';
+  }
+  function chargerV(){
+    if (V_CHARGE) return; V_CHARGE = true;
+    appeler('client:vue360', [ID]).then(function(r){
+      if (!r || !r.ok) { V = { erreur: expliquer(r) }; } else V = r;
+      if (!EDITION) dessinerFiche();
+    });
+  }
+  function c3Date(s){ return s ? esc(dateFr(s)) : '—'; }
+  function c3Table(entetes, lignes, pages){
+    if (!lignes.length) return '<div class="c3-vide">${T("Rien pour l’instant.")}</div>';
+    return '<table class="c3-t"><thead><tr>' + entetes.map(function(h){ return '<th' + (h[1] ? ' style="text-align:right"' : '') + '>' + h[0] + '</th>'; }).join('') + '</tr></thead>'
+      + '<tbody' + (pages ? ' data-pages="' + pages + '"' : '') + '>' + lignes.join('') + '</tbody></table>';
+  }
+  function vueOnglet(){
+    if (!V) return '<div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div></div>';
+    if (V.erreur) return '<div class="carte"><div class="c3-vide">' + esc(V.erreur) + '</div></div>';
+    if (ONG === 'commandes') {
+      return '<div class="carte"><h2>${T("Toutes ses commandes")}</h2>' + c3Table([['${T("Commande")}'], ['${T("Date")}'], ['${T("Articles")}', 1], ['${T("Total")}', 1], ['${T("Statut")}'], ['${T("Coupon")}']],
+        V.commandes.map(function(o){ var st = STATUTS_CMD[o.statut] || ['', o.statut || ''];
+          return '<tr data-cmd="' + esc(o.id) + '" title="${T("Ouvrir la commande")}"><td><b>' + esc(o.numero) + '</b>' + (o.comptoir ? ' <span class="c3-vide">${T("comptoir")}</span>' : '') + '</td><td>' + c3Date(o.date) + '</td>'
+            + '<td class="n">' + o.articles + '</td><td class="n">' + argent(o.total) + '</td><td>' + (st[1] ? '<span class="rf-pill' + st[0] + '">' + esc(st[1]) + '</span>' : '') + '</td><td>' + esc(o.coupon || '') + '</td></tr>'; }), 'c360-cmd') + '</div>';
+    }
+    if (ONG === 'retours') {
+      return '<div class="c3-grille"><div class="carte"><h2>${T("Demandes de retour")}</h2>' + c3Table([['${T("Date")}'], ['${T("Commande")}'], ['${T("Articles")}', 1], ['${T("Statut")}']],
+          V.retours.map(function(r){ return '<tr><td>' + c3Date(r.date) + '</td><td>' + esc(r.commande) + '</td><td class="n">' + r.articles + '</td><td>' + esc(r.statut) + '</td></tr>'; })) + '</div>'
+        + '<div class="carte"><h2>${T("Remboursements")}</h2>' + c3Table([['${T("Date")}'], ['${T("Commande")}'], ['${T("Montant")}', 1]],
+          V.remboursements.map(function(r){ return '<tr><td>' + c3Date(r.date) + '</td><td>' + esc(r.commande) + '</td><td class="n">' + argent(r.montant) + '</td></tr>'; })) + '</div>'
+        + '<div class="carte"><h2>${T("Crédits boutique")}</h2>' + c3Table([['${T("Numéro")}'], ['${T("Émis le")}'], ['${T("Reste")}', 1]],
+          V.credits.map(function(c){ return '<tr><td>' + esc(c.numero) + '</td><td>' + c3Date(c.date) + '</td><td class="n">' + argent(c.reste) + ' / ' + argent(c.montant) + '</td></tr>'; })) + '</div></div>';
+    }
+    if (ONG === 'fidelite') {
+      var f = V.fidelite;
+      return '<div class="tuiles"><div class="tuile"><div class="k">${T("Points")}</div><div class="v">' + f.points + '</div></div>'
+        + '<div class="tuile"><div class="k">${T("En attente")}</div><div class="v">' + f.pointsGeles + '</div></div>'
+        + '<div class="tuile"><div class="k">${T("Palier")}</div><div class="v">' + esc(f.palier || '—') + '</div></div>'
+        + '<div class="tuile"><div class="k">${T("Amies parrainées")}</div><div class="v">' + f.parrainees + '</div></div></div>'
+        + '<div class="carte"><h2>${T("Mouvements de points")}</h2>' + (f.parrainCode ? '<div class="c3-vide">${T("Code de parrainage :")} <b>' + esc(f.parrainCode) + '</b></div>' : '')
+        + c3Table([['${T("Date")}'], ['${T("Motif")}'], ['${T("Points")}', 1]],
+          f.journal.map(function(j){ return '<tr><td>' + c3Date(j.date) + '</td><td>' + esc(j.motif) + '</td><td class="n">' + (j.points > 0 ? '+' : '') + j.points + '</td></tr>'; }), 'c360-pts') + '</div>';
+    }
+    if (ONG === 'echanges') {
+      var e = V.echanges;
+      return '<div class="c3-grille"><div class="carte"><h2>${T("Demandes de support")}</h2>' + c3Table([['${T("Date")}'], ['${T("Sujet")}'], ['${T("État")}']],
+          e.support.map(function(t){ return '<tr><td>' + c3Date(t.date) + '</td><td>' + esc(t.sujet) + (t.commande ? ' · ' + esc(t.commande) : '') + '</td><td>' + (t.repondu ? '${T("Répondu")}' : esc(t.statut)) + '</td></tr>'; })) + '</div>'
+        + '<div class="carte"><h2>${T("Avis laissés")}</h2>' + c3Table([['${T("Date")}'], ['${T("Produit")}'], ['${T("Note")}']],
+          e.avis.map(function(a){ var n = Math.max(0, Math.min(5, a.note)); return '<tr><td>' + c3Date(a.date) + '</td><td>' + esc(a.produit) + '</td><td><span class="c3-etoiles">' + n + ' / 5</span></td></tr>'; })) + '</div>'
+        + '<div class="carte"><h2>${T("Questions posées")}</h2>' + c3Table([['${T("Date")}'], ['${T("Produit")}'], ['${T("État")}']],
+          e.questions.map(function(q){ return '<tr><td>' + c3Date(q.date) + '</td><td>' + esc(q.produit) + '</td><td>' + esc(q.statut) + '</td></tr>'; })) + '</div></div>';
+    }
+    if (ONG === 'marketing') {
+      var m = V.marketing;
+      var nl = m.infolettre === 'abonne' ? '${T("Abonné")}' + (m.abonneLe ? ' · ' + c3Date(m.abonneLe) : '') : (m.infolettre === 'desabonne' ? '${T("Désabonné")}' + (m.desabonneLe ? ' · ' + c3Date(m.desabonneLe) : '') : '${T("Jamais abonné")}');
+      return '<div class="c3-grille"><div class="carte"><h2>${T("Consentements")}</h2>'
+          + '<div class="ligne"><span class="k">${T("Infolettre")}</span><span>' + nl + '</span></div>'
+          + '<div class="ligne"><span class="k">${T("Textos")}</span><span>' + (m.sms ? '${T("Accepte")}' : '${T("Non")}') + '</span></div></div>'
+        + '<div class="carte"><h2>${T("Relances reçues")}</h2>' + c3Table([['${T("Date")}'], ['${T("Sujet")}'], ['${T("Revenu")}']],
+          m.relances.map(function(r){ return '<tr><td>' + c3Date(r.date) + '</td><td>' + esc(r.sujet) + '</td><td>' + (r.revenu ? '${T("Oui")}' : '—') + '</td></tr>'; })) + '</div>'
+        + '<div class="carte"><h2>${T("Coupons utilisés")}</h2>' + c3Table([['${T("Code")}'], ['${T("Fois")}', 1]],
+          m.coupons.map(function(c){ return '<tr><td>' + esc(c.code) + '</td><td class="n">' + c.fois + '</td></tr>'; })) + '</div></div>';
+    }
+    return '';
+  }
+
   function dessinerFiche(){
     var c = R.client, a = c.adresse;
+    var ts = document.getElementById('t-seg');
+    if (ts && V && V.segment) { ts.style.display = ''; ts.className = 'c3-seg ' + V.segment; ts.textContent = SEGMENTS[V.segment] || V.segment; ts.title = '${T("Segment")}'; }
+    if (ONG !== 'apercu') { corps.innerHTML = ongletsHtml() + vueOnglet(); actionsFiche(); brancherFiche(); return; }
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
        quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
        ce poste. Voir JS_TUILES dans socle.js. */
-    var h = szTuiles('<div class="tuiles">'
+    var vv = V && V.valeur;
+    var h = ongletsHtml() + szTuiles('<div class="tuiles">'
+      + (V && V.segment ? '<div class="tuile"><div class="k">${T("Segment")}</div><div class="v"><span class="c3-seg ' + esc(V.segment) + '">' + esc(SEGMENTS[V.segment] || V.segment) + '</span></div></div>' : '')
       + '<div class="tuile"><div class="k">${T("Commandes")}</div><div class="v">' + R.stats.commandes + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Retours")}</div><div class="v">' + R.stats.retours + '</div></div>'
       + '<div class="tuile"><div class="k">${T("Total dépensé")}</div><div class="v">' + argent(R.stats.totalDepense) + '</div></div>'
+      + (vv && vv.joursDepuis != null ? '<div class="tuile"><div class="k">${T("Dernier achat")}</div><div class="v">' + '${T("il y a {0} j")}'.split('{0}').join(String(vv.joursDepuis)) + '</div></div>' : '')
       + '<div class="tuile"><div class="k">${T("Inscrit le")}</div><div class="v date">' + esc(dateFr(c.inscritLe)) + '</div></div>'
       + '</div>');
     /* ⚠ DEUX COLONNES (2026-10-04) : les coordonnees a gauche, etiquette AU-DESSUS
@@ -291,7 +399,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
         : '<div class="aide">${T("Aucune commande.")}</div>')
       + '</div>' + noteHtml() + '</div></div>';
     corps.innerHTML = h;
-
+    actionsFiche();
+    brancherFiche();
+    chargerV();
+  }
+  function actionsFiche(){
     var c2 = R.client;
     var b = '';
     if (c2.supprime) {
@@ -311,7 +423,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     if (c2.supprime && !R.purgeable && R.peutSupprimer) {
       dire('${T("Suppression définitive impossible :")} ' + R.stats.commandes + ' ' + szPl(R.stats.commandes, '${T("commande — conservation fiscale de 6 ans.")}', '${T("commandes — conservation fiscale de 6 ans.")}'), 'att');
     }
-    brancherFiche();
   }
 
   /* ══ LA FICHE ENRICHIE (2026-10-27, sa demande) ══ Sous les coordonnées : « En bref » et « Ses habitudes »
@@ -571,6 +682,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     return appeler('client:lire', [ID]).then(function(r){
       if (!r.ok) { vide('${T("Fiche indisponible")}', expliquer(r)); return; }
       R = r;
+      if (ONG !== 'apercu') chargerV();
       if (!r.peutEcrire) sous.textContent = '${T("Lecture seule")}';
       dessiner();
     });

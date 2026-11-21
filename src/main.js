@@ -2940,6 +2940,8 @@ const OPS_PONT = new Set([
   // Les quatre listes restantes du palier 2 (1.54.0) : meme patron — la page
   // filtree par le site, le clic ouvre la fenetre native de la chose.
   'clients:liste', 'clients:ouvrir',
+  // Clientèle 360 (2026-11-22) : la vue complète d un client pour sa fiche (lecture seule).
+  'client:vue360',
   'collections:liste', 'collections:ouvrir', 'collections:nouvelle',
   'fournisseurs:liste', 'fournisseurs:ouvrir', 'fournisseurs:nouveau',
   'retours:liste', 'retours:ouvrir',
