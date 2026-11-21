@@ -196,6 +196,7 @@ const MENU_APP_EN = {
   'Rappels': 'Reminders',
   // Objectifs et défis (2026-11-20).
   'Objectifs et défis': 'Goals and challenges',
+  'Relance des clients endormis': 'Win back sleeping customers',
   'Recherches sans résultat': 'Searches with no result',
   'Recommandations': 'Recommendations',
   'Remboursements': 'Refunds',

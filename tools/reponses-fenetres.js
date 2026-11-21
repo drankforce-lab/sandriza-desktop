@@ -4235,6 +4235,43 @@ const JEU = {
       { nom: 'module des objectifs absent', id: '', reponses: { 'objectifs:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
     ];
   })(),
+  /* (2026-11-20) Relance des clients endormis : formes copiées de assets/js/relance.js (candidats, bilan, réglages). */
+  'relance.js': (function(){
+    var REG = { seuil: 90, plafond: 540, delai: 60, sujet: '{prenom}, de nouvelles pièces vous attendent',
+      mot: 'Cela fait un petit moment ! Nous avons choisi pour vous quelques nouveautés, dans votre taille.', code: '' };
+    var SUG = [ { id: 'p1', nom: 'Robe Élégance mi-longue', prix: 89.99, image: '' }, { id: 'p2', nom: 'Manteau d’hiver Aurore', prix: 249, image: '' },
+      { id: 'p3', nom: 'Foulard de laine', prix: 39.99, image: '' } ];
+    var C = [
+      { id: 'u1', nom: 'Josée Lafleur', prenom: 'Josée', courriel: 'josee@exemple.ca', joursDepuis: 104, derniere: '2026-08-08', commandes: 12, total: 1450.25, segment: 'vip',
+        taille: 'M', categorie: 'robes', etat: 'pret', dateRelance: '', suggestions: SUG },
+      { id: 'u2', nom: 'Luc Bernard', prenom: 'Luc', courriel: 'luc@exemple.ca', joursDepuis: 96, derniere: '2026-08-16', commandes: 2, total: 210, segment: 'regulier',
+        taille: 'L', categorie: 'manteaux', etat: 'pret', dateRelance: '', suggestions: SUG.slice(1) },
+      { id: 'u3', nom: 'Paul Gagné', prenom: 'Paul', courriel: 'paul@exemple.ca', joursDepuis: 131, derniere: '2026-07-12', commandes: 3, total: 289.5, segment: 'inactif',
+        taille: 'S', categorie: 'hauts', etat: 'sans_consentement', dateRelance: '', suggestions: [] },
+      { id: 'u4', nom: 'Anne Roy', prenom: 'Anne', courriel: 'anne@exemple.ca', joursDepuis: 210, derniere: '2026-04-24', commandes: 1, total: 89.95, segment: 'inactif',
+        taille: 'M', categorie: 'robes', etat: 'deja_relance', dateRelance: '2026-10-30', suggestions: SUG.slice(0, 2) } ];
+    var BILAN = { envoyes90: 18, revenus: 4, taux: 22.2, montant: 1240.5, historique: [
+      { id: 'r1', clientId: 'u4', nom: 'Anne Roy', date: '2026-10-30', revenu: false, montant: 0 },
+      { id: 'r2', clientId: 'u9', nom: 'Marc Dubé', date: '2026-10-12', revenu: true, montant: 312 } ] };
+    var donnees = function(c, b, extra){ return Object.assign({ ok: true, aujourdhui: '2026-11-20', candidats: c, bilan: b, reglages: REG, envoiPossible: true, peutEnvoyer: true }, extra || {}); };
+    var APER = { ok: true, sujet: 'Josée, de nouvelles pièces vous attendent', courriel: 'josee@exemple.ca',
+      html: '<!DOCTYPE html><html><body style="font-family:sans-serif;padding:20px"><p>Bonjour Josée,</p><p>Cela fait un petit moment !</p></body></html>' };
+    var rep = function(d){
+      return { 'relance:donnees': d, identite: IDENTITE, 'relance:apercu': APER,
+        'relance:envoyer': { ok: true, envoyes: 2, echecs: [], nuage: true }, 'relance:reglages': { ok: true } };
+    };
+    var cas = function(nom, id, d, exige){ return { nom: nom, id: id, reponses: rep(d), exige: exige }; };
+    var VIDE_B = { envoyes90: 0, revenus: 0, taux: 0, montant: 0, historique: [] };
+    return [
+      cas('clients endormis : prêts, sans consentement, déjà relancé', '', donnees(C, BILAN), ['data-coche="u1"', 'data-apercu="u2"', 'id="r-tout"', 'data-pages="relance"']),
+      cas('personne ne dort', '', donnees([], VIDE_B), ['class="vide-r"']),
+      cas('réglages ouverts', 'reglages', donnees(C, BILAN), ['id="g-seuil"', 'id="g-sujet"', 'id="g-ok"']),
+      cas('aperçu du courriel', 'apercu', donnees(C, BILAN), ['id="r-cadre"', 'id="a-envoyer"']),
+      cas('historique', 'historique', donnees(C, BILAN), ['data-pages="relance-hist"']),
+      cas('envoi non configuré, lecture seule', '', donnees(C, BILAN, { envoiPossible: false, peutEnvoyer: false }), ['class="avis"']),
+      { nom: 'module de relance absent', id: '', reponses: { 'relance:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
+    ];
+  })(),
   'rappels.js': (function(){
     var FREQ = [
       { cle: 'unique', nom: 'Une seule fois' }, { cle: 'quotidien', nom: 'Chaque jour' },
