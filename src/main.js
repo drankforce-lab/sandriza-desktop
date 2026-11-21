@@ -3332,7 +3332,7 @@ const OPS_PONT = new Set([
   // Automatisations (fenetre Automations, 2.40.0) — pas de secret.
   'config:automations:donnees', 'config:automations:email', 'config:automations:stats',
   'config:telephonie:donnees', 'config:telephonie:ecrire', 'config:telephonie:bloquer', 'config:telephonie:debloquer',
-  'tel:resume', 'tel:sms:envoyer', 'tel:sms:lu', 'tel:sms:suppr', 'tel:sms:page', 'tel:vm:lu', 'tel:vm:suppr',
+  'tel:resume', 'tel:ia:journal', 'tel:sms:envoyer', 'tel:sms:lu', 'tel:sms:suppr', 'tel:sms:page', 'tel:vm:lu', 'tel:vm:suppr',
   'config:modeles:donnees', 'config:modeles:ecrire', 'config:modeles:retirer',
   // Bibliotheque de MANNEQUINS de l habillage IA (2026-08-20, meme fenetre que
   // les modeles par vue). Portage AVANT retrait : produit:modeles la LISAIT
@@ -4047,7 +4047,7 @@ const LIMITES_PONT = {
   'config:transporteurs:donnees': 30000, 'config:transporteurs:ecrire': 45000, 'config:transporteurs:reessayer': 30000, 'config:transporteurs:tester': 70000,
   'config:automations:donnees': 15000, 'config:automations:email': 20000, 'config:automations:stats': 20000,
   'config:telephonie:donnees': 15000, 'config:telephonie:ecrire': 30000, 'config:telephonie:bloquer': 20000, 'config:telephonie:debloquer': 20000,
-  'tel:resume': 20000, 'tel:sms:envoyer': 20000, 'tel:sms:lu': 15000, 'tel:sms:suppr': 15000, 'tel:sms:page': 20000, 'tel:vm:lu': 15000, 'tel:vm:suppr': 15000,
+  'tel:resume': 20000, 'tel:ia:journal': 20000, 'tel:sms:envoyer': 20000, 'tel:sms:lu': 15000, 'tel:sms:suppr': 15000, 'tel:sms:page': 20000, 'tel:vm:lu': 15000, 'tel:vm:suppr': 15000,
   'config:modeles:donnees': 15000, 'config:modeles:ecrire': 60000, 'config:modeles:retirer': 20000,
   // Meme profil que les modeles par vue : l ajout televerse une photo dans R2
   // (60 s), le retrait ecrit la liste puis efface l objet (20 s).

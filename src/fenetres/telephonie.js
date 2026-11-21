@@ -146,6 +146,16 @@ body{background:var(--f-page);color:var(--tx);
 .tbl th{text-align:left;color:var(--tx2);font-weight:600;padding:.35rem .5rem;border-bottom:1px solid var(--v08)}
 .tbl td{padding:.35rem .5rem;border-bottom:1px solid var(--v05)}
 .vide{padding:.8rem;text-align:center;color:var(--tx2);font-size:.82rem}
+/* La transcription d un appel de la réceptionniste IA (2026-11-22) : un voile, comme les autres fenêtres. */
+.voile{position:fixed;inset:0;background:rgba(8,12,20,.82);display:flex;align-items:center;justify-content:center;padding:1.5rem;z-index:50}
+.voile .boite{background:var(--f-carte);border:1px solid var(--v12);border-radius:16px;padding:1.1rem 1.3rem;max-width:40rem;width:100%;max-height:calc(100vh - 3rem);display:flex;flex-direction:column}
+.voile .tt{display:flex;align-items:center;gap:.6rem;margin-bottom:.4rem}
+.voile .tt h3{margin:0;font-size:1.05rem;font-weight:700}
+.voile .ia-trans{flex:1 1 auto;min-height:0;overflow:hidden}
+.ia-trans{margin-top:.6rem}
+.ia-tour{margin:.35rem 0;font-size:.86rem;line-height:1.45}
+.ia-tour b{color:var(--tx2);font-weight:700;margin-right:.35rem}
+.ia-tour.systeme{color:var(--tx2);font-style:italic}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.55rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -229,7 +239,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
   var ONGLETS = [
     ['general', '${T("Général")}'], ['accueil', '${T("Accueil & routage")}'], ['menu', '${T("Menu IVR")}'],
     ['redirection', '${T("Redirection")}'], ['messagerie', '${T("Messagerie")}'], ['sms', 'SMS'], ['file', '${T("File d’attente")}'],
-    ['bloques', '${T("Numéros bloqués")}'],
+    ['bloques', '${T("Numéros bloqués")}'], ['ia', '${T("Réceptionniste IA")}'],
   ];
   var VOIX_FR = [
     ['Polly.Gabrielle-Neural', '${T("Gabrielle — femme, naturelle (neuronale)")}'],
@@ -444,7 +454,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
       + taHtml('t-noinput-fr', '${T("Message « aucun choix » (FR)")}', ni.fr, '${T("Merci d’avoir contacté SANDRIZA. Au revoir !")}')
       + taHtml('t-noinput-en', '${T("Message « aucun choix » (EN)")}', ni.en, '${T("Thank you for contacting SANDRIZA. Goodbye!")}');
     h += selectHtml('t-default', '${T("Action par défaut (à l’ouverture)")}', C.defaultAction || 'menu', [
-        ['menu', '${T("Robot / menu (IVR)")}'], ['forward', '${T("Rediriger directement")}'], ['voicemail', '${T("Messagerie vocale")}']]);
+        ['menu', '${T("Robot / menu (IVR)")}'], ['forward', '${T("Rediriger directement")}'], ['voicemail', '${T("Messagerie vocale")}'],
+        ['assistant', '${T("Réceptionniste IA")}']]);
     h += '</div><div class="carte"><div class="stitre">${T("Heures d’ouverture")}</div>';
     h += checkHtml('t-usehours', '${T("Utiliser les heures d’ouverture — hors heures, message + messagerie")}', !!hr.useHours);
     h += ''
@@ -465,7 +476,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
         + '<option value="queue"' + (o.action === 'queue' ? ' selected' : '') + '>${T("File d’attente")}</option>'
         + '<option value="voicemail"' + (o.action === 'voicemail' ? ' selected' : '') + '>${T("Messagerie")}</option>'
         + '<option value="message"' + (o.action === 'message' ? ' selected' : '') + '>${T("Message vocal")}</option>'
-        + '<option value="repeat"' + (o.action === 'repeat' ? ' selected' : '') + '>${T("Répéter l’accueil")}</option></select></div>'
+        + '<option value="repeat"' + (o.action === 'repeat' ? ' selected' : '') + '>${T("Répéter l’accueil")}</option>'
+        + '<option value="assistant"' + (o.action === 'assistant' ? ' selected' : '') + '>${T("Réceptionniste IA")}</option></select></div>'
       + '<div class="ch" style="margin:0"><label>${T("Numéro (Rediriger / File)")}</label><input aria-label="${T("Numéro (Rediriger / File)")}" data-mf="number" style="width:10rem" value="' + esc(o.number || '') + '" placeholder="+1…"' + (RO ? ' disabled' : '') + '></div>'
       + (RO ? '' : '<button class="b dgr" type="button" data-mdel="' + i + '" title="${T("Retirer")}"><span class="ic">🗑</span></button>')
       + '</div><div class="l2">'
@@ -634,8 +646,76 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     };
   }
 
+  /* ══ LA RÉCEPTIONNISTE VOCALE IA (2026-11-22) ══ Elle répond au téléphone (heures, livraison, retours, état d une
+     commande) et passe la main. On l active en choisissant « Réceptionniste IA » sur une touche du menu, comme action
+     par défaut, ou hors des heures (case ci-dessous). À droite : les derniers appels, avec leur transcription. */
+  var IAJ = null, IAJ_OCC = false;
+  function panIa(){
+    var a = C.assistant || {};
+    var h = '<div class="duo"><div class="carte"><div class="stitre">${T("Réceptionniste vocale IA")}</div>'
+      + '<div class="aide" style="margin:0 0 .6rem">${T("Elle répond aux questions sur vos heures, la livraison et les retours, et donne l’état d’une commande. Pour une plainte, un remboursement ou une demande délicate, elle passe la main : un conseiller aux heures d’ouverture, sinon la messagerie.")}</div>'
+      + '<div class="note">${T("Pour l’activer : choisissez « Réceptionniste IA » sur une touche du menu (onglet Menu IVR), ou comme action par défaut (Accueil & routage).")}</div>';
+    h += checkHtml('t-ia-hh', '${T("Hors des heures d’ouverture, elle répond à la place du message « fermé »")}', !!a.horsHeures);
+    h += texteHtml('t-ia-nom', '${T("Son prénom (facultatif)")}', a.nom || '', '${T("ex. : Sofia")}');
+    h += taHtml('t-ia-consignes', '${T("Ce qu’elle doit savoir en plus")}', a.consignes || '', '${T("Adresse, stationnement, cabines d’essayage, rendez-vous…")}');
+    h += '<div class="aide">${T("Elle connaît déjà vos heures d’ouverture et vos politiques de retour et de livraison. Elle n’invente ni prix, ni stock, ni promotion.")}</div>'
+      + '<div class="note">${T("Confidentialité : les paroles de l’appelant partent au fournisseur d’IA pour être comprises, jamais son numéro. L’état d’une commande est lu par le serveur et donné seulement au numéro de téléphone inscrit sur la commande ; l’IA ne le voit pas.")}</div>'
+      + '<div class="note">${T("Coût : quelques sous par appel (reconnaissance vocale chez Twilio, réponses de l’IA sous le plafond mensuel). Au plus 12 échanges par appel.")}</div>';
+    h += '</div><div class="carte"><div class="stitre">${T("Derniers appels")} <span id="t-ia-mois" class="aide"></span></div>'
+      + '<div class="liste" id="t-ia-journal" data-pages="tel-ia"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div></div>';
+    return h;
+  }
+  var IA_ISSUES = { repondu: '${T("Répondu")}', conseiller: '${T("Passé à un conseiller")}', message: '${T("Message laissé")}',
+    silence: '${T("Aucune parole")}', plafond: '${T("Plafond atteint")}' };
+  function iaIssue(x){ return x ? (IA_ISSUES[x] || (x.indexOf('panne') === 0 ? '${T("IA indisponible")}' : x)) : '${T("En cours ou raccroché")}'; }
+  function chargerIa(){
+    if (IAJ_OCC) return; IAJ_OCC = true;
+    appeler('tel:ia:journal').then(function(r){ IAJ_OCC = false; IAJ = r || { ok: false }; if (ONGLET === 'ia') rendreIa(); });
+  }
+  function rendreIa(){
+    var box = document.getElementById('t-ia-journal'); if (!box) return;
+    if (!IAJ) { chargerIa(); return; }
+    if (!IAJ.ok) { box.innerHTML = '<div class="vide">${T("Le journal des appels n’a pas pu être lu.")}</div>'; return; }
+    var m = document.getElementById('t-ia-mois');
+    if (m && IAJ.mois) m.textContent = '· ${T("ce mois-ci : {0} appel(s), {1} $ US d’IA")}'.split('{0}').join(String(IAJ.mois.appels || 0)).split('{1}').join((+IAJ.mois.cout || 0).toFixed(2));
+    var l = IAJ.appels || [];
+    if (!l.length) { box.innerHTML = '<div class="vide">${T("Aucun appel pour l’instant.")}</div>'; return; }
+    var h = '';
+    for (var i = 0; i < l.length; i++) {
+      var a = l[i], q = '';
+      for (var k = 0; k < (a.tours || []).length; k++) { if (a.tours[k].qui === 'appelant') { q = a.tours[k].texte; break; } }
+      h += '<div class="item"><div class="gauche"><div class="haut"><div class="qui"><span class="rf-nom">' + esc(a.appelant || '') + '</span>'
+        + '<span class="rf-pill' + (a.issue === 'repondu' ? '' : ' bleu') + '">' + esc(iaIssue(a.issue)) + '</span></div>'
+        + '<div class="actes"><button class="b" type="button" data-iaj="' + i + '">${T("Lire")}</button></div></div>'
+        + '<div class="rf-sous"><span>' + esc(szQuand(a.debut)) + '</span><span>·</span><span>' + (a.nb || 0) + ' ${T("échange(s)")}</span><span>·</span><span>' + (+a.cout || 0).toFixed(3) + ' $</span>'
+        + (q ? '<span>·</span><span>« ' + esc(q.slice(0, 80)) + ' »</span>' : '') + '</div></div></div>';
+    }
+    box.innerHTML = h;
+    var bs = box.querySelectorAll('[data-iaj]');
+    for (var j = 0; j < bs.length; j++) bs[j].onclick = function(){ lireAppelIa(l[parseInt(this.getAttribute('data-iaj'), 10)]); };
+  }
+  function lireAppelIa(a){
+    if (!a) return;
+    var QUI = { appelant: '${T("Appelant")}', assistante: '${T("Réceptionniste")}', systeme: '${T("Note")}' };
+    var t = '';
+    for (var i = 0; i < (a.tours || []).length; i++) {
+      var x = a.tours[i];
+      t += '<div class="ia-tour ' + esc(x.qui) + '"><b>' + esc(QUI[x.qui] || x.qui) + '</b> ' + esc(x.texte) + '</div>';
+    }
+    var v = document.createElement('div');
+    v.className = 'voile';
+    v.innerHTML = '<div class="boite" role="dialog" aria-label="${T("Transcription de l’appel")}"><div class="tt"><h3>${T("Transcription de l’appel")}</h3>'
+      + '<button type="button" class="b" id="ia-fermer">${T("Fermer")}</button></div>'
+      + '<div class="aide">' + esc(a.appelant || '') + ' · ' + esc(szQuand(a.debut)) + ' · ' + esc(iaIssue(a.issue)) + '</div>'
+      + '<div class="ia-trans" data-pages="tel-ia-trans">' + (t || '<div class="vide">${T("Aucune parole enregistrée.")}</div>') + '</div></div>';
+    document.body.appendChild(v);
+    document.getElementById('ia-fermer').onclick = function(){ v.remove(); };
+    v.addEventListener('keydown', function(e){ if (e.key === 'Escape') v.remove(); });
+  }
+  window.szPagesCoeur = window.szPagesCoeur || {};
+
   var PANNEAUX = { general: panGeneral, accueil: panAccueil, menu: panMenu,
-    redirection: panRedirection, messagerie: panMessagerie, sms: panSms, file: panFile, bloques: panBloques };
+    redirection: panRedirection, messagerie: panMessagerie, sms: panSms, file: panFile, bloques: panBloques, ia: panIa };
 
   // ── LECTURE DES CHAMPS DU PANNEAU ACTIF vers la config en memoire ────────────
   function lireMenuDom(){
@@ -678,6 +758,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
       C.voicemailEmail = val('t-vm-email');
       C.voicemailPrompt = { fr: val('t-vm-fr'), en: val('t-vm-en') };
       C.voicemailPromptClosed = { fr: val('t-vm-closed-fr'), en: val('t-vm-closed-en') };
+    } else if (ONGLET === 'ia') {
+      C.assistant = { horsHeures: chk('t-ia-hh'), nom: val('t-ia-nom'), consignes: val('t-ia-consignes') };
     } else if (ONGLET === 'sms') {
       C.sms = { enabled: chk('t-sms-enabled'), autoReply: { fr: val('t-sms-fr'), en: val('t-sms-en') }, notifyEmail: val('t-sms-email') };
     } else if (ONGLET === 'file') {
@@ -712,6 +794,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     brancherTels();
     if (ONGLET === 'messagerie') rendreVm();
     if (ONGLET === 'sms') rendreSms();
+    if (ONGLET === 'ia') rendreIa();
   }
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
