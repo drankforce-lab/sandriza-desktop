@@ -26,6 +26,10 @@
  */
 
 module.exports = {
+  'Réglages de l’infolettre — Administration Sandriza': 'Newsletter settings — Sandriza Administration',
+  'Réglages de l’infolettre': 'Newsletter settings',
+  'La clé et les expéditeurs se règlent dans Configuration › Modules › Infolettre.': 'The key and senders are set in Configuration › Modules › Newsletter.',
+  'Ouvrez Configuration › Modules › Infolettre.': 'Open Configuration › Modules › Newsletter.',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Infolettre — Administration Sandriza': 'Newsletter — Sandriza Administration',
   'Infolettre': 'Newsletter',

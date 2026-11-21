@@ -237,14 +237,19 @@ label.case input{width:15px;height:15px;accent-color:var(--or);margin:0}
  * ⚠ L'éditeur s'atteint par un CLIC : sans ce paramètre, le garde-fou ne le
  * verrait jamais — et c'est précisément lui qui manquait.
  */
+/* ⚠ (2026-11-22, sa décision : « déplacer vraiment ») LES RÉGLAGES DES PROGRAMMES (points, ambassadrices, parrainage, paliers)
+   vivent dans Configuration › Modules › Fidélité, qui ouvre CETTE page en mode 'config-seul' : quatre onglets, chacun sur
+   son formulaire. Le module garde le travail de tous les jours (sondages, récompenses, invitations, soldes des points,
+   ambassadrices et candidatures, amies invitées, accès anticipé) — plus aucun formulaire de réglages. */
 function pageFidelisation(ouverture) {
   const ouv = String(ouverture || '');
-  const depart = (['recompenses', 'invitations', 'ambassadrices', 'parrainage', 'paliers', 'anticipe'].indexOf(ouv) >= 0) ? ouv : 'sondages';
+  const seul = (ouv === 'config-seul');
+  const depart = seul ? 'points' : ((['recompenses', 'invitations', 'ambassadrices', 'parrainage', 'anticipe'].indexOf(ouv) >= 0) ? ouv : 'sondages');
   const editeur = (ouv === 'sondage-nouveau');
   return `${TETE()}
-<title>${T("Fidélisation et sondages — Administration Sandriza")}</title>
+<title>${seul ? T("Réglages de la fidélité — Administration Sandriza") : T("Fidélisation et sondages — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.loyalty}</span><h1>${T("Fidélisation et sondages")}</h1>
+<div class="tete"><span class="ico">${ICO.loyalty}</span><h1>${seul ? T("Réglages de la fidélité") : T("Fidélisation et sondages")}</h1>
   <span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"><div class="vide charge">${T("Chargement… (les réponses se resynchronisent)")}</div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -258,6 +263,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
   var sous = document.getElementById('sous');
 
   var D = null;
+  var SEUL = ${seul ? 'true' : 'false'};
   var ONGLET = '${depart}';  // sondages | recompenses | invitations
   var DETAIL = null;
   var ARME = '';             // id de sondage armé, ou '__invites'
@@ -454,8 +460,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
        « Soldes des clients » (le geste de tous les jours, ouvert par défaut) et « Réglages ». */
     var actifPts = !!cf.actif;
     var sous = function(v, lib){ return '<button type="button" class="' + (PTSV === v ? 'on' : '') + '" data-pt-vue="' + v + '">' + lib + '</button>'; };
+    PTSV = SEUL ? 'reglages' : 'soldes';
     var barre = '<div class="amb-sous" id="pt-sous" style="margin-bottom:.7rem">'
-      + '<span class="ed-seg ls-onglets">' + sous('soldes', '${T("Soldes des clients")}') + sous('reglages', '${T("Réglages")}') + '</span>'
+      + '<span class="ed-seg ls-onglets"></span>'
       + '<span class="droite"><span class="rf-pill ' + (actifPts ? 'vert' : '') + '">' + (actifPts ? '${T("Programme actif")}' : '${T("Programme inactif")}') + '</span></span></div>';
     if (PTSV === 'reglages') return barre + h;
     h = '';
@@ -911,11 +918,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     var actif = !!(AMB.cfg && AMB.cfg.actif);
     var sous = function(v, lib, n){ return '<button type="button" class="' + (AMBV === v ? 'on' : '') + '" data-amb-vue="' + v + '">' + lib + (n ? '<span class="n">' + n + '</span>' : '') + '</button>'; };
     return '<div class="amb-zone" id="amb-zone"><div class="amb-sous">'
-      + '<span class="ed-seg ls-onglets">' + sous('liste', '${T("Ambassadrices et bilan")}', 0)
-      + sous('programme', '${T("Programme")}', 0)
-      + sous('demandes', '${T("Candidatures")}', nouv) + '</span>'
+      + '<span class="ed-seg ls-onglets">' + (SEUL ? '' : sous('liste', '${T("Ambassadrices et bilan")}', 0)
+      + sous('demandes', '${T("Candidatures")}', nouv)) + '</span>'
       + '<span class="droite"><span class="rf-pill ' + (actif ? 'vert' : '') + '">' + (actif ? '${T("Programme actif")}' : '${T("Programme inactif")}') + '</span></span></div>'
-      + (AMBV === 'programme' ? ambVueProgramme() : AMBV === 'demandes' ? ambVueDemandes() : ambVueListe())
+      + (SEUL ? ambVueProgramme() : AMBV === 'demandes' ? ambVueDemandes() : ambVueListe())
       + '</div>';
   }
   function ambApres(r, bon){
@@ -1158,9 +1164,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     var sous = function(v, lib, n){ return '<button type="button" class="' + (PARV === v ? 'on' : '') + '" data-par-vue="' + v + '">' + lib + (n ? '<span class="n">' + n + '</span>' : '') + '</button>'; };
     return '<div class="amb-zone" id="par-zone"><div class="amb-sous">'
       + '<span class="ed-seg ls-onglets">' + sous('liste', '${T("Amies invitées et bilan")}', (PAR.totaux || {}).nbDues || 0)
-      + sous('programme', '${T("Programme")}', 0) + '</span>'
+      + '</span>'
       + '<span class="droite"><span class="rf-pill ' + (actif ? 'vert' : '') + '">' + (actif ? '${T("Programme actif")}' : '${T("Programme inactif")}') + '</span></span></div>'
-      + (PARV === 'programme' ? parVueProgramme() : parVueListe())
+      + (SEUL ? parVueProgramme() : parVueListe())
       + '</div>';
   }
   function parVerser(b){
@@ -1634,11 +1640,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       return '<button type="button" class="' + (ONGLET === v ? 'on' : '') + '" data-onglet="' + v + '">' + lib + '</button>';
     };
     var h = '<div class="ls-tete fi-tete"><div class="ed-seg ls-onglets">'
-      + og('sondages', '${T("Sondages")}') + og('recompenses', '${T("Récompenses")}') + og('invitations', '${T("Invitations")}')
-      + og('points', '${T("Points")}') + og('ambassadrices', '${T("Ambassadrices")}') + og('parrainage', '${T("Parrainage")}')
-      + og('paliers', '${T("Paliers")}') + og('anticipe', '${T("Accès anticipé")}')
+      + (SEUL
+        ? og('points', '${T("Points")}') + og('ambassadrices', '${T("Ambassadrices")}') + og('parrainage', '${T("Parrainage")}') + og('paliers', '${T("Paliers")}')
+        : og('sondages', '${T("Sondages")}') + og('recompenses', '${T("Récompenses")}') + og('invitations', '${T("Invitations")}')
+          + og('points', '${T("Points")}') + og('ambassadrices', '${T("Ambassadrices")}') + og('parrainage', '${T("Parrainage")}')
+          + og('anticipe', '${T("Accès anticipé")}'))
       + '</div><div class="droite">'
-      + (D.peutModifier ? '<button class="ed-bt fort" id="fi-nouveau">${T("+ Nouveau sondage")}</button>' : '')
+      + (D.peutModifier && !SEUL ? '<button class="ed-bt fort" id="fi-nouveau">${T("+ Nouveau sondage")}</button>' : '')
       + '</div></div>';
 
     /* 🔴 IL Y AVAIT ICI << ONGLET === '${'$'}{T("invitations")}' >> — une VALEUR

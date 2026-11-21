@@ -142,14 +142,19 @@ html.jour .bascule .piste{background:#cfcabd}
  * `ouverture` : '' (Tableau de bord) · 'config' · 'offer' · 'apercu' (offre, avec
  * l'aperçu du popup ouvert — le banc ne clique pas).
  */
+/* ⚠ (2026-11-22, sa décision : « déplacer vraiment ») LA CONFIGURATION DE L INFOLETTRE (Resend, expéditeurs, courriels
+   automatiques) N EST PLUS UN ONGLET DU MODULE : elle vit dans Configuration › Modules › Infolettre, qui ouvre CETTE
+   page en mode 'config-seul' (l onglet Configuration seul, sans barre d onglets). Le module, lui, n a plus que le
+   Tableau de bord et l Offre de bienvenue. Un seul code, un seul endroit à l écran. */
 function pageNewsletter(ouverture) {
   const ouv = String(ouverture || '');
-  const tabDepart = (ouv === 'config' || ouv === 'offer') ? ouv : (ouv === 'apercu' ? 'offer' : 'dashboard');
+  const seulCfg = (ouv === 'config-seul');
+  const tabDepart = seulCfg ? 'config' : (ouv === 'offer' ? 'offer' : (ouv === 'apercu' ? 'offer' : 'dashboard'));
   const ouvreApercu = (ouv === 'apercu');
   return `${TETE()}
-<title>${T("Infolettre — Administration Sandriza")}</title>
+<title>${seulCfg ? T("Réglages de l’infolettre — Administration Sandriza") : T("Infolettre — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.newsletter}</span><h1>${T("Infolettre")}</h1><span class="sous" id="sous"></span></div>
+<div class="tete"><span class="ico">${ICO.newsletter}</span><h1>${seulCfg ? T("Réglages de l’infolettre") : T("Infolettre")}</h1><span class="sous" id="sous"></span></div>
 <div class="onglets" id="onglets"></div>
 <div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -229,8 +234,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
   }
   function relire(){ return charger().then(function(ok){ if (ok) dessiner(); return ok; }); }
 
+  var SEUL_CFG = ${seulCfg ? 'true' : 'false'};
   function dessinerOnglets(){
-    ongletsEl.innerHTML = [['dashboard','${T("Tableau de bord")}'],['config','${T("⚙ Configuration")}'],['offer','${T("Offre bienvenue")}']]
+    if (SEUL_CFG) { ongletsEl.innerHTML = ''; ongletsEl.className = 'nl-onglets'; return; }
+    ongletsEl.innerHTML = [['dashboard','${T("Tableau de bord")}'],['offer','${T("Offre bienvenue")}']]
       .map(function(t){ return '<button type="button" data-tab="' + t[0] + '" class="' + (TAB === t[0] ? 'on' : '') + '">' + t[1] + '</button>'; }).join('');
     ongletsEl.innerHTML = '<div class="ed-seg ls-onglets">' + ongletsEl.innerHTML + '</div>';
     // Hors de .onglets : le socle y peint l onglet courant en pastille doree, a l oppose des boutons a choix.
@@ -250,7 +257,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
     if (!D.hasKey) {
       return '<div class="setup"><div class="em"><span class="ic">📧</span></div><h2 style="margin:0 0 .5rem">${T("Configurer Resend")}</h2>'
         + '<p style="margin:0 0 1rem">${T("Configurez votre clé API Resend pour commencer à envoyer des infolettres.")}</p>'
-        + '<button class="prim" data-tab="config">${T("Configurer maintenant →")}</button></div>';
+        + '<p style="margin:0 0 1rem;font-size:.82rem;color:var(--tx2)">${T("La clé et les expéditeurs se règlent dans Configuration › Modules › Infolettre.")}</p>'
+        + '<button class="prim" data-act="ouvrircfg">${T("Configurer maintenant →")}</button></div>';
     }
     var recents = D.recents.length ? D.recents.map(function(c){
       var st = c.status === 'sent' ? '<span class="badge ok">${T("Envoyée")}</span>' : c.status === 'sending' ? '<span class="badge warn">${T("En cours")}</span>' : '<span class="badge draft">${T("Brouillon")}</span>';
@@ -550,6 +558,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
     if (APERCU) { if (g('data-act') === 'apclose') { fermerApercu(); return; } if (g('data-act') !== 'apercu') return; }
     if (g('data-tab')) { var tb = g('data-tab'); siPerte(function(){ TAB = tb; APERCU = false; charger().then(function(ok){ if (ok) dessiner(); }); }); return; }
     var act = g('data-act');
+    // (2026-11-22) La configuration vit dans Configuration › Modules : on l y ouvre.
+    if (act === 'ouvrircfg') { appeler('config:ouvrir', 'config-infolettre').then(function(r){ if (!r || !r.ok) dire('${T("Ouvrez Configuration › Modules › Infolettre.")}', 'att'); }); return; }
     if (act === 'cfgsave') saveCfg();
     else if (act === 'ctrlsave') saveCtrls();
     else if (act === 'testconn') testConn();

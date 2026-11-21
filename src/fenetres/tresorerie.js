@@ -89,12 +89,16 @@ html.jour td.num.e{color:#1d6a3b}
 .f-act{display:flex;gap:.5rem;justify-content:flex-end}
 `;
 
+/* ⚠ (2026-11-22, sa décision : « déplacer vraiment ») Solde, seuil, charges fixes et échéances ponctuelles se règlent dans
+   Configuration › Modules › Trésorerie, qui ouvre CETTE page en mode 'config-seul'. Le module n a plus de bouton Réglages. */
 function pageTresorerie(ouverture) {
-  const etat = String(ouverture || '') === 'reglages' ? 'reglages' : '';
+  const o = String(ouverture || '');
+  const etat = o === 'config-seul' ? 'config-seul' : '';
+  const seul = (etat === 'config-seul');
   return `${TETE()}
-<title>${T("Trésorerie — Administration Sandriza")}</title>
+<title>${seul ? T("Réglages de la trésorerie — Administration Sandriza") : T("Trésorerie — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.tresorerie}</span><h1>${T("Trésorerie des 90 prochains jours")}</h1>
+<div class="tete"><span class="ico">${ICO.tresorerie}</span><h1>${seul ? T("Réglages de la trésorerie") : T("Trésorerie des 90 prochains jours")}</h1>
   <span class="cx-resume" id="sous"></span><div class="cx-actions" id="outils"></div></div>
 <div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -109,6 +113,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var LIEU = '${LIEU()}';
   var D = null;
   var ETAT = '${etat}';
+  var SEUL = ${seul ? 'true' : 'false'};
   var REG = null;
   var OCCUPE = false;
 
@@ -183,7 +188,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function echeances(p){
     var L = p.evenements || [];
     var h = '<section class="fc"><h2>${T("Les échéances prévues")}</h2>';
-    if (!L.length) return h + '<p class="resume">${T("Aucune échéance dans les 90 prochains jours. Ajoutez vos charges fixes dans les réglages.")}</p></section>';
+    if (!L.length) return h + '<p class="resume">${T("Aucune échéance dans les 90 prochains jours. Ajoutez vos charges fixes dans Configuration › Modules › Trésorerie.")}</p></section>';
     return h + '<div class="tab-z"><table><thead><tr><th>${T("Date")}</th><th>${T("Quoi")}</th><th style="text-align:right">${T("Montant")}</th></tr></thead><tbody data-pages="tresorerie">'
       + L.map(function(e){
         return '<tr><td>' + esc(jour(e.date)) + '</td><td>' + esc(szTd(e.libelle)) + '<span class="src">' + esc(SOURCES[e.source] || '') + '</span></td>'
@@ -216,18 +221,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (vide(r.fixes, 'nom')) r.fixes.push({ nom: '', montant: '', jour: '' });
     if (vide(r.ponctuels, 'nom')) r.ponctuels.push({ nom: '', montant: '', date: '', sens: 'sortie' });
   }
-  function outils(){
-    elOutils.innerHTML = (D && D.peutModifier) ? '<button type="button" id="r-reglages">' + (REG ? '${T("Fermer les réglages")}' : '${T("Réglages")}') + '</button>' : '';
-  }
+  function outils(){ elOutils.innerHTML = ''; }
   function dessiner(){
     outils();
     if (!D) return;
     var p = D.projection;
+    if (SEUL) {
+      elSous.textContent = '';
+      if (!D.peutModifier) { corps.innerHTML = '<p class="avis">${T("Votre rôle ne permet pas de modifier la trésorerie.")}</p>'; return; }
+      if (!REG) ouvrirReglages();
+      corps.innerHTML = reglages(); return;
+    }
     elSous.textContent = '${T("au {0}")}'.split('{0}').join(jour(p.aujourdhui, true));
     var h = '';
     if (REG) h += reglages();
-    if (!p.reglages.soldeLe) h += '<p class="avis">${T("Saisissez le solde actuel de votre compte dans les réglages : la courbe part de là.")}</p>';
-    else if (p.reglages.soldeLe < p.aujourdhui) h += '<p class="avis">' + '${T("Le solde de départ date du {0} : mettez-le à jour pour une prévision juste.")}'.split('{0}').join(esc(jour(p.reglages.soldeLe, true))) + '</p>';
+    if (!p.reglages.soldeLe) h += '<p class="avis">${T("Saisissez le solde actuel de votre compte dans Configuration › Modules › Trésorerie : la courbe part de là.")}</p>';
+    else if (p.reglages.soldeLe < p.aujourdhui) h += '<p class="avis">' + '${T("Le solde de départ date du {0} : mettez-le à jour dans Configuration › Modules › Trésorerie.")}'.split('{0}').join(esc(jour(p.reglages.soldeLe, true))) + '</p>';
     h += resume(p);
     if (!REG) h += '<div class="deux"><section class="fc"><h2>${T("Le solde, jour par jour")}</h2><div class="leg"><span><i></i>${T("Solde prévu")}</span><span><i class="p"></i>${T("Seuil d’alerte")}</span></div><div class="graph">' + graphique(p) + '</div>'
       + '<p class="resume" style="font-size:.78rem">' + '${T("Ventes prévues : {0} par jour en moyenne. Dépenses courantes : {1} par jour.")}'
@@ -239,7 +248,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('tresorerie:donnees').then(function(r){
       if (!r || !r.ok) { corps.innerHTML = '<div class="vide">' + esc(expliquer(r)) + '</div>'; elOutils.innerHTML = ''; return; }
       D = r;
-      if (ETAT === 'reglages' && D.peutModifier) ouvrirReglages();
+      if (SEUL && D.peutModifier) ouvrirReglages();
       ETAT = '';
       dessiner();
     });
@@ -256,7 +265,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var t = ev.target && ev.target.closest ? ev.target.closest('button') : null;
     if (!t) return;
     if (t.id === 'r-reglages') { if (REG) REG = null; else ouvrirReglages(); dessiner(); return; }
-    if (t.id === 'g-annuler') { REG = null; dessiner(); return; }
+    if (t.id === 'g-annuler') { REG = null; dessiner(); if (SEUL && P && P.fermer) P.fermer(); return; }
     if (t.id === 'g-ok' && !OCCUPE) {
       OCCUPE = true; t.disabled = true;
       appeler('tresorerie:reglages', [REG]).then(function(r){
@@ -291,7 +300,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (ev.key !== 'Escape') return;
     if (document.querySelector('.szc-voile')) return;
     ev.preventDefault();
-    if (REG) { REG = null; dessiner(); return; }
+    if (REG && !SEUL) { REG = null; dessiner(); return; }
     if (P && P.fermer) P.fermer();
   });
   function rechargerSiLibre(){ if (!OCCUPE && !REG) charger(); }

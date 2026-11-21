@@ -58,7 +58,7 @@ html.jour .resume .alerte{color:#a3302b}
 .tab-z{flex:1 1 auto;min-height:0;display:flex;flex-direction:column}
 .tab-z table{flex:0 0 auto}
 table{width:100%;border-collapse:collapse;font-size:.82rem;table-layout:fixed}
-col.c-nom{width:auto} col.c-n{width:4.6rem} col.c-cmd{width:6.6rem} col.c-quand{width:10.5rem}
+col.c-nom{width:auto} col.c-n{width:4.6rem} col.c-cmd{width:6.6rem} col.c-quand{width:12.5rem}
 thead th{text-align:left;font-size:.68rem;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2);padding:.4rem .4rem;border-bottom:1px solid var(--v08);font-weight:700;white-space:nowrap}
 thead th.n{text-align:right}
 tbody td{padding:.42rem .4rem;border-bottom:1px solid var(--v05);vertical-align:middle}
@@ -66,7 +66,7 @@ td.n{text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
 td.nom{overflow:hidden}
 td.nom .pv-n{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:600}
 td.nom .pv-s{font-size:.72rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.pv-pill{display:inline-block;font-size:.72rem;font-weight:700;padding:.12rem .55rem;border-radius:99px;white-space:nowrap}
+.pv-pill{display:inline-block;max-width:100%;overflow:hidden;text-overflow:ellipsis;vertical-align:middle;font-size:.72rem;font-weight:700;padding:.12rem .55rem;border-radius:99px;white-space:nowrap}
 .pv-pill.maintenant{background:rgba(240,138,138,.16);color:var(--tx-err2)}
 .pv-pill.bientot{background:rgba(242,194,107,.16);color:var(--tx-att)}
 .pv-pill.plus-tard{background:var(--v06);color:var(--tx)}

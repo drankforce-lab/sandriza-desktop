@@ -7,6 +7,8 @@
  * chaîne entre apostrophes du script de la page.
  */
 module.exports = {
+  'Réglages de la relance — Administration Sandriza': 'Win-back settings — Sandriza Administration',
+  'Ces réglages s’appliquent au module Relance des clients endormis (menu Marketing).': 'These settings apply to the Win back sleeping customers module (Marketing menu).',
   '90 derniers jours : {0} relancés, {1} revenus ({2} %), {3} de ventes.': 'Last 90 days: {0} contacted, {1} came back ({2} %), {3} in sales.',
   'Achats': 'Spent',
   'Annuler': 'Cancel',

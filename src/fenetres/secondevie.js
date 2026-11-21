@@ -92,12 +92,15 @@ html.jour .pill.acceptee{color:#66512f}
 `;
 
 /** Page de la fenêtre. `ouverture` : '' (les reprises ouvertes) ou 'reglages'. */
+/* ⚠ (2026-11-22, sa décision : « déplacer vraiment ») Les réglages de la reprise vivent dans Configuration › Modules ›
+   Seconde vie, qui ouvre CETTE page en mode 'config-seul' (le formulaire seul). Le module n a plus d onglet Réglages. */
 function pageSecondeVie(ouverture) {
-  const vue = String(ouverture || '') === 'reglages' ? 'reglages' : 'ouvertes';
+  const seul = String(ouverture || '') === 'config-seul';
+  const vue = seul ? 'reglages' : 'ouvertes';
   return `${TETE()}
-<title>${T("Seconde vie — Administration Sandriza")}</title>
+<title>${seul ? T("Réglages de la seconde vie — Administration Sandriza") : T("Seconde vie — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.returns}</span><h1>${T("Seconde vie")}</h1><span class="sous" id="sous"></span></div>
+<div class="tete"><span class="ico">${ICO.returns}</span><h1>${seul ? T("Réglages de la seconde vie") : T("Seconde vie")}</h1><span class="sous" id="sous"></span></div>
 <div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
@@ -107,6 +110,7 @@ function pageSecondeVie(ouverture) {
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var elSous = document.getElementById('sous');
+  var SEUL = ${seul ? 'true' : 'false'};
   var VUE = '${vue}';          /* ouvertes | demandee | acceptee | creditee | refusee | toutes | reglages */
   var D = null, CHOIX = '', OCCUPE = false;
 
@@ -146,10 +150,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function dessiner(){
     if (!D) return;
+    if (SEUL) { elSous.textContent = ''; VUE = 'reglages'; corps.innerHTML = reglages(); return; }
     elSous.textContent = D.enAttente === 1 ? '${T("Une demande à évaluer")}' : D.enAttente > 1 ? '${T("{0} demandes à évaluer")}'.replace('{0}', String(D.enAttente)) : '';
     var h = '<div class="onglets">' + ['ouvertes', 'creditee', 'refusee', 'toutes'].map(function(f){
       return '<button type="button" data-vue="' + f + '" class="' + (VUE === f ? 'actif' : '') + '">' + NOMS[f] + '</button>';
-    }).join('') + '<span class="sep"></span><button type="button" data-vue="reglages" class="' + (VUE === 'reglages' ? 'actif' : '') + '">' + NOMS.reglages + '</button></div>';
+    }).join('') + '</div>';
     h += VUE === 'reglages' ? reglages() : reprises();
     corps.innerHTML = h;
   }
@@ -158,7 +163,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var l = D.reprises || [];
     if (!choisie()) CHOIX = l.length ? l[0].id : '';
     var h = '<div class="duo"><div><div class="carte pleine">';
-    if (!D.cfg.reprise.actif) h += '<div class="aide">${T("La reprise est désactivée : la boutique n’accepte aucune nouvelle demande (Réglages).")}</div>';
+    if (!D.cfg.reprise.actif) h += '<div class="aide">${T("La reprise est désactivée : la boutique n’accepte aucune nouvelle demande (Configuration › Modules › Seconde vie).")}</div>';
     if (!l.length) h += '<div class="vide">' + (VUE === 'ouvertes' ? '${T("Aucune reprise à traiter.")}' : '${T("Aucune reprise ici.")}') + '</div>';
     else h += '<div class="sz-pagee"><div class="pile" data-pages="reprises-' + VUE + '">' + l.map(function(r){
       return '<div class="rp' + (r.id === CHOIX ? ' sel' : '') + '" data-rp="' + esc(r.id) + '" data-ctx-ligne="1">'

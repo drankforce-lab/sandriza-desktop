@@ -94,13 +94,17 @@ html.jour .pill,html.jour .onglets button span,html.jour .rl-av{color:#47505e} h
 .boite .bb{display:flex;gap:.5rem;justify-content:flex-end;padding:.7rem 1rem;border-top:1px solid var(--v08)}
 `;
 
+/* ⚠ (2026-11-22, sa décision : « déplacer vraiment ») LES RÉGLAGES DE LA RELANCE NE SONT PLUS DANS LE MODULE : ils vivent
+   dans Configuration › Modules › Relance des clients, qui ouvre CETTE page en mode 'config-seul' (le formulaire seul).
+   Le module n a plus de bouton « Réglages ». */
 function pageRelance(ouverture) {
-  const ok = ['reglages', 'apercu', 'historique'];
+  const ok = ['reglages', 'apercu', 'historique', 'config-seul'];
   const etat = ok.indexOf(String(ouverture || '')) >= 0 ? String(ouverture) : '';
+  const seul = (etat === 'config-seul');
   return `${TETE()}
-<title>${T("Relance des clients endormis — Administration Sandriza")}</title>
+<title>${seul ? T("Réglages de la relance — Administration Sandriza") : T("Relance des clients endormis — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.relance}</span><h1>${T("Relance des clients endormis")}</h1>
+<div class="tete"><span class="ico">${ICO.relance}</span><h1>${seul ? T("Réglages de la relance") : T("Relance des clients endormis")}</h1>
   <span class="cx-resume" id="sous"></span><div class="cx-actions" id="outils"></div></div>
 <div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -118,6 +122,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var ETAT = '${etat}';
   var LIEU = '${LIEU()}';
   var ONGLET = 'liste';
+  var SEUL = ${seul ? 'true' : 'false'};
   var REG = null;            /* les réglages en cours de saisie (null : panneau fermé) */
   var SEL = {};              /* les clients cochés */
   var OCCUPE = false;
@@ -178,7 +183,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function outils(){
     if (!D) { elOutils.innerHTML = ''; return; }
     var n = nbSel();
-    elOutils.innerHTML = '<button type="button" id="r-reglages">' + (REG ? '${T("Fermer les réglages")}' : '${T("Réglages")}') + '</button>'
+    if (SEUL) { elOutils.innerHTML = ''; return; }
+    elOutils.innerHTML = ''
       + (D.peutEnvoyer ? '<button type="button" class="prim" id="r-envoyer"' + (n ? '' : ' disabled') + '>' + '${T("Relancer la sélection ({0})")}'.split('{0}').join(String(n)) + '</button>' : '');
   }
   function bilan(){
@@ -227,6 +233,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     outils();
     if (!D) return;
+    if (SEUL) {
+      if (!REG) REG = Object.assign({}, D.reglages || {});
+      elSous.textContent = '';
+      corps.innerHTML = '<p class="avis" style="color:var(--tx2)">${T("Ces réglages s’appliquent au module Relance des clients endormis (menu Marketing).")}</p>' + reglages();
+      return;
+    }
     var C = D.candidats || [];
     var np = prets().length;
     elSous.textContent = C.length ? '${T("{0} endormis · {1} prêts à relancer")}'.split('{0}').join(String(C.length)).split('{1}').join(String(np)) : '';
@@ -311,7 +323,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var t = ev.target && ev.target.closest ? ev.target.closest('button') : null;
     if (!t) return;
     if (t.id === 'r-reglages') { REG = REG ? null : Object.assign({}, (D && D.reglages) || {}); dessiner(); return; }
-    if (t.id === 'g-annuler') { REG = null; dessiner(); return; }
+    if (t.id === 'g-annuler') { REG = null; dessiner(); if (SEUL && P && P.fermer) P.fermer(); return; }
     if (t.id === 'g-ok') {
       ramasserReg(); if (OCCUPE) return; OCCUPE = true; t.disabled = true;
       appeler('relance:reglages', [REG]).then(function(r){
@@ -340,7 +352,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (document.querySelector('.szc-voile')) return;
     ev.preventDefault();
     if (APERCU) { APERCU = null; boite(); return; }
-    if (REG) { REG = null; dessiner(); return; }
+    if (REG && !SEUL) { REG = null; dessiner(); return; }
     if (P && P.fermer) P.fermer();
   });
   function rechargerSiLibre(){ if (!OCCUPE && !REG && !APERCU) charger(); }

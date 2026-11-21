@@ -9,6 +9,9 @@
  */
 
 module.exports = {
+  'Réglages de la seconde vie — Administration Sandriza': 'Second life settings — Sandriza Administration',
+  'Réglages de la seconde vie': 'Second life settings',
+  'La reprise est désactivée : la boutique n’accepte aucune nouvelle demande (Configuration › Modules › Seconde vie).': 'Trade-in is turned off: the store accepts no new request (Configuration › Modules › Second life).',
   'Seconde vie — Administration Sandriza': 'Second life — Sandriza Administration',
   'Seconde vie': 'Second life',
   'Chargement en cours': 'Loading',

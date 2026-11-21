@@ -3482,6 +3482,8 @@ const OPS_PONT = new Set([
   'tresorerie:donnees', 'tresorerie:reglages',
   // Prevision des ventes (fenetre Prevision, 2026-11-22) : lecture ; « Passer la commande » ouvre le reappro.
   'prevision:donnees', 'prevision:reappro',
+  // Un module renvoie vers ses réglages, déplacés dans Configuration › Modules (2026-11-22).
+  'config:ouvrir',
   // Bons de commande fournisseurs (2026-10-27). ⚠ `bc:donnees` est l op de LECTURE ; `bc:voeu` lit (ou pose,
   // depuis l Inventaire) l onglet d ouverture.
   'bc:donnees', 'bc:propositions', 'bc:chercher', 'bc:ecrire', 'bc:creerGroupes', 'bc:envoyer',
@@ -4223,7 +4225,7 @@ const LIMITES_PONT = {
   'relance:donnees': 20000, 'relance:apercu': 15000, 'relance:envoyer': 180000, 'relance:reglages': 30000,
   'fermeture:donnees': 15000, 'fermeture:fermer': 30000, 'fermeture:imprimer': 20000,
   'tresorerie:donnees': 20000, 'tresorerie:reglages': 30000,
-  'prevision:donnees': 30000, 'prevision:reappro': 15000,
+  'prevision:donnees': 30000, 'prevision:reappro': 15000, 'config:ouvrir': 15000,
   /* Les bons de commande fournisseurs : lecture locale ; chaque geste est UNE operation serveur (la reception fait
      monter le stock de chaque ligne dans le meme lot) ; « Creer tous les bons » en enchaine une par fournisseur. */
   'bc:donnees': 15000, 'bc:propositions': 15000, 'bc:chercher': 15000, 'bc:voeu': 15000,
@@ -4971,6 +4973,13 @@ const PAGES_ANCRABLES = () => ({
   fermeture: ['Fermeture de caisse', () => pageFermeture()],
   tresorerie: ['Trésorerie des 90 jours', () => pageTresorerie()],
   prevision: ['Prévision des ventes', () => pagePrevision()],
+  /* (2026-11-22, sa décision : « déplacer vraiment ») Les réglages des modules, dans Configuration › Modules : la fenêtre du
+     module en mode « réglages seuls ». Le module n'a plus ses réglages. */
+  'config-infolettre': ['Réglages de l’infolettre', () => pageNewsletter('config-seul')],
+  'config-fidelite': ['Réglages de la fidélité', () => pageFidelisation('config-seul')],
+  'config-relance': ['Réglages de la relance', () => pageRelance('config-seul')],
+  'config-secondevie': ['Réglages de la seconde vie', () => pageSecondeVie('config-seul')],
+  'config-tresorerie': ['Réglages de la trésorerie', () => pageTresorerie('config-seul')],
   // Le calendrier (2026-11-18, relooking) : précommandes, ramassages, échéances fiscales et rappels sur un mois.
   calendrier: ['Calendrier', () => pageCalendrier()],
   // La page Réglages (2026-11-18, maquette) : le menu Configuration mis en page, ouvert par la barre Épuré.
@@ -7824,6 +7833,7 @@ const actionApp = (nom, arg) => {
     case 'fermeture':
     case 'tresorerie':
     case 'prevision':
+    case 'config-infolettre': case 'config-fidelite': case 'config-relance': case 'config-secondevie': case 'config-tresorerie':
     // Calendrier (2026-11-18) : meme cas, ne natif ; sa section hote cote site ne porte que la zone.
     case 'calendrier':
     case 'reglages':

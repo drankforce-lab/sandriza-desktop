@@ -4265,7 +4265,7 @@ const JEU = {
     return [
       cas('clients endormis : prêts, sans consentement, déjà relancé', '', donnees(C, BILAN), ['data-coche="u1"', 'data-apercu="u2"', 'id="r-tout"', 'data-pages="relance"']),
       cas('personne ne dort', '', donnees([], VIDE_B), ['class="vide-r"']),
-      cas('réglages ouverts', 'reglages', donnees(C, BILAN), ['id="g-seuil"', 'id="g-sujet"', 'id="g-ok"']),
+      cas('réglages seuls (Configuration › Modules)', 'config-seul', donnees(C, BILAN), ['id="g-seuil"', 'id="g-sujet"', 'id="g-ok"']),
       cas('aperçu du courriel', 'apercu', donnees(C, BILAN), ['id="r-cadre"', 'id="a-envoyer"']),
       cas('historique', 'historique', donnees(C, BILAN), ['data-pages="relance-hist"']),
       cas('envoi non configuré, lecture seule', '', donnees(C, BILAN, { envoiPossible: false, peutEnvoyer: false }), ['class="avis"']),
@@ -4309,9 +4309,9 @@ const JEU = {
       totalEntrees: 37800, totalSorties: 30000, soldeFinal: jours[89].solde }, extra || {}); };
     var rep = function(p, peut){ return { 'tresorerie:donnees': { ok: true, projection: p, peutModifier: peut !== false }, identite: IDENTITE, 'tresorerie:reglages': { ok: true } }; };
     return [
-      { nom: 'projection : courbe, creux, échéances', id: '', reponses: rep(proj()), exige: ['class="solde"', 'class="creux"', 'data-pages="tresorerie"', 'id="r-reglages"'] },
+      { nom: 'projection : courbe, creux, échéances', id: '', reponses: rep(proj()), exige: ['class="solde"', 'class="creux"', 'data-pages="tresorerie"'] },
       { nom: 'sous le seuil d’alerte', id: '', reponses: rep(proj({ premierSous: '2027-01-31', sousPlancher: 12 })), exige: ['class="alerte"'] },
-      { nom: 'réglages ouverts', id: 'reglages', reponses: rep(proj()), exige: ['id="g-solde"', 'data-fn="0"', 'data-pn="1"', 'id="g-ok"'] },
+      { nom: 'réglages seuls (Configuration › Modules)', id: 'config-seul', reponses: rep(proj()), exige: ['id="g-solde"', 'data-fn="0"', 'data-pn="1"', 'id="g-ok"'] },
       { nom: 'solde jamais saisi, lecture seule', id: '', reponses: rep(proj({ reglages: Object.assign({}, REG, { soldeLe: '' }), evenements: [] }), false), exige: ['class="avis"'] },
       { nom: 'module de trésorerie absent', id: '', reponses: { 'tresorerie:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
     ];
@@ -9762,5 +9762,23 @@ for (const c of CAS_REPRISE) {
     }),
   });
 }
+
+/* (2026-11-22) LES RÉGLAGES DÉPLACÉS DANS CONFIGURATION › MODULES : chaque module se dessine aussi en mode « config-seul ».
+   Le cas réutilise les réponses du module (même pont, même données) : seul l'état d'ouverture change. */
+(function(){
+  var cloner = function(fichier, nom, trouver){
+    var L = JEU[fichier]; if (!Array.isArray(L)) return;
+    var base = L.filter(trouver)[0] || L[0]; if (!base) return;
+    L.push({ nom: nom, id: 'config-seul', reponses: base.reponses });
+  };
+  // Fidélité : les réponses des onglets Ambassadrices, Parrainage et Paliers réunies (les quatre onglets du mode réglages).
+  (function(){
+    var L = JEU['fidelisation.js']; if (!Array.isArray(L)) return;
+    var rep = {};
+    L.forEach(function(c){ Object.keys(c.reponses || {}).forEach(function(k){ if (/^(identite|fidelisation:(liste|amb:donnees|par:donnees|pal:donnees))$/.test(k) && !rep[k]) rep[k] = c.reponses[k]; }); });
+    L.push({ nom: 'réglages seuls (Configuration › Modules › Fidélité)', id: 'config-seul', reponses: rep });
+  })();
+  cloner('newsletter.js', 'réglages seuls (Configuration › Modules › Infolettre)', function(c){ return c.reponses && c.reponses['newsletter:cfgDonnees']; });
+})();
 
 module.exports = JEU;

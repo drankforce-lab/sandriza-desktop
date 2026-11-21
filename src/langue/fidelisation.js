@@ -28,6 +28,8 @@
  */
 
 module.exports = {
+  'Réglages de la fidélité — Administration Sandriza': 'Loyalty settings — Sandriza Administration',
+  'Réglages de la fidélité': 'Loyalty settings',
   /* ── LA FENETRE ─────────────────────────────────────────────────────────── */
   'Fidélisation et sondages — Administration Sandriza':
     'Loyalty and surveys — Sandriza Administration',
