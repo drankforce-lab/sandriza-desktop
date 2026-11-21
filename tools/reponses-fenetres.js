@@ -4272,6 +4272,37 @@ const JEU = {
       { nom: 'module de relance absent', id: '', reponses: { 'relance:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
     ];
   })(),
+  /* (2026-11-22) Trésorerie des 90 jours : formes copiées de assets/js/tresorerie.js (projeter). */
+  'tresorerie.js': (function(){
+    var jours = [], s = 8400;
+    for (var i = 0; i < 90; i++) {
+      var d = new Date(2026, 10, 22 + i), cle = d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2);
+      var sort = 180 + (d.getDate() === 1 ? 2400 : 0) + (cle === '2027-01-31' ? 3100 : 0);
+      s = Math.round((s + 420 - sort) * 100) / 100;
+      jours.push({ date: cle, entrees: 420, sorties: sort, solde: s });
+    }
+    var creux = jours.reduce(function(m, j){ return (!m || j.solde < m.solde) ? j : m; }, null);
+    var REG = { solde: 8400, soldeLe: '2026-11-22', plancher: 2000,
+      fixes: [ { nom: 'Loyer', montant: 2400, jour: 1 } ], ponctuels: [ { nom: 'Salon de la mode', montant: 650, date: '2026-12-10', sens: 'sortie' } ] };
+    var EVTS = [
+      { date: '2026-12-01', montant: 2400, libelle: 'Loyer', source: 'fixe' },
+      { date: '2026-12-10', montant: 650, libelle: 'Salon de la mode', source: 'ponctuel' },
+      { date: '2026-12-22', montant: 1840.5, libelle: 'Bon de commande BC-0012 — Tissus Laval', source: 'bon' },
+      { date: '2027-01-01', montant: 2400, libelle: 'Loyer', source: 'fixe' },
+      { date: '2027-01-31', montant: 3100, libelle: 'Remise TPS/TVQ (trimestre 4, estimée)', source: 'taxes' },
+      { date: '2027-02-01', montant: 2400, libelle: 'Loyer', source: 'fixe' } ];
+    var proj = function(extra){ return Object.assign({ aujourdhui: '2026-11-22', reglages: REG, ventesParJour: [300, 380, 400, 420, 450, 520, 470], depensesParJour: 180,
+      evenements: EVTS, jours: jours, creux: { date: creux.date, solde: creux.solde }, sousPlancher: 0, premierSous: null,
+      totalEntrees: 37800, totalSorties: 30000, soldeFinal: jours[89].solde }, extra || {}); };
+    var rep = function(p, peut){ return { 'tresorerie:donnees': { ok: true, projection: p, peutModifier: peut !== false }, identite: IDENTITE, 'tresorerie:reglages': { ok: true } }; };
+    return [
+      { nom: 'projection : courbe, creux, échéances', id: '', reponses: rep(proj()), exige: ['class="solde"', 'class="creux"', 'data-pages="tresorerie"', 'id="r-reglages"'] },
+      { nom: 'sous le seuil d’alerte', id: '', reponses: rep(proj({ premierSous: '2027-01-31', sousPlancher: 12 })), exige: ['class="alerte"'] },
+      { nom: 'réglages ouverts', id: 'reglages', reponses: rep(proj()), exige: ['id="g-solde"', 'data-fn="0"', 'data-pn="1"', 'id="g-ok"'] },
+      { nom: 'solde jamais saisi, lecture seule', id: '', reponses: rep(proj({ reglages: Object.assign({}, REG, { soldeLe: '' }), evenements: [] }), false), exige: ['class="avis"'] },
+      { nom: 'module de trésorerie absent', id: '', reponses: { 'tresorerie:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
+    ];
+  })(),
   /* (2026-11-21) Fermeture de caisse : formes copiées de assets/js/fermeture.js (journee, historique). */
   'fermeture.js': (function(){
     var MODES = [ { cle: 'comptant', nom: 'Comptant' }, { cle: 'terminal', nom: 'Terminal Square' }, { cle: 'interac', nom: 'Interac' }, { cle: 'autre', nom: 'Autre' } ];

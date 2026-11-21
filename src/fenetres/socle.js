@@ -1198,6 +1198,8 @@ const ICO = {
   /* Les rappels (2026-10-02) : une cloche, et le petit arc de son tintement. */
   /* Objectifs et défis (2026-11-20) : une cible, ses anneaux et la flèche plantée au centre. */
   /* Relance des clients endormis (2026-11-20) : une enveloppe et le croissant de lune du sommeil. */
+  /* Trésorerie des 90 jours (2026-11-22) : une courbe qui creuse puis remonte, et la ligne du seuil. */
+  tresorerie: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4v16h18"/><path d="M6 9l4 5 3-2 3 3 4-7"/><path d="M6 17h14" stroke-dasharray="2 2.5"/></svg>',
   /* Fermeture de caisse (2026-11-21) : le tiroir-caisse et sa serrure. */
   fermeture: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="10" width="18" height="10" rx="2"/><path d="M3 14h18"/><path d="M10 17h4"/><rect x="8" y="3" width="8" height="5" rx="1"/><path d="M12 8v2"/></svg>',
   relance: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="14" height="11" rx="2"/><path d="M3.5 9l6.5 5 6.5-5"/><path d="M19.5 3.5a3 3 0 1 0 2 4.6 3.6 3.6 0 0 1-2-4.6z"/></svg>',

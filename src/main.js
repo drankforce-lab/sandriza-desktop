@@ -1281,6 +1281,12 @@ const notifier = (titre, corps, options = {}) => {
       ...(xml ? { toastXml: xml } : {}),
     });
     n.on('click', () => {
+      /* ⚠ « DEMAIN » OUVRAIT LES DÉPENSES (2026-11-22, sa remarque : « ça ne devrait rien ouvrir »).
+         Avec un `toastXml`, Windows lève AUSSI `click` quand on presse un BOUTON (« Marquer fait »,
+         « Demain ») : ce gestionnaire montrait la fenêtre et naviguait vers le module du rappel,
+         par-dessus le lien du bouton qui, lui, ne montre rien. Une notification à boutons a SES
+         liens pour tout (le corps : `launch` → `ouvrir`) : ici, plus rien. */
+      if (xml) return;
       if (!mainWindow || mainWindow.isDestroyed()) return;
       if (mainWindow.isMinimized()) mainWindow.restore();
       mainWindow.show();
@@ -3466,6 +3472,8 @@ const OPS_PONT = new Set([
   'relance:donnees', 'relance:apercu', 'relance:envoyer', 'relance:reglages',
   // Fermeture de caisse (fenetre Fermeture, 2026-11-21) : journee de comptoir, tiroir, rapport Z.
   'fermeture:donnees', 'fermeture:fermer', 'fermeture:imprimer',
+  // Tresorerie des 90 jours (fenetre Tresorerie, 2026-11-22) : projection du solde, reglages.
+  'tresorerie:donnees', 'tresorerie:reglages',
   // Bons de commande fournisseurs (2026-10-27). ⚠ `bc:donnees` est l op de LECTURE ; `bc:voeu` lit (ou pose,
   // depuis l Inventaire) l onglet d ouverture.
   'bc:donnees', 'bc:propositions', 'bc:chercher', 'bc:ecrire', 'bc:creerGroupes', 'bc:envoyer',
@@ -4206,6 +4214,7 @@ const LIMITES_PONT = {
   /* La relance croise clients, commandes et abonnes (lecture locale) ; l envoi attend Resend, un courriel apres l autre. */
   'relance:donnees': 20000, 'relance:apercu': 15000, 'relance:envoyer': 180000, 'relance:reglages': 30000,
   'fermeture:donnees': 15000, 'fermeture:fermer': 30000, 'fermeture:imprimer': 20000,
+  'tresorerie:donnees': 20000, 'tresorerie:reglages': 30000,
   /* Les bons de commande fournisseurs : lecture locale ; chaque geste est UNE operation serveur (la reception fait
      monter le stock de chaque ligne dans le meme lot) ; « Creer tous les bons » en enchaine une par fournisseur. */
   'bc:donnees': 15000, 'bc:propositions': 15000, 'bc:chercher': 15000, 'bc:voeu': 15000,
@@ -4951,6 +4960,7 @@ const PAGES_ANCRABLES = () => ({
   objectifs: ['Objectifs et défis', () => pageObjectifs()],
   relance: ['Relance des clients endormis', () => pageRelance()],
   fermeture: ['Fermeture de caisse', () => pageFermeture()],
+  tresorerie: ['Trésorerie des 90 jours', () => pageTresorerie()],
   // Le calendrier (2026-11-18, relooking) : précommandes, ramassages, échéances fiscales et rappels sur un mois.
   calendrier: ['Calendrier', () => pageCalendrier()],
   // La page Réglages (2026-11-18, maquette) : le menu Configuration mis en page, ouvert par la barre Épuré.
@@ -7531,6 +7541,7 @@ const { pageRappels } = require('./fenetres/rappels');
 const { pageObjectifs } = require('./fenetres/objectifs');
 const { pageRelance } = require('./fenetres/relance');
 const { pageFermeture } = require('./fenetres/fermeture');
+const { pageTresorerie } = require('./fenetres/tresorerie');
 const { pageAtelier } = require('./fenetres/atelier');
 const { pageFibres } = require('./fenetres/fibres');
 const { pageEncanRapports } = require('./fenetres/encan-rapports');
@@ -7800,6 +7811,7 @@ const actionApp = (nom, arg) => {
     case 'objectifs':
     case 'relance':
     case 'fermeture':
+    case 'tresorerie':
     // Calendrier (2026-11-18) : meme cas, ne natif ; sa section hote cote site ne porte que la zone.
     case 'calendrier':
     case 'reglages':

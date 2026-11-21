@@ -198,6 +198,7 @@ const MENU_APP_EN = {
   'Objectifs et défis': 'Goals and challenges',
   'Relance des clients endormis': 'Win back sleeping customers',
   'Fermeture de caisse': 'Cash register closing',
+  'Trésorerie des 90 jours': '90-day cash flow',
   'Recherches sans résultat': 'Searches with no result',
   'Recommandations': 'Recommendations',
   'Remboursements': 'Refunds',
