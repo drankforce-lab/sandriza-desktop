@@ -1198,6 +1198,8 @@ const ICO = {
   /* Les rappels (2026-10-02) : une cloche, et le petit arc de son tintement. */
   /* Objectifs et défis (2026-11-20) : une cible, ses anneaux et la flèche plantée au centre. */
   /* Relance des clients endormis (2026-11-20) : une enveloppe et le croissant de lune du sommeil. */
+  /* Démarque intelligente (2026-11-22) : une étiquette de prix et une flèche qui descend. */
+  demarque: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12V4h8l9 9-8 8z"/><circle cx="7.5" cy="8.5" r="1.4"/><path d="M14 11v6M11.5 14.5L14 17l2.5-2.5"/></svg>',
   /* Prévision des ventes (2026-11-22) : une courbe qui monte, et son prolongement en pointillé. */
   prevision: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4v16h18"/><path d="M6 15l4-4 3 2 3-4"/><path d="M16 9l4-3" stroke-dasharray="2 2.4"/></svg>',
   /* Trésorerie des 90 jours (2026-11-22) : une courbe qui creuse puis remonte, et la ligne du seuil. */

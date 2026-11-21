@@ -1,0 +1,53 @@
+'use strict';
+/*
+ * DÉMARQUE INTELLIGENTE — les deux langues (2026-11-22)
+ * ⚠ Les NOMS des pièces arrivent du site avec les données (jamais traduits : ce sont des valeurs).
+ * ⚠ AUCUNE APOSTROPHE DROITE dans une valeur : chaque phrase est posée dans une
+ * chaîne entre apostrophes du script de la page.
+ */
+module.exports = {
+  '14 jours': '14 days',
+  '21 jours': '21 days',
+  '30 jours': '30 days',
+  '45 jours': '45 days',
+  'Aucune pièce ne dort : rien à démarquer pour le moment.': 'No item is sitting idle: nothing to mark down for now.',
+  'Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.': 'No session is open in the application. Sign in from the main window.',
+  'Cette version de l’application ne connaît pas cette opération.': 'This version of the application does not know this operation.',
+  'Chargement en cours': 'Loading',
+  'Création des promotions…': 'Creating the promotions…',
+  'Créer les promotions ({0})': 'Create the promotions ({0})',
+  'Créer les promotions': 'Create the promotions',
+  'Durée des promotions': 'Promotion length',
+  'Déjà en promotion': 'Already on promotion',
+  'Démarque intelligente — Administration Sandriza': 'Smart markdowns — Sandriza Administration',
+  'Démarque intelligente': 'Smart markdowns',
+  'Erreur inattendue (': 'Unexpected error (',
+  'La fenêtre principale ne répond pas.': 'The main window is not responding.',
+  'La fenêtre principale n’a pas répondu à temps.': 'The main window did not respond in time.',
+  'Le module de démarque n’est pas chargé dans la fenêtre principale. Rechargez-la (Ctrl+R).': 'The markdown module is not loaded in the main window. Reload it (Ctrl+R).',
+  'Le rabais ne descend jamais sous le coût d’achat + 10 %.': 'The discount never goes below purchase cost + 10%.',
+  'Le serveur n’a pas pris la promotion. Vérifiez la connexion, puis réessayez.': 'The server did not accept the promotion. Check the connection, then try again.',
+  'L’opération a échoué.': 'The operation failed.',
+  'Marge / pièce': 'Margin / item',
+  'Ouvrir cet écran dans sa propre fenêtre': 'Open this screen in its own window',
+  'Pièce': 'Item',
+  'Prix': 'Price',
+  'Promotions créées jusqu’au {0} : {1}.': 'Promotions created until {0}: {1}.',
+  'Rabais': 'Discount',
+  'Ramener cet écran dans la fenêtre principale': 'Bring this screen back into the main window',
+  'Refusées : {0}.': 'Refused: {0}.',
+  'Stock': 'Stock',
+  'Tailles orphelines': 'Broken sizes',
+  'Tout cocher': 'Select all',
+  'Une autre promotion occupe déjà cette priorité. Réessayez.': 'Another promotion already uses this priority. Try again.',
+  'Votre rôle ne permet pas de créer des promotions.': 'Your role does not allow creating promotions.',
+  'coût inconnu': 'cost unknown',
+  '{0} déjà en promotion (non proposées).': '{0} already on promotion (not suggested).',
+  '{0} jours sans vente': '{0} days without a sale',
+  '{0} pièces dorment : {1} unités, {2} immobilisés au coût d’achat. Démarquées, elles rapporteraient environ {3}.': '{0} items are sitting idle: {1} units, {2} tied up at cost. Marked down, they would bring in about {3}.',
+  '{0} pièces seront démarquées pendant {1} jours, une promotion par palier de rabais. Elles paraîtront aussitôt dans la boutique.': '{0} items will be marked down for {1} days, one promotion per discount level. They will show in the store right away.',
+  '{0} à marge trop mince (sous le coût + 10 %) : non proposées.': '{0} with too thin a margin (below cost + 10%): not suggested.',
+  'Écoulement lent ({1} % en 90 jours)': 'Slow sell-through ({1}% in 90 days)',
+  '⚓ Ancrer': '⚓ Dock',
+  '⧉ Détacher': '⧉ Detach',
+};
