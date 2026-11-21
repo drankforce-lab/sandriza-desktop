@@ -99,8 +99,9 @@ module.exports = {
   ' conservé': ' kept',
   'non conservée': 'not kept',
   'au moins ': 'at least ',
-  ' de base + ': ' of database + ',
-  ' d’application': ' of application',
+  'base ': 'database ',
+  ' fichiers': ' files',
+  'app. ': 'app ',
   /* ⚠ « base seule » dit ce que le chiffre NE COMPTE PAS. Les vieilles
      sauvegardes ne connaissent pas le poids des installateurs : on l ecrit
      plutot que d estimer — un chiffre invente serait pire qu une mention

@@ -82,15 +82,15 @@ table.tb td{font-size:.85rem;vertical-align:middle}
 .acts{white-space:nowrap;text-align:right;width:1%}
 .acts .gs{display:inline-flex;gap:.35rem;align-items:center;flex-wrap:nowrap}
 .acts .b{display:inline-flex!important;flex-direction:row!important;align-items:center;gap:.35rem;white-space:nowrap;margin:0}
-/* (2026-11-22, sa 2e capture : « 28 oct. 202 », « 3 produits · 0 cmd · 0 fac ») Les cellules PASSENT À LA LIGNE au lieu
-   d être coupées : le look Épuré pose nowrap + overflow:hidden sur les cellules, et la page n a pas la largeur de 7 colonnes. */
-.tb td:not(.acts){white-space:normal!important;overflow:visible!important;text-overflow:clip!important;max-width:none!important}
-.tb td:not(.acts) *{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;max-width:none!important}
-.sv-date{min-width:7.5rem}
+/* (2026-11-22, ses captures : « 28 oct. 202 » coupé, puis « maximum 2 lignes ») DEUX LIGNES AU PLUS par cellule : la valeur,
+   puis son détail — chacune sur UNE ligne, jamais coupée ni repliée (le look Épuré posait nowrap + overflow:hidden, ce qui
+   COUPAIT ; les laisser replier en faisait cinq). La table prend la largeur de son contenu ; les détails sont courts. */
 .tb{table-layout:auto}
-.tb th:first-child,.tb td:first-child{width:13.5rem}
-.tb td:nth-child(2){min-width:9rem}
-.tb td:nth-child(3){min-width:7.5rem}
+.tb td:not(.acts),.tb td:not(.acts) *:not(.sv-sous){white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important;max-width:none!important}
+.tb td{vertical-align:middle}
+/* Le code de déploiement sous la date peut être long (deploy-2026-10-28-a1b2c3) : coupé d un « … », entier au survol. */
+.tb .sv-sous{display:block;max-width:10rem!important;white-space:nowrap!important;overflow:hidden!important;text-overflow:ellipsis!important}
+.acts .b{padding:.38rem .62rem!important}
 .sv-sous{font-size:.74rem;color:var(--tx2);word-break:break-all}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -275,14 +275,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
 
     // Le registre en PAGES mesurees, jamais de glissiere (JS_PAGES du socle, 2026-10-12).
     h += '<div class="carte sz-pagee"><div data-pages="sauvegarde"><table class="tb"><thead><tr>'
-      + '<th>${T("Date")}</th><th>${T("Contenu")}</th><th>${T("Application")}</th><th style="text-align:center">${T("Objets R2")}</th><th>${T("Taille")}</th><th>${T("Note")}</th><th></th>'
+      + '<th>${T("Date")}</th><th>${T("Contenu")}</th><th>${T("Application")}</th><th>${T("Taille")}</th><th>${T("Note")}</th><th></th>'
       + '</tr></thead><tbody>';
     for (var i=0;i<l.length;i++){ var b=l[i];
       /* Refonte (2026-09-26) : la cellule riche de l Inventaire. */
       h += '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true"><span class="ic">💾</span></span><div>'
         + '<div class="rf-nom sv-date">'+esc(b.createdAt ? szQuand(b.createdAt) : b.quand)+'</div>'
-        + (b.commit?'<div class="sv-sous">'+esc(b.commit)+'</div>':'')+'</div></div></td>'
-        + '<td>'+b.total+'${T(" enreg.")}<div style="font-size:.72rem;color:var(--tx-gris)">'+b.produits+'${T(" produits · ")}'+b.commandes+'${T(" cmd · ")}'+b.factures+'${T(" fact.")}</div></td>'
+        + (b.commit?'<div class="sv-sous" title="'+esc(b.commit)+'">'+esc(b.commit)+'</div>':'')+'</div></div></td>'
+        /* (2026-11-22) « Objets R2 » n a plus sa colonne : le nombre de fichiers rejoint la première ligne du contenu. */
+        + '<td>'+b.total+'${T(" enreg.")}'+(b.r2Objects==null?'':' · '+b.r2Objects+'${T(" fichiers")}')+'<div style="font-size:.72rem;color:var(--tx-gris)">'+b.produits+'${T(" produits · ")}'+b.commandes+'${T(" cmd · ")}'+b.factures+'${T(" fact.")}</div></td>'
         /* ⚠ L APPLICATION CONSERVEE AVEC CETTE SAUVEGARDE (2026-09-08, sur sa
            demande). Trois etats, et les trois doivent se distinguer d un coup
            d oeil :
@@ -311,7 +312,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
               : '<span style="color:var(--tx-gris);font-size:.78rem">${T("non conservée")}</span>'
                 + (b.appErreur ? '<div style="font-size:.7rem;color:var(--tx-att)">' + esc(b.appErreur) + '</div>' : ''))
         + '</td>'
-        + '<td style="text-align:center">'+(b.r2Objects==null?'—':b.r2Objects)+'</td>'
         /* ⚠⚠ LE TOTAL, ET SA DECOMPOSITION SOUS LUI — son signalement du
            2026-09-09 : << verifier ton calcul de poids car ses impossible que
            sa prenne que cette espace pour un exe inclus dans la sauvegarde >>.
@@ -334,7 +334,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
               ? '<div style="font-size:.7rem;color:var(--tx-att)">${T("base seule — installateurs non comptés")}</div>'
               : (b.tailleApp
                   ? '<div style="font-size:.7rem;color:var(--tx-gris)">'
-                    + esc(b.tailleBase) + '${T(" de base + ")}' + esc(b.tailleApp) + '${T(" d’application")}</div>'
+                    + '${T("base ")}' + esc(b.tailleBase) + ' · ${T("app. ")}' + esc(b.tailleApp) + '</div>'
                   : ''))
         + '</td>'
         + '<td style="color:var(--tx2)">'+esc((b.note && b.note !== b.appVersion) ? b.note : '—')+'</td>'

@@ -9778,6 +9778,13 @@ for (const c of CAS_REPRISE) {
     L.forEach(function(c){ Object.keys(c.reponses || {}).forEach(function(k){ if (/^(identite|fidelisation:(liste|amb:donnees|par:donnees|pal:donnees))$/.test(k) && !rep[k]) rep[k] = c.reponses[k]; }); });
     L.push({ nom: 'réglages seuls (Configuration › Modules › Fidélité)', id: 'config-seul', reponses: rep });
   })();
+  /* (2026-11-22, sa capture « maximum 2 lignes ») La sauvegarde la plus chargée : installateurs conservés, code de déploiement long. */
+  (function(){
+    var s = JEU['sauvegarde.js']; var c = Array.isArray(s) ? s[0] : null; var d = c ? c.reponses['sauvegarde:donnees'] : (s && s['sauvegarde:donnees']);
+    if (d && Array.isArray(d.sauvegardes)) d.sauvegardes.unshift({ id: 'bk_2026-10-28T17-16-00', encKey: 'backups/2026-10/bk_2026-10-28T17-16-00.enc', createdAt: '2026-10-28T17:16:00Z',
+      commit: 'deploy-2026-10-28-a1b2c3', note: '8.12.0', r2Objects: 271, blobBytes: 288768, totalBytes: 248512000, tailleBase: '282 Ko', tailleApp: '236 Mo', taille: '237 Mo',
+      appVersion: '8.12.0', appFichiers: 3, total: 200, produits: 3, commandes: 0, factures: 0 });
+  })();
   cloner('newsletter.js', 'réglages seuls (Configuration › Modules › Infolettre)', function(c){ return c.reponses && c.reponses['newsletter:cfgDonnees']; });
 })();
 
