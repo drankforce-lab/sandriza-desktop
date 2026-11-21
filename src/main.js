@@ -3574,6 +3574,8 @@ const OPS_PONT = new Set([
   'demarque:donnees', 'demarque:appliquer',
   // L assistante d exploitation (2026-11-22) : une question (appel IA par le relais du site), un lien de la liste blanche.
   'assistante:demander', 'assistante:ouvrir',
+  // La santé des données (2026-11-22) : le contrôle de nuit, relu ou relancé (lib-fiabilite.php, au serveur).
+  'fiabilite:rapport', 'fiabilite:lancer',
   // Bons de commande fournisseurs (2026-10-27). ⚠ `bc:donnees` est l op de LECTURE ; `bc:voeu` lit (ou pose,
   // depuis l Inventaire) l onglet d ouverture.
   'bc:donnees', 'bc:propositions', 'bc:chercher', 'bc:ecrire', 'bc:creerGroupes', 'bc:envoyer',
@@ -4317,7 +4319,7 @@ const LIMITES_PONT = {
   'tresorerie:donnees': 20000, 'tresorerie:reglages': 30000,
   'prevision:donnees': 30000, 'prevision:reappro': 15000, 'config:ouvrir': 15000,
   'demarque:donnees': 30000, 'demarque:appliquer': 60000,
-  'assistante:demander': 110000, 'assistante:ouvrir': 15000,
+  'assistante:demander': 110000, 'assistante:ouvrir': 15000, 'fiabilite:rapport': 20000, 'fiabilite:lancer': 95000,
   /* Les bons de commande fournisseurs : lecture locale ; chaque geste est UNE operation serveur (la reception fait
      monter le stock de chaque ligne dans le meme lot) ; « Creer tous les bons » en enchaine une par fournisseur. */
   'bc:donnees': 15000, 'bc:propositions': 15000, 'bc:chercher': 15000, 'bc:voeu': 15000,
@@ -5069,6 +5071,7 @@ const PAGES_ANCRABLES = () => ({
   prevision: ['Prévision des ventes', () => pagePrevision()],
   demarque: ['Démarque intelligente', () => pageDemarque()],
   assistante: ['Demande à ta boutique', () => pageAssistante()],
+  fiabilite: ['Santé des données', () => pageFiabilite()],
   /* (2026-11-22, sa décision : « déplacer vraiment ») Les réglages des modules, dans Configuration › Modules : la fenêtre du
      module en mode « réglages seuls ». Le module n'a plus ses réglages. */
   'config-infolettre': ['Réglages de l’infolettre', () => pageNewsletter('config-seul')],
@@ -7660,6 +7663,7 @@ const { pageTresorerie } = require('./fenetres/tresorerie');
 const { pagePrevision } = require('./fenetres/prevision');
 const { pageDemarque } = require('./fenetres/demarque');
 const { pageAssistante } = require('./fenetres/assistante');
+const { pageFiabilite } = require('./fenetres/fiabilite');
 const { pageAtelier } = require('./fenetres/atelier');
 const { pageFibres } = require('./fenetres/fibres');
 const { pageEncanRapports } = require('./fenetres/encan-rapports');
@@ -7933,6 +7937,7 @@ const actionApp = (nom, arg) => {
     case 'prevision':
     case 'demarque':
     case 'assistante':
+    case 'fiabilite':
     case 'config-infolettre': case 'config-fidelite': case 'config-relance': case 'config-secondevie': case 'config-tresorerie':
     // Calendrier (2026-11-18) : meme cas, ne natif ; sa section hote cote site ne porte que la zone.
     case 'calendrier':

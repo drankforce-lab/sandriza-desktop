@@ -203,6 +203,7 @@ const MENU_APP_EN = {
   'Prévision des ventes': 'Sales forecast',
   'Démarque intelligente': 'Smart markdowns',
   'Demande à ta boutique': 'Ask your store',
+  'Santé des données': 'Data health',
   'Modules': 'Modules',
   'Infolettre (Resend et expéditeurs)': 'Newsletter (Resend and senders)',
   'Fidélité (points, parrainage, paliers)': 'Loyalty (points, referrals, tiers)',

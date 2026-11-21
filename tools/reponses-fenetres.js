@@ -4278,6 +4278,29 @@ const JEU = {
       { nom: 'module de relance absent', id: '', reponses: { 'relance:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
     ];
   })(),
+  /* (2026-11-22) La santé des données : un rapport avec des écarts (tous les genres d exemple), puis tout concorde. */
+  'fiabilite.js': [
+    { nom: 'écarts trouvés', id: '', reponses: { identite: IDENTITE, 'fiabilite:rapport': { ok: true, libelles: {}, rapports: [
+      { au: '2026-11-22T08:00:00Z', total: 7, origine: 'nuit', rapport: { ok: true, au: '2026-11-22T08:00:00Z', total: 7,
+        lus: { commandes: 412, factures: 409, produits: 80, remboursements: 23 },
+        controles: {
+          stock_non_decompte: { nb: 2, exemples: [{ numero: 'C-0002-14520', id: 'ord_0412_a1b2c3', date: '2026-11-21', total: 149.41 }, { numero: 'C-0002-14498', id: 'ord_0409_d4e5f6', date: '2026-11-20', total: 89 }] },
+          sans_facture: { nb: 1, exemples: [{ numero: 'C-0002-14477', id: 'ord_0405_x1', date: '2026-11-19', total: 61.2 }] },
+          facture_orpheline: { nb: 0, exemples: [] },
+          totaux_differents: { nb: 1, exemples: [{ numero: 'C-0002-14410', id: 'ord_0399_y2', date: '2026-11-15', total: 120.5, facture: 'F-0002-30871', totalFacture: 118.5 }] },
+          livree_impayee: { nb: 0, exemples: [] },
+          numero_double: { nb: 1, exemples: [{ numero: 'F-0002-30412', sorte: 'facture', nb: 2 }] },
+          rembourse_trop: { nb: 0, exemples: [] },
+          stock_negatif: { nb: 2, exemples: [{ produit: 'Robe Mila', id: 'prod_0014', variante: 'M-Noir', quantite: -1 }, { produit: 'Chemise Walla', id: 'prod_0031', variante: 'S-Blanc', quantite: -2 }] },
+          hors_ligne_coincee: { nb: 0, exemples: [] } } } },
+      { au: '2026-11-21T08:00:00Z', total: 3, origine: 'nuit', rapport: null },
+      { au: '2026-11-20T08:00:00Z', total: 0, origine: 'nuit', rapport: null },
+      { au: '2026-11-19T08:00:00Z', total: 1, origine: 'nuit', rapport: null } ] },
+      'commandes:ouvrirDetail': { ok: true }, 'produits:ouvrir': { ok: true } } },
+    { nom: 'tout concorde', id: '', reponses: { identite: IDENTITE, 'fiabilite:rapport': { ok: true, libelles: {}, rapports: [
+      { au: '2026-11-22T08:00:00Z', total: 0, origine: 'nuit', rapport: { ok: true, au: '2026-11-22T08:00:00Z', total: 0,
+        lus: { commandes: 412, factures: 412, produits: 80, remboursements: 23 }, controles: { stock_non_decompte: { nb: 0, exemples: [] } } } } ] } } },
+  ],
   /* (2026-11-22) L'assistante : l'accueil (idées de questions), puis une conversation (réponse, lien, coût), puis un refus. */
   'assistante.js': [
     { nom: 'accueil — idées de questions', id: '', reponses: { identite: IDENTITE, 'assistante:demander': { ok: true, reponse: 'Cette semaine : 14 commandes pour 1 696,35 $, soit 18 % de plus que la semaine dernière (1 437,60 $).', liens: [{ cle: 'tableau', libelle: 'Tableau de bord' }], cout: 0.02 }, 'assistante:ouvrir': { ok: true } }, exige: ['data-idee='] },
