@@ -19,6 +19,8 @@
  */
 
 module.exports = {
+  '{0} expédiée sur {1} aujourd’hui': '{0} of {1} shipped today',
+  '{0} expédiées sur {1} aujourd’hui': '{0} of {1} shipped today',
   'Objectif du mois': 'Monthly goal',
   'Le revenu prévu de chaque mois se fixe dans Rapports et budget, onglet Budget': 'Each month’s planned revenue is set in Reports and budget, Budget tab',
   'Fixer un objectif': 'Set a goal',

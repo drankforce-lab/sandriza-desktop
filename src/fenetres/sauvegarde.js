@@ -77,8 +77,13 @@ table.tb td{font-size:.85rem;vertical-align:middle}
 .b.dgr:hover:not(:disabled){background:rgba(248,113,113,.16)}
 .b.att{color:var(--tx-or2);border-color:rgba(240,180,80,.35)}
 .b.att:hover:not(:disabled){background:rgba(240,180,80,.14)}
-.acts{white-space:nowrap;text-align:right}
-.acts .b{margin-left:.3rem}
+/* (2026-11-22, sa capture : « corrige l'affichage, c'est affreux ») Les trois gestes sur UNE ligne, l'icône à côté du
+   mot (le look Épuré les empilait), la date entière, et plus de chasse fixe. */
+.acts{white-space:nowrap;text-align:right;width:1%}
+.acts .gs{display:inline-flex;gap:.35rem;align-items:center;flex-wrap:nowrap}
+.acts .b{display:inline-flex!important;flex-direction:row!important;align-items:center;gap:.35rem;white-space:nowrap;margin:0}
+.sv-date{white-space:nowrap;overflow:visible!important;text-overflow:clip!important;max-width:none!important}
+.sv-sous{font-size:.74rem;color:var(--tx2)}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -267,8 +272,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
     for (var i=0;i<l.length;i++){ var b=l[i];
       /* Refonte (2026-09-26) : la cellule riche de l Inventaire. */
       h += '<tr><td><div class="rf-prod"><span class="rf-av" aria-hidden="true"><span class="ic">💾</span></span><div>'
-        + '<div class="rf-nom" style="white-space:nowrap">'+esc(b.createdAt ? szQuand(b.createdAt) : b.quand)+'</div>'
-        + (b.commit?'<div class="rf-sous"><span class="rf-code">'+esc(b.commit)+'</span></div>':'')+'</div></div></td>'
+        + '<div class="rf-nom sv-date">'+esc(b.createdAt ? szQuand(b.createdAt) : b.quand)+'</div>'
+        + (b.commit?'<div class="sv-sous">'+esc(b.commit)+'</div>':'')+'</div></div></td>'
         + '<td>'+b.total+'${T(" enreg.")}<div style="font-size:.72rem;color:var(--tx-gris)">'+b.produits+'${T(" produits · ")}'+b.commandes+'${T(" cmd · ")}'+b.factures+'${T(" fact.")}</div></td>'
         /* ⚠ L APPLICATION CONSERVEE AVEC CETTE SAUVEGARDE (2026-09-08, sur sa
            demande). Trois etats, et les trois doivent se distinguer d un coup
@@ -324,12 +329,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
                     + esc(b.tailleBase) + '${T(" de base + ")}' + esc(b.tailleApp) + '${T(" d’application")}</div>'
                   : ''))
         + '</td>'
-        + '<td style="color:var(--tx2)">'+esc(b.note||'—')+'</td>'
-        + '<td class="acts">'
-        + '<button class="b" data-dl="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="${T("Télécharger le fichier chiffré")}">${T("⬇ Télécharger")}</button>'
-        + (D.peutEcrire ? '<button class="b att" data-rest="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="${T("Réécrire la base à partir de cette sauvegarde")}">${T("↩ Restaurer")}</button>' : '')
-        + (D.peutEcrire ? '<button class="b dgr" data-del="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="${T("Supprimer définitivement cette sauvegarde")}"><span class="ic">🗑</span> ${T("Supprimer")}</button>' : '')
-        + '</td></tr>';
+        + '<td style="color:var(--tx2)">'+esc((b.note && b.note !== b.appVersion) ? b.note : '—')+'</td>'
+        + '<td class="acts"><span class="gs">'
+        + '<button class="b" data-dl="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="${T("Télécharger le fichier chiffré")}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 4v11"/><path d="M7 10l5 5 5-5"/><path d="M5 20h14"/></svg>${T("Télécharger")}</button>'
+        + (D.peutEcrire ? '<button class="b att" data-rest="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="${T("Réécrire la base à partir de cette sauvegarde")}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M9 14L4 9l5-5"/><path d="M4 9h11a5 5 0 0 1 0 10h-3"/></svg>${T("Restaurer")}</button>' : '')
+        + (D.peutEcrire ? '<button class="b dgr" data-del="'+esc(b.encKey)+'" data-id="'+esc(b.id)+'" title="${T("Supprimer définitivement cette sauvegarde")}"><svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>${T("Supprimer")}</button>' : '')
+        + '</span></td></tr>';
     }
     h += '</tbody></table></div></div>';
     corps.innerHTML = h;

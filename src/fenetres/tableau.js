@@ -307,7 +307,10 @@ html.jour .voile{background:rgba(20,24,30,.35)}
 .tm-obj .h .v{margin-left:auto;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
 .tm-obj .h .v small{font-size:12px;color:var(--tx2);font-weight:600}
 .tm-obj .h .p{font-weight:800;font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
-.tm-obj .j{position:relative;height:9px;border-radius:99px;background:var(--v08)}
+/* (2026-11-22, sa capture : « la barre ne se remplit pas, je suis à 15 % ») Les morceaux du bouton S'ÉTIRENT : rétrécis à leur
+   contenu (alignement du look Épuré), la piste n'avait plus de largeur et la barre ne montrait que le repère du jour. */
+.tm-obj>span{align-self:stretch;width:100%}
+.tm-obj .j{display:block;position:relative;height:9px;border-radius:99px;background:var(--v08)}
 .tm-obj .j i{display:block;height:100%;border-radius:99px;background:var(--or);max-width:100%}
 .tm-obj.atteint .j i{background:var(--vv,#5fd4a4)} .tm-obj.enretard .j i{background:#f2c26b} .tm-obj.enavance .j i{background:var(--vv-2,#7cb4f5)}
 .tm-obj .j em{position:absolute;top:-3px;bottom:-3px;width:2px;border-radius:2px;background:var(--tx)}
@@ -723,7 +726,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return '<div class="tm-anneau" title="' + esc(fait + ' / ' + total) + '"><svg viewBox="0 0 36 36" aria-hidden="true"><circle cx="18" cy="18" r="15" class="fd"></circle>'
       + '<circle cx="18" cy="18" r="15" class="pl" stroke-dasharray="' + C + '" stroke-dashoffset="' + (C * (1 - p)).toFixed(2) + '" transform="rotate(-90 18 18)"></circle></svg>'
       + '<span class="n">' + fait + '<small>/' + total + '</small></span>'
-      + '<span class="t"><b>' + (reste ? '${T("{0} à préparer").split("{0}").join("' + reste + '")}' : '${T("Tout est parti")}') + '</b><span>${T("parties aujourd’hui")}</span></span></div>';
+      /* (2026-11-22, sa remarque : « ça porte à confusion, c'est quoi parties aujourd'hui ») La ligne dit ce que compte l'anneau. */
+      + '<span class="t"><b>' + (reste ? '${T("{0} à préparer").split("{0}").join("' + reste + '")}' : '${T("Tout est parti")}') + '</b><span>'
+      + (fait > 1 ? '${T("{0} expédiées sur {1} aujourd’hui")}' : '${T("{0} expédiée sur {1} aujourd’hui")}').split('{0}').join(fait).split('{1}').join(total) + '</span></span></div>';
   }
   function courbe(v){
     var max = Math.max.apply(null, v.concat([1])), n = v.length, pts = v.map(function(x, i){ return [Math.round(i / (n - 1) * 100), Math.round(26 - x / max * 22)]; });
@@ -761,9 +766,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<button type="button" class="tm-tout" data-ouvre="orders">${T("Voir toutes les commandes")} →</button></div><div class="tm-liste">'
       + (fil.length ? fil.map(function(c){
           var att = c.statut === 'pending';
-          var a = c.article || {}, nom = (typeof a === 'string') ? a : (a.nom || '');
-          var det = ((a.qte > 1) ? a.qte + ' × ' : '') + nom + (c.autres ? ' + ' + c.autres : '');
-          return '<div class="tm-l" data-cmd="' + esc(c.oid) + '"><b>' + esc(c.numero) + '</b><span class="cl"><span>' + esc(c.client) + '</span><span>' + esc(det) + '</span></span>'
+          // (2026-11-22, sa demande : « pas besoin de me mettre les articles ») Le client seul.
+          return '<div class="tm-l" data-cmd="' + esc(c.oid) + '"><b>' + esc(c.numero) + '</b><span class="cl"><span>' + esc(c.client) + '</span></span>'
             + '<span class="stt' + (att ? ' a' : '') + '">' + esc(att ? '${T("Paiement en attente")}' : szTd(c.statutLibelle || '')) + '</span>'
             + '<span class="mt">' + fmt(c.total) + '</span>'
             + (D.peutPreparer && !att ? '<button type="button" class="prep" data-prep="' + esc(c.oid) + '">${T("Préparer")}</button>' : '<span></span>') + '</div>';

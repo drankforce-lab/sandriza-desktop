@@ -107,6 +107,8 @@ module.exports = {
      honnete. */
   'base seule — installateurs non comptés': 'database only — installers not counted',
   '⬇ Télécharger': '⬇ Download',
+  'Télécharger': 'Download',
+  'Restaurer': 'Restore',
   '↩ Restaurer': '↩ Restore',
   'Télécharger le fichier chiffré': 'Download the encrypted file',
   'Réécrire la base à partir de cette sauvegarde': 'Rewrite the database from this backup',
