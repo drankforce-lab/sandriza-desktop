@@ -57,7 +57,7 @@ button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.4;cursor:default}
 button.mini{padding:.12rem .45rem;font-size:.74rem}
 /* (2026-11-18) Épuré : sa police est ~8 % plus large — « #FF6B6B » ne tenait plus dans 105 px. */
-html[data-sz-theme="epure"] #inv-color-hex{width:118px!important}
+html[data-sz-theme="epure"] #inv-color-hex{width:136px!important}
 button.prim{background:#8f6f42;border-color:#a3824f;color:var(--tx-sur-accent);font-weight:600;padding:.34rem .7rem}
 button.prim:hover:not(:disabled){background:#a3824f}
 button.ghost{background:transparent}
@@ -360,7 +360,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
     return '<div class="rangee">'
       + '<div class="champ"><label for="inv-color-name">${T("Nom")}</label><input id="inv-color-name" placeholder="${T("Ex: corail rosé")}" style="width:170px"></div>'
       + '<div class="champ"><label for="inv-color-hex">${T("Valeur hex")}</label><div style="display:flex;gap:.35rem;align-items:center">'
-      +   '<input id="inv-color-hex" placeholder="#FF6B6B" class="mono" style="width:105px">'
+      +   '<input id="inv-color-hex" placeholder="#FF6B6B" class="mono" style="width:130px">'
       +   '<input type="color" id="inv-color-picker" aria-label="${T("Choisir la couleur au nuancier")}" value="#FF6B6B" data-syncHex="1" style="width:38px;height:34px;padding:2px"></div></div>'
       + '<div class="champ"><label>${T("Ou chercher par nom")}</label><button class="ghost mini" data-act="colorsearch"><span class="ic">🔍</span> ${T("Chercher")}</button></div>'
       + '</div>'
