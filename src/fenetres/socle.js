@@ -349,6 +349,8 @@ function szPleinEtat(){ return _szPleinOn; }
 function szPleinBasculer(boite, bouton){
   _szPleinOn = !_szPleinOn;
   if (boite) boite.classList.toggle('sz-plein', _szPleinOn);
+  // Une boîte DÉPLACÉE (szDeplacable) revient à sa place pour occuper la fenêtre.
+  if (boite) { try { boite.style.translate = ''; } catch (e) {} }
   document.documentElement.classList.toggle('sz-zoom', _szPleinOn);
   if (bouton){
     bouton.textContent = _szPleinOn ? '${T('⤡ Réduire')}' : '${T('⛶ Plein écran')}';
@@ -495,6 +497,60 @@ function _szPoserBouton(v){
   }
   btn.onclick = function(){ szPleinBasculer(b, btn); };
 }
+/* ── TOUTE BOÎTE SE DÉPLACE PAR SON EN-TÊTE (2026-11-22, sa demande : « toutes les fenêtres de ce genre
+   devraient être déplaçables ») ── Posé ici, sur CHAQUE surcouche (.voile, .sur, .asst), comme le plein
+   écran : une boîte écrite demain se déplacera sans que personne y pense.
+   La poignée : la bande du haut de la boîte (64 px), hors des boutons, champs, liens et listes — le titre,
+   la barre « .tt », l espace autour. Le déplacement est un « translate » (la mise en page de la boîte ne
+   bouge pas), borné pour que la boîte ne sorte jamais de la fenêtre. Double-clic sur l en-tête : elle
+   revient au centre. En plein écran, rien ne bouge. */
+function _szDeplacable(v){
+  if (v.getAttribute('data-szdepl') === '1') return;
+  var b = _szBoite(v); if (!b) return;
+  v.setAttribute('data-szdepl', '1');
+  var INTER = ['button', 'input', 'select', 'textarea', 'a', 'label', 'summary', '[contenteditable]', '[role=button]', '[role=switch]', 'video', 'canvas', '.sz-sans-depl'].join(',');
+  function poignee(ev){
+    if (b.classList.contains('sz-plein')) return false;
+    var t = ev.target;
+    if (!t || !t.closest || t.closest(INTER)) return false;
+    var r = b.getBoundingClientRect();
+    return (ev.clientY - r.top) <= 64;
+  }
+  var dep = null;
+  b.addEventListener('pointermove', function(ev){
+    if (dep) return;
+    b.style.cursor = poignee(ev) ? 'move' : '';
+  });
+  b.addEventListener('pointerleave', function(){ if (!dep) b.style.cursor = ''; });
+  b.addEventListener('pointerdown', function(ev){
+    if (ev.button !== 0 || !poignee(ev)) return;
+    var cur = String(b.style.translate || '').split(' ');
+    var tx = parseFloat(cur[0]) || 0, ty = parseFloat(cur[1]) || 0;
+    var r = b.getBoundingClientRect();
+    dep = { x: ev.clientX, y: ev.clientY, tx: tx, ty: ty, l: r.left - tx, t: r.top - ty, w: r.width, h: r.height };
+    try { b.setPointerCapture(ev.pointerId); } catch (e) {}
+    document.documentElement.style.userSelect = 'none';
+    ev.preventDefault();
+  });
+  b.addEventListener('pointermove', function(ev){
+    if (!dep) return;
+    var W = window.innerWidth, H = window.innerHeight;
+    var nx = dep.tx + ev.clientX - dep.x, ny = dep.ty + ev.clientY - dep.y;
+    // Bornée : au moins 80 px de la boîte et toute sa poignée restent dans la fenêtre.
+    nx = Math.max(80 - dep.l - dep.w, Math.min(nx, W - 80 - dep.l));
+    ny = Math.max(-dep.t, Math.min(ny, H - 48 - dep.t));
+    b.style.translate = Math.round(nx) + 'px ' + Math.round(ny) + 'px';
+  });
+  function fin(ev){
+    if (!dep) return;
+    dep = null;
+    try { b.releasePointerCapture(ev.pointerId); } catch (e) {}
+    document.documentElement.style.userSelect = '';
+  }
+  b.addEventListener('pointerup', fin);
+  b.addEventListener('pointercancel', fin);
+  b.addEventListener('dblclick', function(ev){ if (poignee(ev)) b.style.translate = ''; });
+}
 var _szAutoEnCours = false;
 /* ── LES « ACTIVER » EN INTERRUPTEUR, PARTOUT (2026-10-04) ────────────────
    Sa consigne : relooking 2026 de TOUTES les fenetres. Une vingtaine ont leur
@@ -520,7 +576,7 @@ function _szAutoPasse(){
   _szAutoEnCours = false;
   try { _szInterAuto(); } catch (e) {}
   var l = document.querySelectorAll(SZ_VOILES);
-  for (var i = 0; i < l.length; i++) _szPoserBouton(l[i]);
+  for (var i = 0; i < l.length; i++) { _szPoserBouton(l[i]); try { _szDeplacable(l[i]); } catch (e) {} }
   if (!l.length && szPleinEtat()) szPleinReinit();
 }
 function szPleinAuto(){

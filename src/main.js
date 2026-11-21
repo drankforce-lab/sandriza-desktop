@@ -1173,14 +1173,82 @@ ipcMain.handle('recherche:menu:agir', (e, brut) => {
     return true;
   } catch (er) { return false; }
 });
-app.on('browser-window-focus', () => {
-  try { if (!globalShortcut.isRegistered('CommandOrControl+K')) globalShortcut.register('CommandOrControl+K', ouvrirRecherchePartout); } catch {}
+/* ══ Ctrl+K : BREF = LA RECHERCHE, MAINTENU = LE RAPPEL DES RACCOURCIS (2026-11-22, sa demande) ══
+   « N'affiche pas les raccourcis à côté des menus ; si on fait Ctrl + K, ça affiche un écran temporaire pendant
+   que l'on garde appuyé, où on voit les raccourcis en rappel. »
+   ⚠ PLUS DE RACCOURCI GLOBAL (globalShortcut) : il ne dit jamais quand la touche est RELÂCHÉE. On écoute chaque
+     page de l'application (before-input-event) : enfoncé → minuterie de 350 ms ; relâché avant → la recherche,
+     comme avant ; la minuterie échue → le rappel s'affiche, et part au relâchement (de K ou de Ctrl). Toujours
+     limité aux fenêtres de l'application qui ont le focus — Ctrl+K n'est volé à aucun autre logiciel.
+   ⚠ Le rappel ne prend JAMAIS le focus (focusable: false, showInactive) : le relâchement doit arriver à la page
+     qui a vu l'appui. */
+let _ckMinut = null, _ckBas = false, _ckRappel = null;
+const _ckListe = () => {
+  const out = [];
+  const tr = (x) => { try { return _trMenu(x); } catch (e) { return x; } };
+  const enAnglais = (() => { try { return _langueCourante() === 'en'; } catch (e) { return false; } })();
+  const marcher = (items, section) => (items || []).forEach((it) => {
+    if (!it || it.sep) return;
+    const lab = String(it.label || '');
+    if (!lab || lab.startsWith('__')) return;
+    if (it.sub) { marcher(it.sub, section); return; }
+    if (it.accel) out.push({ s: section, t: tr(lab), k: enAnglais ? String(it.accel).replace(/Maj/g, 'Shift') : String(it.accel) });
+  });
+  try { _sansPseudo(_modele.menus).forEach((m) => marcher(m.items, tr(String(m.label || '')))); } catch (e) {}
+  return out;
+};
+const montrerRappelRaccourcis = () => {
+  try {
+    if (_ckRappel && !_ckRappel.isDestroyed()) return;
+    let parent = BrowserWindow.getFocusedWindow();
+    if (!parent || parent.isDestroyed() || (panneauWin && parent === panneauWin)) parent = (mainWindow && !mainWindow.isDestroyed() ? mainWindow : null);
+    if (!parent || parent.isDestroyed()) return;
+    const { pageRaccourcis } = require('./fenetres/raccourcis');
+    const b = parent.getContentBounds();
+    const liste = _ckListe();
+    const nbSec = new Set(liste.map((x) => x.s)).size + 1, nbLig = liste.length + 4;
+    const L = Math.min(900, Math.max(420, b.width - 80));
+    // La hauteur suit le contenu : colonnes de ~270 px, ~22 px par ligne, ~36 px par titre de groupe.
+    const cols = Math.max(1, Math.floor((L - 40) / 270));
+    const H = Math.min(Math.max(300, b.height - 80), Math.max(220, 110 + Math.ceil((nbLig * 22 + nbSec * 36) / cols)));
+    const win = new BrowserWindow({
+      parent, x: Math.round(b.x + (b.width - L) / 2), y: Math.round(b.y + (b.height - H) / 2), width: L, height: H,
+      frame: false, transparent: true, resizable: false, movable: false, minimizable: false, maximizable: false,
+      fullscreenable: false, skipTaskbar: true, show: false, focusable: false, hasShadow: true,
+      webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: false },
+    });
+    _ckRappel = win;
+    win.on('closed', () => { if (_ckRappel === win) _ckRappel = null; });
+    win.webContents.on('will-navigate', (ev) => ev.preventDefault());
+    win.webContents.setWindowOpenHandler(() => ({ action: 'deny' }));
+    win.webContents.on('did-finish-load', () => { try { appliquerTheme(win.webContents); } catch (e) {} });
+    win.once('ready-to-show', () => { try { if (_ckRappel === win && _ckBas) win.showInactive(); else win.close(); } catch {} });
+    win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageRaccourcis(liste))).catch(() => {});
+  } catch (er) { console.error('[rappel des raccourcis]', er && er.message); }
+};
+const cacherRappelRaccourcis = () => { try { if (_ckRappel && !_ckRappel.isDestroyed()) _ckRappel.close(); } catch {} _ckRappel = null; };
+app.on('web-contents-created', (_e, wc) => {
+  wc.on('before-input-event', (ev, i) => {
+    const k = String(i.key || '').toLowerCase();
+    if (i.type === 'keyDown' && k === 'k' && (i.control || i.meta) && !i.shift && !i.alt) {
+      ev.preventDefault();
+      if (i.isAutoRepeat || _ckBas) return;
+      _ckBas = true;
+      clearTimeout(_ckMinut);
+      _ckMinut = setTimeout(() => { _ckMinut = null; if (_ckBas) montrerRappelRaccourcis(); }, 350);
+      return;
+    }
+    if (i.type === 'keyUp' && _ckBas && (k === 'k' || k === 'control' || k === 'meta')) {
+      _ckBas = false;
+      if (_ckMinut) { clearTimeout(_ckMinut); _ckMinut = null; ouvrirRecherchePartout(); }
+      else cacherRappelRaccourcis();
+    }
+  });
 });
+// Le focus quitte l'application pendant l'appui : le relâchement ne nous parviendra pas — on range tout.
 app.on('browser-window-blur', () => {
-  // Le focus passe d'une fenêtre de l'application à une autre : on attend de voir s'il est resté chez nous.
-  setTimeout(() => { try { if (!BrowserWindow.getFocusedWindow()) globalShortcut.unregister('CommandOrControl+K'); } catch {} }, 120);
+  setTimeout(() => { try { if (!BrowserWindow.getFocusedWindow()) { _ckBas = false; clearTimeout(_ckMinut); _ckMinut = null; cacherRappelRaccourcis(); } } catch {} }, 120);
 });
-app.on('will-quit', () => { try { globalShortcut.unregister('CommandOrControl+K'); } catch {} });
 
 ipcMain.on('session:fermee', (e) => {
   if (!_deLaPrincipale(e)) return;

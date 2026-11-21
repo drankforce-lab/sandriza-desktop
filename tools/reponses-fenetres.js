@@ -5616,6 +5616,10 @@ const JEU = {
     ] }, 'commandes:ouvrirDetail': { ok: true } } },
     { nom: 'aucun résultat', id: '', reponses: { 'recherche:partout': { ok: true, resultats: [] } } },
   ],
+  // Le rappel des raccourcis (Ctrl+K maintenu, 2026-11-22) : aucune opération — la liste naît avec la page (échantillon ici).
+  'raccourcis.js': [
+    { nom: 'rappel des raccourcis', id: '', reponses: {} },
+  ],
   'recherches.js': [
     {
       // ⚠ FORME REELLE de recherches:liste (coeur Admin._recherchesDonnees).

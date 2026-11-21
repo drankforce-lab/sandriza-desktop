@@ -72,7 +72,7 @@ ${css}
     if(it.coche!==undefined){ var c=document.createElement('span'); c.className='sz-coche';
       c.textContent=it.coche?'\\u2713':''; b.appendChild(c); }
     var l=document.createElement('span'); l.className='sz-lbl'; l.textContent=it.label; b.appendChild(l);
-    if(it.accel){ var a=document.createElement('span'); a.className='sz-acc'; a.textContent=it.accel; b.appendChild(a); }
+    /* (2026-11-22, sa demande) plus de raccourci à côté des entrées : Ctrl+K maintenu les rappelle. */
     b.onclick=function(){ envoyer(it); };
     return b;
   }
@@ -319,7 +319,7 @@ ${PAN}
     var l=document.createElement('span'); l.className='sz-lbl'; l.textContent=it.label; b.appendChild(l);
     // (2026-11-18, maquette) le compteur de l'entrée, dans une pastille nette (ambre : une action attend ; gris : information)
     if(it.nb){ var nb=document.createElement('span'); nb.className='ep-nb'+(it.ton==='a'?' a':''); nb.textContent=it.nb>99?'99+':String(it.nb); b.appendChild(nb); }
-    if(it.accel){ var a=document.createElement('span'); a.className='sz-acc'; a.textContent=it.accel; b.appendChild(a); }
+    /* (2026-11-22, sa demande) plus de raccourci à côté des entrées : Ctrl+K maintenu les rappelle. */
     if(it.sub){
       var f=document.createElement('span'); f.className='sz-fleche'; f.textContent='\\u25B8'; b.appendChild(f);
       b.onmouseenter=function(){ montrerSous(it, b); };
