@@ -4148,6 +4148,13 @@ function pageProduit(id, importId) {
         + (VIDIA.position ? ' ' + '${T("Rang dans la file : {0}.")}'.split('{0}').join(String(VIDIA.position)) : '');
       return;
     }
+    if (VIDIA.etat === 'prete' && VIDEO && VIDEO === VIDIA.url) {
+      e.textContent = '${T("Vidéo ajoutée : enregistrez la fiche pour la publier.")}';
+      l.style.display = '';
+      l.innerHTML = '<video src="' + esc(VIDEO) + '" muted loop playsinline controls preload="metadata"></video>'
+        + '<button type="button" id="p-vidia-retirer">${T("Retirer la vidéo")}</button>';
+      return;
+    }
     if (VIDIA.etat === 'prete') {
       e.textContent = '${T("La vidéo est prête. Regardez-la avant de l’ajouter.")}';
       l.style.display = '';
@@ -4158,7 +4165,8 @@ function pageProduit(id, importId) {
     }
     if (VIDIA.etat === 'echec') {
       e.textContent = '${T("La vidéo n’a pas pu être produite :")} ' + (VIDIA.erreur || '');
-      l.style.display = ''; l.innerHTML = '<button type="button" id="p-vidia-ignorer">${T("Fermer")}</button>';
+      l.style.display = ''; l.innerHTML = (VIDIA.rapatriable ? '<button type="button" class="prim" id="p-vidia-reessayer">${T("Réessayer le rapatriement")}</button>' : '')
+        + '<button type="button" id="p-vidia-ignorer">${T("Fermer")}</button>';
       return;
     }
     if (VIDEO) {
@@ -4203,11 +4211,14 @@ function pageProduit(id, importId) {
     var t = ev.target && ev.target.closest ? ev.target.closest('button') : null; if (!t) return;
     if (t.id === 'p-vidia-gen') { vidiaLancer(false); return; }
     if (t.id === 'p-vidia-ajouter') {
+      /* (relecture du 2026-11-22) La vidéo en attente n'est oubliée qu'APRÈS l'enregistrement réussi de la fiche : fermée
+         sans enregistrer, la vidéo payée attend toujours ici. */
       VIDEO = VIDIA.url; VIDEO_OCTETS = 0;
-      P.appeler('produit:videoOublier', [String(ID)]).then(function(){ VIDIA = { etat: 'aucune', prix: VIDIA.prix }; dessinerMedias(); majFicheBientot();
-        dire('${T("Vidéo ajoutée : enregistrez la fiche pour la publier.")}', 'bon'); });
+      dessinerMedias(); majFicheBientot();
+      dire('${T("Vidéo ajoutée : enregistrez la fiche pour la publier.")}', 'bon');
       return;
     }
+    if (t.id === 'p-vidia-reessayer') { P.appeler('produit:videoReessayer', [String(ID)]).then(function(){ vidiaCharger(); }); return; }
     if (t.id === 'p-vidia-ignorer') { P.appeler('produit:videoOublier', [String(ID)]).then(function(){ VIDIA = { etat: 'aucune', prix: VIDIA.prix }; dessinerVidia(); }); return; }
     if (t.id === 'p-vidia-retirer') { VIDEO = ''; VIDEO_OCTETS = 0; dessinerMedias(); majFicheBientot(); return; }
   });
@@ -5826,6 +5837,8 @@ function pageProduit(id, importId) {
         dire(expliquer(r), 'err');
         return;
       }
+      // La vidéo par l'IA ajoutée à la fiche est maintenant enregistrée : sa copie en attente s'oublie (relecture du 2026-11-22).
+      try { if (VIDIA && VIDIA.etat === 'prete' && VIDEO && VIDEO === VIDIA.url && ID) P.appeler('produit:videoOublier', [String(ID)]).then(function(){ VIDIA = { etat: 'aucune', prix: VIDIA.prix }; }); } catch (e) {}
       // ⚠ LE BROUILLON SE JETTE SEULEMENT MAINTENANT, et l'autosauvegarde s'arrête
       // AVANT : sans cela, un dernier tic le réécrirait juste après l'avoir jeté,
       // et la prochaine ouverture proposerait de reprendre une fiche déjà créée.

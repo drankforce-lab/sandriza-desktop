@@ -480,6 +480,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       szBrouillonAuDom(DEMANDE_SAISIE);
       var st0 = document.getElementById('r-statut');
       if (st0 && st0.onchange) st0.onchange.call(st0);
+      // (relecture du 2026-11-22) le bloc d étiquette suit aussi le choix « qui paie » rendu par le brouillon
+      var fr0 = document.getElementById('r-frais');
+      if (fr0 && fr0.onchange) fr0.onchange.call(fr0);
     }
   }
 
@@ -771,6 +774,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       var t = '${T("Demande mise à jour.")}';
       if (r.etiquetteErreur) t += ' ${T("Étiquette :")} ' + r.etiquetteErreur;
+      if (r.avisFrais) t += ' ' + '${T("Une étiquette Postes Canada payée existait : reprenez-la (« Reprendre chez Postes Canada ») pour être remboursé.")}';
       if (r.courriel) t += r.courriel.envoye ? ' ${T("Courriel envoyé.")}' : (r.courriel.erreur ? ' ${T("Courriel NON envoyé :")} ' + r.courriel.erreur : '');
       /* Le brouillon meurt a l'enregistrement REUSSI, pas avant. */
       szBrouillonJeter();

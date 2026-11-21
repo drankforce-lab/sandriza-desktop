@@ -1086,4 +1086,5 @@ module.exports = {
   "Enregistré — photos copiées dans la photothèque, liées au produit :": "Saved — photos copied to the photo library, linked to the product:",
   "Enregistré. Votre rôle ne permet pas d’ajouter à la photothèque : les photos sont dans la fiche seulement.": "Saved. Your role cannot add to the photo library: the photos are in the product only.",
   "Enregistré, mais la copie dans la photothèque est incomplète :": "Saved, but the copy to the photo library is incomplete:",
+  'Réessayer le rapatriement': 'Retry fetching the video',
 };

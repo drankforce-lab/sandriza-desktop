@@ -419,10 +419,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       dessiner(); return true;
     });
   }
+  /* (relecture du 2026-11-22) Les réponses peuvent arriver dans le désordre (base, horizon ou délai changés vite) : seule
+     la DERNIÈRE demande est dessinée. */
+  var RA_N = 0;
   function chargerPropositions(){
+    var n = ++RA_N;
     PROP = null; if (TAB === 'proposer') dessiner();
     return appeler('bc:propositions', [{ mode: RA.mode, semaines: RA.semaines, delai: RA.delai }]).then(function(r){
-      if (!r || !r.ok) { PROP = { groupes: [] }; dessiner(); dire(expliquer(r), 'err'); return false; }
+      if (n !== RA_N) return false;
+      if (!r || !r.ok) { PROP = { groupes: [], mode: RA.mode }; dessiner(); dire(expliquer(r), 'err'); return false; }
       PROP = r; dessiner(); return true;
     });
   }

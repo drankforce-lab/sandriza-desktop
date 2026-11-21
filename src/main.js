@@ -3595,7 +3595,7 @@ const OPS_PONT = new Set([
   'produit:teinter',
   // La vue 360° générée (Product 360 de The New Black, 2026-10-18 — remplace l'aperçu 3D Hunyuan), les coûts par
   // article et le contrôle des marges (7.16.0).
-  'generations:etat', 'generations:lancer3d', 'generations:rattraper', 'generations:agir', 'generations:ouvrir', 'generations:refaireCouleur', 'produit:photosVerrou', 'produit:couts', 'produit:videoLancer', 'produit:videoEtat', 'produit:videoOublier', 'produit:grosPlanZone', 'produit:grosPlan', 'marges:analyser', 'marges:appliquer',
+  'generations:etat', 'generations:lancer3d', 'generations:rattraper', 'generations:agir', 'generations:ouvrir', 'generations:refaireCouleur', 'produit:photosVerrou', 'produit:couts', 'produit:videoLancer', 'produit:videoEtat', 'produit:videoOublier', 'produit:videoReessayer', 'produit:grosPlanZone', 'produit:grosPlan', 'marges:analyser', 'marges:appliquer',
   'commandes:preparer', 'commandes:expedier',
   // La file de préparation (2026-11-18) : la suivante choisie AU CLIC (prioritaires, verrous relus).
   'commandes:fileSuivante',
@@ -4168,7 +4168,7 @@ const LIMITES_PONT = {
   // Detourage, impressions et rapports.
   'produit:photoIa': 120000,
   'produit:detourer': 30000, 'produit:teinter': 30000, 'stock:etiquettes': 30000,
-  'generations:etat': 10000, 'generations:lancer3d': 120000, 'generations:rattraper': 30000, 'generations:agir': 20000, 'generations:ouvrir': 15000, 'generations:refaireCouleur': 30000, 'produit:photosVerrou': 15000, 'produit:couts': 30000, 'produit:videoLancer': 90000, 'produit:videoEtat': 10000, 'produit:videoOublier': 10000,
+  'generations:etat': 10000, 'generations:lancer3d': 120000, 'generations:rattraper': 30000, 'generations:agir': 20000, 'generations:ouvrir': 15000, 'generations:refaireCouleur': 30000, 'produit:photosVerrou': 15000, 'produit:couts': 30000, 'produit:videoLancer': 90000, 'produit:videoEtat': 10000, 'produit:videoOublier': 10000, 'produit:videoReessayer': 10000,
   /* le gros plan sur la fibre : la zone se trouve au poste (court) ; l agrandissement passe par fal.ai */
   'produit:grosPlanZone': 30000, 'produit:grosPlan': 120000,
   'marges:analyser': 60000, 'marges:appliquer': 90000,
