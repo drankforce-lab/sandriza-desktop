@@ -1198,6 +1198,8 @@ const ICO = {
   /* Les rappels (2026-10-02) : une cloche, et le petit arc de son tintement. */
   /* Objectifs et défis (2026-11-20) : une cible, ses anneaux et la flèche plantée au centre. */
   /* Relance des clients endormis (2026-11-20) : une enveloppe et le croissant de lune du sommeil. */
+  /* Prévision des ventes (2026-11-22) : une courbe qui monte, et son prolongement en pointillé. */
+  prevision: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4v16h18"/><path d="M6 15l4-4 3 2 3-4"/><path d="M16 9l4-3" stroke-dasharray="2 2.4"/></svg>',
   /* Trésorerie des 90 jours (2026-11-22) : une courbe qui creuse puis remonte, et la ligne du seuil. */
   tresorerie: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 4v16h18"/><path d="M6 9l4 5 3-2 3 3 4-7"/><path d="M6 17h14" stroke-dasharray="2 2.5"/></svg>',
   /* Fermeture de caisse (2026-11-21) : le tiroir-caisse et sa serrure. */
@@ -5570,6 +5572,12 @@ html[data-sz-theme="epure"] :is(.so-renvoi,.ch-renvoi){display:none!important}
    des boutons. La classe sz-wco n'est posée que si Windows dessine vraiment ces boutons (jamais dans le panneau ancré). */
 html.sz-wco .tete{-webkit-app-region:drag;min-height:44px;padding-right:calc(100vw - env(titlebar-area-x, 0px) - env(titlebar-area-width, 100vw) + 12px)!important}
 html.sz-wco .tete :is(button,a,input,select,label,[role=button]){-webkit-app-region:no-drag}
+/* ⚠ PLUS DE CHASSE FIXE DANS LES TABLEAUX (2026-11-21, sa demande : « Photos : codes PH-…, poids 1020 Ko — épuré partout »).
+   Codes, numéros, poids et montants des listes prennent la police de l'application ; les chiffres restent alignés
+   (chiffres tabulaires). Restent en chasse fixe ce qui EST du code : champs de saisie, <code>, <pre>, <kbd>. */
+:is(td,th),:is(td,th) :not(code,pre,kbd,input,textarea,code *,pre *){font-family:inherit!important}
+td{font-variant-numeric:tabular-nums}
+.rf-code{font-family:inherit!important;letter-spacing:.01em}
 `;
 
 const CSS_VIVANT = `

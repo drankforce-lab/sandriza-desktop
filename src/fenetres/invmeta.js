@@ -86,13 +86,42 @@ thead th{text-align:left;padding:.28rem .45rem;font-size:.6875rem;text-transform
 tbody td{padding:.32rem .45rem;border-top:1px solid var(--v055);vertical-align:middle}
 tbody tr:hover td{background:var(--v03)}
 tr.edit td{background:rgba(var(--or-rgb),.09)}
-code{font:.77rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
-.mono{font-family:Consolas,monospace}
+/* (2026-11-22, refonte « plus professionnel ») Plus de chasse fixe : une clé ou un code se lit en pastille discrète. */
+code{font-family:inherit;font-size:.76rem;font-weight:600;color:var(--tx-bleute);background:var(--v06);padding:.08rem .4rem;border-radius:5px;letter-spacing:.01em}
+.mono{font-family:inherit;letter-spacing:.04em}
+/* Les cartes de la page ne se TASSENT plus : la colonne est plus courte que leur contenu, et la carte
+   (overflow:hidden) coupait « noir » et « corail rosé » à mi-hauteur. La page défile, les cartes restent entières. */
+.corps>*{flex-shrink:0}
+/* Dans l alerte (fond rouge pâle de jour), la pastille de code reprend la couleur de l alerte. */
+.alerte code{background:transparent;color:inherit;padding:0}
+/* La carte d un onglet : un titre, une phrase, le contenu. */
+.im-carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;padding:.9rem 1rem;display:flex;flex-direction:column;gap:.55rem}
+.im-tete{display:flex;align-items:baseline;gap:.6rem;flex-wrap:wrap}
+.im-tete h2{margin:0;font-size:.95rem;font-weight:700}
+.im-tete .n{font-size:.76rem;color:var(--tx2)}
+.im-carte .aide{margin:0}
+.chip .lk{display:inline-flex;color:var(--tx2)}
+.chip .lk svg{width:11px;height:11px}
+.chip .u{font-size:.7rem;font-weight:700;color:var(--tx);margin-left:.1rem}
+/* Gestes d une ligne : côte à côte, jamais empilés. */
+td.gestes{white-space:nowrap;text-align:right}
+td.gestes .gs{display:inline-flex;gap:.3rem;align-items:center}
+button.icb{display:inline-flex;align-items:center;justify-content:center;width:30px;height:28px;padding:0}
+button.icb svg{width:15px!important;height:15px!important;flex:none}
+/* Réachat : deux réglages, deux cartes côte à côte. */
+.im-reglages{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:.8rem}
+.im-reg{background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;padding:.9rem 1rem;display:flex;flex-direction:column;gap:.6rem}
+.im-reg h2{margin:0;font-size:.92rem;font-weight:700}
+.im-reg p{margin:0;font-size:.79rem;color:var(--tx2);line-height:1.5}
+.im-reg .ligne{display:flex;gap:.5rem;align-items:center;margin-top:auto}
+.im-reg .ligne input{width:7.5rem}
+.im-reg .ligne .u{font-size:.78rem;color:var(--tx2)}
+.im-reg .ligne button{margin-left:auto}
 .chips{display:flex;flex-wrap:wrap;gap:.4rem;align-items:center;width:100%;padding:.45rem .5rem;
   border:1px solid var(--v16);border-radius:10px;background:var(--v03);min-height:44px}
 .chip{display:inline-flex;align-items:center;gap:.25rem;background:rgba(var(--or-rgb),.14);
   border:1px solid var(--v14);border-radius:7px;padding:.24rem .2rem .24rem .55rem;font-weight:600;font-size:.82rem}
-.chip button{background:none;border:none;color:var(--tx2);font-size:1.05rem;line-height:1;padding:0 3px}
+.chip button{background:none;border:none;color:var(--tx);opacity:1;font-size:1.05rem;line-height:1;padding:0 3px}
 .chip button:hover{color:var(--tx-err);background:none}
 .chip .lock{font-size:.7rem;opacity:.65}
 .chips input{flex:1;min-width:110px;border:none;background:transparent;padding:.26rem .2rem}
@@ -172,6 +201,10 @@ function pageInvMeta(ouverture) {
   var P = window.szPont;
   // Le « + » des en-têtes de tableau : un trait centré par construction (voir button.ic.plus svg).
   var PLUS_SVG = '<svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 3v10M3 8h10"/></svg>';
+  var SVG_A = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">';
+  var ICO_LOCK = SVG_A + '<rect x="5" y="11" width="14" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  var ICO_EDIT = SVG_A + '<path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>';
+  var ICO_DEL = SVG_A + '<path d="M4 7h16"/><path d="M10 11v6M14 11v6"/><path d="M6 7l1 13h10l1-13"/><path d="M9 7V4h6v3"/></svg>';
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'ec-name':30,'ec-hex':7,'sz-input':120,'at-key':40,'at-fr':40,'at-en':40,'ic-name':40,'ic-nameen':40,'ic-key':40})}
   var corps = document.getElementById('corps');
   var sous = document.getElementById('sous');
@@ -260,14 +293,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
   /* ══ ONGLET TAILLES ════════════════════════════════════════════════════════ */
   function vueSizes(){
     var chips = D.sizes.map(function(s){
-      var lock = s.used > 0 ? '<span class="lock" title="' + phrase(s.used, '${T("Utilisée par {0} produit")}', '${T("Utilisée par {0} produits")}') + '"><span class="ic">🔒</span></span>' : '';
+      var lock = s.used > 0 ? '<span class="lk" title="' + phrase(s.used, '${T("Utilisée par {0} produit")}', '${T("Utilisée par {0} produits")}') + '">' + ICO_LOCK + '</span><span class="u">' + s.used + '</span>' : '';
       var x = D.peut.edit ? '<button data-sizerm="' + esc(s.nom) + '" title="' + (s.used > 0 ? '${T("Utilisée — suppression bloquée")}' : '${T("Retirer")}') + '">×</button>' : '';
       return '<span class="chip">' + esc(s.nom) + lock + x + '</span>';
     }).join('');
     var inp = D.peut.edit ? '<input id="sz-input" aria-label="${T("Ajouter une taille")}" placeholder="' + (D.sizes.length ? '${T("Ajouter une taille…")}' : '${T("Ex : 46, OS, 2XL…")}') + '" autocomplete="off">' : '';
-    return '<p class="aide">${T("Ces tailles s’affichent dans le formulaire d’édition des produits.")}</p>'
+    return '<section class="im-carte"><div class="im-tete"><h2>${T("Tailles")}</h2></div>'
+      + '<p class="aide">${T("Ces tailles s’affichent dans le formulaire d’édition des produits. Le cadenas et le chiffre disent combien de produits l’utilisent : elle ne peut alors pas être retirée.")}</p>'
       + '<div class="chips">' + chips + inp + '</div>'
-      + (D.peut.edit ? '<div class="aide" style="margin:.5rem 0 0">${T("Tapez une taille puis <strong>Entrée</strong> ou <strong>,</strong> — ou collez-en plusieurs séparées par des virgules. <strong>Retour arrière</strong> (champ vide) retire la dernière.")}</div>' : '');
+      + (D.peut.edit ? '<div class="aide">${T("Tapez une taille puis <strong>Entrée</strong> ou <strong>,</strong> — ou collez-en plusieurs séparées par des virgules. <strong>Retour arrière</strong> (champ vide) retire la dernière.")}</div>' : '')
+      + '</section>';
   }
 
   /* ══ ONGLETS GENRES / GROUPES D ÂGE / STYLES ═══════════════════════════════ */
@@ -423,17 +458,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
     var cats = D.categories || [];
     var rows = cats.map(function(c){
       if (CATEDIT === c.id) return catEditRow(c);
-      var edit = D.peut.edit ? '<button class="mini" data-catedit="' + esc(c.id) + '" title="${T("Modifier")}" aria-label="${T("Modifier")}"><span class="ic">✎</span></button>' : '';
-      var del = D.peut.supprime ? ' <button class="mini danger" data-catdel="' + esc(c.id) + '" title="' + (c.used > 0 ? c.used + ' ' + szPl(c.used, '${T("produit — bloqué")}', '${T("produits — bloqué")}') : '${T("Supprimer")}') + '"><span class="ic">🗑</span></button>' : '';
+      var edit = D.peut.edit ? '<button class="mini icb" data-catedit="' + esc(c.id) + '" title="${T("Modifier")}" aria-label="${T("Modifier")}">' + ICO_EDIT + '</button>' : '';
+      var del = D.peut.supprime ? '<button class="mini icb danger" data-catdel="' + esc(c.id) + '" aria-label="${T("Supprimer")}" title="' + (c.used > 0 ? c.used + ' ' + szPl(c.used, '${T("produit — bloqué")}', '${T("produits — bloqué")}') : '${T("Supprimer")}') + '">' + ICO_DEL + '</button>' : '';
       return '<tr><td><span class="pastille" style="background:' + esc(c.color) + '"></span></td>'
         + '<td style="font-weight:600">' + esc(c.name) + '</td>'
         + '<td style="color:var(--tx2)">' + esc(c.nameEN || '—') + '</td>'
         + '<td><code>' + esc(c.catKey) + '</code></td>'
         + '<td><span class="mono" style="font-weight:700;background:rgba(150,130,105,.18);padding:.1rem .45rem;border-radius:4px">' + esc(c.code) + '</span></td>'
-        + '<td style="text-align:center">' + (c.aiOn ? '<span style="color:var(--tx-or)" title="Canvas auto"><span class="ic">⚡</span></span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
+        + '<td style="text-align:center">' + (c.aiOn ? '<span style="color:var(--tx-or)" title="Canvas auto">✓</span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
         + '<td style="text-align:center">' + (c.simpleOn ? '<span style="color:var(--tx-or)">✓</span>' : '<span style="color:var(--tx2)">—</span>') + '</td>'
         + '<td style="text-align:center">' + c.used + '</td>'
-        + '<td style="text-align:right">' + edit + del + '</td></tr>';
+        + '<td class="gestes"><span class="gs">' + edit + del + '</span></td></tr>';
     }).join('');
     var empty = (!cats.length && CATEDIT !== '__new__') ? '<tr><td colspan="9" class="vide">${T("Aucune catégorie — cliquez sur + pour en créer une.")}</td></tr>' : '';
     var plus = (D.peut.ajout && CATEDIT !== '__new__') ? '<button class="ic plus" data-catadd="1" title="${T("Ajouter")}">' + PLUS_SVG + '</button>' : '';
@@ -448,18 +483,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
   /* ══ ONGLET RÉACHAT ════════════════════════════════════════════════════════ */
   function vueReachat(){
     var r = D.reachat, ro = D.peut.edit ? '' : ' disabled';
-    return ''
-      + '<div class="champ" style="max-width:220px"><label for="rc-low">${T("Seuil général")}</label>'
-      + '<input type="number" min="0" step="1" id="rc-low" value="' + r.lowStockDefault + '"' + ro + ' style="width:100%"></div>'
-      + '<div class="avis" style="margin:.7rem 0">${T("Le seuil se règle à trois niveaux, <strong>le plus précis l’emporte</strong> : exception sur la variante, sinon seuil du produit, sinon celui-ci.")}<br>'
+    /* (2026-11-22, refonte) Deux réglages, deux cartes côte à côte : un titre, ce qu il fait, le champ et son bouton
+       sur une ligne. Les boutons pleine largeur faisaient « formulaire » plus que « réglage ». */
+    return '<div class="im-reglages">'
+      + '<section class="im-reg"><h2><label for="rc-low">${T("Seuil général")}</label></h2>'
+      + '<p>${T("Le seuil se règle à trois niveaux, <strong>le plus précis l’emporte</strong> : exception sur la variante, sinon seuil du produit, sinon celui-ci.")}<br>'
       + '${T("Actuellement :")} <strong>' + r.regles + '</strong> ' + szPl(r.regles, '${T("produit a son propre seuil,")}', '${T("produits ont leur propre seuil,")}')
-      + ' <strong>' + r.exceptions + '</strong> ' + szPl(r.exceptions, '${T("variante fait exception.")}', '${T("variantes font exception.")}') + '</div>'
-      + (D.peut.edit ? '<button class="prim" data-act="reachatlow">${T("Enregistrer le seuil")}</button>' : '')
-      + '<hr style="border:none;border-top:1px solid var(--v10);margin:1.3rem 0">'
-      + ''
-      + '<div class="champ" style="max-width:220px"><label for="rc-buymax">${T("Limite d’achat par commande")}</label>'
-      + '<input type="number" min="1" step="1" id="rc-buymax" value="' + r.buyMax + '"' + ro + ' style="width:100%"></div>'
-      + (D.peut.edit ? '<button class="prim" style="margin-top:.7rem" data-act="reachatbuymax">${T("Enregistrer la limite")}</button>' : '');
+      + ' <strong>' + r.exceptions + '</strong> ' + szPl(r.exceptions, '${T("variante fait exception.")}', '${T("variantes font exception.")}') + '</p>'
+      + '<div class="ligne"><input type="number" min="0" step="1" id="rc-low" value="' + r.lowStockDefault + '"' + ro + '><span class="u">${T("unités")}</span>'
+      + (D.peut.edit ? '<button class="prim" data-act="reachatlow">${T("Enregistrer le seuil")}</button>' : '') + '</div></section>'
+      + '<section class="im-reg"><h2><label for="rc-buymax">${T("Limite d’achat par commande")}</label></h2>'
+      + '<p>${T("Le nombre maximal d’exemplaires d’un même article dans une commande.")}</p>'
+      + '<div class="ligne"><input type="number" min="1" step="1" id="rc-buymax" value="' + r.buyMax + '"' + ro + '><span class="u">${T("par article")}</span>'
+      + (D.peut.edit ? '<button class="prim" data-act="reachatbuymax">${T("Enregistrer la limite")}</button>' : '') + '</div></section>'
+      + '</div>';
   }
 
   /* ══ LE PIED ET L EXPORT, ONGLET PAR ONGLET (2026-09-24, #148) ═════════════

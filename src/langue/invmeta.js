@@ -27,6 +27,10 @@
  */
 
 module.exports = {
+  'Ces tailles s’affichent dans le formulaire d’édition des produits. Le cadenas et le chiffre disent combien de produits l’utilisent : elle ne peut alors pas être retirée.': 'These sizes appear in the product edit form. The lock and the number show how many products use a size: it cannot be removed then.',
+  'unités': 'units',
+  'par article': 'per item',
+  'Le nombre maximal d’exemplaires d’un même article dans une commande.': 'The maximum number of copies of the same item in one order.',
   /* ── L EN-TETE ET LES ONGLETS ───────────────────────────────────────────── */
   'Attributs produits — Administration Sandriza': 'Product attributes — Sandriza Administration',
   'Attributs produits': 'Product attributes',

@@ -82,8 +82,16 @@ table.tb td{font-size:.85rem;vertical-align:middle}
 .acts{white-space:nowrap;text-align:right;width:1%}
 .acts .gs{display:inline-flex;gap:.35rem;align-items:center;flex-wrap:nowrap}
 .acts .b{display:inline-flex!important;flex-direction:row!important;align-items:center;gap:.35rem;white-space:nowrap;margin:0}
-.sv-date{white-space:nowrap;overflow:visible!important;text-overflow:clip!important;max-width:none!important}
-.sv-sous{font-size:.74rem;color:var(--tx2)}
+/* (2026-11-22, sa 2e capture : « 28 oct. 202 », « 3 produits · 0 cmd · 0 fac ») Les cellules PASSENT À LA LIGNE au lieu
+   d être coupées : le look Épuré pose nowrap + overflow:hidden sur les cellules, et la page n a pas la largeur de 7 colonnes. */
+.tb td:not(.acts){white-space:normal!important;overflow:visible!important;text-overflow:clip!important;max-width:none!important}
+.tb td:not(.acts) *{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;max-width:none!important}
+.sv-date{min-width:7.5rem}
+.tb{table-layout:auto}
+.tb th:first-child,.tb td:first-child{width:13.5rem}
+.tb td:nth-child(2){min-width:9rem}
+.tb td:nth-child(3){min-width:7.5rem}
+.sv-sous{font-size:.74rem;color:var(--tx2);word-break:break-all}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;border:1px solid var(--v16);border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -246,7 +254,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('sauvegarde')}
       + (D.peutEcrire ? '<button class="prim" id="s-nouveau">${T("＋ Créer une sauvegarde")}</button>' : '')
       + '<button class="b" id="s-refresh">${T("↻ Actualiser")}</button>'
       + (D.peutEcrire ? '<button class="b dgr" id="s-purger"><span class="ic">🗑</span> ${T("Purger (&gt; ")}'+(D.retentionMois||12)+'${T(" mois)")}</button>' : '')
-      + (D.peutEcrire ? '<button class="b" id="s-photos" title="${T("Faire passer l’adresse des photos à photos.sandriza.com")}">${T("Adresse des photos")}</button>' : '')
+      /* (2026-11-22, sa demande) « Adresse des photos » retirée : la bascule vers photos.sandriza.com est faite. */
       + '</div></div>';
 
     /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel

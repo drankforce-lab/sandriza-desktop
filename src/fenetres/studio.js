@@ -103,11 +103,14 @@ body{background:var(--f-page);color:var(--tx);
    REMPLIT les cinq etapes d un coup : sa place est donc au-dessus d elles. */
 /* REFONTE 2026-09-29 (« plus moderne et simple ») : une LIGNE, plus une carte.
    Trois cartes empilées à gauche faisaient trois cadres pour un seul travail. */
-.rcbar{flex:0 0 auto;display:flex;align-items:center;gap:.45rem;padding:0 .15rem}
+/* (2026-11-22, sa remarque : les fonds des barres Produit / Profil « jurent ») Les DEUX barres portent le même habillage :
+   le fond des cartes (opaque — la texture d un thème ne passe pas sous le texte), un filet discret, le même rayon. */
+.rcbar{flex:0 0 auto;display:flex;align-items:center;gap:.45rem;padding:.2rem .3rem;
+  background:var(--f-carte);border:1px solid var(--v08);border-radius:9px}
 /* ── LE PRODUIT (2026-10-19, la partie 3) : la fiche à laquelle les photos sont DESTINÉES, et leur rôle. Une ligne,
    comme la barre des profils : ce n est pas une étape, c est le destinataire. ── */
 .pdbar{flex:0 0 auto;display:flex;align-items:center;gap:.45rem;padding:.2rem .3rem;position:relative;min-width:0;
-  background:var(--f-page);border-radius:9px}   /* opaque : la texture d un thème ne passe pas sous le texte */
+  background:var(--f-carte);border:1px solid var(--v08);border-radius:9px}   /* opaque : la texture d un thème ne passe pas sous le texte */
 .pdbar>label{flex:0 0 auto;font:700 .7rem/1 system-ui;color:var(--tx)}
 .pdin{flex:1 1 auto;min-width:0;position:relative}
 .pdin input{width:100%;font-size:.78rem;padding:.3rem .5rem}

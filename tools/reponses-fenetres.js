@@ -4272,6 +4272,19 @@ const JEU = {
       { nom: 'module de relance absent', id: '', reponses: { 'relance:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
     ];
   })(),
+  /* (2026-11-22) Prévision des ventes : une sortie RÉELLE du moteur (assets/js/prevision.js) sur deux ans de ventes simulées. */
+  'prevision.js': (function(){
+    var D = {"ok":true,"aujourdhui":"2026-11-22","semaines":12,"delai":21,"saison":1.42,"avecSaison":true,"histoSemaines":65,"passe":[{"debut":"2026-08-02","unites":10},{"debut":"2026-08-09","unites":12},{"debut":"2026-08-16","unites":10},{"debut":"2026-08-23","unites":11},{"debut":"2026-08-30","unites":11},{"debut":"2026-09-06","unites":10},{"debut":"2026-09-13","unites":11},{"debut":"2026-09-20","unites":11},{"debut":"2026-09-27","unites":11},{"debut":"2026-10-04","unites":10},{"debut":"2026-10-11","unites":11},{"debut":"2026-10-18","unites":11},{"debut":"2026-10-25","unites":10},{"debut":"2026-11-01","unites":26},{"debut":"2026-11-08","unites":24},{"debut":"2026-11-15","unites":24}],"futur":[{"debut":"2026-11-22","unites":23.4,"bas":17.3,"haut":29.5},{"debut":"2026-11-29","unites":24.4,"bas":18.3,"haut":30.4},{"debut":"2026-12-06","unites":24.4,"bas":18.3,"haut":30.4},{"debut":"2026-12-13","unites":23.4,"bas":17.3,"haut":29.5},{"debut":"2026-12-20","unites":25.3,"bas":19.2,"haut":31.4},{"debut":"2026-12-27","unites":23.4,"bas":17.3,"haut":29.5},{"debut":"2027-01-03","unites":23.4,"bas":17.3,"haut":29.5},{"debut":"2027-01-10","unites":25.3,"bas":19.2,"haut":31.4},{"debut":"2027-01-17","unites":23.4,"bas":17.3,"haut":29.5},{"debut":"2027-01-24","unites":24.4,"bas":18.3,"haut":30.4},{"debut":"2027-01-31","unites":24.4,"bas":18.3,"haut":30.4},{"debut":"2027-02-07","unites":23.4,"bas":17.3,"haut":29.5}],"lignes":[{"productId":"pM","nom":"Manteau Aurore laine bouillie","image":"","vendus12":126,"rythme":13.3,"prevu":227,"bas":197,"haut":257,"stock":14,"enCommande":0,"rupture":"2026-11-27","commanderAvant":"2026-11-22","aCommander":270,"cout":40,"urgence":"maintenant","jeune":false},{"productId":"pJ","nom":"Jupe Camélia","image":"","vendus12":16,"rythme":1.3,"prevu":22,"bas":20,"haut":25,"stock":6,"enCommande":4,"rupture":"2026-12-14","commanderAvant":"2026-11-23","aCommander":22,"cout":18,"urgence":"bientot","jeune":false},{"productId":"pR","nom":"Robe Mila","image":"","vendus12":28,"rythme":2.3,"prevu":39,"bas":37,"haut":42,"stock":50,"enCommande":0,"rupture":"2027-03-09","commanderAvant":"2027-02-16","aCommander":0,"cout":20,"urgence":"ok","jeune":false},{"productId":"pX","nom":"Chemise Walla","image":"","vendus12":0,"rythme":0,"prevu":0,"bas":0,"haut":0,"stock":3,"enCommande":0,"rupture":"","commanderAvant":"","aCommander":0,"cout":0,"urgence":"ok","jeune":true}],"resume":{"unitesPrevues":288,"aCommander":2,"unitesACommander":292,"coutACommander":11196,"maintenant":1},"peutVoirCout":true};
+    var rep = function(d){ return { 'prevision:donnees': d, identite: IDENTITE, 'prevision:reappro': { ok: true } }; };
+    var sans = JSON.parse(JSON.stringify(D)); sans.avecSaison = false; sans.saison = 1;
+    var vide = JSON.parse(JSON.stringify(D)); vide.lignes = []; vide.resume = { unitesPrevues: 0, aCommander: 0, unitesACommander: 0, coutACommander: 0, maintenant: 0 };
+    return [
+      { nom: 'prévision : courbe, pièces urgentes', id: '', reponses: rep(D), exige: ['class="passe"', 'class="futur"', 'data-pages="prevision"', 'id="pv-reappro"', 'class="alerte"'] },
+      { nom: 'sans un an d’historique', id: '', reponses: rep(sans), exige: ['class="avis"'] },
+      { nom: 'rien à prévoir', id: '', reponses: rep(vide) },
+      { nom: 'module de prévision absent', id: '', reponses: { 'prevision:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
+    ];
+  })(),
   /* (2026-11-22) Trésorerie des 90 jours : formes copiées de assets/js/tresorerie.js (projeter). */
   'tresorerie.js': (function(){
     var jours = [], s = 8400;

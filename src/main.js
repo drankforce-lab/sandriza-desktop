@@ -1815,14 +1815,20 @@ const createWindow = () => {
   // #41 : la barre de titre OS des fenetres a cadre standard doit naitre du bon
   // cote du theme des le demarrage (avant meme d en ouvrir une).
   _majThemeOS();
+  /* ⚠ LE PLANCHER DE LA FENÊTRE PRINCIPALE (2026-11-22, sa capture : « tu ne dois pas permettre un redimensionnement trop
+     petit ») : à 1024 × 700, le tableau de bord écrasait « À préparer » et « Activité des commandes » en une bande vide.
+     1280 × 820 tient le tableau de bord entier — mais jamais plus que la zone utile de l'écran : sur un portable de
+     1366 × 768, un plancher plus haut que l'écran rendrait la fenêtre impossible à poser. */
+  let _minL = 1280, _minH = 820;
+  try { const wa = require('electron').screen.getPrimaryDisplay().workAreaSize; _minL = Math.min(_minL, wa.width); _minH = Math.min(_minH, wa.height); } catch (e) {}
   mainWindow = new BrowserWindow({
     // (2026-10-18, sa capture : la barre des tâches montrait encore l ancien « S ») l icône posée SUR la fenêtre —
     // Windows prend sinon celle de son cache d icônes, qui survit aux mises à jour
     icon: ICON_PATH || undefined,
     width: 1400,
     height: 900,
-    minWidth: 1024,
-    minHeight: 700,
+    minWidth: _minL,
+    minHeight: _minH,
     // ⚠ CACHÉE JUSQU À LA DÉCISION DE LA VÉRIFICATION (2026-10-17) — voir _montrerDemarrage.
     show: false,
     backgroundColor: _fondTheme(),
@@ -3474,6 +3480,8 @@ const OPS_PONT = new Set([
   'fermeture:donnees', 'fermeture:fermer', 'fermeture:imprimer',
   // Tresorerie des 90 jours (fenetre Tresorerie, 2026-11-22) : projection du solde, reglages.
   'tresorerie:donnees', 'tresorerie:reglages',
+  // Prevision des ventes (fenetre Prevision, 2026-11-22) : lecture ; « Passer la commande » ouvre le reappro.
+  'prevision:donnees', 'prevision:reappro',
   // Bons de commande fournisseurs (2026-10-27). ⚠ `bc:donnees` est l op de LECTURE ; `bc:voeu` lit (ou pose,
   // depuis l Inventaire) l onglet d ouverture.
   'bc:donnees', 'bc:propositions', 'bc:chercher', 'bc:ecrire', 'bc:creerGroupes', 'bc:envoyer',
@@ -4215,6 +4223,7 @@ const LIMITES_PONT = {
   'relance:donnees': 20000, 'relance:apercu': 15000, 'relance:envoyer': 180000, 'relance:reglages': 30000,
   'fermeture:donnees': 15000, 'fermeture:fermer': 30000, 'fermeture:imprimer': 20000,
   'tresorerie:donnees': 20000, 'tresorerie:reglages': 30000,
+  'prevision:donnees': 30000, 'prevision:reappro': 15000,
   /* Les bons de commande fournisseurs : lecture locale ; chaque geste est UNE operation serveur (la reception fait
      monter le stock de chaque ligne dans le meme lot) ; « Creer tous les bons » en enchaine une par fournisseur. */
   'bc:donnees': 15000, 'bc:propositions': 15000, 'bc:chercher': 15000, 'bc:voeu': 15000,
@@ -4961,6 +4970,7 @@ const PAGES_ANCRABLES = () => ({
   relance: ['Relance des clients endormis', () => pageRelance()],
   fermeture: ['Fermeture de caisse', () => pageFermeture()],
   tresorerie: ['Trésorerie des 90 jours', () => pageTresorerie()],
+  prevision: ['Prévision des ventes', () => pagePrevision()],
   // Le calendrier (2026-11-18, relooking) : précommandes, ramassages, échéances fiscales et rappels sur un mois.
   calendrier: ['Calendrier', () => pageCalendrier()],
   // La page Réglages (2026-11-18, maquette) : le menu Configuration mis en page, ouvert par la barre Épuré.
@@ -7542,6 +7552,7 @@ const { pageObjectifs } = require('./fenetres/objectifs');
 const { pageRelance } = require('./fenetres/relance');
 const { pageFermeture } = require('./fenetres/fermeture');
 const { pageTresorerie } = require('./fenetres/tresorerie');
+const { pagePrevision } = require('./fenetres/prevision');
 const { pageAtelier } = require('./fenetres/atelier');
 const { pageFibres } = require('./fenetres/fibres');
 const { pageEncanRapports } = require('./fenetres/encan-rapports');
@@ -7812,6 +7823,7 @@ const actionApp = (nom, arg) => {
     case 'relance':
     case 'fermeture':
     case 'tresorerie':
+    case 'prevision':
     // Calendrier (2026-11-18) : meme cas, ne natif ; sa section hote cote site ne porte que la zone.
     case 'calendrier':
     case 'reglages':
@@ -8241,8 +8253,13 @@ const _panneauGardeArmer = () => {
       const dans = (r, m) => c.x >= r.x - m && c.x <= r.x + r.width + m && c.y >= r.y - m && c.y <= r.y + r.height + m;
       const pb = panneauWin.getBounds(), cb = mainWindow.getContentBounds();
       let origine = null;
-      if (panneauPose.mode === 'droite') origine = { x: cb.x, y: cb.y, width: Math.max(0, panneauPose.x - cb.x), height: cb.height };
-      else if (panneauPose.mode === 'gauche') origine = { x: panneauPose.x, y: cb.y, width: Math.max(0, cb.x + cb.width - panneauPose.x), height: cb.height };
+      /* ⚠ (2026-11-22, sa remarque : « tant que le curseur est dans la partie des menus de gauche, le menu reste ouvert »)
+         En rail, l'origine était TOUTE la colonne, sur toute sa hauteur : le panneau ne se fermait jamais tant que le curseur
+         restait à gauche. L'origine est maintenant la BANDE DU BOUTON qui l'a ouvert (sa hauteur, à la hauteur du panneau) :
+         le chemin bouton → panneau reste couvert, le reste de la colonne referme. Survoler une autre rubrique ouvre la sienne. */
+      const bande = Math.round(58 * (panneauPose.f || 1));
+      if (panneauPose.mode === 'droite') origine = { x: cb.x, y: panneauPose.y - 6, width: Math.max(0, panneauPose.x - cb.x), height: bande };
+      else if (panneauPose.mode === 'gauche') origine = { x: panneauPose.x, y: panneauPose.y - 6, width: Math.max(0, cb.x + cb.width - panneauPose.x), height: bande };
       else origine = { x: cb.x, y: cb.y, width: cb.width, height: Math.max(0, panneauPose.y - cb.y) };
       if (dans(pb, 6) || dans(origine, 4)) { panneauGardeHors = 0; return; }
       if (++panneauGardeHors >= 2) fermerPanneauMenu();
@@ -8371,7 +8388,7 @@ ipcMain.on('menu:panneau', (e, label, x, y, ancrage) => {
   const _mode = ['bas', 'droite', 'gauche'].indexOf(String(ancrage || 'bas')) >= 0
     ? String(ancrage || 'bas') : 'bas';
   panneauPose = {
-    mode: _mode,
+    mode: _mode, f,
     x: Math.round(cb.x + (Number(x) || 0) * f),
     y: Math.round(cb.y + (Number(y) || 0) * f),
   };
