@@ -71,6 +71,15 @@ body{background:var(--f-page);color:var(--tx);
    droit de defiler — elle peut grandir, le reste non. A droite, tout est empile
    SANS TROU et c est la colonne entiere qui defile si elle deborde : le bouton
    reste atteignable, et il PORTE LE TOTAL (<< Effectuer la vente (77,61 $) >>). */
+/* LA CAISSE HORS LIGNE (2026-11-22) : le bandeau qui dit la coupure et la file d envoi. */
+.hl{flex:0 0 auto;display:flex;align-items:center;flex-wrap:wrap;gap:.5rem .8rem;margin:.6rem 1.2rem 0;padding:.5rem .9rem;
+  border-radius:10px;border:1px solid var(--tx-att);background:var(--f-carte);color:var(--tx);font-size:.86rem;line-height:1.4}
+.hl.err{border-color:var(--tx-err)}
+.hl .hl-t{flex:1 1 18rem;min-width:0}
+.hl .hl-t strong{color:var(--tx-att)}
+.hl .hl-t strong.ref{color:var(--tx-err)}
+.hl .hl-t .no{white-space:nowrap}
+.hl .hl-b{display:flex;gap:.4rem;flex:0 0 auto}
 .corps{flex:1 1 auto;min-height:0;padding:1rem 1.2rem;overflow:hidden;
   display:grid;grid-template-columns:minmax(0,1.3fr) minmax(360px,.8fr);gap:1rem}
 .col{min-width:0;min-height:0;display:flex;flex-direction:column;gap:.75rem}
@@ -287,6 +296,10 @@ function pageCaisse(mode) {
        refuse de toute facon tout autre role. -->
   <button id="btn-nip" class="mini" style="display:none"
     title="${T("Voir ou changer le NIP exigé pour modifier un prix à la caisse")}">${T("NIP des prix")}</button></div>
+<!-- LA CAISSE HORS LIGNE (2026-11-22) : caché tant que le réseau est là et que la file est vide. -->
+<div class="hl" id="hl" role="status" aria-live="polite" style="display:none"><span class="hl-t" id="hl-t"></span>
+  <span class="hl-b"><button type="button" class="mini" id="hl-env">${T("Envoyer maintenant")}</button>
+  <button type="button" class="mini" id="hl-rel" style="display:none">${T("Réessayer les refusées")}</button></span></div>
 <div class="corps" id="corps">
   <div class="col">
     <div class="carte">
@@ -394,6 +407,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function pctTxt(n){ return szNombre(n, 2).replace(/[.,]00$/, '') + ' %'; }
 
   var MOTIFS = {
+    lien_hors_ligne:    '${T("Hors ligne : le lien de paiement ne peut pas être créé (Square doit le fabriquer). Encaissez sur place — comptant, Interac ou terminal — ou attendez le retour du réseau.")}',
+    nip_hors_ligne:     '${T("Hors ligne : un prix modifié ou un rabais autorisé par NIP ne peut pas être vérifié. Retirez-le, ou attendez le retour du réseau.")}',
   maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:            '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit:              '${T("Votre rôle ne permet pas d’encaisser une vente.")}',
@@ -1036,6 +1051,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // La vente est en base : on peut vider CETTE fenetre.
       reinitialiser();
       compteRendu(r, remise === 'impression' || remise === 'deux');
+      if (r.enFile) hlLire();
     });
   }
 
@@ -1049,12 +1065,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (r.rabaisTotal > 0) lignes += rangee('${T("Rabais accordés")}', '−' + argent(r.rabaisTotal));
     if (r.enAttente) {
       lignes += rangee('${T("Paiement")}', '<span style="color:var(--tx-att)">${T("en attente — lien à envoyer")}</span>');
+    } else if (r.enFile && !r.stockOk) {
+      lignes += rangee('${T("Stock décompté")}', '${T("au retour du réseau")}');
     } else {
       lignes += rangee('${T("Stock décompté")}', r.stockOk ? '${T("oui")}'
         : '<strong style="color:var(--tx-err)">${T("NON — à vérifier")}</strong>');
     }
-    lignes += rangee('${T("Enregistrement en base")}', r.nuageOk ? '${T("confirmé")}'
-      : '<strong style="color:var(--tx-err)">${T("non confirmé")}</strong>');
+    if (r.enFile) {
+      /* LA CAISSE HORS LIGNE (2026-11-22) : la vente est EN SÛRETÉ sur ce poste ; la file l envoie au retour du
+         réseau (stock, points et courriel compris). Ce n est pas une erreur : pas de rouge. */
+      lignes += rangee('${T("Enregistrement en base")}', '<strong style="color:var(--tx-att)">${T("gardée sur ce poste — partira au retour du réseau")}</strong>');
+    } else {
+      lignes += rangee('${T("Enregistrement en base")}', r.nuageOk ? '${T("confirmé")}'
+        : '<strong style="color:var(--tx-err)">${T("non confirmé")}</strong>');
+    }
+    if (r.envoiDiffere) lignes += rangee('${T("Facture")}', '${T("partira par courriel au retour du réseau")}');
     if (r.envoiCourriel === true)  lignes += rangee('${T("Facture")}', '${T("envoyée par courriel")}');
     if (r.envoiCourriel === false) lignes += rangee('${T("Facture")}', '<strong style="color:var(--tx-err)">${T("NON envoyée")}</strong>');
     if (r.compteNeuf) lignes += rangee('${T("Compte client")}', '${T("ouvert · lien de finalisation envoyé")}');
@@ -1085,7 +1110,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var v = document.createElement('div');
     v.className = 'voile';
     v.innerHTML = '<div class="boite"><h3>' + (r.enAttente ? '${T("Vente")}${T(" en attente de paiement")}'
-      : '${T("Vente enregistrée")}') + '</h3>' + lignes + lien + avis
+      : (r.enFile ? '${T("Vente enregistrée hors ligne")}' : '${T("Vente enregistrée")}')) + '</h3>' + lignes + lien + avis
       + '<div class="fin">'
       // Toujours offert, choisi ou non : c est aussi le RECOURS quand l impression
       // automatique echoue — un clic ici est un vrai geste dans cette fenetre.
@@ -1166,7 +1191,56 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }).join('');
   }
 
+  /* ══ LA CAISSE HORS LIGNE (2026-11-22) ══ L état de la file est lu dans la page principale (caisse:file, qui
+     SONDE le serveur) toutes les 20 s, et après chaque vente. Le bandeau ne paraît que s il a quelque chose à dire. */
+  var HL = null, HL_T = null, HL_ENVOI = false;
+  function hlDessiner(){
+    var b = document.getElementById('hl'), t = document.getElementById('hl-t');
+    var be = document.getElementById('hl-env'), br = document.getElementById('hl-rel');
+    if (!b || !t || !be || !br) return;
+    var e = HL;
+    if (!e || !e.ok || (e.enLigne && !e.attente && !e.refusees)) { b.style.display = 'none'; return; }
+    var txt = '';
+    if (!e.enLigne) txt = '<strong>${T("Hors ligne.")}</strong> ${T("La caisse continue : les ventes payées sur place sont gardées sur ce poste et partiront au retour du réseau.")}';
+    else if (e.attente) txt = '<strong>${T("Réseau revenu.")}</strong> ${T("Envoi des ventes gardées sur ce poste…")}';
+    if (e.attente) txt += ' ' + '${T("En attente d’envoi : {0}.")}'.split('{0}').join(String(e.attente));
+    if (e.refusees) {
+      var r1 = null;
+      for (var i = 0; i < (e.ventes || []).length; i++) { if (e.ventes[i].refus) { r1 = e.ventes[i]; break; } }
+      txt += ' <strong class="ref">' + '${T("Refusées par le serveur : {0}.")}'.split('{0}').join(String(e.refusees)) + '</strong>'
+        + (r1 ? ' <span class="no">' + esc(r1.numero || '') + '</span> — ' + esc(r1.refus) : '');
+    }
+    b.className = 'hl' + (e.refusees ? ' err' : '');
+    t.innerHTML = txt;
+    be.style.display = (e.attente && e.enLigne) ? '' : 'none';
+    be.disabled = HL_ENVOI;
+    br.style.display = e.refusees ? '' : 'none';
+    br.disabled = HL_ENVOI;
+    b.style.display = '';
+  }
+  function hlLire(){
+    clearTimeout(HL_T);
+    appeler('caisse:file', [true]).then(function(r){ if (r && r.ok) HL = r; hlDessiner(); HL_T = setTimeout(hlLire, 20000); });
+  }
+  function hlEnvoyer(op){
+    if (HL_ENVOI) return;
+    HL_ENVOI = true; hlDessiner();
+    appeler(op).then(function(r){
+      HL_ENVOI = false;
+      if (r && r.ok) HL = r;
+      hlDessiner();
+      var n = r && r.envoi ? (r.envoi.envoyees || 0) : 0;
+      if (n) dire('${T("Ventes envoyées au nuage : {0}.")}'.split('{0}').join(String(n)), 'bon');
+      else if (r && r.envoi && r.envoi.motif === 'hors_ligne') dire('${T("Toujours hors ligne : les ventes restent gardées sur ce poste.")}', 'att');
+    });
+  }
+  document.getElementById('hl-env').addEventListener('click', function(){ hlEnvoyer('caisse:fileEnvoyer'); });
+  document.getElementById('hl-rel').addEventListener('click', function(){ hlEnvoyer('caisse:fileRelancer'); });
+  window.addEventListener('online', function(){ setTimeout(hlLire, 2500); });
+  window.addEventListener('offline', function(){ hlLire(); });
+
   function demarrer(){
+    hlLire();
     appeler('caisse:contexte').then(function(r){
       if (!r.ok) {
         // ⚠ ON DESARME L ECRAN AU LIEU DE LE LAISSER CROIRE QU IL PEUT VENDRE.

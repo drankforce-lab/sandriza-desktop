@@ -2857,7 +2857,7 @@ const OPS_PONT = new Set([
   // (8.29.0) La seconde vie : les reprises de vêtements (le crédit est créé au serveur) et les réglages des deux sections.
   'secondevie:donnees', 'secondevie:traiter', 'secondevie:regler',
   'caisse:contexte', 'caisse:chercher', 'caisse:article',
-  'caisse:totaux', 'caisse:client', 'caisse:vendre',
+  'caisse:totaux', 'caisse:client', 'caisse:vendre', 'caisse:file', 'caisse:fileEnvoyer', 'caisse:fileRelancer',
   /* Verifier a la main un paiement par LIEN. ⚠ Ce recours n existait que dans
      l ecran web : la caisse native s appuie sur la confirmation automatique au
      retour du client, mais quand elle n arrive pas, il faut pouvoir reconcilier
@@ -3897,7 +3897,7 @@ const LIMITES_PONT = {
   /* ⚠ LA VENTE AU COMPTOIR N AVAIT PAS DE PLAFOND PROPRE (2026-10-14) : 8 s pour écrire la commande, la
      facture, le stock, les points, vérifier les autorisations et envoyer le courriel. Elle annonçait
      « délai » pendant qu elle s enregistrait — même défaut que le remboursement, même plafond. */
-  'caisse:vendre': 45000, 'caisse:verifierPaiement': 45000, 'caisse:nipVerifier': 20000,
+  'caisse:vendre': 45000, 'caisse:file': 10000, 'caisse:fileEnvoyer': 120000, 'caisse:fileRelancer': 120000, 'caisse:verifierPaiement': 45000, 'caisse:nipVerifier': 20000,
   /* ⚠⚠ LES TRAITEMENTS D IMAGE PAR MODELE, ET C EST LA CAUSE DE << modele
      delai >> (signale le 2026-08-09 sur un retrait de mannequin). Ces
      operations n etaient PAS dans cette table : elles heritaient du plafond
@@ -4415,6 +4415,8 @@ const OPS_QUI_CHANGENT_L_INVENTAIRE = new Set([
      ouvert a cote afficherait encore l ancien nom du batiment. */
   'stock:lieuEcrire', 'stock:lieuSupprimer',
   'caisse:vendre', 'retour:finaliser', 'remboursement:ecrire',
+  // La file de la caisse hors ligne (2026-11-22) DÉCOMPTE le stock des ventes qu'elle envoie.
+  'caisse:fileEnvoyer', 'caisse:fileRelancer',
   /* ⚠ ELLE DECOMPTE LE STOCK quand Square confirme le paiement : l Inventaire
      ouvert a cote doit le voir sans qu on le rafraichisse a la main. */
   'caisse:verifierPaiement',
@@ -6936,7 +6938,7 @@ const majEtat = (etat) => {
    ➡ (1) Ces opérations sont REFUSÉES (motif « maj_en_cours », expliqué dans chaque fenêtre) ; (2) celles déjà parties
    sont ATTENDUES avant de quitter (90 s au plus) ; (3) [retiré le 2026-11-20, sa demande] le bandeau ambre. */
 const OPS_CRITIQUES = new Set([
-  'caisse:vendre', 'caisse:verifierPaiement', 'encan:vendre', 'encan:annuler', 'stock:vendre', 'stock:vendreLot',
+  'caisse:vendre', 'caisse:fileEnvoyer', 'caisse:fileRelancer', 'caisse:verifierPaiement', 'encan:vendre', 'encan:annuler', 'stock:vendre', 'stock:vendreLot',
   'commande:etiquette', 'commande:expedier', 'commande:statut', 'commandes:expedier', 'commandes:statutEcrire', 'commandes:rembourser',
   'expedition:etiquette', 'expedition:confirmer', 'expedition:annulerEtiquette', 'retour:reprendreEtiquette', 'retour:renvoyer',
   'remboursement:ecrire', 'factures:payer', 'bc:envoyer', 'campagnes:envoyer', 'campagnes:renvoyer-echecs', 'config:vip:envoyer',

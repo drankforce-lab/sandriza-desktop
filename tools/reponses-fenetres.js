@@ -526,6 +526,12 @@ const JEU = {
         'caisse:vendre': { ok: true, numero: 'SZ-100250', commandeId: 'ord_0003',
           factureId: 'inv_0003', total: 149.41, stockOk: true, nuageOk: true,
           compteNeuf: false, envoiCourriel: true, enAttente: false, lien: null, avis: [] },
+        /* LA CAISSE HORS LIGNE (2026-11-22) : le bandeau, dans son état le plus chargé — hors ligne, deux ventes
+           en attente, une refusée avec son motif — pour que les bancs de rendu le mesurent. */
+        'caisse:file': { ok: true, enLigne: false, attente: 2, refusees: 1, ventes: [
+          { numero: 'C-0002-14520', total: 149.41, creeLe: '2026-11-22T14:05:00Z', client: 'Marie Tremblay', refus: '', erreur: 'Failed to fetch', essais: 2, renum: [] },
+          { numero: 'C-0002-14498', total: 89.0, creeLe: '2026-11-22T13:51:00Z', client: 'Julie Roy', refus: 'Votre rôle ne permet pas cette écriture.', erreur: 'droit_insuffisant', essais: 1, renum: [] },
+        ] },
         // L afficheur : la fenetre diffuse son panier a chaque changement.
         'caisse:diffuser': { ok: true },
         'caisse:affichage': { ok: true },
