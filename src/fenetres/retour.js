@@ -402,8 +402,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '<input id="r-refus" value="' + esc(d.noteRefus) + '" placeholder="${T("Expliquez la raison du refus…")}"></div></div>';
 
       // Etiquette de retour — visible quand on approuve.
+      /* (2026-11-22, sa règle) QUI PAIE LE RETOUR, décidé ICI à l approbation (préréglé selon le motif du client) :
+         à nos frais → l étiquette prépayée ; à la charge du client → aucune étiquette, le courriel donne l adresse. */
+      var fraisV = d.fraisPayesPar === 'store' ? 'store' : 'customer';
       h += '<div id="z-etiq" style="' + (d.statut === 'approved' ? '' : 'display:none') + ';margin-top:.55rem;'
         + 'padding:.55rem .7rem;background:var(--v03);border:1px solid var(--v08);border-radius:9px">'
+        + '<div class="ch" style="margin-bottom:.5rem"><label for="r-frais">${T("Frais de retour")}</label><select id="r-frais">'
+        + '<option value="store"' + (fraisV === 'store' ? ' selected' : '') + '>${T("À nos frais — étiquette prépayée")}</option>'
+        + '<option value="customer"' + (fraisV === 'customer' ? ' selected' : '') + '>${T("À la charge du client — il expédie lui-même")}</option></select>'
+        + '<div class="aide">' + (d.fauteMarchande ? '${T("Préréglé : le motif indique un défaut ou une erreur de notre part.")}' : '${T("Préréglé : le motif est un choix du client (taille, couleur, changement d’avis).")}') + '</div></div>'
+        + '<div id="z-etiq-l"' + (fraisV === 'store' ? '' : ' style="display:none"') + '>'
         + '<div style="font-size:.72rem;color:var(--tx2);font-weight:700;text-transform:uppercase;letter-spacing:.07em"><span class="ic">📦</span> ${T("Étiquette de retour")}</div>'
         + (d.aUneEtiquette ? '<div class="avis jaune"><span class="ic">⚠</span> ${T("Une étiquette existe déjà (")}'
             + (d.etiquetteReelle ? '${T("réelle Postes Canada — la régénérer sera FACTURÉ une seconde fois")}' : '${T("PDF interne")}')
@@ -424,6 +432,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         + '<input type="checkbox" id="r-generer"' + (d.aUneEtiquette ? '' : ' checked') + '> '
         + (d.aUneEtiquette ? '${T("Régénérer et joindre au courriel")}' : '${T("Générer et joindre l’étiquette au courriel")}') + '</label>'
         + (R.etiquette.cpPret ? '' : '<div class="aide" style="margin-top:.3rem"><span class="ic">💡</span> ${T("Postes Canada non configuré : un PDF interne sera généré (sans suivi réel).")}</div>')
+        + '</div>'
+        + '<div class="aide" id="z-etiq-client"' + (fraisV === 'store' ? ' style="display:none"' : '') + '>${T("Aucune étiquette : le courriel d’approbation donne votre adresse de retour, et le client expédie à ses frais (il saisit son numéro de suivi dans son compte).")}</div>'
         + '</div>';
     }
     if (!R.archive) {
@@ -588,6 +598,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       var z = document.getElementById('z-refus'); if (z) z.style.display = this.value === 'rejected' ? '' : 'none';
       var e = document.getElementById('z-etiq'); if (e) e.style.display = this.value === 'approved' ? '' : 'none';
     };
+    var fr = document.getElementById('r-frais');
+    if (fr) fr.onchange = function(){
+      var l = document.getElementById('z-etiq-l'), c = document.getElementById('z-etiq-client');
+      if (l) l.style.display = this.value === 'store' ? '' : 'none';
+      if (c) c.style.display = this.value === 'store' ? 'none' : '';
+    };
     var enr = document.getElementById('btn-enr');
     if (enr) enr.onclick = function(){ enregistrer(fige); };
     var sp = document.getElementById('btn-suppr');
@@ -695,7 +711,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      demande EXISTANTE. */
   /* r-notes EN TETE (2026-10-25, audit) : szBrouillonDuDom rend null si le PREMIER
      champ manque, et r-statut n existe pas sur un dossier fige (notes seules). */
-  var BR_CHAMPS = ['r-notes', 'r-statut', 'r-refus', 'r-transp', 'r-service', 'r-poids'];
+  var BR_CHAMPS = ['r-notes', 'r-statut', 'r-refus', 'r-frais', 'r-transp', 'r-service', 'r-poids'];
   szBrouillonBrancher({
     portee: 'retour',
     libelle: '${T("Une modification de cette demande")}',
@@ -747,6 +763,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     var saisie = fige
       ? { statut: '', notes: val('r-notes') }
       : { statut: val('r-statut'), notes: val('r-notes'), noteRefus: val('r-refus'),
+          fraisPayesPar: val('r-frais'),
           etiquette: { generer: coche('r-generer'), transporteur: val('r-transp'),
                        service: val('r-service'), poidsKg: parseFloat(val('r-poids')) || 0 } };
     appeler('retour:enregistrer', [ID, saisie]).then(function(r){
