@@ -90,6 +90,13 @@ const CSS_PROPRE = `
 .pf-ia{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap;margin-top:.5rem}
 .pf-ia .ed-seg button{height:1.85rem;font-size:.78rem;padding:0 .75rem}
 .pf-ia-nom{display:inline-flex;align-items:center;gap:.35rem;font-size:.8rem;cursor:pointer}
+/* (2026-11-22) LA BOITE DE REVISION de la proposition de l IA (voir reviserIa). */
+.szbr-boite.pf-rev{max-width:46rem}
+.pf-rev-l{display:block;font-size:.8rem;font-weight:700;color:var(--tx2);margin:.75rem 0 .3rem}
+.pf-rev input,.pf-rev textarea{width:100%;box-sizing:border-box;font:inherit;font-size:.88rem}
+.pf-rev textarea{min-height:9.5rem;resize:vertical}
+.pf-rev-anc{margin-top:.35rem;max-height:3.1em;overflow:hidden}
+.pf-rev-att{color:var(--tx-att);font-size:.82rem}
 /* L'étape Photos (2026-10-26) : la principale en GRAND à gauche ; à droite, l'aperçu 3D EN HAUT (sa demande), puis les
    autres photos. */
 /* (2026-10-26, sa capture : « prends toute l'espace de haut en bas et agrandis les photos en conséquence ») La carte
@@ -1843,24 +1850,58 @@ function pageProduit(id, importId) {
     }).then(function(r){
       b.disabled = false;
       if (!r || !r.ok) { dire(expliquer(r) + (r && r.detail ? ' — ' + r.detail : ''), 'err'); return; }
-      if (r.texte) poser('p-desc', r.texte);
       /* (2026-11-04) La consigne interdit les noms de fibre ; le site redemande une fois. S il en reste, on le dit. */
       var resteF = (r.fibres && r.fibres.length) ? ' ${T("Le texte nomme encore")} ' + guillemets(r.fibres) + ' ${T("— retirez-le, ou inscrivez la composition.")}' : '';
-      majCompo();
-      /* Le NOM proposé remplace celui du champ ; l'ancien est rappelé dans le message pour qu'on puisse le
-         reprendre (un nom tapé avec soin ne doit pas disparaître sans trace). majNom() recalcule ce qui en dépend. */
-      if (avecNom && r.nom) {
-        poser('p-nom', r.nom);
-        var eN = document.getElementById('p-nom'); if (eN) eN.classList.remove('manque');
-        majNom(); Assist.fil();
-        majCompo();
-        dire('${T("Nom et description proposés — relisez-les avant d’enregistrer.")}'
-          + (ancienNom && ancienNom !== r.nom ? ' ${T("Ancien nom :")} « ' + ancienNom + ' »' : '') + resteF, resteF ? 'att' : 'bon');
-        return;
-      }
-      dire('${T("Description rédigée — relisez-la avant d’enregistrer.")}' + resteF, resteF ? 'att' : 'bon');
+      /* (2026-11-22, sa demande : « on doit pouvoir réviser et approuver avant la création ») La proposition ne s écrit
+         plus d elle-même dans la fiche : elle s ouvre dans la boîte de révision (reviserIa). */
+      reviserIa(r, avecNom, ancienNom, resteF);
     });
   }
+
+  /* ══ LA RÉVISION DE LA PROPOSITION DE L IA (2026-11-22, sa demande : « fiches produit rédigées par l IA — on doit
+     pouvoir réviser et approuver avant la création ») ═══════════════════════════════════════════════════════════
+     Le nom et la description proposés s ouvrent dans une boîte, éditables. « Approuver et appliquer » les pose dans
+     la fiche — qui ne sera créée qu à « Enregistrer », comme toujours ; « Rejeter » (ou Échap) ne touche à rien.
+     L ancien nom et le début de l ancienne description restent sous les yeux : un texte tapé avec soin ne disparaît
+     pas sans qu on l ait vu. */
+  function reviserIa(r, avecNom, ancienNom, resteF){
+    var ancDesc = val('p-desc') || '';
+    var v = document.createElement('div');
+    v.className = 'szbr-voile';
+    v.innerHTML = '<div class="szbr-boite pf-rev" role="dialog" aria-modal="true" aria-labelledby="pf-rev-t">'
+      + '<h3 id="pf-rev-t">${T("Proposition de l’IA — à réviser")}</h3>'
+      + '<p class="szbr-note">${T("Rien n’est appliqué tant que vous n’approuvez pas. Corrigez librement le texte proposé.")}</p>'
+      + ((avecNom && r.nom) ? '<label class="pf-rev-l" for="pf-rev-nom">${T("Nom proposé")}</label><input id="pf-rev-nom" maxlength="70">'
+          + (ancienNom ? '<div class="szbr-note">${T("Nom actuel :")} « ' + esc(ancienNom) + ' »</div>' : '') : '')
+      + '<label class="pf-rev-l" for="pf-rev-desc">${T("Description proposée")}</label><textarea id="pf-rev-desc" maxlength="3000"></textarea>'
+      + (ancDesc ? '<div class="szbr-note pf-rev-anc">${T("Description actuelle :")} ' + esc(ancDesc.slice(0, 240)) + (ancDesc.length > 240 ? '…' : '') + '</div>' : '')
+      + (resteF ? '<p class="pf-rev-att">' + esc(resteF.trim()) + '</p>' : '')
+      + '<div class="szbr-pied"><button type="button" id="pf-rev-non">${T("Rejeter")}</button>'
+      + '<button type="button" class="prim" id="pf-rev-oui">${T("Approuver et appliquer")}</button></div></div>';
+    document.body.appendChild(v);
+    var eN = document.getElementById('pf-rev-nom'); if (eN) eN.value = r.nom || '';
+    var eD = document.getElementById('pf-rev-desc'); eD.value = r.texte || '';
+    try { eD.focus(); } catch (e) {}
+    var touche = function(ev){ if (ev.key === 'Escape') { ev.preventDefault(); rejeter(); } };
+    var fermer = function(){ if (v.parentNode) v.parentNode.removeChild(v); document.removeEventListener('keydown', touche, true); };
+    var rejeter = function(){ fermer(); dire('${T("Proposition rejetée — la fiche n’a pas changé.")}'); };
+    document.addEventListener('keydown', touche, true);
+    document.getElementById('pf-rev-non').onclick = rejeter;
+    document.getElementById('pf-rev-oui').onclick = function(){
+      var d = (eD.value || '').trim(), n = eN ? (eN.value || '').trim() : '';
+      if (d) poser('p-desc', d);
+      if (eN && n) {
+        poser('p-nom', n);
+        var pn = document.getElementById('p-nom'); if (pn) pn.classList.remove('manque');
+        majNom(); Assist.fil();
+      }
+      majCompo();
+      fermer();
+      dire('${T("Proposition approuvée et appliquée — elle sera enregistrée avec la fiche.")}' + (resteF || ''), resteF ? 'att' : 'bon');
+    };
+  }
+  // Pour les bancs et la capture : ouvrir la boîte avec une proposition fabriquée (aucun appel à l IA).
+  window._pfReviserIa = function(nom, texte){ reviserIa({ nom: nom, texte: texte }, !!nom, val('p-nom') || '', ''); };
 
   // Les couleurs CHOISIES vivent dans ce tableau, pas dans le DOM : les jetons
   // sont redessines a chaque ajout.

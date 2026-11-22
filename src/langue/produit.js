@@ -1087,4 +1087,13 @@ module.exports = {
   "Enregistré. Votre rôle ne permet pas d’ajouter à la photothèque : les photos sont dans la fiche seulement.": "Saved. Your role cannot add to the photo library: the photos are in the product only.",
   "Enregistré, mais la copie dans la photothèque est incomplète :": "Saved, but the copy to the photo library is incomplete:",
   'Réessayer le rapatriement': 'Retry fetching the video',
+  "Proposition de l’IA — à réviser": "AI proposal — to review",
+  "Rien n’est appliqué tant que vous n’approuvez pas. Corrigez librement le texte proposé.": "Nothing is applied until you approve. Edit the proposed text freely.",
+  "Nom proposé": "Proposed name",
+  "Nom actuel :": "Current name:",
+  "Description proposée": "Proposed description",
+  "Description actuelle :": "Current description:",
+  "Approuver et appliquer": "Approve and apply",
+  "Proposition rejetée — la fiche n’a pas changé.": "Proposal rejected — the product sheet is unchanged.",
+  "Proposition approuvée et appliquée — elle sera enregistrée avec la fiche.": "Proposal approved and applied — it will be saved with the product sheet.",
 };
