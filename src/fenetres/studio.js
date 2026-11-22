@@ -705,8 +705,8 @@ html.mode-fiche #b-reset,html.mode-fiche #b-lot,html.mode-fiche #b-final,html.mo
        était périmé : le sondage des lots ne tournait que sur l'écran des lots. -->
   <!-- (2026-10-25, sa capture : devant et dos du gilet « pas à la même hauteur ») Le cadrage uniforme s applique de
        lui-même aux nouvelles générations ; ce bouton le passe sur les photos DÉJÀ en place, après confirmation. -->
-  <button class="tj" id="recadrer" title="${T("Uniformiser le cadrage des photos déjà en place (même hauteur, centrées)")}"
-    aria-label="${T("Uniformiser le cadrage des photos")}">⛶</button>
+  <!-- (2026-11-22, sa demande : « retirer ce bouton et option ») Le recadrage des photos déjà en place est retiré ; les
+       nouvelles générations restent recadrées d'elles-mêmes. Le gestionnaire ci-dessous ne trouve plus son bouton. -->
   <button class="tj" id="lots-voir" title="${T("Traitements par lot — voir la file, mettre en pause, arrêter")}"
     aria-label="${T("Traitements par lot")}">${ICO.clock}</button></div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : votre rôle ne permet pas de lancer de traitement.")}</div>

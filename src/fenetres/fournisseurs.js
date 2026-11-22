@@ -72,7 +72,17 @@ tbody .dt{font-size:.72rem;color:var(--tx2)}
   padding:.6rem .7rem;display:flex;flex-direction:column;gap:.25rem}
 .reptete{display:flex;align-items:flex-start;gap:.5rem;justify-content:space-between}
 .reptete strong{font-size:.88rem;line-height:1.3}
-.repquoi{font-size:.76rem;color:var(--tx-bleute);line-height:1.5;margin:.15rem 0}
+.repquoi{font-size:.76rem;color:var(--tx-bleute);line-height:1.5;margin:.15rem 0;display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.repcarte .dt{overflow-wrap:anywhere}
+.rep-vue{display:inline-flex;gap:3px;margin-right:.8rem;vertical-align:middle}
+.rep-vue button{height:1.8rem;padding:0 .7rem;border-radius:8px;border:1px solid var(--v12);background:transparent;color:var(--tx2);font:inherit;font-size:.76rem;font-weight:600;cursor:pointer}
+.rep-vue button.on{background:var(--tx);color:var(--f-carte);border-color:var(--tx)}
+.rep-liste table{width:100%;border-collapse:collapse;font-size:.8rem}
+.rep-liste th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.04em;color:var(--tx2);padding:.35rem .5rem}
+.rep-liste td{padding:.38rem .5rem;border-top:1px solid var(--v08);vertical-align:middle}
+.rep-liste td b{display:block;font-size:.84rem}
+.rep-liste .rep-q{display:block;max-width:26rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rep-liste td.r{text-align:right;white-space:nowrap}
 .repfin{margin-top:auto;padding-top:.4rem;display:flex;justify-content:flex-end}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -145,6 +155,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var REP = null;         // { entrees, cats, pays, peutAjouter } ou null
   var REP_Q = '', REP_CAT = '', REP_PAYS = '';
 
+  /* (2026-11-22, sa capture : « améliore la vue et ajoute un mode compact ») Retenu sur le poste. */
+  var REP_COMPACT = false; try { REP_COMPACT = localStorage.getItem('sz-rep-compact') === '1'; } catch (e) {}
   function vueRepertoire(){
     var d = REP;
     var h = '<div class="barreoutils">'
@@ -158,10 +170,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (d.pays || []).map(function(p){
           return '<option value="' + esc(p.cle) + '"' + (REP_PAYS === p.cle ? ' selected' : '') + '>'
             + esc(p.nom) + '</option>'; }).join('') + '</select>'
-      + '<span class="droite">' + (d.entrees || []).length + '${T(" sur ")}' + (d.total || 0) + '</span></div>';
+      + '<span class="droite"><span class="rep-vue"><button type="button" data-repvue="cartes" class="' + (REP_COMPACT ? '' : 'on') + '">${T("Cartes")}</button>'
+      + '<button type="button" data-repvue="compact" class="' + (REP_COMPACT ? 'on' : '') + '">${T("Compact")}</button></span>'
+      + (d.entrees || []).length + '${T(" sur ")}' + (d.total || 0) + '</span></div>';
 
     if (!(d.entrees || []).length) {
       return h + '<div class="carte"><div class="vide">${T("Aucun résultat pour cette recherche.")}</div></div>';
+    }
+    var geste = function(s){
+      return s.dejaAjoute ? '<span class="rf-pill vert">${T("Déjà dans vos fournisseurs")}</span>'
+        : (d.peutAjouter ? '<button class="mini prim" data-repadd="' + esc(s.nom) + '">${T("+ Ajouter")}</button>' : '<span class="dt">${T("consultation seulement")}</span>');
+    };
+    if (REP_COMPACT) {
+      return h + '<div class="carte rep-liste"><table><thead><tr><th>${T("Fournisseur")}</th><th>${T("Catégorie")}</th><th>${T("Lieu")}</th><th>${T("Contact")}</th><th></th></tr></thead><tbody>'
+        + d.entrees.map(function(s){
+            return '<tr><td><b>' + esc(s.nom) + '</b><span class="dt rep-q" title="' + esc(s.quoi) + '">' + esc(s.quoi) + '</span></td>'
+              + '<td><span class="rf-pill">' + esc(s.cat) + '</span></td>'
+              + '<td class="dt">' + esc(s.paysLibelle) + ' · ' + esc(s.lieu) + '</td>'
+              + '<td class="dt">' + esc([s.courriel, s.tel].filter(Boolean).join(' · ')) + (s.site ? '<br>' + esc(s.site) : '') + '</td>'
+              + '<td class="r">' + geste(s) + '</td></tr>'; }).join('')
+        + '</tbody></table></div>';
     }
     h += '<div class="repgrille">' + d.entrees.map(function(s){
       return '<div class="repcarte">'
@@ -341,6 +369,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     };
     var c = document.getElementById('rep-cat');
     if (c) c.onchange = function(){ REP_CAT = c.value; chargerRepertoire(); };
+    Array.prototype.forEach.call(document.querySelectorAll('[data-repvue]'), function(b){
+      b.onclick = function(){ REP_COMPACT = b.getAttribute('data-repvue') === 'compact'; try { localStorage.setItem('sz-rep-compact', REP_COMPACT ? '1' : '0'); } catch (e) {}
+        corps.innerHTML = vueRepertoire(); brancherRepertoire(); };
+    });
     var p = document.getElementById('rep-pays');
     if (p) p.onchange = function(){ REP_PAYS = p.value; chargerRepertoire(); };
     if (q) { try { q.focus({ preventScroll: true }); q.setSelectionRange(q.value.length, q.value.length); } catch (e) {} }

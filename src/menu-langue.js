@@ -86,7 +86,6 @@ const MENU_APP_EN = {
   'Ancrer à gauche': 'Dock at the left',
   'Apparence': 'Appearance',
   'Archives': 'Archives',
-  'Attributs produits': 'Product attributes',
   'Automatisations': 'Automations',
   'Avis produits': 'Product reviews',
   /* ⚠ << Status bar >> est le terme CONVENU dans les logiciels de bureau ; c est
@@ -98,6 +97,15 @@ const MENU_APP_EN = {
   'Cartes-cadeaux': 'Gift cards',
   // (2026-11-22) « Catalogue » coupé en trois sections (l'ancien intitulé est retiré).
   'Produits': 'Products',
+  // (2026-11-22) Configuration › Produit : un attribut par entrée.
+  'Tailles': 'Sizes',
+  'Genres': 'Genders',
+  'Groupes d’âge': 'Age groups',
+  'Styles': 'Styles',
+  'Couleurs': 'Colours',
+  'Étiquettes': 'Labels',
+  'Catégories': 'Categories',
+  'Réachat': 'Reorder',
   'Stock et achats': 'Stock & purchasing',
   'Photos et création': 'Photos & creation',
   'Centre d’impression': 'Print centre',

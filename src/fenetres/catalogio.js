@@ -290,6 +290,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
     var repli  = !!(d && d.repli);
     var titre  = (DERNIER_EXPORT ? '${T("Dernier fichier écrit :")} ' + esc(DERNIER_EXPORT) + '. ' : '')
                + '${T("Ouvre ce dossier")}';
+    /* (2026-11-22, sa demande : « ça ne doit être configurable que par les configurations ») Le dossier ne se montre
+       ni ne se change plus ici (Configuration › Système › Dossier des exports). Seul reste l'AVERTISSEMENT quand le
+       dossier choisi ne répond pas : sans lui, on chercherait ses fichiers au mauvais endroit. */
+    if (!repli) return '';
     return '<div class="dossier' + (repli ? ' repli' : '') + '">'
       +   '<div class="dl">'
       +     '<span class="dk">${T("Les fichiers sortent dans")}</span>'
@@ -302,10 +306,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
             + '${T("ou dossier renommé. Les fichiers sortent dans le dossier standard <strong>en attendant</strong> : ")}'
             + '${T("votre choix est gardé et redeviendra effectif dès qu’il réapparaîtra.")}</div>'
           : '')
-      +   '<div class="dbtns">'
-      +     '<button class="ghost mini" data-act="dosschoisir">${T("Changer…")}</button>'
-      +     (perso ? '<button class="ghost mini" data-act="dossdefaut">${T("Revenir au dossier standard")}</button>' : '')
-      +   '</div>'
       + '</div>';
   }
 

@@ -621,7 +621,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (x) copierTexte(messagePrive(x.g, x.a), '${T("Message copié : collez-le en réponse à son message privé dans TikTok.")}');
   };
   $('essai').onchange = function(){ geste('modeEssai', [this.checked]); };
-  $('ecran').onclick = function(){ if (EN) EN.ecran({ pleinEcran: false }); };
+  $('ecran').onclick = function(){ if (EN) EN.ecran({ pleinEcran: false }).then(function(r){ if (r && r.ok === false) szDire('${T("L’écran filmé n’a pas pu s’ouvrir.")}', 'err'); }); };
+  // (2026-11-22, sa capture : « les boutons ne marchent pas ») Ce bouton n'avait AUCUN gestionnaire.
+  $('ecran-plein').onclick = function(){
+    if (!EN) return;
+    EN.ecran({ pleinEcran: true }).then(function(r){
+      if (r && r.motif === 'un_seul_ecran') szDire('${T("Un seul moniteur est branché : l’écran filmé s’ouvre dans une fenêtre.")}', 'att');
+      else if (r && r.ok === false) szDire('${T("L’écran filmé n’a pas pu s’ouvrir.")}', 'err');
+    });
+  };
   $('rapports').onclick = function(){
     var P0 = window.szPont;
     if (P0 && P0.ouvrirModule) { P0.ouvrirModule('encan-rapports'); szDire('${T("Ouverture des rapports d’encan…")}'); }

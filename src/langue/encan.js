@@ -268,4 +268,6 @@ module.exports = {
   'L’adjudication est annulée : la gagnante perd l’article et son lien de paiement est annulé. Toutes les offres sont effacées.': 'The sale is cancelled: the winner loses the item and her payment link is cancelled. All bids are erased.',
   'Toutes les offres reçues pour cet article sont effacées et l’encan revient au prix de départ.': 'All bids received for this item are erased and the auction returns to the starting price.',
   'Offres': 'Bids',
+  'L’écran filmé n’a pas pu s’ouvrir.': 'The on-camera screen could not open.',
+  'Un seul moniteur est branché : l’écran filmé s’ouvre dans une fenêtre.': 'Only one monitor is connected: the on-camera screen opens in a window.',
 };

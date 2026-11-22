@@ -267,10 +267,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
     /* Deux phrases ENTIERES, chacune dans un seul litteral : coupees, elles se
        traduiraient en morceaux qui ne se recollent pas. */
-    h += '<div class="carte"><div class="avis">'
-      + '${T("Les commandes livrées sont archivées automatiquement 45 jours après leur livraison, avec leurs factures et remboursements associés, puis conservées 6 ans.")} '
-      + '${T("Pour rembourser une commande archivée, « Rembourser » la réactive pour un nouveau délai de 45 jours et l’ouvre dans sa fenêtre.")}'
-      + '</div></div>';
+    /* (2026-11-22, sa capture : « retire ça ») Le bandeau qui expliquait l'archivage automatique est retiré. */
 
     h += '<div class="carte sz-pagee">';
     if (!vue.length) {

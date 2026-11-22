@@ -180,7 +180,10 @@ html.jour .reco-head:hover{background:var(--f-bande)}
  * ⚠ Les lignes d'AJOUT ont leur id d'ouverture : le banc ne clique pas.
  */
 function pageInvMeta(ouverture) {
-  const ouv = String(ouverture || '');
+  /* (2026-11-22, sa demande : « au lieu de tous ces onglets, une zone Produit dans Configuration, et chacun dedans »)
+     « seul:<onglet> » : la fenêtre ne montre QUE cet attribut — pas de rangée d'onglets, son nom en titre. */
+  const seul = /^seul:/.test(String(ouverture || '')) ? String(ouverture).slice(5) : '';
+  const ouv = seul || String(ouverture || '');
   const ONGLETS = ['sizes', 'genres', 'ageGroups', 'styles', 'colors', 'labels', 'categories', 'reachat'];
   const tabDepart = ouv === 'attr-nouveau' ? 'genres'
     : ouv === 'cat-nouvelle' ? 'categories'
@@ -192,7 +195,7 @@ function pageInvMeta(ouverture) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.invmeta}</span><h1>${T("Attributs produits")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="onglets" id="onglets"></div>
+<div class="onglets" id="onglets"${seul ? ' hidden style="display:none"' : ''}></div>
 <div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
 <script>
@@ -285,6 +288,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
 
   /* ══ ONGLETS ═══════════════════════════════════════════════════════════════ */
   function dessinerOnglets(){
+    if (${seul ? 'true' : 'false'}) { ongletsEl.innerHTML = ''; var h1 = document.querySelector('.tete h1'); if (h1) h1.textContent = LIBELLES[TAB] || h1.textContent; return; }
     ongletsEl.innerHTML = ['sizes','genres','ageGroups','styles','colors','labels','categories','reachat']
       .map(function(id){ return '<button data-tab="' + id + '" class="' + (TAB === id ? 'actif' : '') + '">'
         + esc(LIBELLES[id]) + '</button>'; }).join('');

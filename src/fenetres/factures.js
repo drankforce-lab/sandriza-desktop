@@ -79,6 +79,16 @@ table{width:100%;font-size:.84rem}
 thead th{text-align:left}
 tbody tr{cursor:pointer}
 tbody td{vertical-align:middle}
+/* (2026-11-22, sa capture : « améliore l'affichage dans les factures ») Le numéro et le client ne se coupent plus
+   (« FAC-0002-47040… », « Bobby Brouss… ») ; échéance, total et statut prennent leur largeur juste, le reste va au client. */
+[data-pages="factures"] table{table-layout:fixed;width:100%}
+[data-pages="factures"] th:nth-child(1){width:2.2rem}[data-pages="factures"] th:nth-child(2){width:11rem}
+[data-pages="factures"] th:nth-child(4){width:7.5rem}[data-pages="factures"] th:nth-child(5){width:6.5rem}
+[data-pages="factures"] th:nth-child(6){width:7rem}[data-pages="factures"] th:nth-child(7){width:9.5rem}
+[data-pages="factures"] .cx-num{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}
+[data-pages="factures"] .cx-qui b,[data-pages="factures"] .cx-qui .cx-l2{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:break-word}
+[data-pages="factures"] td.fin{white-space:normal!important;text-align:right}
+[data-pages="factures"] td.fin .geste{display:block;margin:.15rem 0 .15rem auto;white-space:nowrap}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}

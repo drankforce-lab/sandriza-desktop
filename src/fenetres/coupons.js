@@ -134,6 +134,7 @@ html[data-sz-theme="epure"] .cp-lot{align-items:center}
 .cp-ticket{flex:0 0 auto;width:9.5rem;height:2.6rem;padding:0 .8rem;display:flex;align-items:center;justify-content:center;
   border:1.5px dashed var(--sz-accent);border-radius:9px;background:var(--sz-accent-doux);color:var(--tx);
   font:700 .8rem/1 ui-monospace,"Courier New",monospace;letter-spacing:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls.compacte .cp-ticket{width:7.5rem;height:1.8rem;font-size:.75rem}
 .cp-rang.eteint .cp-ticket{border-color:var(--sz-bord-fort);background:transparent;color:var(--tx2)}
 .cp-rang .ou b.cp-red{font-size:1.05rem;font-weight:700}
 .cp-rang .bilan small{font-size:.76rem;font-weight:500;color:var(--tx2)}
@@ -441,12 +442,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
        RANG aere par coupon, qui commence par le coupon LUI-MEME (son code sur
        un ticket). Crochets gardes : #cp-q, data-etat, #cp-nouveau,
        data-modifier / data-basculer / data-suppr, #cp-exporter. */
-    var h = '<div class="ls">';
+    var CPC = false; try { CPC = localStorage.getItem('sz-cp-compact') === '1'; } catch (e) {}
+    var h = '<div class="ls' + (CPC ? ' compacte' : '') + '">';
     h += '<div class="ls-tete"><div class="ed-seg ls-onglets">'
       + '<button type="button" class="' + (ETAT === '' ? 'on' : '') + '" data-etat="">${T("Tous")}</button>'
       + '<button type="button" class="' + (ETAT === 'actifs' ? 'on' : '') + '" data-etat="actifs">${T("En cours")}</button>'
       + '<button type="button" class="' + (ETAT === 'inactifs' ? 'on' : '') + '" data-etat="inactifs">${T("Hors service")}</button>'
       + '</div><div class="droite">'
+      + '<span class="ed-seg ls-vue"><button type="button" data-cpvue="detail" class="' + (CPC ? '' : 'on') + '">${T("Détaillé")}</button>'
+      + '<button type="button" data-cpvue="compact" class="' + (CPC ? 'on' : '') + '">${T("Compact")}</button></span>'
       + '<label class="ls-rch">${ICO.loupe}<input aria-label="${T("Code ou nom")}" type="search" id="cp-q" placeholder="${T("Code ou nom…")}" value="' + esc(Q) + '"></label>'
       + (D.peutModifier ? '<button class="ed-bt fort" id="cp-nouveau">${T("+ Nouveau coupon")}</button>' : '')
       + '</div></div>';
@@ -645,6 +649,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
     var t = ev.target;
     if (!t || !t.closest || t.closest('.boite')) return;
     if (CK.clic(ev)) { lotSynchro(); return; }   // une case, « tout cocher » ou la barre d actions
+    var cv = t.closest('[data-cpvue]');
+    if (cv) { try { localStorage.setItem('sz-cp-compact', cv.getAttribute('data-cpvue') === 'compact' ? '1' : '0'); } catch (e) {} dessiner(); return; }
 
     var be = t.closest('[data-etat]');
     if (be) { ETAT = be.getAttribute('data-etat'); SUPPR_ARME = ''; if (D && D.pagine) { PG = 0; charger(); } else dessiner(); return; }

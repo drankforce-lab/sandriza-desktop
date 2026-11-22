@@ -388,6 +388,14 @@ html.jour .gp .cat.tc{color:color-mix(in srgb,var(--cc,#6d7f96) 55%,black);
 .gp.compacte .acts button.ico{width:1.75rem}
 .gp.compacte .acts button svg,.gp.compacte .acts button.ico svg{width:15px;height:15px}
 .gp.compacte .acts button.inv .tx{display:none}
+/* (2026-11-22, sa capture : « le mode compact est affreux ») Les gestes s'EMPILAIENT (le thème Épuré pose les boutons en
+   bloc) : chaque rangée prenait trois hauteurs de bouton. En compact, ils restent côte à côte, sans cadre. */
+.gp.compacte td.acts{width:1%;white-space:nowrap!important}
+.gp.compacte .acts button,.gp.compacte .acts button.ico{display:inline-flex!important;vertical-align:middle;margin:0 0 0 .2rem!important;
+  height:1.7rem!important;width:auto!important;padding:0 .4rem!important;border-color:transparent!important;background:transparent!important}
+.gp.compacte .acts button.ico,.gp.compacte .acts button.inv{width:1.7rem!important;padding:0!important;justify-content:center}
+.gp.compacte .acts button:hover:not(:disabled){background:var(--v06)!important}
+.gp.compacte tbody tr{height:auto}
 /* LA BASCULE D AFFICHAGE (2026-10-12, sa demande : << un genre de bouton toggle >>) : deux positions
    accolees dans un rail, la position choisie en or. Un bouton d application est PLAT (pas d ombre). */
 .vue-bascule{display:inline-flex;align-items:stretch;gap:2px;padding:3px;border-radius:10px;

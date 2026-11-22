@@ -195,4 +195,7 @@ module.exports = {
   "{0} coupons activés.": "{0} coupons activated.",
   "{0} coupon suspendu.": "{0} coupon suspended.",
   "{0} coupons suspendus.": "{0} coupons suspended.",
+  // 2026-11-22 : mode compact.
+  'Détaillé': 'Detailed',
+  'Compact': 'Compact',
 };

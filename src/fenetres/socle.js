@@ -4858,7 +4858,10 @@ html.jour .pf-fiche .etat.on{color:#1f6b3d}
 .pf-fiche .reste button.fait{color:var(--tx2)}
 .pf-fiche .reste button.fait .o{border-color:var(--tx-ok);background:var(--tx-ok);display:flex;align-items:center;justify-content:center}
 .pf-fiche .reste button.fait .o svg{width:.7rem;height:.7rem;fill:none;stroke:var(--f-carte);stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
-@media (max-width:1100px){.pf-fiche{display:none}}
+/* (2026-11-22, ses captures « Nouveau fournisseur » et « Nouvelle collection » : la moitié de la fenêtre vide) Le volet reste
+   visible jusqu'à 760 px — plus étroit sous 1100 px — au lieu de disparaître dès 1100. */
+@media (max-width:1100px){.pf-fiche{flex-basis:14rem}}
+@media (max-width:760px){.pf-fiche{display:none}}
 /* Ajouts pour Collection et Fournisseur (2026-10-01) : un monogramme quand
    la fiche n a pas de photo par nature, des puces pour une liste courte, et
    les premieres lignes d une selection. */
@@ -5003,6 +5006,16 @@ const CSS_RESPIRE = `
 .ls-rang{display:grid;align-items:center;gap:1.4rem;min-height:4.6rem;padding:.75rem 1rem .75rem .9rem;margin-bottom:.55rem;
   border-radius:14px;background:var(--f-carte);border:1px solid var(--sz-bord)}
 .ls-rang:hover{border-color:var(--sz-bord-fort)}
+/* (2026-11-22, sa demande : « un mode compact doit être ajouté ici aussi » — Offres, Coupons…) LE MODE COMPACT des listes en
+   rangées : une ligne serrée, sans pastille d'initiales, sous-titre sur la même ligne, gestes plus petits. */
+.ls.compacte .ls-rang{min-height:2.5rem;padding:.3rem .8rem;margin-bottom:.22rem;gap:1rem;border-radius:10px}
+.ls.compacte .ls-rang .bico{display:none}
+.ls.compacte .ls-rang .tx{flex-direction:row;align-items:baseline;gap:.6rem}
+.ls.compacte .ls-rang .tx b{white-space:nowrap}
+.ls.compacte .ls-rang .tx span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls.compacte .ls-rang .ou,.ls.compacte .ls-rang .etat,.ls.compacte .ls-rang .bilan{flex-direction:row;align-items:center;gap:.5rem}
+.ls.compacte .ls-rang button{height:1.75rem;padding:0 .6rem;font-size:.75rem}
+.ls-vue{display:inline-flex;gap:0;margin-right:.5rem}
 /* (2026-11-21, sa capture : « agrandis la zone du titre pour maximiser l’affichage du nom ») Le nom prend la place ;
    la colonne des gestes ne prend que ce qu’il faut à ses boutons. */
 .ls-camp{grid-template-columns:minmax(0,2.4fr) minmax(0,1.1fr) 7.5rem 7.5rem auto}

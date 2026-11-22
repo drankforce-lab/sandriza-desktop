@@ -208,4 +208,8 @@ module.exports = {
   'Correct': 'OK',
   '{0} en stock': '{0} in stock',
   'Importer d’un fournisseur': 'Import from a supplier',
+  // 2026-11-22 : filtre en liste et mode compact.
+  'Afficher': 'Show',
+  'Tous les produits': 'All products',
+  'Ventes spéciales': 'Special sales',
 };

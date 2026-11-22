@@ -287,4 +287,10 @@ module.exports = {
   'Prévu': 'Forecast',
   'à commander maintenant': 'order now',
   'avant le {0}': 'before {0}',
+  // 2026-11-22
+  '＋ Nouveau bon': '＋ New order',
+  'Aucun bon en cours': 'No order in progress',
+  'Partez des articles sous leur seuil : un bon par fournisseur, prêt à envoyer.': 'Start from the items under their threshold: one order per supplier, ready to send.',
+  'Voir les articles à commander': 'See items to order',
+  'Créer un bon vide': 'Create an empty order',
 };

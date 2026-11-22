@@ -5989,9 +5989,11 @@ const JEU = {
          Le bouton qui ouvre ce dossier est la seule chose qui repond a << ou est
          parti mon fichier ? >> : s il disparait, plus rien ne casse, et la
          fenetre redevient muette exactement comme avant. */
-      { nom: 'onglet exporter (catalogue)', id: '', exige: ['data-act="dossier"'],
+      /* (2026-11-22, sa demande) Le dossier ne s'affiche plus dans cette fenêtre : il se règle dans Configuration › Système
+         › Dossier des exports, et le message de fin d'export dit où le fichier est parti. */
+      { nom: 'onglet exporter (catalogue)', id: '',
         reponses: { identite: IDENTITE, 'catalogio:etat': etat({}) } },
-      { nom: 'choix du fichier a importer', id: 'import', exige: ['data-act="dossier"'],
+      { nom: 'choix du fichier a importer', id: 'import',
         reponses: { identite: IDENTITE, 'catalogio:etat': etat({}) } },
       { nom: 'apercu d un import catalogue', id: 'apercu',
         reponses: { identite: IDENTITE, 'catalogio:etat': etat({ imp: IMP }), 'catalogio:lignes': LIGNES } },

@@ -37,4 +37,13 @@ module.exports = {
   'lecture seule · réponses tirées de vos données': 'read-only · answers drawn from your data',
   '⚓ Ancrer': '⚓ Dock',
   '⧉ Détacher': '⧉ Detach',
+  // 2026-11-22 : vider, exporter, imprimer la conversation.
+  'Vider': 'Clear',
+  'Exporter': 'Export',
+  'Imprimer': 'Print',
+  'Question': 'Question',
+  'Réponse': 'Answer',
+  'Conversation exportée.': 'Conversation exported.',
+  'Vider la conversation': 'Clear the conversation',
+  'Les questions et réponses affichées seront effacées. Rien n’est enregistré ailleurs.': 'The questions and answers shown will be erased. Nothing is saved elsewhere.',
 };

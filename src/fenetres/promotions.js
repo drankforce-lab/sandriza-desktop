@@ -186,6 +186,17 @@ input[type=checkbox]{accent-color:var(--or)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* La liste refaite (2026-10-15, lot B) : un rang par offre ; une annonce montre son bandeau ou son badge en petit. */
 .pr-rang{grid-template-columns:minmax(0,1.8fr) minmax(0,1fr) minmax(0,1.1fr) auto}
+/* Le mode COMPACT : une ligne serrée par offre ou annonce — sans pastille d'initiales, sous-titre sur la même ligne, gestes plus petits. */
+.ls.compacte .ls-rang{min-height:2.5rem;padding:.3rem .8rem;margin-bottom:.22rem;gap:1rem;border-radius:10px}
+.ls.compacte .ls-rang .bico{display:none}
+.ls.compacte .ls-rang .tx{flex-direction:row;align-items:baseline;gap:.6rem}
+.ls.compacte .ls-rang .tx b{white-space:nowrap}
+.ls.compacte .ls-rang .tx span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls.compacte .ls-rang .ou,.ls.compacte .ls-rang .etat{flex-direction:row;align-items:center;gap:.5rem}
+.ls.compacte .ls-rang .ou b.pr-red{font-size:.92rem}
+.ls.compacte .ls-rang button{height:1.75rem;padding:0 .6rem;font-size:.75rem}
+.ls.compacte .pr-rang-an .ou>*{font-size:.75rem!important;padding-top:.15rem!important;padding-bottom:.15rem!important}
+.pr-vue{margin-right:.5rem}
 .pr-rang-an{grid-template-columns:minmax(0,1.1fr) minmax(0,1.6fr) minmax(0,1fr) auto}
 .pr-rang .ou b.pr-red{font-size:1.05rem;font-weight:700}
 .pr-vu{min-width:0;display:flex}
@@ -223,6 +234,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
   var sous = document.getElementById('sous');
 
   var ONGLET = 'offres';    // offres | annonces
+  /* (2026-11-22, sa demande : « un mode compact doit être ajouté ici aussi ») Retenu sur le poste, comme l'inventaire. */
+  var COMPACT = false; try { COMPACT = localStorage.getItem('sz-pr-compact') === '1'; } catch (e) {}
   var D = null;             // le jeu de l onglet courant
   var Q = '';
   var FORM = null;          // objet en cours d edition (ou {} pour une creation)
@@ -634,11 +647,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
        BANDEAU en petit (ses couleurs) ou son BADGE. Crochets gardes :
        data-onglet, data-prt, #pr-q, #pr-nouveau, #pr-interv, #pr-interv-enr,
        data-modifier, data-basculer, data-suppr, #pr-exporter. */
-    var h = '<div class="ls">';
+    var h = '<div class="ls' + (COMPACT ? ' compacte' : '') + '">';
     h += '<div class="ls-tete"><div class="ed-seg ls-onglets">'
       + '<button type="button" class="' + (ONGLET === 'offres' ? 'on' : '') + '" data-onglet="offres">${T("Offres et rabais")}</button>'
       + '<button type="button" class="' + (ONGLET === 'annonces' ? 'on' : '') + '" data-onglet="annonces">${T("Annonces et badges")}</button>'
       + '</div><div class="droite">'
+      + '<span class="ed-seg pr-vue"><button type="button" data-prvue="detail" class="' + (COMPACT ? '' : 'on') + '">${T("Détaillé")}</button>'
+      + '<button type="button" data-prvue="compact" class="' + (COMPACT ? 'on' : '') + '">${T("Compact")}</button></span>'
       + '<label class="ls-rch">${ICO.loupe}<input aria-label="${T("Rechercher")}" type="search" id="pr-q" placeholder="${T("Rechercher…")}" value="' + esc(Q) + '"></label>'
       + (D.peutModifier ? '<button class="ed-bt fort" id="pr-nouveau">+ '
           + (ONGLET === 'offres' ? '${T("Nouvelle offre")}' : '${T("Nouvelle annonce")}') + '</button>' : '')
@@ -1053,6 +1068,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       var f = pt.getAttribute('data-prt') || '';
       ETAT = (ETAT === f) ? '' : f; SUPPR_ARME = ''; dessiner(); return;
     }
+    var pv = t.closest('[data-prvue]');
+    if (pv) { COMPACT = pv.getAttribute('data-prvue') === 'compact'; try { localStorage.setItem('sz-pr-compact', COMPACT ? '1' : '0'); } catch (e) {} dessiner(); return; }
     var og = t.closest('[data-onglet]');
     if (og) {
       ONGLET = og.getAttribute('data-onglet');

@@ -185,6 +185,18 @@ html.jour .voile{background:rgba(20,24,30,.35)}
   background:var(--f-carte);border:1px solid var(--v10);color:var(--tx)}
 .pm-puces button.on{background:var(--tx);border-color:var(--tx);color:var(--f-carte)}
 .pm-puces .sep{flex:1 1 auto}
+.pm-puces{flex-wrap:nowrap}
+.pm-filtre{display:inline-flex;align-items:center;gap:8px;font-size:13px;font-weight:600;color:var(--tx2);white-space:nowrap}
+.pm-filtre select{height:34px;min-width:14rem;border-radius:10px;font-size:13px}
+.pm-vue{display:inline-flex;gap:4px}
+/* Le mode COMPACT : une ligne serrée par produit (vignette 28 px, référence sur la même ligne, jauge cachée). */
+.pm-compacte .pm-prod .vg{width:28px!important;height:28px!important;border-radius:7px!important}
+.pm-compacte .pm-prod>span:last-child{display:flex;align-items:baseline;gap:10px;min-width:0}
+.pm-compacte .pm-prod b{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pm-compacte .pm-prod .r{white-space:nowrap}
+.pm-compacte tbody td{padding-top:5px!important;padding-bottom:5px!important}
+.pm-compacte .pm-st .j{display:none}
+.pm-compacte .pm-cat{padding:1px 8px!important;font-size:11.5px!important}
 /* La carte BORNE la liste (jamais de glissière) : sans flex, la liste prenait sa pleine hauteur et sortait de la carte. */
 .pm .carte.plein{display:flex;flex-direction:column;flex:1 1 0;min-height:0;overflow:hidden}
 .pm .carte.plein>.liste{flex:1 1 0;min-height:0;overflow:hidden}
@@ -404,6 +416,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   }
 
   function EPM(){ return document.documentElement.getAttribute('data-sz-theme') === 'epure'; }
+  var PMC = false; try { PMC = localStorage.getItem('sz-pm-compact') === '1'; } catch (e) {}
   /* La vue « Épuré » : mêmes données, mêmes crochets (#p-q, #p-nouveau, #p-lot, #p-marges, #p-tri, #p-prec,
      #p-suiv, #p-exporter, tr[data-id]) ; les listes déroulantes deviennent des puces. */
   function dessinerEp(ST){
@@ -419,14 +432,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + ((D.peutVenteFinale || D.peutLot) && !LOT ? '<button type="button" id="p-lot">${T("Sélectionner")}</button>' : '')
       + '<button type="button" class="prim" id="p-nouveau">${T("+ Nouveau produit")}</button></header>';
     var puce = function(lib, on, attr){ return '<button type="button" class="' + (on ? 'on' : '') + '" aria-pressed="' + on + '" ' + attr + '>' + esc(lib) + '</button>'; };
+    /* (2026-11-22, sa demande : « regrouper les types dans une liste à choix pour ne pas prendre plus d'une ligne », et
+       « une liste compacte ») : UNE ligne — la liste « Afficher » (catégories, puis l'état du stock et les ventes
+       spéciales), la bascule Détaillé / Compact, le tri par panier. */
+    var opt = function(v, lib, on){ return '<option value="' + esc(v) + '"' + (on ? ' selected' : '') + '>' + esc(lib) + '</option>'; };
     h += '<div class="pm-puces" role="group" aria-label="${T("Filtrer les produits")}">'
-      + puce('${T("Tous")}', !CAT && !STOCK && !TAG, 'data-pm-tous="1"')
-      + (D.cats || []).map(function(c){ return puce(szTd(c.nom), CAT === c.cle, 'data-pm-cat="' + esc(c.cle) + '"'); }).join('')
-      + puce('${T("À réassortir")}', STOCK === 'low', 'data-pm-stock="low"')
-      + puce('${T("En rupture")}', STOCK === 'rupture', 'data-pm-stock="rupture"')
-      + (D.aFinal ? puce('${T("Vente finale")}', TAG === '__final__', 'data-pm-tag="__final__"') : '')
-      + (D.aLiq ? puce('${T("Liquidation")}', TAG === '__liq__', 'data-pm-tag="__liq__"') : '')
+      + '<label class="pm-filtre">${T("Afficher")} <select id="pm-filtre" aria-label="${T("Filtrer les produits")}">'
+      + opt('', '${T("Tous les produits")}', !CAT && !STOCK && !TAG)
+      + '<optgroup label="${T("Catégories")}">' + (D.cats || []).map(function(c){ return opt('cat:' + c.cle, szTd(c.nom), CAT === c.cle); }).join('') + '</optgroup>'
+      + '<optgroup label="${T("Stock")}">' + opt('stock:low', '${T("À réassortir")}', STOCK === 'low') + opt('stock:rupture', '${T("En rupture")}', STOCK === 'rupture') + '</optgroup>'
+      + ((D.aFinal || D.aLiq) ? '<optgroup label="${T("Ventes spéciales")}">'
+          + (D.aFinal ? opt('tag:__final__', '${T("Vente finale")}', TAG === '__final__') : '')
+          + (D.aLiq ? opt('tag:__liq__', '${T("Liquidation")}', TAG === '__liq__') : '') + '</optgroup>' : '')
+      + '</select></label>'
       + '<span class="sep"></span>'
+      + '<span class="pm-vue">' + puce('${T("Détaillé")}', !PMC, 'data-pmvue="detail"') + puce('${T("Compact")}', PMC, 'data-pmvue="compact"') + '</span>'
       + puce(TRI === 'cart' ? '${T("Tri panier ✓")}' : '${T("Trier par panier")}', TRI === 'cart', 'id="p-tri"')
       + '</div>';
     if (LOT) {
@@ -438,7 +458,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + (D.peutVenteFinale ? '<button id="lot-app">${T("Appliquer vente finale")}</button><button id="lot-ret">${T("Retirer vente finale")}</button>' : '')
         + '<button id="lot-annuler">${T("Annuler")}</button></div>';
     }
-    h += '<div class="carte plein">';
+    h += '<div class="carte plein' + (PMC ? ' pm-compacte' : '') + '">';
     if (!rows.length) h += '<div class="vide">${T("Aucun produit ne correspond.")}</div>';
     else {
       var max = Math.max.apply(null, rows.map(function(r){ return r.stockTotal || 0; }).concat([1]));
@@ -478,6 +498,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     corps.innerHTML = h;
     var bi = document.getElementById('p-import');
     if (bi) bi.onclick = function(){ P.ouvrirModule('import-fournisseur'); dire('${T("Ouverture…")}'); };
+    var sf = document.getElementById('pm-filtre');
+    if (sf) sf.onchange = function(){
+      var v = sf.value || '', k = v.split(':')[0], x = v.slice(k.length + 1);
+      CAT = k === 'cat' ? x : ''; STOCK = k === 'stock' ? x : ''; TAG = k === 'tag' ? x : '';
+      PAGE = 0; charger();
+    };
+    corps.querySelectorAll('[data-pmvue]').forEach(function(b){
+      b.onclick = function(){ PMC = b.getAttribute('data-pmvue') === 'compact'; try { localStorage.setItem('sz-pm-compact', PMC ? '1' : '0'); } catch (e) {} dessiner(); };
+    });
     corps.querySelectorAll('[data-pm-tous],[data-pm-cat],[data-pm-stock],[data-pm-tag]').forEach(function(b){
       b.onclick = function(){
         if (b.hasAttribute('data-pm-tous')) { CAT = ''; STOCK = ''; TAG = ''; }

@@ -113,4 +113,9 @@ module.exports = {
   'Supprimer le fournisseur': 'Delete supplier',
   'La fiche du fournisseur': 'The supplier record',
   'sera supprimée définitivement. Les produits qui lui sont rattachés restent en place, mais sans fournisseur. Cette action est irréversible.': 'will be permanently deleted. Products linked to it remain in place, but without a supplier. This action cannot be undone.',
+  // 2026-11-22 : mode compact.
+  'Cartes': 'Cards',
+  'Compact': 'Compact',
+  'Catégorie': 'Category',
+  'Lieu': 'Location',
 };

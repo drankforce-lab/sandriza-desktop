@@ -49,7 +49,18 @@ body{background:var(--f-page);color:var(--tx);
 .onglets button.actif{color:var(--tx-creme);border-bottom-color:var(--or)}
 .onglets .pastille{display:inline-block;min-width:1.15rem;padding:0 .3rem;margin-left:.35rem;
   border-radius:99px;background:var(--or);color:#1a1207;font-size:.6875rem;font-weight:800;text-align:center}
-.onglets .droite{margin-left:auto}
+.onglets .droite{margin-left:auto;display:flex;align-items:center;padding-bottom:.35rem}
+/* (2026-11-22) Boutons plus nets : le geste principal en plein, les autres en contour discret. */
+.onglets .droite .bc-nouveau,.bc-nouveau,.bc-prim{height:2.1rem!important;border-bottom:0!important;background:var(--sz-btn-prim,#8a5a2b)!important;color:var(--sz-btn-prim-txt,#fff)!important;padding:0 1rem;border-radius:10px;border:0;background:var(--sz-btn-prim,#8a5a2b);color:var(--sz-btn-prim-txt,#fff);
+  font:inherit;font-size:.82rem;font-weight:700;cursor:pointer}
+.bc-nouveau:hover,.bc-prim:hover{filter:brightness(1.06)}
+.bc-sec{height:2.1rem;padding:0 1rem;border-radius:10px;border:1px solid var(--v16);background:transparent;color:var(--tx);font:inherit;font-size:.82rem;font-weight:600;cursor:pointer}
+.bc-sec:hover{background:var(--v05)}
+.bc-vide{display:flex;flex-direction:column;align-items:center;gap:.55rem;padding:3rem 1rem!important;text-align:center}
+.bc-vide b{font-size:1rem;color:var(--tx)}
+.bc-vide .dt{max-width:30rem}
+.bc-ico{width:3.2rem;height:3.2rem;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--v05);color:var(--tx2)}
+.bc-vide-gestes{display:flex;gap:.5rem;margin-top:.4rem;flex-wrap:wrap;justify-content:center}
 .corps{flex:1 1 auto;min-height:0;padding:.8rem 1.05rem;overflow:hidden;
   display:flex;flex-direction:column;gap:.7rem}
 .pile{display:flex;flex-direction:column;gap:.7rem}
@@ -470,7 +481,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       +   (nO ? '<span class="pastille">' + nO + '</span>' : '') + '</button>'
       + (D.peutEcrire ? '<button data-tab="proposer" class="' + (TAB==='proposer'?'actif':'') + '">${T("À commander")}</button>' : '')
       + '<button data-tab="histo" class="' + (TAB==='histo'?'actif':'') + '">${T("Historique")}</button>'
-      + (D.peutEcrire ? '<span class="droite"><button class="mini" data-act="nouveau">${T("＋ Bon vide")}</button></span>' : '');
+      + (D.peutEcrire ? '<span class="droite"><button class="bc-nouveau" data-act="nouveau">${T("＋ Nouveau bon")}</button></span>' : '');
 
     var enAttente = 0;
     ouverts().forEach(function(b){
@@ -498,8 +509,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (br) return '<div class="rang"><button class="mini" data-act="retour">${T("← Tous les bons")}</button></div>'
       + carteBon(br) + voletRecevoir(br);
     if (!l.length) {
-      return '<div class="vide">${T("Aucun bon en cours.")}'
-        + (D.peutEcrire ? '<br><span class="dt">${T("L’onglet <strong>À commander</strong> propose un bon par fournisseur à partir des articles sous leur seuil.")}</span>' : '')
+      /* (2026-11-22, sa capture : « des beaux boutons, un travail plus épuré ») Un état vide qui propose le geste suivant. */
+      return '<div class="vide bc-vide"><div class="bc-ico" aria-hidden="true"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h11v9H3zM14 10h4l3 3v3h-7"/><circle cx="7" cy="17.5" r="1.6"/><circle cx="17" cy="17.5" r="1.6"/></svg></div>'
+        + '<b>${T("Aucun bon en cours")}</b>'
+        + (D.peutEcrire ? '<span class="dt">${T("Partez des articles sous leur seuil : un bon par fournisseur, prêt à envoyer.")}</span>'
+          + '<div class="bc-vide-gestes"><button class="bc-prim" data-tab="proposer">${T("Voir les articles à commander")}</button>'
+          + '<button class="bc-sec" data-act="nouveau">${T("Créer un bon vide")}</button></div>' : '')
         + '</div>';
     }
     return '<div class="lot-rang">' + lotCase(CK.th(), 'lot-tout') + '<span class="lot-lib">${T("Tout sélectionner")}</span>' + CK.barre() + '</div>'

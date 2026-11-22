@@ -123,6 +123,12 @@ html[data-sz-theme="epure"] .ana.sel{background:var(--sz-accent-doux)}
 .ana .rf-pill.papier{color:var(--tx)}
 .ent,.ana{grid-template-columns:1.6rem 5.2rem minmax(0,1fr) minmax(0,1.1fr) minmax(0,1fr) minmax(0,1fr) 4.4rem 5.4rem 6.4rem}
 .ana .nb{font-variant-numeric:tabular-nums;text-align:right}
+/* (2026-11-22, sa capture : « on perd du texte ») Les cellules passent sur deux lignes au lieu de couper (« 100 % fibres mixt… »),
+   et les en-têtes s'écrivent en entier. */
+.ana .cel{white-space:normal!important;text-overflow:clip!important;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;line-height:1.3}
+.ent span{white-space:normal!important;text-overflow:clip!important;overflow:visible!important;line-height:1.2}
+html[data-sz-theme="epure"] .ent,html[data-sz-theme="epure"] .ana{grid-template-columns:1.6rem 4.8rem minmax(0,.8fr) minmax(0,1.25fr) minmax(0,1.05fr) minmax(0,1.1fr) 4.6rem 5.4rem 6.6rem}
+.ana .rem{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden;line-height:1.3;overflow-wrap:break-word}
 .ent .nb{text-align:right}
 /* ── L HISTORIQUE ──────────────────────────────────────────────────────── */
 .imp{border-top:1px solid var(--v08);padding:.5rem .3rem}

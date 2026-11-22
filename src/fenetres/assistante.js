@@ -12,7 +12,7 @@
  *   avec la question suivante, pour les questions de suite (« et le mois dernier ? »).
  * ⚠ AUCUN CARACTÈRE accent grave dans la portion de script.
  */
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU } = require('./socle.js');
 const T = require('../langue').tr('assistante');
 
 const CSS = `
@@ -54,13 +54,23 @@ html.jour .bulle.err{color:#a3302b}
 .saisie textarea,.saisie textarea:focus,.saisie textarea:hover{border:0!important;box-shadow:none!important;background:transparent!important;padding:.3rem 0!important;min-height:2rem!important}
 .pied{flex:0 0 auto;padding:.35rem 1.1rem;border-top:1px solid var(--v08);min-height:1.9rem;font-size:.75rem;color:var(--tx2)}
 .msg.err{color:var(--tx-err)}
+/* (2026-11-22, sa demande : « un bouton pour vider et exporter la conversation, et pour imprimer aussi ») */
+.as-gestes{display:flex;gap:.3rem;margin-left:auto}
+.as-gestes button{height:1.9rem;padding:0 .7rem;border-radius:8px;border:0;background:transparent;color:var(--tx2);font:inherit;font-size:.78rem;font-weight:600;cursor:pointer}
+.as-gestes button:hover:not(:disabled){background:var(--v06);color:var(--tx)}
+.as-gestes button:disabled{opacity:.4;cursor:default}
+#as-impr{display:none}
+@media print{body>*:not(#as-impr){display:none!important}#as-impr{display:block!important;color:#000;font:12pt/1.45 system-ui,sans-serif}
+  #as-impr h1{font-size:16pt;margin:0 0 .3rem}#as-impr .d{color:#555;margin-bottom:1rem}#as-impr .q{font-weight:700;margin:.9rem 0 .2rem}#as-impr .r{white-space:pre-wrap}}
 `;
 
 function pageAssistante() {
   return `${TETE()}
 <title>${T("Demande à ta boutique — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.assistante}</span><h1>${T("Demande à ta boutique")}</h1><span class="as-sous">${T("lecture seule · réponses tirées de vos données")}</span></div>
+<div class="tete"><span class="ico">${ICO.assistante}</span><h1>${T("Demande à ta boutique")}</h1><span class="as-sous">${T("lecture seule · réponses tirées de vos données")}</span>
+  <span class="as-gestes"><button type="button" id="as-vider">${T("Vider")}</button><button type="button" id="as-exporter">${T("Exporter")}</button><button type="button" id="as-imprimer">${T("Imprimer")}</button></span></div>
+<div id="as-impr"></div>
 <div id="corps"><div class="fil" id="fil"></div>
   <div class="saisie"><textarea id="q" rows="1" maxlength="500" placeholder="${T("Posez une question sur vos ventes, votre stock, vos clients…")}" aria-label="${T("Votre question")}"></textarea>
   <button type="button" class="prim" id="envoyer">${T("Demander")}</button></div></div>
@@ -122,6 +132,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var b = fil.children;
     while (b && fil.scrollHeight > fil.clientHeight + 1 && b.length > 1) fil.removeChild(b[0]);
   }
+  /* LA CONVERSATION ENTIÈRE (le fil n'en montre que ce qui tient) : texte brut pour l'export, page pour l'impression. */
+  function textes(){
+    return ECH.filter(function(e){ return e.qui === 'moi' || e.qui === 'ia'; });
+  }
+  function majGestes(){
+    var n = textes().length;
+    ['as-vider', 'as-exporter', 'as-imprimer'].forEach(function(id){ var b = document.getElementById(id); if (b) b.disabled = !n; });
+  }
+  function exporter(){
+    var L = textes(); if (!L.length) return;
+    var d = new Date().toLocaleString('${LIEU()}');
+    // ⚠ La page est un gabarit : la barre oblique est DOUBLÉE ici pour arriver simple dans la page.
+    var t = '${T("Demande à ta boutique")} — ' + d + '\\n\\n' + L.map(function(e){
+      return (e.qui === 'moi' ? '${T("Question")} : ' : '${T("Réponse")} : ') + e.texte; }).join('\\n\\n') + '\\n';
+    var a = document.createElement('a');
+    a.href = URL.createObjectURL(new Blob(['\\ufeff' + t], { type: 'text/plain;charset=utf-8' }));
+    a.download = 'demande-a-ta-boutique-' + new Date().toISOString().slice(0, 10) + '.txt';
+    document.body.appendChild(a); a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); a.remove(); }, 1500);
+    szDire('${T("Conversation exportée.")}', 'bon');
+  }
+  function imprimer(){
+    var L = textes(); if (!L.length) return;
+    var z = document.getElementById('as-impr'); if (!z) return;
+    z.innerHTML = '<h1>${T("Demande à ta boutique")}</h1><div class="d">' + esc(new Date().toLocaleString('${LIEU()}')) + '</div>'
+      + L.map(function(e){ return e.qui === 'moi' ? '<div class="q">' + esc(e.texte) + '</div>' : '<div class="r">' + esc(e.texte) + '</div>'; }).join('');
+    window.print();
+  }
+  function vider(){
+    if (!textes().length) return;
+    szConfirmer({ titre: '${T("Vider la conversation")}', texte: '${T("Les questions et réponses affichées seront effacées. Rien n’est enregistré ailleurs.")}', oui: '${T("Vider")}' })
+      .then(function(ok){ if (!ok) return; ECH = []; HIST = []; dessiner(); majGestes(); if (q) q.focus(); });
+  }
   function envoyer(texte){
     var t = String(texte || (q && q.value) || '').trim();
     if (!t || OCCUPE) return;
@@ -132,10 +174,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!r || !r.ok) { ECH.push({ qui: 'err', texte: expliquer(r) }); dessiner(); if (q) q.focus(); return; }
       ECH.push({ qui: 'ia', texte: r.reponse, liens: r.liens || [], cout: r.cout || 0 });
       HIST.push({ q: t, r: r.reponse }); if (HIST.length > 3) HIST.shift();
-      dessiner(); if (q) q.focus();
+      dessiner(); majGestes(); if (q) q.focus();
     });
   }
   if (btn) btn.addEventListener('click', function(){ envoyer(); });
+  (function(){ var v = document.getElementById('as-vider'), x = document.getElementById('as-exporter'), i = document.getElementById('as-imprimer');
+    if (v) v.onclick = vider; if (x) x.onclick = exporter; if (i) i.onclick = imprimer; })();
   if (q) q.addEventListener('keydown', function(ev){
     if (ev.key === 'Enter' && !ev.shiftKey) { ev.preventDefault(); envoyer(); }
   });
@@ -160,7 +204,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (actif) { b.textContent = '${T("⧉ Détacher")}'; b.title = '${T("Ouvrir cet écran dans sa propre fenêtre")}'; b.onclick = function(){ if (P && P.detacher) P.detacher(); }; }
     else { b.textContent = '${T("⚓ Ancrer")}'; b.title = '${T("Ramener cet écran dans la fenêtre principale")}'; b.onclick = function(){ if (P && P.ancrer) P.ancrer(); }; }
   };
-  dessiner(); if (q) q.focus();
+  dessiner(); majGestes(); if (q) q.focus();
 })();
 </script></body></html>`;
 }

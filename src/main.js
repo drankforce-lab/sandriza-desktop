@@ -4927,8 +4927,7 @@ const _encanPousser = (etat) => {
   // (2026-10-23, lot 3) L'état de la lecture du direct voyage avec celui du moteur.
   etat = Object.assign({}, etat, { direct: _directEncan ? Object.assign(_directEncan.etat(), { alerte: _directAlerte }) : null });
   for (const cle of ['encan', 'encan-ecran']) {
-    const w = fenetresNatives.get(cle);
-    if (w && !w.isDestroyed()) { try { w.webContents.send('encan:etat', etat); } catch {} }
+    for (const wc of _wcEncan(cle)) { try { wc.send('encan:etat', etat); } catch {} }
   }
 };
 const encanMoteur = () => {
@@ -4980,10 +4979,16 @@ const encanMoteur = () => {
   }, 100);
   return _encan;
 };
-const _deLaConsoleEncan = (e) => {
-  const w = fenetresNatives.get('encan');
-  return !!(w && !w.isDestroyed() && e.sender === w.webContents);
+/* ⚠ (2026-11-22, ses captures : « Votre rôle ne donne pas accès au catalogue de la caisse », « les boutons ne marchent
+   pas ») La console d'encan s'ouvre aussi ANCRÉE (vue dans la fenêtre principale, ou détachée) : seule la fenêtre
+   native était reconnue, et chaque geste de la vue ancrée était refusé (« droit »). On reconnaît les deux. */
+const _wcEncan = (cle) => {
+  const out = [];
+  try { const w = fenetresNatives.get(cle); if (w && !w.isDestroyed()) out.push(w.webContents); } catch (er) {}
+  try { const a = ancrees.get(cle); if (a && a.view && a.view.webContents && !a.view.webContents.isDestroyed()) out.push(a.view.webContents); } catch (er) {}
+  return out;
 };
+const _deLaConsoleEncan = (e) => _wcEncan('encan').indexOf(e.sender) >= 0;
 ipcMain.handle('encan:geste', (e, nom, args) => {
   if (!_deLaConsoleEncan(e)) return { ok: false, motif: 'droit' };
   if (!ENCAN_GESTES.has(String(nom))) return { ok: false, motif: 'operation_inconnue' };
@@ -4991,7 +4996,7 @@ ipcMain.handle('encan:geste', (e, nom, args) => {
   catch (er) { return { ok: false, motif: 'echec', detail: String((er && er.message) || er) }; }
 });
 ipcMain.handle('encan:lire', (e) => {
-  const de = ['encan', 'encan-ecran'].some((c) => { const w = fenetresNatives.get(c); return w && !w.isDestroyed() && e.sender === w.webContents; });
+  const de = ['encan', 'encan-ecran'].some((c) => _wcEncan(c).indexOf(e.sender) >= 0);
   if (!de) return null;
   const m = encanMoteur();
   return Object.assign(m.etat(), { direct: _directEncan ? Object.assign(_directEncan.etat(), { alerte: _directAlerte }) : null,
@@ -7901,10 +7906,10 @@ const actionApp = (nom, arg) => {
        plus bas), a la demande du 2026-08-10 — « fais attention de creer les
        fenetres en mode ancrable ». */
     case 'fournisseur-nouveau':
-      ouvrirNative('fournisseur', TF('Nouveau fournisseur'), () => pageFournisseur(''), { width: 820, height: 620, minHeight: 460 });
+      ouvrirNative('fournisseur', TF('Nouveau fournisseur'), () => pageFournisseur(''), { width: 1120, height: 680, minHeight: 460 });
       break;
     case 'collection-nouvelle':
-      ouvrirNative('collection', TF('Nouvelle collection'), () => pageCollection(''), { width: 860, height: 640, minHeight: 480 });
+      ouvrirNative('collection', TF('Nouvelle collection'), () => pageCollection(''), { width: 1120, height: 700, minHeight: 480 });
       break;
     case 'produit-nouveau':
       ouvrirNative('produit', TF('Nouveau produit'), () => pageProduit(''), { width: 980, height: 860, minHeight: 520 });
@@ -7935,7 +7940,9 @@ const actionApp = (nom, arg) => {
     // (8.33.0) L'import de produits depuis le site d'un fournisseur.
     case 'import-fournisseur': _ouvrirAncre('import-fournisseur'); break;
     case 'rentabilite': _ouvrirAncre('rentabilite'); break;
-    case 'encan-rapports': _ouvrirAncre('encan-rapports'); break;
+    /* (2026-11-22, sa capture : « quand on entre dans Rapport d'encan, plus moyen de sortir ») Ancrés, les rapports
+       remplaçaient la console de l'encan dans la fenêtre principale. Ils s'ouvrent dans LEUR fenêtre : la console reste. */
+    case 'encan-rapports': ouvrirNative('encan-rapports', TF('Rapports d’encan'), () => pageEncanRapports(''), { width: 1200, height: 820, minWidth: 820, minHeight: 560 }); break;
     // (2026-10-20) L'encan en direct : la console de l'animatrice (l'écran filmé s'ouvre depuis elle).
     case 'encan': _ouvrirAncre('encan'); break;
     /* ⚠ TOUS LES ECRANS ANCRABLES DU MENU PASSENT PAR LE FLUX D ANCRAGE
@@ -7953,6 +7960,13 @@ const actionApp = (nom, arg) => {
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
     case 'liquidation':
     case 'catalogio':
+    /* (2026-11-22) Configuration › Produit : chaque attribut dans SA fenêtre, sans onglets (pageInvMeta('seul:…')). */
+    case 'attr-sizes': case 'attr-genres': case 'attr-ageGroups': case 'attr-styles': case 'attr-colors':
+    case 'attr-labels': case 'attr-categories': case 'attr-reachat': {
+      const t = nom.slice(5);
+      ouvrirNative('invmeta-' + t, TF('Attributs produits'), () => pageInvMeta('seul:' + t), { width: 980, height: 720, minWidth: 720, minHeight: 520 });
+      break;
+    }
     case 'invmeta':
     case 'newsletter':
     case 'publicite':
