@@ -335,7 +335,7 @@ function pageCaisse(mode) {
       <!-- (2026-11-22, sa demande) L ENTREPRISE ET L ADRESSE DE FACTURATION, saisies à la main : elles vont sur la facture
            et METTENT À JOUR le profil du client au moment de la vente. Les taxes restent celles du comptoir (Québec). -->
       <details class="fact" id="c-fact-zone">
-        <summary>${T("Entreprise et adresse de facturation")}</summary>
+        <summary title="${T("Facultatif. Remplie, elle va sur la facture et dans le profil du client ; les taxes restent celles du comptoir.")}">${T("Entreprise et adresse de facturation")}</summary>
         <div class="champs">
           <input aria-label="${T("Nom d’entreprise")}" id="c-entr" autocomplete="off" maxlength="120" placeholder="${T("Nom d’entreprise (facultatif)")}">
           <input aria-label="${T("Adresse de facturation — rue")}" id="c-fact-rue" autocomplete="off" maxlength="160" placeholder="${T("Adresse de facturation — rue")}">
@@ -344,7 +344,6 @@ function pageCaisse(mode) {
             <select aria-label="${T("Province")}" id="c-fact-prov"></select>
             <input aria-label="${T("Code postal")}" id="c-fact-cp" autocomplete="off" maxlength="10" placeholder="${T("Code postal")}">
           </div>
-          <span class="exp">${T("Facultatif. Remplie, elle va sur la facture et dans le profil du client ; les taxes restent celles du comptoir.")}</span>
         </div>
       </details>
       <label class="case" id="c-creer-zone"><input type="checkbox" id="c-creer">
