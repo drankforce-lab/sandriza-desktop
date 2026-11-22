@@ -91,8 +91,8 @@ body{background:var(--f-page);color:var(--tx);
   border-radius:12px;background:var(--f-carte);overflow:hidden}
 .cal-col.auj{border-color:var(--or);box-shadow:inset 0 0 0 1px var(--or)}
 .cal-col .cal-ct{flex:none;display:flex;align-items:baseline;gap:.4rem;padding:0 .15rem .35rem;border-bottom:1px solid var(--v08);cursor:pointer}
-.cal-col .cal-ct b{font-size:1.35rem;font-weight:800;line-height:1}
-.cal-col .cal-ct span{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2)}
+.cal-ctn{font-size:1.35rem;font-weight:800;line-height:1}
+.cal-ctj{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2)}
 .cal-col .cal-items{gap:.35rem}
 .cal-col .cal-item{padding:.42rem .5rem}
 .cal-col .cal-item .l1{flex-wrap:wrap;gap:.25rem .4rem}
@@ -234,7 +234,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var cols = '';
     for (var k = 0; k < 5; k++) {
       var d = plusJours(lun, k), l = duJour(d); n += l.length;
-      cols += '<div class="cal-col' + (d === AUJ ? ' auj' : '') + '"><div class="cal-ct" data-voirjour="' + d + '" title="${T("Voir ce jour")}"><span>' + esc(JSEM[k]) + '</span><b>' + versDate(d).getDate() + '</b></div>'
+      cols += '<div class="cal-col' + (d === AUJ ? ' auj' : '') + '"><div class="cal-ct" data-voirjour="' + d + '" title="${T("Voir ce jour")}"><span class="cal-ctj">' + esc(JSEM[k]) + '</span><b class="cal-ctn">' + versDate(d).getDate() + '</b></div>'
         + (l.length ? '<div class="cal-items">' + l.map(itemHtml).join('') + '</div><div class="cal-reste" hidden></div>' : '<div class="cal-vide">—</div>')
         + '</div>';
     }
