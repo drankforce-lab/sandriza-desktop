@@ -300,4 +300,11 @@ module.exports = {
   'Refusées par le serveur : {0}.': 'Refused by the server: {0}.',
   'Ventes envoyées au nuage : {0}.': 'Sales sent to the cloud: {0}.',
   'Toujours hors ligne : les ventes restent gardées sur ce poste.': 'Still offline: the sales stay kept on this computer.',
+  'Entreprise et adresse de facturation': 'Company and billing address',
+  'Facultatif. Remplie, elle va sur la facture et dans le profil du client ; les taxes restent celles du comptoir.': 'Optional. When filled in, it goes on the invoice and into the customer’s profile; taxes stay those of the counter.',
+  'Nom d’entreprise': 'Company name',
+  'Nom d’entreprise (facultatif)': 'Company name (optional)',
+  'Adresse de facturation — rue': 'Billing address — street',
+  'Province': 'Province',
+  'Code postal': 'Postal code',
 };

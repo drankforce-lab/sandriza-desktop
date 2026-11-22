@@ -114,6 +114,14 @@ input[type=checkbox]{width:auto;min-height:0}
 html[data-sz-theme="epure"] .champs .g2{grid-template-columns:minmax(0,.85fr) minmax(0,1.15fr)}
 .g3{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr) minmax(0,1fr);gap:.55rem}
 .champs{display:flex;flex-direction:column;gap:.4rem}
+.fact{margin-top:.5rem}
+.fact summary{cursor:pointer;font-size:.8rem;font-weight:600;color:var(--tx2);padding:.2rem 0;list-style:none}
+.fact summary::-webkit-details-marker{display:none}
+.fact summary::before{content:'+ ';color:var(--tx-or)}
+.fact[open] summary::before{content:'− '}
+.fact .champs{margin-top:.35rem}
+.fact .g3{display:grid;grid-template-columns:minmax(0,1.3fr) 4.6rem minmax(0,.9fr);gap:.45rem}
+.fact .exp{font-size:.72rem;color:var(--tx2);line-height:1.35}
 .sep{height:1px;background:var(--v07);margin:.65rem 0}
 .num{font-variant-numeric:tabular-nums}
 
@@ -324,6 +332,21 @@ function pageCaisse(mode) {
         </div>
       </div>
       <div id="c-res"></div>
+      <!-- (2026-11-22, sa demande) L ENTREPRISE ET L ADRESSE DE FACTURATION, saisies à la main : elles vont sur la facture
+           et METTENT À JOUR le profil du client au moment de la vente. Les taxes restent celles du comptoir (Québec). -->
+      <details class="fact" id="c-fact-zone">
+        <summary>${T("Entreprise et adresse de facturation")}</summary>
+        <div class="champs">
+          <input aria-label="${T("Nom d’entreprise")}" id="c-entr" autocomplete="off" maxlength="120" placeholder="${T("Nom d’entreprise (facultatif)")}">
+          <input aria-label="${T("Adresse de facturation — rue")}" id="c-fact-rue" autocomplete="off" maxlength="160" placeholder="${T("Adresse de facturation — rue")}">
+          <div class="g3">
+            <input aria-label="${T("Ville")}" id="c-fact-ville" autocomplete="off" maxlength="80" placeholder="${T("Ville")}">
+            <select aria-label="${T("Province")}" id="c-fact-prov"></select>
+            <input aria-label="${T("Code postal")}" id="c-fact-cp" autocomplete="off" maxlength="10" placeholder="${T("Code postal")}">
+          </div>
+          <span class="exp">${T("Facultatif. Remplie, elle va sur la facture et dans le profil du client ; les taxes restent celles du comptoir.")}</span>
+        </div>
+      </details>
       <label class="case" id="c-creer-zone"><input type="checkbox" id="c-creer">
         <span>${T("Ouvrir un compte et lui envoyer le lien pour le finaliser")}
         <span class="exp">${T("Courriel requis. Historique et retours pour lui ; aucune inscription à l’infolettre.")}</span></span></label>
@@ -949,6 +972,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     CLI = u.id;
     document.getElementById('c-nom').value = u.nom || '';
     document.getElementById('c-mail').value = u.courriel || '';
+    // (2026-11-22) L entreprise et la facturation du profil, reprises (modifiables : la vente les remettra à jour).
+    var f = u.facturation || null;
+    document.getElementById('c-entr').value = u.entreprise || '';
+    document.getElementById('c-fact-rue').value = f ? (f.street || '') : '';
+    document.getElementById('c-fact-ville').value = f ? (f.city || '') : '';
+    document.getElementById('c-fact-cp').value = f ? (f.postalCode || '') : '';
+    if (f && f.province) document.getElementById('c-fact-prov').value = f.province;
+    if (u.entreprise || f) document.getElementById('c-fact-zone').open = true;
     var tel = document.getElementById('c-tel');
     tel.value = u.tel || '';
     masquerTel(tel);
@@ -1021,7 +1052,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function reinitialiser(){
     LIGNES = []; CLI = null; TOT = null; EDIT = -1; TROUVES = []; RABNIP = null;
     videRecherche(); fermerListeCli();
-    ['c-nom', 'c-mail', 'c-tel', 'v-note', 'v-rabnote'].forEach(function(id){ document.getElementById(id).value = ''; });
+    ['c-nom', 'c-mail', 'c-tel', 'v-note', 'v-rabnote', 'c-entr', 'c-fact-rue', 'c-fact-ville', 'c-fact-cp'].forEach(function(id){ document.getElementById(id).value = ''; });
+    document.getElementById('c-fact-prov').value = 'QC'; document.getElementById('c-fact-zone').open = false;
     document.getElementById('c-creer').checked = false;
     // VIDE, avec l indication en filigrane (2026-10-05) : un « 0,00 $ » ecrit
     // dans le champ devait etre efface a la main avant de taper un pourcentage.
@@ -1059,6 +1091,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       rabType: RABTYPE, rabNote: val('v-rabnote').trim(),
       rabNip: rabVenteAutorise() ? { jeton: RABNIP.jeton } : null,
       nom: val('c-nom').trim(), courriel: val('c-mail').trim(), tel: val('c-tel').trim(),
+      entreprise: val('c-entr').trim(),
+      facturation: val('c-fact-rue').trim() ? { street: val('c-fact-rue').trim(), city: val('c-fact-ville').trim(),
+        province: val('c-fact-prov') || 'QC', postalCode: val('c-fact-cp').trim().toUpperCase(), country: 'Canada' } : null,
       moyen: val('v-paie'), note: val('v-note').trim(), remise: val('v-remise'),
       veutCompte: !!document.getElementById('c-creer').checked,
       cliId: CLI,
@@ -1389,6 +1424,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   document.getElementById('scan').onkeydown = function(ev){
     if (ev.key === 'Enter') { ev.preventDefault(); chercher(this.value, true); }
   };
+  // Les provinces de l adresse de facturation : des codes (données), posés ici plutôt qu écrits dans la page.
+  document.getElementById('c-fact-prov').innerHTML = ['QC','ON','BC','AB','MB','SK','NS','NB','NL','PE','NT','NU','YT'].map(function(p){ return '<option>' + p + '</option>'; }).join('');
   ['c-nom','c-mail'].forEach(function(id){
     document.getElementById(id).oninput = function(){ chercherClient(this.value); majBouton(); };
   });
