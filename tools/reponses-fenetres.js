@@ -6057,7 +6057,7 @@ const JEU = {
       active: 128, unsub: 12, sentCamps: 6, draftCamps: 2, totalSent: 940, failedSent: 3,
       activeChains: 2, pendingSteps: 4,
       recents: [
-        { name: 'Nouvelle collection automne', sentAt: '2026-08-10', sent: 120, failed: 1, status: 'sent' },
+        { name: 'Campagne Automne 2026 — nouvelle collection (copie)', sentAt: '2026-08-10', sent: 120, failed: 1, status: 'sent' },
         { name: 'Soldes — brouillon', sentAt: '', sent: 0, failed: 0, status: 'draft' },
       ],
       sources: [{ label: 'Pied de page', count: 90, pct: 64 }, { label: 'Commande', count: 38, pct: 27 }, { label: 'Admin', count: 12, pct: 9 }] };

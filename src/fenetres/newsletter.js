@@ -132,6 +132,16 @@ html.jour .bascule .piste{background:#cfcabd}
 .nl-gestes{margin-top:auto;padding-top:.8rem;display:flex;gap:.5rem;flex-wrap:wrap}
 .nl-reset{color:var(--tx-or)}
 .nl-onglets .nl-lien span{font-size:.72em;opacity:.6}
+/* (2026-11-22, sa capture : « améliore le tableau ici, on ne voit pas tout ») Les onglets passent à la ligne au lieu de
+   sortir de la fenêtre ; les campagnes récentes montrent le NOM EN ENTIER (il passe à la ligne), les chiffres et le
+   statut ne prennent que leur largeur ; les deux cartes s'empilent dès que la fenêtre est étroite. */
+.nl-onglets .ls-onglets{flex-wrap:wrap;max-width:100%;row-gap:.3rem}
+.nl-rec{width:100%;table-layout:auto}
+.nl-rec th:not(:first-child),.nl-rec td:not(:first-child){width:1%;white-space:nowrap}
+.nl-rec td:first-child,.nl-rec td:first-child strong{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;
+  max-width:none!important;overflow-wrap:anywhere}
+.nl-rec td:first-child strong{display:block;line-height:1.3}
+@media(max-width:1100px){.deux{grid-template-columns:minmax(0,1fr)}}
 /* (2026-11-22, « refais cette page de un et de deux ») Trois blocs, les gestes sur une ligne, les chiffres avec l'aperçu. */
 .nl-of .nl-reg{display:flex;flex-direction:column;gap:.6rem}
 .nl-of .nl-reg-t{margin-bottom:0}
@@ -140,12 +150,17 @@ html.jour .bascule .piste{background:#cfcabd}
 .nl-bloc .champ{margin:0}
 .nl-of .nl-code{margin:0}
 .nl-img2{display:flex;gap:.8rem;align-items:stretch}
-.nl-vign{flex:0 0 4.6rem;height:5.8rem;border-radius:10px;background:#e8dcc6 center/cover no-repeat;border:1px solid var(--v08);display:flex;align-items:center;justify-content:center;overflow:hidden}
+.nl-vign{flex:0 0 3.8rem;height:4.8rem;border-radius:10px;background:#e8dcc6 center/cover no-repeat;border:1px solid var(--v08);display:flex;align-items:center;justify-content:center;overflow:hidden}
 .nl-vign img{display:none}
 .nl-vign.logo{background:#FAF6EF}
 .nl-vign.logo img{display:block;width:84%;height:auto}
 .nl-img2-d{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:.45rem;justify-content:center}
 .nl-img2-d .nl-fic{align-self:flex-start}
+.nl-img-b{display:flex;gap:.4rem;flex-wrap:nowrap}
+.nl-img-b .nl-fic{height:2rem!important;padding:0 .65rem!important;font-size:.76rem!important;white-space:nowrap}
+.nl-of .nl-scene .nl-gestes{margin:0;padding:0}
+.nl-of .nl-bloc{padding:.55rem .85rem .6rem;gap:.35rem}
+.nl-of .nl-reg{gap:.5rem}
 .nl-of .nl-gestes{flex-wrap:nowrap;align-items:center}
 .nl-of .nl-gestes .nl-reset{margin-left:auto;background:transparent;border-color:transparent}
 .nl-of .nl-scene .tuiles{margin-bottom:.4rem}
@@ -288,7 +303,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
     var recents = D.recents.length ? D.recents.map(function(c){
       var st = c.status === 'sent' ? '<span class="badge ok">${T("Envoyée")}</span>' : c.status === 'sending' ? '<span class="badge warn">${T("En cours")}</span>' : '<span class="badge draft">${T("Brouillon")}</span>';
       return '<tr><td><strong>' + esc(c.name) + '</strong><div style="font-size:.72rem;color:var(--tx2)">' + esc(c.sentAt ? jourLisible(c.sentAt) : '—') + '</div></td>'
-        + '<td>' + c.sent + (c.failed ? ' / <span style="color:var(--tx-err)">' + c.failed + '</span>' : '') + '</td><td>' + st + '</td></tr>';
+        + '<td class="dr">' + c.sent + (c.failed ? ' / <span style="color:var(--tx-err)">' + c.failed + '</span>' : '') + '</td><td>' + st + '</td></tr>';
     }).join('') : '<tr><td colspan="3" class="vide">${T("Aucune campagne")}</td></tr>';
     var srcs = D.sources.length ? D.sources.map(function(s){
       return '<div class="src"><div class="l"><span>' + esc(s.label) + '</span><span style="font-weight:600">' + s.count + '</span></div>'
@@ -305,7 +320,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
       + '</div>')
       + (PEUT.edit ? '<div><button class="ghost mini" data-act="chains">${T("⚙ Traiter les chaînes (")}' + D.pendingSteps + ')</button></div>' : '')
       + '<div class="deux">'
-      +   '<div class="carte"><h2>${T("Campagnes récentes")}</h2><table><thead><tr><th>${T("Campagne")}</th><th>${T("Envoyés")}</th><th>${T("Statut")}</th></tr></thead><tbody>' + recents + '</tbody></table></div>'
+      +   '<div class="carte"><h2>${T("Campagnes récentes")}</h2><table class="nl-rec"><thead><tr><th>${T("Campagne")}</th><th class="dr">${T("Envoyés")}</th><th>${T("Statut")}</th></tr></thead><tbody>' + recents + '</tbody></table></div>'
       +   '<div class="carte"><h2>${T("Sources d’abonnés")}</h2>' + srcs + '</div>'
       + '</div>';
   }
@@ -405,7 +420,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
     var vign = fondImage(c.imageUrl);
     return '<div class="nl-ed nl-of">'
       + '<div class="nl-reg">'
-      +   '<div class="nl-reg-t"><div><b>${T("Offre de bienvenue")}</b><span>${T("Un rabais offert à l’inscription à l’infolettre — un code unique par personne.")}</span></div>'
+      +   '<div class="nl-reg-t"><div><b title="${T("Un rabais offert à l’inscription à l’infolettre — un code unique par personne.")}">${T("Offre de bienvenue")}</b></div>'
       +   '<label class="nl-actif"><span>${T("Actif")}</span>' + bascule('offer-enabled', c.enabled) + '</label></div>'
       +   (D.done ? '<div class="nl-fait">${T("✓ Un visiteur a déjà soumis ce widget. Utilisez « Réinitialiser » pour re-tester.")}</div>' : '')
       +   '<section class="nl-bloc"><h4>${T("Le message")}</h4>'
@@ -421,18 +436,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
       +   '<section class="nl-bloc"><h4>${T("L’image")}</h4>'
       +     '<div class="nl-img2"><div class="nl-vign' + (vign ? '' : ' logo') + '" id="nl-vign" style="' + vign + '"><img alt="" src="' + LOGO_NOUVEAU + '"></div>'
       +       '<div class="nl-img2-d">'
-      +         (PEUT.edit ? '<label class="ed-bt nl-fic"><span class="ic">📁</span> ${T("Choisir une photo")}<input type="file" accept="image/*" id="offer-file" style="display:none"></label>' : '')
+      +         (PEUT.edit ? '<div class="nl-img-b"><label class="ed-bt nl-fic"><span class="ic">📁</span> ${T("Choisir une photo")}<input type="file" accept="image/*" id="offer-file" style="display:none"></label>'
+        /* (2026-11-22, sa capture : l'ancien logo « Signature » restait — c'était la PHOTO enregistrée) Un geste pour revenir
+           au nouveau logo de la boutique : il vide la photo, l'aperçu suit ; « Enregistrer » le rend définitif. */
+      +           '<button type="button" class="ed-bt nl-fic" data-act="offerlogo" title="${T("Retire la photo : le nouveau logo de la boutique s’affiche")}">${T("Nouveau logo de la boutique")}</button></div>' : '')
       +         '<input id="offer-img" aria-label="${T("Image côté gauche")}" value="' + esc(c.imageUrl) + '" placeholder="${T("https://… ou coller une URL")}"' + ro + '>'
-      +         '<div class="hint">${T("700 × 900 px recommandé (portrait). Max 600 Ko. Sans photo, le logo de la boutique est affiché.")}</div>'
+      +         '<div class="hint">${T("Portrait 700 × 900 px, 600 Ko au plus. Sans photo : le logo de la boutique.")}</div>'
       +       '</div></div>'
       +   '</section>'
-      +   '<div class="nl-gestes">'
+      + '</div>'
+      /* (2026-11-22, sa capture : les boutons passaient sous le bas de la fenêtre) Les gestes en tête de l'aperçu : toujours visibles. */
+      + '<div class="nl-scene"><div class="nl-gestes">'
       +     (PEUT.edit ? '<button class="ed-bt fort" data-act="offersave">${T("Enregistrer")}</button>' : '')
       +     '<button class="ed-bt" data-act="apercu">${T("Aperçu du popup")}</button>'
       +     (PEUT.edit ? '<button class="ed-bt nl-reset" data-act="offerreset" title="${T("Réinitialiser pour re-tester")}">${T("↺ Réinitialiser")}</button>' : '')
-      +   '</div>'
-      + '</div>'
-      + '<div class="nl-scene">' + stats + '<div class="ed-titre">${T("Aperçu en direct — ce que la visiteuse verra")}</div>'
+      +   '</div>' + stats + '<div class="ed-titre">${T("Aperçu en direct — ce que la visiteuse verra")}</div>'
       +   '<div class="nl-pop-zone">' + popHtml(c, true) + '</div></div>'
       + '</div>';
   }
@@ -606,6 +624,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
     else if (act === 'testconn') testConn();
     else if (act === 'offersave') saveOffer();
     else if (act === 'offerreset') resetOffer();
+    else if (act === 'offerlogo') { var oi = document.getElementById('offer-img'); if (oi) { oi.value = ''; oi.dispatchEvent(new Event('input', { bubbles: true })); dire('${T("Le nouveau logo est en place — « Enregistrer » pour le garder.")}', 'bon'); } }
     else if (act === 'chains') traiterChaines();
     else if (act === 'apercu') ouvrirApercu();
     else if (act === 'apclose') fermerApercu();

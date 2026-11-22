@@ -229,4 +229,8 @@ module.exports = {
   'Étapes en attente': 'Pending steps',
   'Envoyer {0} étape': 'Send {0} step',
   'Envoyer {0} étapes': 'Send {0} steps',
+  'Retire la photo : le nouveau logo de la boutique s’affiche': 'Removes the photo: the shop’s new logo is shown',
+  'Nouveau logo de la boutique': 'Shop’s new logo',
+  'Portrait 700 × 900 px, 600 Ko au plus. Sans photo : le logo de la boutique.': 'Portrait 700 × 900 px, 600 KB max. No photo: the shop logo.',
+  'Le nouveau logo est en place — « Enregistrer » pour le garder.': 'The new logo is in place — “Save” to keep it.',
 };
