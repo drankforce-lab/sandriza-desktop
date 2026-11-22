@@ -39,7 +39,8 @@ body{background:var(--f-page);color:var(--tx);
 /* (même base que Rappels) */
 .cx{gap:.7rem}
 .cal-nav{display:flex;align-items:center;gap:.45rem;flex:0 0 auto}
-.cal-nav h2{margin:0 .4rem;font-size:1rem;min-width:11rem;text-align:center;text-transform:capitalize;white-space:nowrap}
+.cal-nav h2{margin:0 .4rem;font-size:1rem;min-width:11rem;text-align:center;white-space:nowrap}
+.cal-nav h2::first-letter{text-transform:uppercase}
 .cal-leg{display:flex;align-items:center;gap:.5rem;margin-left:auto;flex-wrap:wrap}
 .cx>.cal-deux{flex:1 1 0;min-height:0;display:grid;grid-template-columns:minmax(0,1fr) 19rem;gap:.8rem}
 .cal-grille{min-height:0;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));gap:4px;
@@ -70,6 +71,39 @@ body{background:var(--f-page);color:var(--tx);
 .cal-item .l2{font-size:.72rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .cal-reste{flex:none;font-size:.72rem;color:var(--tx2)}
 .cal-vide{font-size:.8rem;color:var(--tx2);padding:.4rem 0}
+/* (2026-11-22, sa capture : « corriger l’affichage des tâches, ça déborde ») Le panneau du jour a ses marges, chaque
+   tâche tient dans sa largeur (un bouton prend sinon la largeur de son texte) et son détail passe sur deux lignes. */
+.cal-jour{padding:.75rem .85rem;min-width:0}
+.cal-item{width:100%;min-width:0;max-width:100%}
+.cal-item .l2{white-space:normal;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;overflow-wrap:anywhere}
+.cal-item .l1 .rf-pill{flex:none}
+/* Le titre d une tâche passe à la ligne : rien n est coupé dans le panneau du jour. */
+.cal-item .l1{flex-wrap:wrap;row-gap:.2rem}
+.cal-item .l1 b{white-space:normal;overflow-wrap:anywhere}
+/* LES TROIS VUES (2026-11-22, sa demande : « l’affichage du calendrier devrait se faire par jour / semaine de travail / mois ») */
+.cal-vues{display:inline-flex;border:1px solid var(--v16);border-radius:9px;overflow:hidden;margin-left:.4rem}
+.cal-vues button{font:inherit;font-size:.78rem;font-weight:600;border:0;border-radius:0;background:transparent;color:var(--tx2);padding:.32rem .8rem;cursor:pointer}
+.cal-vues>button{background:transparent!important;box-shadow:none!important}
+.cal-vues>button.on{background:var(--f-pill)!important;color:var(--tx)!important;box-shadow:inset 0 0 0 1px var(--v20)!important}
+.cx>.cal-deux.une{grid-template-columns:minmax(0,1fr)}
+.cal-sem{min-height:0;display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.55rem}
+.cal-col{min-height:0;min-width:0;display:flex;flex-direction:column;gap:.4rem;padding:.55rem .55rem .6rem;border:1px solid var(--v08);
+  border-radius:12px;background:var(--f-carte);overflow:hidden}
+.cal-col.auj{border-color:var(--or);box-shadow:inset 0 0 0 1px var(--or)}
+.cal-col .cal-ct{flex:none;display:flex;align-items:baseline;gap:.4rem;padding:0 .15rem .35rem;border-bottom:1px solid var(--v08);cursor:pointer}
+.cal-col .cal-ct b{font-size:1.35rem;font-weight:800;line-height:1}
+.cal-col .cal-ct span{font-size:.72rem;font-weight:700;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2)}
+.cal-col .cal-items{gap:.35rem}
+.cal-col .cal-item{padding:.42rem .5rem}
+.cal-col .cal-item .l1{flex-wrap:wrap;gap:.25rem .4rem}
+.cal-col .cal-item .l1 b{white-space:normal;overflow-wrap:anywhere;flex-basis:100%}
+.cal-unjour{min-height:0;display:flex;flex-direction:column;gap:.6rem;padding:.9rem 1rem;border:1px solid var(--v08);border-radius:14px;background:var(--f-carte);overflow:hidden}
+.cal-unjour h3{margin:0;font-size:1.05rem}
+.cal-unjour h3::first-letter{text-transform:uppercase}
+.cal-unjour .cal-items{display:grid;grid-template-columns:repeat(auto-fill,minmax(20rem,1fr));align-content:start}
+.cal-unjour .cal-item{padding:.7rem .8rem}
+.cal-unjour .cal-item .l1 b{font-size:.92rem;white-space:normal}
+.cal-unjour .cal-item .l2{font-size:.8rem;-webkit-line-clamp:3}
 `;
 
 function pageCalendrier() {
@@ -88,6 +122,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
   var elSous = document.getElementById('sous');
   var D = null, AN = 0, MO = 0, JOUR = '';
+  /* (2026-11-22) LA VUE : jour | semaine (de travail, lundi à vendredi) | mois — retenue sur ce poste. Les mois lus sont
+     gardés (MC) : une semaine qui chevauche deux mois lit les deux. AUJ : la date du jour selon le site. */
+  var VUE = 'mois'; try { VUE = localStorage.getItem('sz-cal-vue') || 'mois'; } catch (e) {}
+  if (['jour', 'semaine', 'mois'].indexOf(VUE) < 0) VUE = 'mois';
+  var MC = {}, AUJ = '';
   var MOIS = ['${T("janvier")}', '${T("février")}', '${T("mars")}', '${T("avril")}', '${T("mai")}', '${T("juin")}',
     '${T("juillet")}', '${T("août")}', '${T("septembre")}', '${T("octobre")}', '${T("novembre")}', '${T("décembre")}'];
   var JSEM = ['${T("lun.")}', '${T("mar.")}', '${T("mer.")}', '${T("jeu.")}', '${T("ven.")}', '${T("sam.")}', '${T("dim.")}'];
@@ -123,37 +162,100 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (e.sorte === 'precommande') return '${T("Livraison promise des précommandes")}';
     return e.sous || '';
   }
-  function duJour(d){ return ((D && D.evenements) || []).filter(function(e){ return e.date === d; }); }
+  function duJour(d){ var m = MC[String(d).slice(0, 7)]; return ((m && m.evenements) || []).filter(function(e){ return e.date === d; }); }
+  function versDate(d){ var p = String(d).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
+  function versIso(dt){ return iso(dt.getFullYear(), dt.getMonth() + 1, dt.getDate()); }
+  function plusJours(d, n){ var dt = versDate(d); dt.setDate(dt.getDate() + n); return versIso(dt); }
+  function lundiDe(d){ var dt = versDate(d); dt.setDate(dt.getDate() - ((dt.getDay() + 6) % 7)); return versIso(dt); }
+  function lireMois(a, m){
+    var k = iso(a, m, 1).slice(0, 7);
+    if (MC[k]) return Promise.resolve(MC[k]);
+    return appeler('calendrier:mois', [a, m]).then(function(r){ if (r && r.ok) { MC[k] = r; if (r.aujourdhui) AUJ = r.aujourdhui; } return r; });
+  }
+  function itemHtml(e, i){
+    return '<button type="button" class="cal-item" data-ev="' + esc(e.date) + '|' + i + '" title="${T("Ouvrir dans son module")}">'
+      + '<span class="l1"><span class="rf-pill ' + (TON[e.ton] || 'bleu') + '">' + esc(SORTES[e.sorte] || '') + '</span><b>' + esc(e.titre) + '</b></span>'
+      + (sousDe(e) ? '<span class="l2">' + esc(sousDe(e)) + '</span>' : '') + '</button>';
+  }
+  function barre(titre, prec, suiv){
+    var v = function(k, l){ return '<button type="button" class="' + (VUE === k ? 'on' : '') + '" data-vue="' + k + '">' + l + '</button>'; };
+    return '<div class="cal-nav"><button type="button" class="mini" data-nav="-1" aria-label="' + prec + '">‹</button>'
+      + '<h2>' + esc(titre) + '</h2>'
+      + '<button type="button" class="mini" data-nav="1" aria-label="' + suiv + '">›</button>'
+      + '<button type="button" class="mini" data-nav="0">${T("Aujourd’hui")}</button>'
+      + '<span class="cal-vues" role="group" aria-label="${T("Affichage")}">' + v('jour', '${T("Jour")}') + v('semaine', '${T("Semaine de travail")}') + v('mois', '${T("Mois")}') + '</span>'
+      + '<span class="cal-leg"><span class="rf-pill rouge">${T("En retard")}</span><span class="rf-pill ambre">${T("Cette semaine")}</span>'
+      + '<span class="rf-pill bleu">${T("À venir")}</span></span></div>';
+  }
 
   function charger(){
-    appeler('calendrier:mois', [AN, MO]).then(function(r){
-      if (!r || !r.ok) { corps.innerHTML = '<div class="cal-vide">' + esc(expliquer(r)) + '</div>'; return; }
-      D = r;
-      if (!AN) { AN = r.annee; MO = r.mois; }
-      if (!JOUR || JOUR.slice(0, 7) !== iso(AN, MO, 1).slice(0, 7)) JOUR = (r.aujourdhui && r.aujourdhui.slice(0, 7) === iso(AN, MO, 1).slice(0, 7)) ? r.aujourdhui : iso(AN, MO, 1);
+    if (!JOUR) {   // premier chargement : le mois courant, pour connaître la date du jour
+      appeler('calendrier:mois', [0, 0]).then(function(r){
+        if (!r || !r.ok) { corps.innerHTML = '<div class="cal-vide">' + esc(expliquer(r)) + '</div>'; return; }
+        MC[iso(r.annee, r.mois, 1).slice(0, 7)] = r; AUJ = r.aujourdhui || iso(r.annee, r.mois, 1);
+        JOUR = AUJ; charger();
+      });
+      return;
+    }
+    var a = versDate(JOUR); AN = a.getFullYear(); MO = a.getMonth() + 1;
+    var besoins = [[AN, MO]];
+    if (VUE === 'semaine') { var v = versDate(plusJours(lundiDe(JOUR), 4)); besoins.push([v.getFullYear(), v.getMonth() + 1]);
+      var l = versDate(lundiDe(JOUR)); besoins.push([l.getFullYear(), l.getMonth() + 1]); }
+    Promise.all(besoins.map(function(b){ return lireMois(b[0], b[1]); })).then(function(rs){
+      var mauvais = rs.filter(function(r){ return !r || !r.ok; })[0];
+      if (mauvais) { corps.innerHTML = '<div class="cal-vide">' + esc(expliquer(mauvais)) + '</div>'; return; }
+      D = MC[iso(AN, MO, 1).slice(0, 7)];
       dessiner();
     });
   }
 
   function dessiner(){
+    if (VUE === 'jour') return dessinerUnJour();
+    if (VUE === 'semaine') return dessinerSemaine();
+    return dessinerMois();
+  }
+  function dessinerUnJour(){
+    var l = duJour(JOUR);
+    elSous.textContent = l.length ? (l.length + ' ' + (l.length > 1 ? '${T("événements ce jour-là")}' : '${T("événement ce jour-là")}')) : '';
+    var dt = versDate(JOUR);
+    var h = barre(libJour(JOUR) + ' ' + dt.getFullYear(), '${T("Jour précédent")}', '${T("Jour suivant")}')
+      + '<div class="cal-deux une"><div class="cal-unjour' + (JOUR === AUJ ? ' auj' : '') + '"><h3>' + esc(libJour(JOUR)) + (JOUR === AUJ ? ' · ${T("aujourd’hui")}' : '') + '</h3>'
+      + (l.length ? '<div class="cal-items">' + l.map(itemHtml).join('') + '</div><div class="cal-reste" id="cal-reste" hidden></div>'
+                  : '<div class="cal-vide">${T("Rien ce jour-là.")}</div>')
+      + '</div></div>';
+    corps.innerHTML = h;
+    ajusterListe(corps.querySelector('.cal-unjour .cal-items'), document.getElementById('cal-reste'));
+  }
+  function dessinerSemaine(){
+    var lun = lundiDe(JOUR), ven = plusJours(lun, 4), dl = versDate(lun), dv = versDate(ven), n = 0;
+    var titre = dl.getMonth() === dv.getMonth()
+      ? dl.getDate() + ' – ' + dv.getDate() + ' ' + MOIS[dv.getMonth()] + ' ' + dv.getFullYear()
+      : dl.getDate() + ' ' + MOIS[dl.getMonth()] + ' – ' + dv.getDate() + ' ' + MOIS[dv.getMonth()] + ' ' + dv.getFullYear();
+    var cols = '';
+    for (var k = 0; k < 5; k++) {
+      var d = plusJours(lun, k), l = duJour(d); n += l.length;
+      cols += '<div class="cal-col' + (d === AUJ ? ' auj' : '') + '"><div class="cal-ct" data-voirjour="' + d + '" title="${T("Voir ce jour")}"><span>' + esc(JSEM[k]) + '</span><b>' + versDate(d).getDate() + '</b></div>'
+        + (l.length ? '<div class="cal-items">' + l.map(itemHtml).join('') + '</div><div class="cal-reste" hidden></div>' : '<div class="cal-vide">—</div>')
+        + '</div>';
+    }
+    elSous.textContent = n ? (n + ' ' + (n > 1 ? '${T("événements cette semaine")}' : '${T("événement cette semaine")}')) : '';
+    corps.innerHTML = barre(titre, '${T("Semaine précédente")}', '${T("Semaine suivante")}') + '<div class="cal-deux une"><div class="cal-sem">' + cols + '</div></div>';
+    Array.prototype.forEach.call(corps.querySelectorAll('.cal-col'), function(c){ ajusterListe(c.querySelector('.cal-items'), c.querySelector('.cal-reste')); });
+  }
+  function dessinerMois(){
     var ev = (D && D.evenements) || [];
     elSous.textContent = ev.length ? (ev.length + ' ' + (ev.length > 1 ? '${T("événements ce mois-ci")}' : '${T("événement ce mois-ci")}')) : '';
     var premier = new Date(AN, MO - 1, 1), decal = (premier.getDay() + 6) % 7;
     var nbJours = new Date(AN, MO, 0).getDate();
     var rangs = Math.ceil((decal + nbJours) / 7);
-    var h = '<div class="cal-nav"><button type="button" class="mini" data-nav="-1" aria-label="${T("Mois précédent")}">‹</button>'
-      + '<h2>' + esc(MOIS[MO - 1]) + ' ' + AN + '</h2>'
-      + '<button type="button" class="mini" data-nav="1" aria-label="${T("Mois suivant")}">›</button>'
-      + '<button type="button" class="mini" data-nav="0">${T("Aujourd’hui")}</button>'
-      + '<span class="cal-leg"><span class="rf-pill rouge">${T("En retard")}</span><span class="rf-pill ambre">${T("Cette semaine")}</span>'
-      + '<span class="rf-pill bleu">${T("À venir")}</span></span></div>';
+    var h = barre(MOIS[MO - 1] + ' ' + AN, '${T("Mois précédent")}', '${T("Mois suivant")}');
     h += '<div class="cal-deux"><div class="cal-grille" style="--cal-rangs:' + rangs + '">'
       + JSEM.map(function(j){ return '<div class="cal-jsem">' + esc(j) + '</div>'; }).join('');
     for (var c = 0; c < rangs * 7; c++) {
       var j = c - decal + 1;
       if (j < 1 || j > nbJours) { h += '<div class="cal-case hors" aria-hidden="true"></div>'; continue; }
       var d = iso(AN, MO, j), l = duJour(d);
-      h += '<div class="cal-case' + (d === (D && D.aujourdhui) ? ' auj' : '') + (d === JOUR ? ' choisi' : '') + '" data-jour="' + d + '">'
+      h += '<div class="cal-case' + (d === AUJ ? ' auj' : '') + (d === JOUR ? ' choisi' : '') + '" data-jour="' + d + '">'
         + '<span class="n">' + j + '</span>'
         + l.map(function(e){ return '<span class="rf-pill cal-ev ' + (TON[e.ton] || 'bleu') + '" title="' + esc(SORTES[e.sorte] || '') + ' — ' + esc(e.titre) + '">' + esc(e.titre) + '</span>'; }).join('')
         + '<span class="cal-plus" hidden></span></div>';
@@ -169,10 +271,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var l = duJour(JOUR);
     var h = '<h3>' + esc(libJour(JOUR)) + '</h3>';
     if (!l.length) h += '<div class="cal-vide">${T("Rien ce jour-là.")}</div>';
-    else h += '<div class="cal-items">' + l.map(function(e, i){
-      return '<button type="button" class="cal-item" data-i="' + i + '" title="${T("Ouvrir dans son module")}">'
-        + '<span class="l1"><span class="rf-pill ' + (TON[e.ton] || 'bleu') + '">' + esc(SORTES[e.sorte] || '') + '</span><b>' + esc(e.titre) + '</b></span>'
-        + (sousDe(e) ? '<span class="l2">' + esc(sousDe(e)) + '</span>' : '') + '</button>'; }).join('') + '</div>'
+    else h += '<div class="cal-items">' + l.map(itemHtml).join('') + '</div>'
       + '<div class="cal-reste" id="cal-reste" hidden></div>';
     z.innerHTML = h;
     ajusterJour();
@@ -190,8 +289,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!k) plus.hidden = true;
     });
   }
+  function ajusterListe(z, r){
+    if (!z || !r) return;
+    var it = z.querySelectorAll('.cal-item');
+    Array.prototype.forEach.call(it, function(e){ e.hidden = false; });
+    r.hidden = true;
+    if (z.scrollHeight <= z.clientHeight + 1) return;
+    var k = 0;
+    for (var i = it.length - 1; i >= 0 && z.scrollHeight > z.clientHeight + 1; i--) { it[i].hidden = true; k++; }
+    r.hidden = !k; r.textContent = '+ ' + k + ' ' + (k > 1 ? '${T("autres")}' : '${T("autre")}');
+    r.title = '${T("Passez à la vue Jour pour tout voir.")}';
+  }
   function ajusterJour(){
-    var z = document.querySelector('.cal-items'), r = document.getElementById('cal-reste'); if (!z || !r) return;
+    var z = document.querySelector('#cal-jour .cal-items'), r = document.getElementById('cal-reste'); if (!z || !r) return;
     var it = z.querySelectorAll('.cal-item');
     Array.prototype.forEach.call(it, function(e){ e.hidden = false; });
     r.hidden = true;
@@ -203,26 +313,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   corps.onclick = function(ev){
     var t = ev.target; if (!t || !t.closest) return;
+    var vb = t.closest('[data-vue]');
+    if (vb) { VUE = vb.getAttribute('data-vue'); try { localStorage.setItem('sz-cal-vue', VUE); } catch (e) {} charger(); return; }
     var n = t.closest('[data-nav]');
     if (n) {
       var v = +n.getAttribute('data-nav');
-      if (v === 0) { var a = String((D && D.aujourdhui) || '').split('-'); AN = +a[0]; MO = +a[1]; JOUR = D.aujourdhui; }
-      else { MO += v; if (MO < 1) { MO = 12; AN--; } if (MO > 12) { MO = 1; AN++; } JOUR = ''; }
+      if (v === 0) JOUR = AUJ;
+      else if (VUE === 'jour') JOUR = plusJours(JOUR, v);
+      else if (VUE === 'semaine') JOUR = plusJours(lundiDe(JOUR), 7 * v);
+      else { var dm = versDate(JOUR); dm = new Date(dm.getFullYear(), dm.getMonth() + v, 1); JOUR = versIso(dm);
+        if (AUJ && AUJ.slice(0, 7) === JOUR.slice(0, 7)) JOUR = AUJ; }
       charger(); return;
     }
+    var vj = t.closest('[data-voirjour]');
+    if (vj) { JOUR = vj.getAttribute('data-voirjour'); VUE = 'jour'; try { localStorage.setItem('sz-cal-vue', VUE); } catch (e) {} charger(); return; }
     var it = t.closest('.cal-item');
     if (it) {
-      var e = duJour(JOUR)[+it.getAttribute('data-i')];
+      var k = String(it.getAttribute('data-ev') || '').split('|');
+      var e = duJour(k[0])[+k[1]];
       if (e && e.ouvrir && P && P.ouvrirModule) { P.ouvrirModule(e.ouvrir); szDire('${T("Ouverture du module…")}'); }
       return;
     }
     var c = t.closest('.cal-case[data-jour]');
-    if (c) { JOUR = c.getAttribute('data-jour');
+    if (c) {
+      /* Un double-clic sur une case ouvre la vue Jour. */
+      if (ev.detail >= 2) { JOUR = c.getAttribute('data-jour'); VUE = 'jour'; try { localStorage.setItem('sz-cal-vue', VUE); } catch (e2) {} charger(); return; }
+      JOUR = c.getAttribute('data-jour');
       Array.prototype.forEach.call(corps.querySelectorAll('.cal-case.choisi'), function(x){ x.classList.remove('choisi'); });
       c.classList.add('choisi'); dessinerJour(); }
   };
   var minut = null;
-  window.addEventListener('resize', function(){ clearTimeout(minut); minut = setTimeout(function(){ ajusterCases(); ajusterJour(); }, 120); });
+  window.addEventListener('resize', function(){ clearTimeout(minut); minut = setTimeout(function(){ if (VUE === 'mois') { ajusterCases(); ajusterJour(); } else dessiner(); }, 120); });
   charger();
 })();
 </script></body></html>`;
