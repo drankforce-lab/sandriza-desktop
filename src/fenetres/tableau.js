@@ -302,13 +302,14 @@ html.jour .voile{background:rgba(20,24,30,.35)}
 .tm-k .l{font-size:12px;font-weight:600;color:var(--tx2)}
 .tm-k .v{font-size:20px;line-height:1.15;font-weight:800;letter-spacing:-.02em;color:var(--tx)}
 .tm-k .s{font-size:12px;font-weight:600;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.tm-obj{display:flex;flex-direction:column;gap:8px;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;margin:0;
-  background:var(--f-carte);border:1px solid rgba(var(--or-rgb),.35);border-radius:14px;padding:12px 16px}
-.tm-obj .h{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
-.tm-obj .h b{font-size:14px}
-.tm-obj .h .v{margin-left:auto;font-size:18px;font-weight:800;font-variant-numeric:tabular-nums}
-.tm-obj .h .v small{font-size:12px;color:var(--tx2);font-weight:600}
-.tm-obj .h .p{font-weight:800;font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
+.tm-obj{display:flex;flex-direction:column;gap:5px;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;margin:0;
+  background:var(--f-carte);border:1px solid rgba(var(--or-rgb),.35);border-radius:12px;padding:8px 14px}
+/* (2026-11-22, sa capture : « mets ça un peu plus petit ») Bande d'objectif resserrée : marges, chiffres et piste réduits. */
+.tm-obj .h{display:flex;align-items:baseline;gap:10px;flex-wrap:wrap}
+.tm-obj .h b{font-size:13px}
+.tm-obj .h .v{margin-left:auto;font-size:15px;font-weight:800;font-variant-numeric:tabular-nums}
+.tm-obj .h .v small{font-size:11px;color:var(--tx2);font-weight:600}
+.tm-obj .h .p{font-size:13px;font-weight:800;font-variant-numeric:tabular-nums;min-width:44px;text-align:right}
 /* (2026-11-22, sa capture : « la barre ne se remplit pas, je suis à 15 % ») Les morceaux du bouton S'ÉTIRENT : rétrécis à leur
    contenu (alignement du look Épuré), la piste n'avait plus de largeur et la barre ne montrait que le repère du jour. */
 .tm-obj>span{align-self:stretch;width:100%}
@@ -326,11 +327,11 @@ html.jour .voile{background:rgba(20,24,30,.35)}
 .tm-att .calme{font-size:13px;color:var(--tx2)}
 html.jour .tm-att button.a b{color:#8a4b06}
 html.jour .tm-att button.r b{color:#a11d1d}
-.tm-obj .j{display:block;position:relative;height:9px;border-radius:99px;background:var(--v08)}
+.tm-obj .j{display:block;position:relative;height:6px;border-radius:99px;background:var(--v08)}
 .tm-obj .j i{display:block;height:100%;border-radius:99px;background:var(--or);max-width:100%}
 .tm-obj.atteint .j i{background:var(--vv,#5fd4a4)} .tm-obj.enretard .j i{background:#f2c26b} .tm-obj.enavance .j i{background:var(--vv-2,#7cb4f5)}
-.tm-obj .j em{position:absolute;top:-3px;bottom:-3px;width:2px;border-radius:2px;background:var(--tx)}
-.tm-obj .t{font-size:12px;color:var(--tx2)}
+.tm-obj .j em{position:absolute;top:-2px;bottom:-2px;width:2px;border-radius:2px;background:var(--tx)}
+.tm-obj .t{font-size:11.5px;color:var(--tx2)}
 .tm-tend{display:inline-flex;align-items:center;margin-left:8px;vertical-align:middle;font-size:11.5px;font-weight:800;letter-spacing:0;padding:2px 8px;border-radius:999px}
 .tm-tend.h{color:var(--ep-vert-t,#86e0a8);background:var(--ep-vert-f,#173326)}
 .tm-tend.b{color:var(--tx-err2);background:rgba(248,113,113,.14)}
