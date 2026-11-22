@@ -99,13 +99,17 @@ tbody td{vertical-align:middle}
 /** Page complète de la fenêtre native « Paiements Square ». */
 function pagePaiements() {
   return `${TETE()}
-<title>${T("Paiements Square — Administration Sandriza")}</title>
+<title>${T("Paiements reçus — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.payments}</span><h1>${T("Paiements Square")}</h1>
+<div class="tete"><span class="ico">${ICO.payments}</span><h1>${T("Paiements reçus")}</h1>
+  <!-- (2026-11-22, sa demande : « le module devrait s'appeler Paiements reçus, avec une liste déroulante en haut de nos systèmes
+       de paiement — un autre, s'il s'en ajoute, viendra dans le même module ») Square est le seul branché aujourd'hui. -->
+  <label class="pr-sys" title="${T("Système de paiement")}"><select id="p-systeme" aria-label="${T("Système de paiement")}"><option value="square" selected>Square</option></select></label>
   <span class="cx-resume" id="sous"></span>
   <div class="cx-actions" id="p-actions"></div></div>
 <div class="cx" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
+<style>.pr-sys{margin-left:.6rem}.pr-sys select{height:2rem;border-radius:9px;font-size:.82rem;font-weight:600;padding:0 .6rem;min-width:8rem}</style>
 <script>
 (function(){
   'use strict';

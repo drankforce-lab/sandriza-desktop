@@ -54,6 +54,11 @@ td.acts{text-align:right;white-space:nowrap}
 .rf-nom code{font-family:ui-monospace,monospace;font-size:.88rem;background:none;padding:0;border:0}
 .carte{background:var(--v03);border:1px solid var(--v08);border-radius:12px;padding:1rem 1.1rem;margin:0 0 1rem}
 .carte.ajout{border-color:rgba(var(--or-rgb),.42)}
+.ln-boite{width:min(40rem,92vw)!important;max-width:none!important}
+.ln-boite h3{margin:0 0 .7rem}
+.ln-boite .carte.ajout{border:0;padding:0;background:transparent;box-shadow:none}
+.ln-boite .cols{grid-template-columns:minmax(0,1fr)}
+.ln-boite .pied2{margin-top:1rem}
 .cols{display:grid;grid-template-columns:repeat(auto-fit,minmax(13rem,1fr));gap:.8rem}
 label.champ{display:block;margin:0}
 label.champ .lbl{display:block;font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .25rem}
@@ -113,6 +118,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   var corps = document.getElementById('corps');
   var D = null, RO = true, OCCUPE = false;
   var AJOUT = '${AJOUT0}' === '1';
+  document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && AJOUT && document.querySelector('.ln-voile')) { ev.preventDefault(); ev.stopPropagation(); AJOUT = false; dessiner(); } }, true);
   var TYPE = 'email';
   var DELID = '';
   var SUG_TIMER = null;   // #42 : anti-rebond des suggestions d'adresse
@@ -249,8 +255,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '</div></div>';
     }
 
+    /* (2026-11-22, sa demande : « ajouter une entrée devrait avoir sa propre fenêtre ») Le formulaire s'ouvre dans une BOÎTE
+       à part, par-dessus la liste (mêmes champs, mêmes identifiants : rien ne change pour l'enregistrement). */
     if (AJOUT && D.peutAjouter) {
-      h += '<div class="carte ajout"><div class="cols">'
+      h += '<div class="szc-voile ln-voile"><div class="szc-boite ln-boite" role="dialog" aria-modal="true" aria-labelledby="ln-titre">'
+        + '<h3 id="ln-titre">${T("Ajouter à la liste noire")}</h3>'
+        + '<div class="carte ajout"><div class="cols">'
         + '<label class="champ"><span class="lbl">${T("Type")}</span><select class="t" id="l-type">'
         + '<option value="email"'+(TYPE==='email'?' selected':'')+'>${T("Courriel")}</option>'
         + '<option value="postal"'+(TYPE==='postal'?' selected':'')+'>${T("Code postal")}</option>'
@@ -267,7 +277,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       }
       h += '<label class="champ"><span class="lbl">${T("Note (facultatif)")}</span><input class="t" id="l-note" placeholder="${T("Raison, numéro de commande…")}"></label>'
         + '</div><div class="pied2"><button class="b" id="l-annuler">${T("Annuler")}</button>'
-        + '<button class="prim" id="l-ajouter">${T("Ajouter")}</button></div></div>';
+        + '<button class="prim" id="l-ajouter">${T("Ajouter")}</button></div></div></div></div>';
     }
 
     if (!l.length && toutes.length) {
@@ -333,6 +343,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     b=document.getElementById('l-nouveau'); if (b) b.onclick=function(){ AJOUT=true; dessiner();
       var v=document.getElementById('l-valeur'); if (v) try { v.focus(); } catch(e){} };
     b=document.getElementById('l-annuler'); if (b) b.onclick=function(){ AJOUT=false; dessiner(); dire(''); };
+    // La boîte se ferme aussi par Échap et par un clic sur le voile.
+    var vo=document.querySelector('.ln-voile');
+    if (vo) { vo.onclick=function(ev){ if (ev.target===vo) { AJOUT=false; dessiner(); } };
+      try { var pv=document.getElementById('l-valeur'); if (pv) pv.focus(); } catch(e){} }
     b=document.getElementById('l-ajouter'); if (b) b.onclick=ajouter;
     var lt=corps.querySelectorAll('[data-lnt]');
     for (var j=0;j<lt.length;j++) lt[j].onclick=function(){

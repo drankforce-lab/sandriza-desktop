@@ -188,4 +188,8 @@ module.exports = {
   "Catégorie": "Category",
   "Toutes": "All",
   "Aucune transaction de cette catégorie pour ": "No transactions in this category for ",
+  // 2026-11-22
+  'Paiements reçus — Administration Sandriza': 'Payments received — Sandriza Administration',
+  'Paiements reçus': 'Payments received',
+  'Système de paiement': 'Payment system',
 };

@@ -5066,7 +5066,7 @@ const PAGES_ANCRABLES = () => ({
   avis: ['Avis produits', () => pageAvis('')],
   messagerie: ['Messagerie clients', () => pageMessagerie()],
   archives: ['Archives', () => pageArchives()],
-  paiements: ['Paiements Square', () => pagePaiements()],
+  paiements: ['Paiements reçus', () => pagePaiements()],
   cartescadeaux: ['Cartes-cadeaux', () => pageCartesCadeaux()],
   coupons: ['Coupons', () => pageCoupons()],
   promotions: ['Offres et annonces', () => pagePromotions()],

@@ -5362,6 +5362,8 @@ html[data-sz-theme="epure"] select,html[data-sz-theme="epure"] textarea,html[dat
 html[data-sz-theme="epure"] .tete h1{font-weight:800;letter-spacing:-.01em}
 /* Les cartes : blanches le jour, bordure fine, une ombre à peine ; plus d'air dedans. */
 html[data-sz-theme="epure"] .carte{border-radius:var(--ep-rayon);border-color:var(--v08)}
+/* (2026-11-22) Partout : le fond d'une carte s'arrête à sa bordure — sous une bordure translucide, il faisait un coin sombre. */
+.carte,.cx-carte,.ls-rang{background-clip:padding-box}
 html[data-sz-theme="epure"].jour .carte{box-shadow:0 1px 2px rgba(16,24,40,.05)}
 html[data-sz-theme="epure"] .carte h2{letter-spacing:.06em;font-weight:700}
 /* Boutons et champs : coins de 10 px ; le principal en brun, texte blanc le jour. */

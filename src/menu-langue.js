@@ -134,7 +134,6 @@ const MENU_APP_EN = {
   'Démarrer avec Windows': 'Start with Windows',
   'Dépenses': 'Expenses',
   'Expéditions': 'Shipments',
-  'Factures': 'Invoices',
   /* Les quatre entrées S('…') que le banc ne lisait pas (2026-09-25). */
   'Facturation': 'Billing',
   'Conciliation bancaire': 'Bank reconciliation',
@@ -149,9 +148,6 @@ const MENU_APP_EN = {
      tous — c'est celui qu'on cherchera.
      ⚠ « Plafond » reste « ceiling », comme dans l'écran des clés : un budget se
      dépasse, un plafond arrête. */
-  'Édition publicitaire': 'Ad studio',
-  'Publication pour les réseaux sociaux': 'Social media post',
-  'Courriel publicitaire': 'Marketing email',
   'Clé et plafond de dépense IA': 'AI key and spending ceiling',
   'Fiscalité et impôt': 'Taxation and income tax',
   'Rapports et budget': 'Reports and budget',
@@ -196,7 +192,7 @@ const MENU_APP_EN = {
   'Page d’accueil': 'Home page',
   'Pages du site': 'Site pages',
   'Paiement & taxes': 'Payment & taxes',
-  'Paiements Square': 'Square payments',
+  'Paiements reçus': 'Payments received',
   'Personnel connecté': 'Staff signed in',
   'Photos': 'Photos',
   'Pied de page': 'Footer',

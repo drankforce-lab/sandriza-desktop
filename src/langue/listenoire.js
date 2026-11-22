@@ -140,4 +140,6 @@ module.exports = {
   "Retrait de la liste noire": "Removing from blacklist",
   "{0} entrée retirée.": "{0} entry removed.",
   "{0} entrées retirées.": "{0} entries removed.",
+  // 2026-11-22
+  'Ajouter à la liste noire': 'Add to the blocklist',
 };

@@ -117,4 +117,9 @@ module.exports = {
   "Retrait des requêtes": "Removing queries",
   "{0} requête retirée de la liste.": "{0} query removed from the list.",
   "{0} requêtes retirées de la liste.": "{0} queries removed from the list.",
+  // 2026-11-22
+  'Première': 'First',
+  'revient : {0} mois': 'recurring: {0} months',
+  '{0} fois en archive': '{0} times archived',
+  'nouvelle': 'new',
 };

@@ -95,7 +95,16 @@ tbody tr:hover td{background:var(--v04)}
 .rs-rang .jaugef{width:100%;max-width:18rem;margin-top:.3rem}
 /* LES CASES A COCHER (2026-10-29, gestes groupes) : la liste est faite de rangs, pas d un tableau — la case
    du socle (szCoches) y est posee dans un span, et le rang coche se repere par :has. */
-.rs-rang{grid-template-columns:auto minmax(0,1fr) 10rem 3.5rem}
+.rs-rang{grid-template-columns:auto minmax(0,1fr) 12.5rem 9.5rem 3.5rem}
+.rs-dates{display:grid;grid-template-columns:auto 1fr;column-gap:.45rem;row-gap:.1rem;align-items:baseline;font-size:.76rem;min-width:0}
+.rs-dates .k{color:var(--tx3,var(--tx2));font-size:.68rem;text-transform:uppercase;letter-spacing:.04em}
+.rs-dates b{font-weight:600}
+.rs-rec{display:flex;flex-direction:column;gap:.15rem;align-items:flex-start;font-size:.74rem}
+/* La tête : le titre seul à gauche, les gestes en boutons sobres à droite (sa capture : « améliore aussi ici »). */
+.ls-tete .ls-titre b{font-size:1rem}
+.ls-tete #rs-vers-journaux,.ls-tete #rs-vider{height:2rem;padding:0 .8rem;border-radius:9px;font-size:.8rem}
+.ls-tete #rs-vider{background:transparent;border-color:transparent;color:var(--tx-err)}
+.ls-tete #rs-vider:hover{background:rgba(220,38,38,.08)}
 span.szk-c{display:inline-flex;align-items:center;justify-content:center;width:1.4rem;cursor:pointer}
 .szk-c input[type=checkbox]{padding:0;border-radius:3px}
 .ls-tete span.szk-c{margin-right:.35rem}
@@ -222,6 +231,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
     });
   }
 
+  /* Date ET heure d'un horodatage ISO (« 26 oct. 2026 · 14 h 05 »). */
+  function quandH(iso){
+    var d = iso ? new Date(iso) : null; if (!d || isNaN(d)) return '';
+    return d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short', year: 'numeric' }) + ' · '
+      + d.toLocaleTimeString('${LIEU()}', { hour: '2-digit', minute: '2-digit' });
+  }
   function filtrees(){
     var q = Q.trim().toLowerCase();
     if (!q) return D.recentes || [];
@@ -274,7 +289,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('recherches')}
           + '<div class="qui"><span class="rs-fois" aria-hidden="true">' + x.fois + '</span>'
           + '<div class="tx"><b>' + esc(x.q) + '</b>'
           + '<div class="jaugef"><i style="width:' + Math.max(4, Math.round(100 * (Number(x.fois) || 0) / max)) + '%"></i></div></div></div>'
-          + '<div class="ou"><span>' + esc(szQuand(x.derniere) || '—') + '</span></div>'
+          /* (2026-11-22, sa demande : « les dates et heures visibles, et les récurrences ») */
+          + '<div class="rs-dates"><span class="k">${T("Dernière")}</span><b>' + esc(quandH(x.derniereLe) || szQuand(x.derniere) || '—') + '</b>'
+          + (x.premiereLe && x.premiereLe !== x.derniereLe ? '<span class="k">${T("Première")}</span><span>' + esc(quandH(x.premiereLe)) + '</span>' : '') + '</div>'
+          + '<div class="rs-rec">' + (x.moisVus > 0
+              ? '<span class="rf-pill ambre">' + esc(szPl(x.moisVus, '${T("revient : {0} mois")}', '${T("revient : {0} mois")}').split('{0}').join(x.moisVus)) + '</span>'
+                + '<span class="dt">' + esc(szPl(x.archiveFois, '${T("{0} fois en archive")}', '${T("{0} fois en archive")}').split('{0}').join(x.archiveFois)) + '</span>'
+              : '<span class="dt">${T("nouvelle")}</span>') + '</div>'
           + '<div class="gestes">' + (D.peutModifier
               ? '<button class="mini geste danger" data-retirer="' + esc(x.q)
                 + '" title="${T("Traitée — retirer de la liste")}">&#10005;</button>'

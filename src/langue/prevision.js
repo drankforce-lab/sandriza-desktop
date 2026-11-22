@@ -61,4 +61,6 @@ module.exports = {
   'À prévoir': 'Plan ahead',
   '⚓ Ancrer': '⚓ Dock',
   '⧉ Détacher': '⧉ Detach',
+  // 2026-11-22 : survol des graphiques.
+  'Semaine du {0}': 'Week of {0}',
 };

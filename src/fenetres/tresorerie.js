@@ -54,6 +54,11 @@ html.jour .avis{color:#8a5a00}
 .graph .axe{stroke:var(--v10);stroke-width:1}
 .graph .lab{fill:var(--tx2);font-size:11px;font-family:system-ui}
 .graph .plancher{stroke:#f08a8a;stroke-dasharray:4 4;stroke-width:1.2}
+.graph .survol{stroke:var(--tx2);stroke-width:1;stroke-dasharray:3 3}
+.graph .survol-pt{fill:var(--f-carte);stroke:var(--sz-btn-prim,#8a5a2b);stroke-width:2}
+.tr-bulle{position:absolute;z-index:3;pointer-events:none;display:flex;flex-direction:column;gap:2px;padding:.45rem .65rem;border-radius:10px;
+  background:var(--f-carte);border:1px solid var(--v12);box-shadow:0 6px 18px rgba(0,0,0,.16);font-size:.76rem;white-space:nowrap}
+.tr-bulle .ev{color:var(--tx2)}
 .graph .solde{fill:none;stroke:var(--or);stroke-width:2.2;stroke-linejoin:round}
 .graph .aire{fill:rgba(var(--or-rgb),.12)}
 .graph .creux{fill:#f08a8a}
@@ -154,9 +159,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
 
   /* La courbe du solde : 90 points, la ligne du seuil, le creux, les échéances en tirets. */
-  function graphique(p){
+  /* (2026-11-22, sa capture : « les chiffres sont tout étirés, et je veux des données au survol ») Le dessin se fait à la
+     taille RÉELLE de sa carte (plus d'étirement : preserveAspectRatio par défaut), et une bulle suit la souris. */
+  var GR = null;
+  function graphique(p, W0, H0){
     var J = p.jours || []; if (!J.length) return '';
-    var W = 1000, H = 300, g = 64, d = 10, h = 14, b = 26;
+    var W = Math.max(320, Math.round(W0 || 1000)), H = Math.max(160, Math.round(H0 || 300)), g = 64, d = 10, h = 14, b = 26;
     var vals = J.map(function(j){ return j.solde; }).concat([Number(p.reglages.plancher) || 0, 0]);
     var mn = Math.min.apply(null, vals), mx = Math.max.apply(null, vals);
     if (mx - mn < 1) mx = mn + 1;
@@ -164,7 +172,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var X = function(i){ return g + i / (J.length - 1) * (W - g - d); };
     var Y = function(v){ return h + (mx - v) / (mx - mn) * (H - h - b); };
     var pts = J.map(function(j, i){ return X(i).toFixed(1) + ',' + Y(j.solde).toFixed(1); });
-    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" preserveAspectRatio="none" role="img" aria-label="${T("Solde prévu sur 90 jours")}">';
+    GR = { p: p, J: J, X: X, Y: Y, W: W, H: H, g: g, d: d };
+    var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" role="img" aria-label="${T("Solde prévu sur 90 jours")}">';
     for (var k = 0; k <= 4; k++) {
       var v = mn + (mx - mn) * k / 4, y = Y(v).toFixed(1);
       s += '<line class="axe" x1="' + g + '" x2="' + (W - d) + '" y1="' + y + '" y2="' + y + '"></line>'
@@ -176,8 +185,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     s += '<path class="aire" d="M' + pts.join(' L') + ' L' + X(J.length - 1).toFixed(1) + ',' + (H - b) + ' L' + g + ',' + (H - b) + 'Z"></path>';
     s += '<polyline class="solde" vector-effect="non-scaling-stroke" points="' + pts.join(' ') + '"></polyline>';
     if (p.creux) { var ic = 0; J.forEach(function(j, i){ if (j.date === p.creux.date) ic = i; }); s += '<circle class="creux" cx="' + X(ic).toFixed(1) + '" cy="' + Y(p.creux.solde).toFixed(1) + '" r="5"></circle>'; }
-    return s + '</svg>';
+    s += '<line class="survol" id="tr-ligne" x1="0" x2="0" y1="' + h + '" y2="' + (H - b) + '" style="display:none"></line>'
+      + '<circle class="survol-pt" id="tr-pt" r="4.5" style="display:none"></circle>';
+    return s + '</svg><div class="tr-bulle" id="tr-bulle" hidden></div>';
   }
+  /* Redessine à la taille réelle de la carte, puis branche le survol. */
+  function ajusterGraphique(){
+    var z = corps.querySelector('.graph'); if (!z || !GR) return;
+    var w = z.clientWidth, hh = z.clientHeight; if (!(w > 50 && hh > 50)) return;
+    if (Math.abs(w - GR.W) > 2 || Math.abs(hh - GR.H) > 2) z.innerHTML = graphique(GR.p, w, hh);
+    var svg = z.querySelector('svg'), bulle = document.getElementById('tr-bulle'), ln = document.getElementById('tr-ligne'), pt = document.getElementById('tr-pt');
+    if (!svg || !bulle) return;
+    svg.onmousemove = function(ev){
+      var r = svg.getBoundingClientRect(), x = ev.clientX - r.left;
+      var n = GR.J.length, i = Math.round((x - GR.g) / (GR.W - GR.g - GR.d) * (n - 1)); i = Math.max(0, Math.min(n - 1, i));
+      var j = GR.J[i], cx = GR.X(i), cy = GR.Y(j.solde);
+      ln.setAttribute('x1', cx); ln.setAttribute('x2', cx); ln.style.display = '';
+      pt.setAttribute('cx', cx); pt.setAttribute('cy', cy); pt.style.display = '';
+      var evs = (GR.p.evenements || []).filter(function(e){ return e.date === j.date; });
+      bulle.innerHTML = '<b>' + esc(jour(j.date, true)) + '</b><span>${T("Solde prévu")} : <strong>' + esc(szArgent(j.solde)) + '</strong></span>'
+        + evs.map(function(e){ return '<span class="ev">' + esc(szTd(e.libelle)) + ' · ' + (e.entree ? '+' : '−') + esc(szArgent(e.montant)) + '</span>'; }).join('');
+      bulle.hidden = false;
+      var bx = Math.min(Math.max(cx + 12, 0), GR.W - bulle.offsetWidth - 4); if (cx + 12 + bulle.offsetWidth > GR.W) bx = cx - bulle.offsetWidth - 12;
+      bulle.style.left = Math.max(0, bx) + 'px'; bulle.style.top = Math.max(0, Math.min(cy - 20, GR.H - bulle.offsetHeight - 4)) + 'px';
+    };
+    svg.onmouseleave = function(){ bulle.hidden = true; ln.style.display = 'none'; pt.style.display = 'none'; };
+  }
+  window.addEventListener('resize', function(){ clearTimeout(window.__trR); window.__trR = setTimeout(ajusterGraphique, 80); });
   function resume(p){
     var t = '${T("Solde de départ {0}. Dans 90 jours : {1}. Point le plus bas : {2} le {3}.")}'
       .split('{0}').join('<b>' + esc(szArgent(p.reglages.solde)) + '</b>').split('{1}').join('<b>' + esc(szArgent(p.soldeFinal)) + '</b>')
@@ -243,6 +277,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         .split('{0}').join(esc(szArgent(p.ventesParJour.reduce(function(a, b){ return a + b; }, 0) / 7))).split('{1}').join(esc(szArgent(p.depensesParJour))) + '</p></section>'
       + echeances(p) + '</div>';
     corps.innerHTML = h;
+    requestAnimationFrame(ajusterGraphique);
   }
   function charger(){
     appeler('tresorerie:donnees').then(function(r){

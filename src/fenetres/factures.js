@@ -84,7 +84,7 @@ tbody td{vertical-align:middle}
 [data-pages="factures"] table{table-layout:fixed;width:100%}
 [data-pages="factures"] th:nth-child(1){width:2.2rem}[data-pages="factures"] th:nth-child(2){width:11rem}
 [data-pages="factures"] th:nth-child(4){width:7.5rem}[data-pages="factures"] th:nth-child(5){width:6.5rem}
-[data-pages="factures"] th:nth-child(6){width:7rem}[data-pages="factures"] th:nth-child(7){width:9.5rem}
+[data-pages="factures"] th:nth-child(6){width:8.5rem}[data-pages="factures"] th:nth-child(7){width:12rem}
 [data-pages="factures"] .cx-num{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}
 [data-pages="factures"] .cx-qui b,[data-pages="factures"] .cx-qui .cx-l2{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:break-word}
 [data-pages="factures"] td.fin{white-space:normal!important;text-align:right}

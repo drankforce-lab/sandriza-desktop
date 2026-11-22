@@ -376,6 +376,15 @@ html[data-sz-theme="epure"] .tm-tete{border-radius:16px;padding:14px 16px;border
 .tm-l button.prep{background:var(--sz-btn-prim,#8a5a2b);border:0;color:var(--sz-btn-prim-txt,#fff)}
 .tm-plus{flex:none;font-size:12px;color:var(--tx2);padding-top:6px}
 .tm-barres{flex:1 1 0;min-height:110px;display:flex;align-items:flex-end;gap:10px;padding-top:6px}
+.tm-per{display:inline-flex;gap:2px;margin-left:auto}
+.tm-per button{height:1.6rem;padding:0 .55rem;border-radius:7px;border:0;background:transparent;color:var(--tx2);font:inherit;font-size:.72rem;font-weight:700;cursor:pointer}
+.tm-per button.on{background:var(--v08);color:var(--tx)}
+.tm-barres.l90{gap:1px;position:relative}
+.tm-barres.l90 .tm-b{flex:1 1 0;min-width:0;position:relative}
+.tm-barres.l90 .tm-b .j{position:absolute;bottom:-1.2rem;left:0;white-space:nowrap;font-size:.62rem}
+.tm-barres.l90 .tm-b:hover i{filter:brightness(.85)}
+.tm-barres.l90{padding-bottom:1.2rem}
+.tm-barres.l90 .tm-b.auj .j{left:auto;right:0}
 .tm-b{flex:1;display:flex;flex-direction:column;align-items:center;gap:6px;height:100%;justify-content:flex-end;min-width:0}
 .tm-b .v{font-size:11px;font-weight:700;color:var(--tx)}
 .tm-b i{display:block;width:100%;border-radius:6px 6px 2px 2px;background:#4a3c2c;min-height:2px}
@@ -705,6 +714,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ══ LA VUE DE LA MAQUETTE (Épuré) ════════════════════════════════════════════════════════════════════ */
   function MAQ(){ return document.documentElement.getAttribute('data-sz-theme') === 'epure'; }
   var D7 = null;   // la même lecture, sur 7 jours : l'histogramme de l'activité
+  /* (2026-11-22, sa demande : « voir l'historique des 90 derniers jours en appuyant sur un bouton ») */
+  var D90 = null, ACT90 = false;
   /* (2026-11-20) L'objectif épinglé (ou en cours) : une bande sous les tuiles, qui ouvre la fenêtre Objectifs.
      Une coquille sans le module des objectifs répond operation_inconnue : la bande ne s'affiche simplement pas. */
   var OBJ = null;
@@ -776,7 +787,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var max = Math.max.apply(null, v.concat([1])), n = v.length, pts = v.map(function(x, i){ return [Math.round(i / (n - 1) * 100), Math.round(26 - x / max * 22)]; });
     var ligne = pts.map(function(q){ return q[0] + ' ' + q[1]; }).join(' L');
     var der = pts[n - 1];
-    return '<svg class="tm-courbe" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><path class="a" d="M' + ligne + ' L100 28 L0 28Z"></path><path class="l" d="M' + ligne + '"></path>'
+    return '<svg class="tm-courbe" viewBox="0 0 100 28" preserveAspectRatio="none" aria-hidden="true"><path class="a" d="M' + ligne + ' L100 28 L0 28Z"></path><path class="l" vector-effect="non-scaling-stroke" d="M' + ligne + '"></path>'
       + '<circle cx="' + Math.min(98, der[0]) + '" cy="' + der[1] + '" r="2.4"></circle></svg>';
   }
   function vueMaquette(){
@@ -815,9 +826,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + (D.peutPreparer && !att ? '<button type="button" class="prep" data-prep="' + esc(c.oid) + '">${T("Préparer")}</button>' : '<span></span>') + '</div>';
         }).join('') + '<div class="tm-plus" hidden></div>' : '<div class="st">${T("Rien à préparer pour le moment.")}</div>')
       + '</div></section>';
-    var c7 = D7 && D7.vivant && D7.vivant.courbe;
-    h += '<section class="tm-c"><h2>${T("Activité des commandes")}</h2><span class="st">${T("7 derniers jours · reçues")}</span><div class="tm-barres">';
-    if (c7 && c7.actuel && c7.actuel.length) {
+    var c7 = ACT90 ? (D90 && D90.vivant && D90.vivant.courbe) : (D7 && D7.vivant && D7.vivant.courbe);
+    var nAct = ACT90 ? 90 : 7;
+    h += '<section class="tm-c"><div class="tm-ct"><h2>${T("Activité des commandes")}</h2>'
+      + '<span class="tm-per"><button type="button" data-act-per="7"' + (ACT90 ? '' : ' class="on"') + '>${T("7 j")}</button>'
+      + '<button type="button" data-act-per="90"' + (ACT90 ? ' class="on"' : '') + '>${T("90 j")}</button></span></div>'
+      + '<span class="st">' + (ACT90 ? '${T("90 derniers jours · reçues")}' + (D90 && c7 && c7.actuel ? ' · <b>' + c7.actuel.slice(-90).reduce(function(a, b){ return a + b; }, 0) + '</b> ${T("au total")}' : '') : '${T("7 derniers jours · reçues")}') + '</span><div class="tm-barres' + (ACT90 ? ' l90' : '') + '">';
+    if (c7 && c7.actuel && c7.actuel.length && ACT90) {
+      var v90 = c7.actuel.slice(-90), mx90 = Math.max.apply(null, v90.concat([1])), tot90 = v90.reduce(function(a, b){ return a + b; }, 0);
+      var auj90 = new Date();
+      h += v90.map(function(v, i){
+        var d = new Date(auj90.getTime() - (v90.length - 1 - i) * 864e5);
+        var lib = d.toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'short' });
+        return '<div class="tm-b' + (i === v90.length - 1 ? ' auj' : '') + '" title="' + esc(lib + ' : ' + v + ' ' + (v > 1 ? '${T("commandes")}' : '${T("commande")}')) + '">'
+          + '<i style="height:' + Math.max(2, Math.round(v / mx90 * 100)) + '%"></i>'
+          + '<span class="j">' + ((v90.length - 1 - i) % 15 === 0 ? esc(lib) : '') + '</span></div>';
+      }).join('');
+    } else if (c7 && c7.actuel && c7.actuel.length) {
       var vals = c7.actuel.slice(-7), et = (c7.etiquettes || []).slice(-7), max = Math.max.apply(null, vals.concat([1]));
       h += vals.map(function(v, i){
         return '<div class="tm-b' + (i === vals.length - 1 ? ' auj' : '') + '"><span class="v">' + v + '</span><i style="height:' + Math.max(2, Math.round(v / max * 100)) + '%"></i><span class="j">' + esc(String(et[i] == null ? '' : et[i])) + '</span></div>';
@@ -1093,6 +1118,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (rt) { appeler('retours:ouvrir', [rt.getAttribute('data-retour')]).then(function(r){ if (!r || !r.ok) dire(expliquer(r), 'err'); else dire(''); }); return; }
     var pe = t.closest('[data-periode]');
     if (pe) { PERIODE = pe.getAttribute('data-periode'); charger(); return; }
+    var ap = t.closest('[data-act-per]');
+    if (ap) {
+      ACT90 = ap.getAttribute('data-act-per') === '90'; dessiner();
+      if (ACT90 && !D90) appeler('tableau:lire', ['all', '90j', false]).then(function(r){ if (r && r.ok) { D90 = r; if (ACT90) dessiner(); } });
+      return;
+    }
     if (t.closest('#tb-zeros')) { ZEROS = !ZEROS; dessiner(); return; }
     var ec = t.closest('button[data-prep]');
     if (ec) { if (!ec.disabled) lancerPreparation(ec.getAttribute('data-prep'), ec); return; }

@@ -73,6 +73,10 @@ body>#vh-barre{padding:.8rem 1.3rem 0}
 #vh-barre select{font-size:.8rem}
 /* Le corps : la grammaire, un peu resserree — la mesure des listes (dessiner) compte chaque ligne. */
 #corps.cx{padding:.8rem 1.3rem .6rem;gap:.7rem;overflow-y:auto}
+/* (2026-11-22, sa capture : « corrige les coins des zones ») Le fond de la carte ne passe plus sous sa bordure translucide
+   (le coin arrondi laissait voir une teinte plus sombre), et la zone qui défile n'a pas de fond à elle. */
+.carte{background-clip:padding-box}
+#corps.cx{background:transparent}
 #corps::-webkit-scrollbar{width:8px}
 #corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* Les cartes des cinq onglets prennent l allure de .cx-carte (meme rayon, meme bord, meme titre). */

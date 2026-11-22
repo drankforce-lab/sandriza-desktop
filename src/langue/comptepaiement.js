@@ -63,7 +63,7 @@ module.exports = {
   '. Un mouvement manque, ou un signe est faux.': '. A movement is missing, or a sign is wrong.',
   'Bac à sable : ces chiffres ne sont pas ceux de la production.':
     'Sandbox: these figures are not the production ones.',
-  'Aucune transaction en cache pour cette année. Ouvrez « Paiements Square » et chargez-les — cet écran ne va pas chercher les données lui-même.':
+  'Aucune transaction en cache pour cette année. Ouvrez « Paiements reçus » et chargez-les — cet écran ne va pas chercher les données lui-même.':
     'No transactions cached for this year. Open “Square payments” and load them — this screen does not fetch the data itself.',
 
   /* ── LES TUILES ─────────────────────────────────────────────────────────── */
@@ -126,4 +126,7 @@ module.exports = {
   'Mois Ventes': 'Month Sales',
   'Frais Remboursements': 'Fees Refunds',
   'Dépôts Variation': 'Deposits Net change',
+  // 2026-11-22
+  'Estimé d’après les commandes': 'Estimated from orders',
+  'Ventes et remboursements d’après les commandes de la boutique ; frais estimés (2,9 % + 0,30 $). Chargez les transactions dans « Paiements reçus » pour les montants exacts de Square.': 'Sales and refunds from the shop’s orders; fees estimated (2.9% + $0.30). Load the transactions in “Payments received” for Square’s exact amounts.',
 };

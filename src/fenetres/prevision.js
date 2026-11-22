@@ -47,6 +47,11 @@ html.jour .resume .alerte{color:#a3302b}
 .graph svg{position:absolute;inset:0;width:100%;height:100%}
 .graph .axe{stroke:var(--v10);stroke-width:1}
 .graph .lab{fill:var(--tx2);font-size:11px;font-family:system-ui}
+.graph .survol{stroke:var(--tx2);stroke-width:1;stroke-dasharray:3 3}
+.graph .survol-pt{fill:var(--f-carte);stroke:var(--sz-btn-prim,#8a5a2b);stroke-width:2}
+.pv-bulle{position:absolute;z-index:3;pointer-events:none;display:flex;flex-direction:column;gap:2px;padding:.45rem .65rem;border-radius:10px;
+  background:var(--f-carte);border:1px solid var(--v12);box-shadow:0 6px 18px rgba(0,0,0,.16);font-size:.76rem;white-space:nowrap}
+.pv-bulle .ev{color:var(--tx2)}
 .graph .passe{fill:none;stroke:var(--or);stroke-width:2.2;stroke-linejoin:round}
 .graph .futur{fill:none;stroke:var(--or);stroke-width:2.2;stroke-dasharray:6 5;stroke-linejoin:round}
 .graph .marge{fill:rgba(var(--or-rgb),.14)}
@@ -135,10 +140,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var n = A.length + F.length, g = 40, dr = 10, h = 12, b = 22;
     var vals = A.map(function(x){ return x.unites; }).concat(F.map(function(x){ return x.haut; }), [0]);
     var mx = Math.max.apply(null, vals); if (mx < 1) mx = 1; mx *= 1.1;
-    var X = function(i){ return g + i / Math.max(1, n - 1) * (W - g - dr); };
+    /* (2026-11-22, sa capture : l'axe disait « 2, 1, 1, 0 ») Des graduations ENTIÈRES et distinctes : le pas est arrondi
+       vers le haut, et le haut de l'axe en découle. */
+    var pas = Math.max(1, Math.ceil(mx / 3)); mx = pas * 3;
+    PV = { A: A, F: F, X: X0, n: n };
+    var X0 = function(i){ return g + i / Math.max(1, n - 1) * (W - g - dr); }, X = X0;
     var Y = function(v){ return h + (mx - v) / mx * (H - h - b); };
     var s = '<svg viewBox="0 0 ' + W + ' ' + H + '" width="' + W + '" height="' + H + '" role="img" aria-label="${T("Unités vendues par semaine, et la prévision")}">';
-    for (var k = 0; k <= 3; k++) { var v = mx * k / 3, y = Y(v).toFixed(1);
+    PV.Y = Y; PV.g = g; PV.W = W; PV.dr = dr; PV.H = H; PV.h = h; PV.b = b;
+    for (var k = 0; k <= 3; k++) { var v = pas * k, y = Y(v).toFixed(1);
       s += '<line class="axe" x1="' + g + '" x2="' + (W - dr) + '" y1="' + y + '" y2="' + y + '"></line><text class="lab" x="' + (g - 6) + '" y="' + (Number(y) + 4) + '" text-anchor="end">' + Math.round(v) + '</text>'; }
     var pA = A.map(function(x, i){ return X(i).toFixed(1) + ',' + Y(x.unites).toFixed(1); });
     var i0 = A.length - 1;
@@ -152,7 +162,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (F.length) s += '<polyline class="futur" vector-effect="non-scaling-stroke" points="' + pF.join(' ') + '"></polyline>';
     var ex = [[0, A[0]], [i0, A[i0]], [n - 1, F[F.length - 1]]];
     ex.forEach(function(e, j){ if (e[1]) s += '<text class="lab" x="' + X(e[0]).toFixed(1) + '" y="' + (H - 6) + '" text-anchor="' + (j === 0 ? 'start' : (j === 2 ? 'end' : 'middle')) + '">' + esc(jour(e[1].debut)) + '</text>'; });
-    return s + '</svg>';
+    s += '<line class="survol" id="pv-ligne" x1="0" x2="0" y1="' + h + '" y2="' + (H - b) + '" style="display:none"></line><circle class="survol-pt" id="pv-pt" r="4.5" style="display:none"></circle>';
+    return s + '</svg><div class="pv-bulle" id="pv-bulle" hidden></div>';
+  }
+  /* (2026-11-22, sa demande : « des données au survol de la souris ») La semaine sous la souris : vendu, ou prévu et sa marge. */
+  var PV = null;
+  function survol(){
+    var z = document.getElementById('pv-graph'); if (!z || !PV) return;
+    var svg = z.querySelector('svg'), bulle = document.getElementById('pv-bulle'), ln = document.getElementById('pv-ligne'), pt = document.getElementById('pv-pt');
+    if (!svg || !bulle) return;
+    svg.onmousemove = function(ev){
+      var r = svg.getBoundingClientRect(), x = ev.clientX - r.left;
+      var i = Math.round((x - PV.g) / (PV.W - PV.g - PV.dr) * Math.max(1, PV.n - 1)); i = Math.max(0, Math.min(PV.n - 1, i));
+      var passe = i < PV.A.length, e = passe ? PV.A[i] : PV.F[i - PV.A.length]; if (!e) return;
+      var cx = PV.X(i), cy = PV.Y(e.unites);
+      ln.setAttribute('x1', cx); ln.setAttribute('x2', cx); ln.style.display = ''; pt.setAttribute('cx', cx); pt.setAttribute('cy', cy); pt.style.display = '';
+      bulle.innerHTML = '<b>' + '${T("Semaine du {0}")}'.split('{0}').join(esc(jour(e.debut))) + '</b>'
+        + (passe ? '<span>${T("Vendu")} : <strong>' + e.unites + '</strong></span>'
+                 : '<span>${T("Prévu")} : <strong>' + e.unites + '</strong></span><span class="ev">${T("Marge probable")} : ' + e.bas + ' – ' + e.haut + '</span>');
+      bulle.hidden = false;
+      var bx = cx + 12; if (bx + bulle.offsetWidth > PV.W) bx = cx - bulle.offsetWidth - 12;
+      bulle.style.left = Math.max(0, bx) + 'px'; bulle.style.top = Math.max(0, Math.min(cy - 20, PV.H - bulle.offsetHeight - 4)) + 'px';
+    };
+    svg.onmouseleave = function(){ bulle.hidden = true; ln.style.display = 'none'; pt.style.display = 'none'; };
   }
   function resume(d){
     var r = d.resume;
@@ -195,6 +227,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function tracer(){
     var z = document.getElementById('pv-graph'); if (!z || !D) return;
     z.innerHTML = graphique(D, z.clientWidth, z.clientHeight);
+    survol();
   }
   try { if (window.ResizeObserver) new ResizeObserver(function(){ tracer(); }).observe(corps); } catch (e) {}
   function charger(){

@@ -206,9 +206,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptepaiement')}
     if (D.bacASable) {
       h += avis('', '${T("Bac à sable")}', '${T("Bac à sable : ces chiffres ne sont pas ceux de la production.")}');
     }
-    if (!D.charge) {
+    /* (2026-11-22) Sans transactions chargées, le site reconstitue le fil d'après les commandes payées : on le DIT. */
+    if (D.estime) {
+      h += avis('', '${T("Estimé d’après les commandes")}',
+        '${T("Ventes et remboursements d’après les commandes de la boutique ; frais estimés (2,9 % + 0,30 $). Chargez les transactions dans « Paiements reçus » pour les montants exacts de Square.")}');
+    } else if (!D.charge) {
       h += avis('', '${T("Aucune transaction en cache")}',
-        '${T("Aucune transaction en cache pour cette année. Ouvrez « Paiements Square » et chargez-les — cet écran ne va pas chercher les données lui-même.")}');
+        '${T("Aucune transaction en cache pour cette année. Ouvrez « Paiements reçus » et chargez-les — cet écran ne va pas chercher les données lui-même.")}');
     }
     return h ? '<div class="cp-avis">' + h + '</div>' : '';
   }
