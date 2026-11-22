@@ -125,7 +125,7 @@ function pageMessagerie(mode) {
       + '<h2>' + T("Réponses conservées") + '</h2>'
       + '<p>' + T("Les demandes répondues sont supprimées passé ce délai. Les demandes en attente ne le sont jamais.") + '</p>'
       + '<div class="mc-l"><input id="ret-mois" aria-label="' + T("Durée de conservation en mois") + '" type="number" min="1" max="120"><span>' + T("mois") + '</span>'
-      + '<button id="ret-save">' + T("Enregistrer") + '</button></div></div></div>'
+      + '<button id="ret-save" class="prim">' + T("Enregistrer") + '</button></div></div></div>'
     : '<div class="corps" id="corps"><div class="vide charge">' + T("Chargement… (les demandes se resynchronisent)") + '</div></div>';
   return `${TETE()}
 <title>${CFG ? T("Configuration de la messagerie — Administration Sandriza") : T("Messagerie clients — Administration Sandriza")}</title>
@@ -135,8 +135,7 @@ function pageMessagerie(mode) {
 .mc-carte p{margin:0;font-size:.8rem;color:var(--tx2);line-height:1.45}
 .mc-l{display:flex;align-items:center;gap:.55rem;font-size:.84rem}
 .mc-l input{width:5rem;font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.35rem .5rem}
-#ret-save{margin-left:auto;font:inherit;font-size:.8rem;font-weight:600;color:var(--sz-btn-prim-tx,#fff);background:var(--sz-btn-prim,#8a5a2b);border:0;border-radius:9px;padding:.45rem 1rem;cursor:pointer}
-#ret-save:disabled{opacity:.5;cursor:default}
+#ret-save{margin-left:auto}
 </style></head><body>
 <div class="tete"><span class="ico">${ICO.support}</span><h1>${CFG ? T("Configuration de la messagerie") : T("Messagerie clients")}</h1>
   <span class="sous" id="sous"></span></div>
