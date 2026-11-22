@@ -400,6 +400,12 @@ html.jour .tm-b.auj i{background:var(--sz-btn-prim,#8a5a2b)}
 .tm-a .pt.a{background:#e8a35b}.tm-a .pt.r{background:#e07a78}
 .tm-a b{font-size:14px;font-weight:700}
 .tm-a .tm-pill{margin-left:auto}
+/* (2026-11-22, sa capture : « il manque de l'espacement entre le nombre et le mot commande ») Le nombre dans sa propre
+   pastille ronde, le mot à côté — même langage que « À faire aujourd'hui ». */
+.tm-pill.tm-cpt{display:inline-flex;align-items:center;gap:7px;padding:3px 11px 3px 4px}
+.tm-pill.tm-cpt b{min-width:20px;height:20px;padding:0 6px;border-radius:99px;display:inline-flex;align-items:center;justify-content:center;
+  font-size:11.5px;font-weight:800;background:var(--v10);color:inherit;font-variant-numeric:tabular-nums}
+.tm-pill.tm-cpt.a b{background:rgba(245,158,11,.22)}
 .tm-a .t{font-size:12px;color:var(--tx2);line-height:1.45}
 `;
 
@@ -815,7 +821,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '</div>' + bandeAttention() + bandeObjectif();
     var fil = (V.fil || []).filter(function(c){ return ['pending', 'confirmed', 'preparing', 'verification'].indexOf(c.statut) >= 0; });
     h += '<div class="tm-mil"><section class="tm-c l2"><div class="tm-ct"><h2>${T("À préparer maintenant")}</h2>'
-      + '<span class="tm-pill' + (aFaire ? ' a' : '') + '">' + aFaire + ' ' + (aFaire > 1 ? '${T("commandes")}' : '${T("commande")}') + '</span>'
+      + '<span class="tm-pill tm-cpt' + (aFaire ? ' a' : '') + '"><b>' + aFaire + '</b>' + (aFaire > 1 ? '${T("commandes")}' : '${T("commande")}') + '</span>'
       // (2026-11-18, sa capture : « il manque un lien pour voir toutes les commandes »)
       + '<button type="button" class="tm-tout" data-ouvre="orders">${T("Voir toutes les commandes")} →</button></div><div class="tm-liste">'
       + (fil.length ? fil.map(function(c){
