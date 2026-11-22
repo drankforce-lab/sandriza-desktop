@@ -720,7 +720,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var rep = (o.joursTotal > 0 && o.mesure !== 'panier') ? Math.max(0, Math.min(100, o.joursEcoules / o.joursTotal * 100)) : -1;
     var txt = o.statut === 'atteint' ? '${T("Objectif atteint !")}'
       : (o.rythme > 0 ? '${T("{0} par jour pour y arriver · {1} jours restants")}'.split('{0}').join(val(o.rythme)).split('{1}').join(String(o.joursRestants)) : '');
-    return '<button type="button" class="tm-obj ' + esc(o.statut || '') + '" data-ouvre="objectifs"><span class="h"><b>' + esc(o.titre) + '</b>'
+    return '<button type="button" class="tm-obj ' + esc(o.statut || '') + '" data-ouvre="objectifs"><span class="h"><b>' + esc(szTd(o.titre)) + '</b>'
       + '<span class="v">' + esc(val(o.valeur)) + ' <small>/ ' + esc(val(o.cible)) + '</small></span><span class="p">' + esc(String(Math.round(pct))) + ' %</span></span>'
       + '<span class="j"><i style="width:' + pct + '%"></i>' + (rep >= 0 ? '<em style="left:calc(' + rep.toFixed(1) + '% - 1px)"></em>' : '') + '</span>'
       + (txt ? '<span class="t">' + esc(txt) + '</span>' : '') + '</button>';

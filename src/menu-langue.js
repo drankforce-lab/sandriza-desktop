@@ -96,7 +96,10 @@ const MENU_APP_EN = {
   'Boutique': 'Shop',
   'Campagnes et chaînes': 'Campaigns and sequences',
   'Cartes-cadeaux': 'Gift cards',
-  'Catalogue': 'Catalogue',
+  // (2026-11-22) « Catalogue » coupé en trois sections (l'ancien intitulé est retiré).
+  'Produits': 'Products',
+  'Stock et achats': 'Stock & purchasing',
+  'Photos et création': 'Photos & creation',
   'Centre d’impression': 'Print centre',
   'Changer le dossier des exports…': 'Change the exports folder…',
   'Chat en ligne': 'Live chat',

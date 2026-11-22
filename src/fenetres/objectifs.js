@@ -227,7 +227,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     else if (o.mesure === 'panier') rythme = '${T("Panier moyen de la période, sur la cible.")}';
     else if (o.rythme > 0) rythme = '${T("Il faut {0} par jour pendant {1} jours pour y arriver.")}'.split('{0}').join('<b>' + esc(nombre(o.rythme, u)) + '</b>').split('{1}').join(String(o.joursRestants));
     var h = '<article class="ob' + (o.epingle ? ' epingle' : '') + '" data-ob="' + esc(o.id) + '">'
-      + '<div class="ob-h"><div class="t"><b>' + esc(o.titre) + '</b><span class="m">' + esc(quoi) + ' · ' + esc(quand) + '</span></div>'
+      + '<div class="ob-h"><div class="t"><b>' + esc(szTd(o.titre)) + '</b><span class="m">' + esc(quoi) + ' · ' + esc(quand) + '</span></div>'
       + (o.genre === 'defi' ? '<span class="pill defi">${T("Défi")}</span>' : '')
       + '<span class="pill ' + esc(o.statut) + '">' + esc(STATUTS[o.statut] || '') + '</span></div>'
       + '<div class="ob-v"><span class="n">' + esc(nombre(o.valeur, u)) + '</span><span class="c">/ ' + esc(nombre(o.cible, u)) + '</span>'

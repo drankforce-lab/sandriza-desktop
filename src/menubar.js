@@ -384,12 +384,14 @@ ${PAN}
   }
   var EP_EN = (document.documentElement.lang || 'fr') === 'en';
   var _IC_BOUT='<path d="M6 7h12l1 13H5z"/><path d="M9 7a3 3 0 0 1 6 0"/>',
+      _IC_STK='<path d="M21 8 12 3 3 8v8l9 5 9-5z"/><path d="M3 8l9 5 9-5"/><path d="M12 13v8"/>',
+      _IC_PHO='<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
       _IC_CAT='<path d="M20.6 13.4 13.4 20.6a2 2 0 0 1-2.8 0L3 13V3h10l7.6 7.6a2 2 0 0 1 0 2.8z"/><circle cx="7.5" cy="7.5" r="1.5"/>',
       _IC_MKT='<path d="M3 11v3a1 1 0 0 0 1 1h3l5 4V6L7 10H4a1 1 0 0 0-1 1z"/><path d="M16 9a4 4 0 0 1 0 6"/><path d="M19 6.5a8 8 0 0 1 0 11"/>',
       _IC_CPT='<rect x="5" y="3" width="14" height="18" rx="2"/><path d="M8 7h8"/><path d="M8 11h2M12 11h2M8 15h2M12 15h2M8 18h2M12 18h2"/><path d="M16 15v3"/>',
       _IC_AFF='<rect x="3" y="4" width="18" height="12" rx="2"/><path d="M8 20h8M12 16v4"/>',
       _IC_CONF='<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1 7 17M17 7l2.1-2.1"/>';
-  var ICO_SECTION={ 'Boutique':_IC_BOUT, 'Shop':_IC_BOUT, 'Catalogue':_IC_CAT, 'Marketing':_IC_MKT, 'Comptabilité':_IC_CPT, 'Accounting':_IC_CPT,
+  var ICO_SECTION={ 'Boutique':_IC_BOUT, 'Shop':_IC_BOUT, 'Catalogue':_IC_CAT, 'Produits':_IC_CAT, 'Products':_IC_CAT, 'Stock et achats':_IC_STK, 'Stock & purchasing':_IC_STK, 'Photos et création':_IC_PHO, 'Photos & creation':_IC_PHO, 'Marketing':_IC_MKT, 'Comptabilité':_IC_CPT, 'Accounting':_IC_CPT,
     'Affichage':_IC_AFF, 'View':_IC_AFF, 'Configuration':_IC_CONF };
   function panneauMaquette(pan, m){
     pan.classList.add('ep-pan'); pan.dataset.aff='block';
@@ -411,7 +413,7 @@ ${PAN}
     /* (2026-11-20, sa demande) Une icône au trait, la même que la colonne du site (appbar.js ICO_SECTION) ; la lettre reste le repli. */
     var ic=document.createElement('span'); ic.className='ic'; var _sv=ICO_SECTION[String(m.label||'').trim()];
     /* (2026-11-20, look « vivant ») Le carré prend la couleur de la section, la même que la colonne du site. */
-    var _COUL={ 'Boutique':'#2f6aa8','Shop':'#2f6aa8','Catalogue':'#6a4fb0','Marketing':'#a8436f','Comptabilité':'#1f7a57','Accounting':'#1f7a57' };
+    var _COUL={ 'Boutique':'#2f6aa8','Shop':'#2f6aa8','Catalogue':'#6a4fb0','Produits':'#6a4fb0','Products':'#6a4fb0','Stock et achats':'#9a5b12','Stock & purchasing':'#9a5b12','Photos et création':'#1d7480','Photos & creation':'#1d7480','Marketing':'#a8436f','Comptabilité':'#1f7a57','Accounting':'#1f7a57' };
     var _cl=_COUL[String(m.label||'').trim()]; if(_cl) ic.style.background=_cl;
     if(_sv){ ic.className='ic svg'; ic.innerHTML='<svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">'+_sv+'</svg>'; }
     else ic.textContent=String(m.label||'?').trim().charAt(0).toUpperCase();
