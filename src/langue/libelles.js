@@ -93,6 +93,7 @@ const LIBELLES_EN = {
   'Interac (reçu)': 'Interac (receipt)',
   'Autre (reçu)': 'Other (receipt)',
   'Lien de paiement (téléphone)': 'Payment link (phone)',
+  'Tap to Pay (téléphone)': 'Tap to Pay (phone)',
   '✉ Envoyer par courriel': '✉ Send by email',
   '🖨 Imprimer seulement': '🖨 Print only',
   '✉ + 🖨 Courriel et impression': '✉ + 🖨 Email and print',

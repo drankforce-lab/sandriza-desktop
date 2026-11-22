@@ -386,6 +386,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var RABTYPE = 'montant';   // rabais sur la vente : 'montant' | 'pct'
   var RABNIP = null;         // autorisation du rabais sur la vente : { jeton, type, valeur } (NIP verifie)
   var enVente = false;
+  /* TAP TO PAY (2026-11-22) : le jeton PAYÉ (confirmé par le serveur après relecture de Square) que la prochaine vente
+     consommera. Gardé si la vente est refusée pour une autre raison (client manquant…) : l argent est déjà pris. */
+  var TAPJ = null, TAPMIN = null;
   var PUCES = [10, 15, 20, 25, 30, 40, 50];
   /* ⚠ LES SUGGESTIONS DE REMARQUE SONT DES DONNEES (2026-10-25, audit). Choisies, elles deviennent la
      remarque, conservee a la facture, au registre des rabais et au journal. Passees par T(), une caisse
@@ -407,6 +410,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function pctTxt(n){ return szNombre(n, 2).replace(/[.,]00$/, '') + ' %'; }
 
   var MOTIFS = {
+    tap_hors_ligne:     '${T("Hors ligne : Tap to Pay exige le réseau (Square doit confirmer le paiement). Encaissez autrement, ou attendez le retour du réseau.")}',
+    tap_minimum:        '${T("Tap to Pay : le total doit être d’au moins 1,00 $.")}',
+    tap_montant:        '${T("Le total a changé depuis le paiement par Tap to Pay. Remettez la vente comme elle était, ou remboursez le paiement dans Square.")}',
+    tap_jeton:          '${T("Tap to Pay : aucun paiement confirmé pour cette vente.")}',
+    tap_non_paye:       '${T("Tap to Pay : Square n’a pas confirmé le paiement.")}',
+    tap_deja_consomme:  '${T("Ce paiement Tap to Pay a déjà servi à une autre vente.")}',
+    tap_reseau:         '${T("Tap to Pay : le serveur ne répond pas. Réessayez dans un instant — le paiement confirmé reste gardé.")}',
+    tap_base:           '${T("Tap to Pay : le serveur ne répond pas. Réessayez dans un instant — le paiement confirmé reste gardé.")}',
+    tap_droit:          '${T("Votre rôle ne permet pas d’encaisser une vente.")}',
     lien_hors_ligne:    '${T("Hors ligne : le lien de paiement ne peut pas être créé (Square doit le fabriquer). Encaissez sur place — comptant, Interac ou terminal — ou attendez le retour du réseau.")}',
     nip_hors_ligne:     '${T("Hors ligne : un prix modifié ou un rabais autorisé par NIP ne peut pas être vérifié. Retirez-le, ou attendez le retour du réseau.")}',
   maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
@@ -1018,8 +1030,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       if ((parseFloat(String(val('v-rab') || '').replace(',', '.')) || 0) > 0 && !rabVenteAutorise()) { demanderNipVente(vendre); return; }
     }
+    /* TAP TO PAY : d abord le paiement (code QR → téléphone → Square → serveur), ensuite seulement la vente. */
+    if (val('v-paie') === 'tap' && !TAPJ) { tapOuvrir(); return; }
     enVente = true; majBouton(); dire('${T("Enregistrement…")}', 'att');
     appeler('caisse:vendre', [{
+      tapJeton: val('v-paie') === 'tap' ? TAPJ : '',
       lignes: LIGNES,
       prov: PROV, liv: LIV, rab: val('v-rab'),
       rabType: RABTYPE, rabNote: val('v-rabnote').trim(),
@@ -1044,14 +1059,65 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }
       /* ⚠ UN DÉLAI N EST PAS UN REFUS : la vente a pu être enregistrée pendant qu on attendait. Recommencer
          sans regarder créerait une SECONDE vente. */
+      if (!r.ok && r.motif === 'tap_deja_consomme') TAPJ = null;
       if (!r.ok && r.motif === 'delai') { majBouton(); dire('${T("La réponse tarde : la vente a peut-être été enregistrée. Vérifiez dans Commandes avant de recommencer.")}', 'err'); return; }
       if (!r.ok) { majBouton(); dire(expliquer(r.motif), 'err'); return; }
       // Lu AVANT la remise a zero, qui ramene la liste a son choix par defaut.
       var remise = val('v-remise');
       // La vente est en base : on peut vider CETTE fenetre.
+      TAPJ = null;
       reinitialiser();
       compteRendu(r, remise === 'impression' || remise === 'deux');
       if (r.enFile) hlLire();
+    });
+  }
+
+  /* ══ TAP TO PAY — LE VOILE DU CODE QR (2026-11-22) ══════════════════════════════
+     Le site pose le jeton (montant au serveur) et dessine le code ; on suit l état toutes les 2 s. « payé » ne vient
+     que du serveur, après relecture de Square. Annuler ferme le jeton : un téléphone qui l ouvrirait ensuite est refusé. */
+  function tapOuvrir(){
+    if (document.getElementById('voile-tap')) return;
+    var v = document.createElement('div');
+    v.className = 'voile'; v.id = 'voile-tap';
+    v.innerHTML = '<div class="boite" style="text-align:center;max-width:380px"><h3>${T("Tap to Pay")}</h3>'
+      + '<div id="tap-corps" class="aide">${T("Préparation du paiement…")}</div>'
+      + '<div class="fin" style="justify-content:center"><button id="tap-annuler">${T("Annuler")}</button></div></div>';
+    document.body.appendChild(v);
+    var jeton = null, fini = false, minut = null;
+    function fermer(){ fini = true; clearTimeout(minut); if (v.parentNode) v.parentNode.removeChild(v); majBouton(); }
+    function corps(h){ var c = document.getElementById('tap-corps'); if (c) c.innerHTML = h; }
+    document.getElementById('tap-annuler').onclick = function(){
+      if (jeton) appeler('caisse:tapAnnuler', [jeton]);
+      fermer(); dire('${T("Paiement Tap to Pay annulé.")}', '');
+    };
+    appeler('caisse:tapDemarrer', [{ lignes: LIGNES, prov: PROV, liv: LIV, rab: val('v-rab'), rabType: RABTYPE }]).then(function(r){
+      if (fini) { if (r && r.ok && r.jeton) appeler('caisse:tapAnnuler', [r.jeton]); return; }
+      if (!r || !r.ok) { corps('<span style="color:var(--tx-err)">' + expliquer(r && r.motif) + '</span>'); return; }
+      jeton = r.jeton;
+      corps('<div style="font-size:1.6rem;font-weight:700;margin:.2rem 0 .6rem">' + argent(r.total) + '</div>'
+        + '<div style="background:#fff;padding:10px;border-radius:12px;width:230px;height:230px;margin:0 auto">' + (r.qr || '') + '</div>'
+        + '<p>${T("Scannez avec le téléphone de la boutique : l’app Square s’ouvre avec ce montant. La vente s’enregistre dès que Square confirme le paiement.")}</p>'
+        + '<p id="tap-etat" style="color:var(--tx-att)">${T("En attente du paiement…")}</p>');
+      function suivre(){
+        if (fini) return;
+        appeler('caisse:tapEtat', [jeton]).then(function(e){
+          if (fini) return;
+          if (e && e.ok && e.statut === 'paye') {
+            TAPJ = jeton; fermer(); dire('${T("Paiement confirmé par Square.")}', 'bon');
+            vendre();
+            return;
+          }
+          if (e && e.ok && (e.statut === 'expire' || e.statut === 'annule' || e.statut === 'inconnu')) {
+            corps('<span style="color:var(--tx-err)">' + (e.statut === 'expire' ? '${T("Le code a expiré (15 minutes). Annulez puis recommencez.")}'
+              : '${T("Cette demande n’est plus valide. Annulez puis recommencez.")}') + '</span>');
+            return;
+          }
+          var et = document.getElementById('tap-etat');
+          if (et && e && e.ok && e.motif) et.textContent = '${T("Square a refusé la vérification :")} ' + e.motif;
+          minut = setTimeout(suivre, 2000);
+        });
+      }
+      minut = setTimeout(suivre, 2000);
     });
   }
 

@@ -2942,6 +2942,8 @@ const OPS_PONT = new Set([
   'secondevie:donnees', 'secondevie:traiter', 'secondevie:regler',
   'caisse:contexte', 'caisse:chercher', 'caisse:article',
   'caisse:totaux', 'caisse:client', 'caisse:vendre', 'caisse:file', 'caisse:fileEnvoyer', 'caisse:fileRelancer',
+  // (2026-11-22) Tap to Pay : jeton + code QR, état, annulation (le paiement est vérifié chez Square par le serveur).
+  'caisse:tapDemarrer', 'caisse:tapEtat', 'caisse:tapAnnuler',
   /* Verifier a la main un paiement par LIEN. ⚠ Ce recours n existait que dans
      l ecran web : la caisse native s appuie sur la confirmation automatique au
      retour du client, mais quand elle n arrive pas, il faut pouvoir reconcilier
@@ -3983,7 +3985,7 @@ const LIMITES_PONT = {
   /* ⚠ LA VENTE AU COMPTOIR N AVAIT PAS DE PLAFOND PROPRE (2026-10-14) : 8 s pour écrire la commande, la
      facture, le stock, les points, vérifier les autorisations et envoyer le courriel. Elle annonçait
      « délai » pendant qu elle s enregistrait — même défaut que le remboursement, même plafond. */
-  'caisse:vendre': 45000, 'caisse:file': 10000, 'caisse:fileEnvoyer': 120000, 'caisse:fileRelancer': 120000, 'caisse:verifierPaiement': 45000, 'caisse:nipVerifier': 20000,
+  'caisse:vendre': 45000, 'caisse:tapDemarrer': 20000, 'caisse:tapEtat': 15000, 'caisse:tapAnnuler': 15000, 'caisse:file': 10000, 'caisse:fileEnvoyer': 120000, 'caisse:fileRelancer': 120000, 'caisse:verifierPaiement': 45000, 'caisse:nipVerifier': 20000,
   /* ⚠⚠ LES TRAITEMENTS D IMAGE PAR MODELE, ET C EST LA CAUSE DE << modele
      delai >> (signale le 2026-08-09 sur un retrait de mannequin). Ces
      operations n etaient PAS dans cette table : elles heritaient du plafond
