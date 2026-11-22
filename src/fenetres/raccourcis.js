@@ -22,11 +22,12 @@ const CSS = `
    fenêtre : un voile sombre semi-transparent qui apparaît en fondu, la carte au centre, en grand. */
 html,body{margin:0;height:100%;background:transparent;overflow:hidden}
 body{color:var(--tx);font:17px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
-  display:flex;align-items:center;justify-content:center;background:rgba(6,10,18,.62);animation:rcFondu .18s ease-out both}
-html.jour body{background:rgba(29,36,51,.42)}
+  display:flex;align-items:center;justify-content:center;background:rgba(6,10,18,.30);animation:rcFondu .18s ease-out both}
+html.jour body{background:rgba(29,36,51,.18)}
 @keyframes rcFondu{from{opacity:0}to{opacity:1}}
 @keyframes rcCarte{from{opacity:0;transform:scale(.97)}to{opacity:1;transform:none}}
-.rc{display:flex;flex-direction:column;width:min(1180px,90vw);max-height:88vh;background:var(--f-carte);border:1px solid var(--v14);
+/* (2026-11-22, sa remarque : « opaque, je dois voir mon application derrière ») La carte elle-même est translucide. */
+.rc{display:flex;flex-direction:column;width:min(1180px,90vw);max-height:88vh;background:color-mix(in srgb,var(--f-carte) 74%,transparent);border:1px solid var(--v14);
   border-radius:22px;overflow:hidden;box-shadow:0 30px 80px rgba(0,0,0,.45);animation:rcCarte .2s ease-out both}
 .rc-t{flex:0 0 auto;display:flex;align-items:baseline;gap:1rem;padding:1.3rem 1.8rem 1rem;border-bottom:1px solid var(--v10)}
 .rc-t h1{margin:0;font-size:1.45rem;font-weight:750}

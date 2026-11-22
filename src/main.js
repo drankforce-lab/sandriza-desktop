@@ -1220,8 +1220,8 @@ const montrerRappelRaccourcis = () => {
     // (2026-11-22, « trop petit ») Toute la fenêtre : le voile en fondu la couvre, la carte se centre dedans.
     const win = new BrowserWindow({
       parent, x: b.x, y: b.y, width: b.width, height: b.height,
-      frame: false, transparent: true, resizable: false, movable: false, minimizable: false, maximizable: false,
-      fullscreenable: false, skipTaskbar: true, show: false, focusable: false, hasShadow: true,
+      frame: false, transparent: true, backgroundColor: '#00000000', resizable: false, movable: false, minimizable: false, maximizable: false,
+      fullscreenable: false, skipTaskbar: true, show: false, focusable: false, hasShadow: false,
       webPreferences: { contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: false },
     });
     _ckRappel = win;

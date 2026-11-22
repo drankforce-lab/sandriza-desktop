@@ -296,9 +296,11 @@ html.jour .voile{background:rgba(20,24,30,.35)}
 .tm-tete h1{margin:0;font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--tx)}
 .tm-tete .prim{height:38px;padding:0 16px;display:flex;align-items:center;gap:8px}
 .tm-kpi{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
-.tm-k{background:var(--f-carte);border:1px solid var(--v08);border-radius:14px;padding:14px 16px;display:flex;flex-direction:column;gap:4px;min-width:0;cursor:pointer;text-align:left;font:inherit;color:inherit}
+.tm-k{background:var(--f-carte);border:1px solid var(--v08);border-radius:12px;padding:8px 12px;display:grid;grid-template-columns:auto minmax(0,1fr);grid-template-areas:'l l' 'v s';align-items:end;column-gap:12px;row-gap:1px;min-width:0;cursor:pointer;text-align:left;font:inherit;color:inherit}
+/* (2026-11-22, sa capture : « on perd beaucoup d espace pour nos affichages de commande ») Tuiles compactes : le chiffre et son sous-titre (ou la mini-courbe) sur UNE ligne. */
+.tm-k .l{grid-area:l}.tm-k .v{grid-area:v}.tm-k .s,.tm-k .tm-courbe{grid-area:s;justify-self:end;text-align:right}
 .tm-k .l{font-size:12px;font-weight:600;color:var(--tx2)}
-.tm-k .v{font-size:26px;font-weight:800;letter-spacing:-.02em;color:var(--tx)}
+.tm-k .v{font-size:20px;line-height:1.15;font-weight:800;letter-spacing:-.02em;color:var(--tx)}
 .tm-k .s{font-size:12px;font-weight:600;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .tm-obj{display:flex;flex-direction:column;gap:8px;width:100%;text-align:left;font:inherit;color:inherit;cursor:pointer;margin:0;
   background:var(--f-carte);border:1px solid rgba(var(--or-rgb),.35);border-radius:14px;padding:12px 16px}
@@ -332,7 +334,7 @@ html.jour .tm-att button.r b{color:#a11d1d}
 .tm-tend{display:inline-flex;align-items:center;margin-left:8px;vertical-align:middle;font-size:11.5px;font-weight:800;letter-spacing:0;padding:2px 8px;border-radius:999px}
 .tm-tend.h{color:var(--ep-vert-t,#86e0a8);background:var(--ep-vert-f,#173326)}
 .tm-tend.b{color:var(--tx-err2);background:rgba(248,113,113,.14)}
-.tm-courbe{display:block;width:100%;height:26px;margin-top:2px;overflow:visible}
+.tm-courbe{display:block;width:100%;max-width:150px;height:20px;margin-top:0;overflow:visible}
 .tm-courbe .a{fill:color-mix(in srgb,var(--vv,#5fd4a4) 20%,transparent)}
 .tm-courbe .l{fill:none;stroke:var(--vv,#5fd4a4);stroke-width:2;vector-effect:non-scaling-stroke;stroke-linejoin:round}
 .tm-courbe circle{fill:var(--vv,#5fd4a4)}

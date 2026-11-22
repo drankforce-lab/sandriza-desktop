@@ -231,10 +231,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('notes:lire', []).then(function(r){
       if (!r || !r.ok) { vide('${T('Notes indisponibles')}', expliquer(r)); return; }
       D = r;
-      // La version installee ICI s ouvre d elle-meme : c est celle qu on vient lire.
-      if (!OUVERTE && D.installee && (D.entrees || []).some(function(e){ return e.v === D.installee; })) {
-        OUVERTE = D.installee;
-      }
+      /* (2026-11-22, sa capture) La fenetre s ouvre sur la LISTE, toutes les notes fermees : la version installee
+         ici se reconnait a sa pastille « installee ici », et un clic l ouvre. */
       dire('');
       dessiner();
     });
