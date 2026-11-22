@@ -8318,7 +8318,7 @@ const _MODULES_OUVRABLES = ['generations', 'verrous', 'journaux', 'securite', 'i
   'calendrier', 'ramassages', 'produits', 'reglages',
   // Produits (Épuré, 2026-11-18) : « Importer d’un fournisseur », comme dans la maquette.
   'import-fournisseur',
-  // Les onglets de l'Infolettre (2026-11-22) : Abonnés, Campagnes et chaînes, Relance s'ouvrent depuis elle.
+  // Les onglets de l Infolettre (2026-11-22) : Abonnes, Campagnes et chaines, Relance, ouverts depuis elle.
   'abonnes', 'campagnes', 'relance'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();
