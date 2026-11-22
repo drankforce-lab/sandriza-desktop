@@ -787,6 +787,7 @@ function _pleineZoneQuitter(w) {
   const avant = w._szPleineZone && w._szPleineZone.avant;
   w._szPleineZone = null;
   if (!avant) return;
+  _journalFenetre((w._szCle || 'principale') + ' quitte la pleine zone (double-clic) -> ' + JSON.stringify(avant));
   if (w.isMaximized()) _poserApresRetour(w, avant);
   else { try { w._szPoseT = Date.now(); w.setBounds(avant); w._szVoulu = { ...avant }; } catch (e) {} }
 }
@@ -803,16 +804,21 @@ const _pleineZoneArmer = (w) => {
       let vrai = true; try { vrai = w.isMaximized(); } catch (e) {}
       try {
         require('fs').appendFileSync(path.join(app.getPath('userData'), 'fenetre.log'),
-          new Date().toISOString() + ' maximize vrai=' + vrai + ' pz=' + !!pz + ' depuisBande=' + (Date.now() - (w._szOvlT || 0)) + 'ms bornes=' + JSON.stringify(w.getBounds()) + '\n');
+          new Date().toISOString() + ' ' + (w._szCle || 'principale') + ' maximize vrai=' + vrai + ' pz=' + !!pz + ' depuisBande=' + (Date.now() - (w._szOvlT || 0)) + 'ms bornes=' + JSON.stringify(w.getBounds()) + '\n');
       } catch (e) {}
       if (!vrai) return;
       /* Déjà en pleine zone ET toujours à sa place : c'est un « restaurer ».
          Si la personne a entre-temps redimensionné ou déplacé la fenêtre, la
          pleine zone n'est plus vraie — on traite comme un nouvel agrandissement. */
-      // Un « maximize » juste après une recoloration de la bande : faux, émis par Electron — on garde la pleine zone.
-      if (pz && (Date.now() - (w._szOvlT || 0)) < 900) { _poserApresRetour(w, pz.zone); return; }
+      /* Un « maximize » qui suit une recoloration de la bande : faux, émis par Electron — on garde la pleine zone.
+         ⚠ (2026-11-22, 9.2.1) 900 ms ne suffisaient pas : le journal du 2026-11-21 13:12:37 montre un « maximize » sur une
+         fenêtre en pleine zone 2009 ms après la recoloration (le verrou redessine la bande), pris pour « restaurer » — la
+         fenêtre retombait à sa petite taille, et le garde anti-rapetissement le laissait passer (geste de la coquille).
+         3 s : un vrai « restaurer » dans ce délai ne fait rien ; un second clic le fait. */
+      if (pz && (Date.now() - (w._szOvlT || 0)) < 3000) { _journalFenetre((w._szCle || 'principale') + ' maximize ignore (bande)'); _poserApresRetour(w, pz.zone); return; }
       if (pz && _pleineZoneSeuil(pz.zone, w.getNormalBounds())) {
         w._szPleineZone = null;
+        _journalFenetre((w._szCle || 'principale') + ' RESTAURE par la coquille -> ' + JSON.stringify(pz.avant) + ' depuisBande=' + (Date.now() - (w._szOvlT || 0)) + 'ms');
         _poserApresRetour(w, pz.avant);
         return;
       }
@@ -6256,6 +6262,7 @@ const ouvrirNative = (cle, titre, page, opts = {}) => {
     },
   });
   if (_teteSansCadre()) win._szWco = true;
+  win._szCle = cle;   // nommée dans fenetre.log
   fenetresNatives.set(cle, win);
   /* La recette, portée par la fenêtre : voir la fiche de `ouvrirNative`. */
   win._szRefaire = refaire;
