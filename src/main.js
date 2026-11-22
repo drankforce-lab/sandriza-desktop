@@ -3556,7 +3556,7 @@ const OPS_PONT = new Set([
   // ⚠ LA FENETRE NE CALCULE RIEN : une seule porte de lecture, qui rend les
   // resultats, la comparaison pluriannuelle, le budget et ses ecarts d un coup.
   // Deux portes pour la meme donnee, ce sont deux reponses qui divergent.
-  'compta:donnees', 'compta:budgetEcrire',
+  'compta:donnees', 'compta:budgetEcrire', 'compta:coutsIa',
   // Cloture d un exercice (7.66.0 du site) : lire les exercices clos, clore ou
   // rouvrir. Le super-administrateur est revérifié AU SERVEUR (op compta_cloturer).
   'compta:cloturesDonnees', 'compta:cloturer',
@@ -4306,7 +4306,7 @@ const LIMITES_PONT = {
      remboursements et toutes les depenses de son annee. Le delai par defaut
      couperait une demande legitime et l ecran dirait << la fenetre principale
      n a pas repondu a temps >> pour un calcul qui allait aboutir. */
-  'compta:donnees': 30000, 'compta:budgetEcrire': 20000,
+  'compta:donnees': 30000, 'compta:budgetEcrire': 20000, 'compta:coutsIa': 20000,
   'compta:cloturesDonnees': 20000, 'compta:cloturer': 20000,
   /* Le livre RECONSTRUIT toutes ses ecritures a chaque lecture — une par
      commande, par remboursement et par depense de l annee — puis les range en
@@ -8984,6 +8984,21 @@ ipcMain.handle('menu:langue', () => {
  * ⚠ CE QUI NE SE REFABRIQUE PAS LE DIT. Les ouvertures qui passent encore une
  * CHAÎNE à `ouvrirNative` n'ont pas de recette ; elles sont comptées et
  * journalisées, pas ignorées en silence. */
+/* La photo et la reprise de la saisie (voir refaireUne, ci-dessous). Des CHAÎNES : elles s'exécutent dans la page. */
+const _PHOTO_SAISIE = `(function(){try{var c={};Array.prototype.forEach.call(document.querySelectorAll('input[id],select[id],textarea[id]'),function(e){
+  var t=String(e.type||'').toLowerCase(); if(t==='password'||t==='file'||t==='hidden')return;
+  if(t==='checkbox'||t==='radio'){c[e.id]={k:!!e.checked};return;} if(e.value!=='')c[e.id]={v:String(e.value)};});
+  var p=null;try{p=window.szEtatLangue?window.szEtatLangue():null;}catch(x){p=null;}
+  return JSON.stringify({c:c,p:p});}catch(e){return null;}})()`;
+const _REPOSER_SAISIE = `function(E){if(!E)return;var touche={},pFait=false;
+  document.addEventListener('input',function(ev){if(ev.isTrusted&&ev.target&&ev.target.id)touche[ev.target.id]=1;},true);
+  var tour=function(){
+    try{if(E.p!=null&&!pFait&&window.szEtatLangueReprendre){if(window.szEtatLangueReprendre(E.p)!==false)pFait=true;}}catch(x){}
+    Object.keys(E.c||{}).forEach(function(id){if(touche[id])return;var e=document.getElementById(id);if(!e||document.activeElement===e&&e.value!=='')return;var s=E.c[id];
+      try{if('k' in s){if(e.checked!==s.k){e.checked=s.k;e.dispatchEvent(new Event('change',{bubbles:true}));}return;}
+      if(e.tagName==='SELECT'&&!Array.prototype.some.call(e.options,function(o){return o.value===s.v;}))return;
+      if(e.value!==s.v){e.value=s.v;e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));}}catch(x){}});};
+  [50,400,1200,2500].forEach(function(t){setTimeout(tour,t);});}`;
 const _refabriquerToutesLesFenetres = () => {
   let faites = 0, sansRecette = 0;
 
@@ -8993,9 +9008,24 @@ const _refabriquerToutesLesFenetres = () => {
     if (!wc || wc.isDestroyed()) return;
     if (typeof refaire !== 'function') { sansRecette++; return; }
     faites++;
+    /* ⚠⚠ LA SAISIE EN COURS SURVIT AU CHANGEMENT DE LANGUE (2026-11-22, 9.1.3, sa capture : « si on a commencé à éditer,
+       par exemple une vente de comptoir, les données disparaissent — il faut corriger pour toute l'application »).
+       Seules les pages à BROUILLON sauvaient leur saisie ; les autres (la caisse : ses lignes vivent en mémoire)
+       repartaient de zéro. Avant de refaire la page, on PHOTOGRAPHIE : chaque champ portant un id (valeur ou coche —
+       jamais un mot de passe ni un fichier) et l'état propre que la page déclare (`window.szEtatLangue()`). Après, on
+       REPOSE : la page reprend son état (`szEtatLangueReprendre(etat)`, qui rend `false` tant qu'elle n'est pas prête),
+       puis les champs, en quatre passages (50 ms → 2,5 s) pour ceux qui n'apparaissent qu'après le chargement. Un champ
+       que la personne a déjà touché n'est jamais réécrit. */
+    let photo = null;
     const poser = () => {
       try {
         if (wc.isDestroyed()) return;
+        if (photo) {
+          const E = photo;
+          wc.once('did-finish-load', () => {
+            try { if (!wc.isDestroyed()) wc.executeJavaScript('(' + _REPOSER_SAISIE + ')(' + E + ')', true).catch(() => {}); } catch (er) {}
+          });
+        }
         wc.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(refaire()));
       } catch (er) { cnxDire('refabrication impossible (' + quoi + ') : ' + ((er && er.message) || er)); }
     };
@@ -9003,10 +9033,11 @@ const _refabriquerToutesLesFenetres = () => {
     let parti = false;
     const allerY = () => { if (!parti) { parti = true; poser(); } };
     try {
-      wc.executeJavaScript('window.szBrouillonMaintenant ? szBrouillonMaintenant() : null', true)
+      wc.executeJavaScript(_PHOTO_SAISIE, true).then((j) => { if (typeof j === 'string' && j.length < 4000000) photo = j; }, () => {})
+        .then(() => wc.executeJavaScript('window.szBrouillonMaintenant ? szBrouillonMaintenant() : null', true))
         .then(allerY, allerY);
     } catch (er) { allerY(); }
-    setTimeout(allerY, 900);
+    setTimeout(allerY, 1200);
   };
 
   try {

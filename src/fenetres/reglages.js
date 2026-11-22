@@ -50,13 +50,15 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.45 system-ui,-apple-sy
 .rg-ic{flex:none;width:28px;height:28px;border-radius:8px;background:#3d4456;display:flex;align-items:center;justify-content:center}
 /* Le carré ardoise de la maquette reste ardoise EN JOUR (pictogramme blanc dessus) — reprise écrite exprès. */
 html.jour .rg-ic{background:#3d4456}
-.rg-ct h2{margin:0;font-size:15px;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+/* (2026-11-22, sa capture : « que les titres et les menus apparaissent au complet, pas tronqués ») : ils passent à la ligne. */
+.rg-ct{flex-wrap:wrap;row-gap:2px}
+.rg-ct h2{margin:0;font-size:15px;font-weight:800;line-height:1.25;min-width:0;flex:1 1 auto}
 .rg-ct .nb{margin-left:auto;flex:none;font-size:12px;font-weight:600;color:var(--tx2)}
 .rg-ent{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:6px}
 .rg-ent.une{grid-template-columns:minmax(0,1fr)}
 .rg-e{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;font:inherit;font-size:13px;font-weight:500;
   color:var(--tx);background:transparent;border:0;text-align:left;cursor:pointer;min-width:0}
-.rg-e span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rg-e span{line-height:1.3;min-width:0}
 .rg-e:hover{background:var(--v05);color:var(--tx-or)}
 .rg-e[hidden],.rg-ch[hidden]{display:none}
 .rg-e .ok{flex:none;width:1em;color:var(--tx-or);font-weight:800}

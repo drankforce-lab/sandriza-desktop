@@ -195,7 +195,7 @@ module.exports = {
   'Invitations Réponses Taux': 'Invitations Answers Rate',
   'Récompense État': 'Reward Status',
   'Voir le dépouillement': 'See the results',
-  'aucune': 'none',
+  'aucune': 'None',
   'Actif': 'Active',
   'Inactif': 'Inactive',
 

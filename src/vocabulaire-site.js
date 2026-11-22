@@ -481,4 +481,8 @@ module.exports = {
   'Lettre': 'Letter',
   'Légal': 'Legal',
   'Tabloïd': 'Tabloid',
+  // (2026-11-22, sa capture : les sondages mal traduits) déclencheurs et sondage par défaut
+  'Confirmation commande': 'Order confirmation',
+  'Livraison (statut livré)': 'Delivery (delivered status)',
+  'Satisfaction post-livraison': 'Post-delivery satisfaction',
 };

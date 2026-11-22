@@ -374,13 +374,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     } else {
       h += '<div data-pages="fidelisation-sondages">' + D.sondages.map(function(s){
         var taux = Math.max(0, Math.min(100, Number(s.taux) || 0));
+        s.taux = taux;   // (2026-11-22, sa capture : « 200 % ») jamais plus de réponses que d'invitations
         return '<div data-ctx-ligne class="ls-rang fi-rang' + (s.actif ? '' : ' eteint') + '" data-sondage="' + esc(s.id) + '" title="${T("Voir le dépouillement")}">'
           + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(initiales(s.nom)) + '</span>'
-          + '<div class="tx"><b>' + esc(s.nom) + '</b><span>' + esc(s.declencheur) + ' · ' + s.nbQuestions
+          + '<div class="tx"><b>' + esc(szTd(s.nom)) + '</b><span>' + esc(szTd(s.declencheur)) + ' · ' + s.nbQuestions
           + (s.nbQuestions > 1 ? '${T(" questions")}' : '${T(" question")}') + '</span></div></div>'
           + '<div class="bilan"><b>' + szNombre(s.taux, 1) + ' %</b>'
           + '<div class="jauger"><i style="width:' + taux + '%"></i></div>'
-          + '<span>' + s.reponses + ' / ' + s.invitations + '</span></div>'
+          + '<span>' + Math.min(s.reponses, s.invitations || s.reponses) + ' / ' + s.invitations + '</span></div>'
           + '<div class="ou">' + (s.recompense ? '<span class="rf-pill bleu">' + esc(s.recompense) + '</span>'
                                                : '<span>${T("aucune")}</span>') + '</div>'
           + '<div class="etat"><span class="rf-pill ' + (s.actif ? 'vert' : '') + '">'
@@ -1364,7 +1365,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
         + '<th>${T("Répondu le")}</th><th>${T("Utilisé")}</th></tr></thead><tbody>'
         + rs.map(function(r){
             return '<tr><td><span class="rf-code" style="font-size:.84rem;color:var(--tx)">' + esc(r.code) + '</span></td>'
-              + '<td>' + esc(r.sondage) + '</td>'
+              + '<td>' + esc(szTd(r.sondage)) + '</td>'
               + '<td class="dt">' + esc(r.commande || '—') + '</td>'
               + '<td class="dt">' + esc(r.date) + '</td>'
               + '<td>' + (r.utilise ? '<span class="rf-pill vert">${T("utilisé")}</span>'
@@ -1393,9 +1394,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
         + '<th>${T("Déclencheur")}</th><th>${T("État")}</th>' + (D.peutModifier ? '<th></th>' : '') + '</tr></thead><tbody>'
         + iv.map(function(i){
             return '<tr><td class="dt">' + esc(i.date) + '</td>'
-              + '<td>' + esc(i.sondage) + '</td>'
+              + '<td>' + esc(szTd(i.sondage)) + '</td>'
               + '<td>' + esc(i.courriel || '—') + '</td>'
-              + '<td class="dt">' + esc(i.declencheur) + '</td>'
+              + '<td class="dt">' + esc(szTd(i.declencheur)) + '</td>'
               + '<td><span class="rf-pill ' + (i.repondu ? 'vert' : 'ambre') + '">'
               + (i.repondu ? '${T("Répondu")}' : '${T("En attente")}') + '</span></td>'
               + (D.peutModifier
@@ -1437,7 +1438,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       + '<label class="champ"><span class="lbl">${T("Envoyé quand")}</span><select class="t" id="sd-decl">'
       + (FORM.declencheurs || []).map(function(d){
           return '<option value="' + esc(d.v) + '"' + (e.declencheur === d.v ? ' selected' : '') + '>'
-            + esc(d.l) + '</option>'; }).join('')
+            + esc(szTd(d.l)) + '</option>'; }).join('')
       + '</select></label>'
       + '<label class="champ"><span class="lbl">${T("Texte d’introduction du courriel")}</span>'
       + '<textarea class="t" id="sd-intro" rows="3">' + esc(e.intro) + '</textarea></label>'
@@ -1605,7 +1606,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     var h = '<div class="voile" id="fi-voile"><div class="boite">'
       + '<h3>' + esc(s.nom)
       + ' <span class="rf-pill ' + (s.actif ? 'vert' : '') + '">' + (s.actif ? '${T("Actif")}' : '${T("Inactif")}') + '</span></h3>'
-      + '<div class="dt" style="margin-bottom:.5rem">' + esc(s.declencheur)
+      + '<div class="dt" style="margin-bottom:.5rem">' + esc(szTd(s.declencheur))
       + ' · ' + s.nbReponses + (s.nbReponses > 1 ? '${T(" réponses")}' : '${T(" réponse")}') + '</div>';
     if (!s.questions.length) {
       h += '<div class="vide">${T("Ce sondage n’a aucune question.")}</div>';

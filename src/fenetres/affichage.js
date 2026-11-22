@@ -59,9 +59,16 @@ body{background:linear-gradient(160deg,#0d1420 0%,#141d2c 55%,#0d1420 100%);
    visible en permanence, c'est la seule chose que la cliente cherche.
    (2026-10-25, audit) Plus de glissiere : data-pages-fin (le meme mecanisme que la caisse)
    montre la DERNIERE page — l article qu on vient de scanner. */
-.liste{flex:1 1 auto;min-height:0}
-.ln{display:flex;align-items:baseline;gap:1rem;padding:.72rem 0;border-bottom:1px solid var(--v06)}
-.ln .q{flex:0 0 auto;min-width:2.6rem;font-variant-numeric:tabular-nums;color:var(--tx-or);font-weight:700;font-size:1.05rem}
+.liste{flex:1 1 auto;min-height:0;overflow:hidden}
+.ln{display:flex;align-items:center;gap:1rem;padding:.72rem 0;border-bottom:1px solid var(--v06)}
+/* (2026-11-22, sa capture : « la photo du produit aussi », « le 1x doit être plus gros ») */
+.ln[hidden],.plus[hidden]{display:none!important}
+.ln .ph{flex:0 0 auto;width:64px;height:84px;border-radius:10px;overflow:hidden;background:var(--v06);display:flex;align-items:center;justify-content:center;
+  font-weight:800;font-size:1.4rem;color:var(--tx2)}
+.ln .ph img{width:100%;height:100%;object-fit:cover}
+.ln .q{flex:0 0 auto;min-width:3.4rem;font-variant-numeric:tabular-nums;color:var(--tx-or);font-weight:800;font-size:1.7rem}
+/* « + X articles » : la liste ne défile pas ; les plus anciens se replient sous cette ligne. */
+.plus{padding:.55rem 0 .65rem;color:var(--tx2);font-size:1rem;font-weight:600;border-bottom:1px solid var(--v06)}
 .ln .d{flex:1 1 auto;min-width:0}
 .ln .n{font-size:1.12rem;font-weight:600;line-height:1.3}
 .ln .v{font-size:.82rem;color:var(--tx2);margin-top:.15rem}
@@ -162,10 +169,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     dernierNb = lignes.length;
 
     var t = etat.totaux || {};
-    var h = ['<div class="liste" data-pages="aff-lignes" data-pages-fin>'];
+    /* (2026-11-22) Plus de pages : la liste montre les DERNIERS articles qui tiennent, et une ligne « + X articles »
+       dit combien sont repliés au-dessus (sa demande : « s'il y a plus d'articles que prévu, écrire plus (x articles) »). */
+    var h = ['<div class="liste" id="aff-liste" style="flex:1 1 0;min-height:0;overflow:hidden;display:block"><div class="plus" id="aff-plus" hidden></div>'];
     lignes.forEach(function(l, i){
       var variante = [l.size, l.color].filter(Boolean).join(' · ');
       h.push('<div class="ln' + (i === neuve ? ' neuf' : '') + '">'
+        + '<div class="ph">' + (l.image ? '<img src="' + esc(l.image) + '" alt="" onerror="this.remove()">' : esc(String(l.name || '?').trim().charAt(0).toUpperCase())) + '</div>'
         + '<div class="q">' + (l.quantity || 1) + '×</div>'
         + '<div class="d"><div class="n">' + esc(l.name) + '</div>'
         + (variante ? '<div class="v">' + esc(variante) + '</div>' : '')
@@ -187,12 +197,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.rabais)    h.push('<div class="sl"><span>${T("Rabais")}</span><b>− ' + fmt(t.rabais) + '</b></div>');
     if (t.livraison) h.push('<div class="sl"><span>${T("Livraison")}</span><b>' + fmt(t.livraison) + '</b></div>');
     (t.taxes || []).forEach(function(x){
-      h.push('<div class="sl"><span>' + esc(x.nom) + '</span><b>' + fmt(x.montant) + '</b></div>');
+      h.push('<div class="sl"><span>' + esc(taxeNom(x.nom)) + '</span><b>' + fmt(x.montant) + '</b></div>');
     });
     h.push('<div class="tot"><span class="lb">Total</span><span class="vl">' + fmt(t.total) + '</span></div>');
     h.push('</div>');
     corps.innerHTML = h.join('');
+    replier();
+    // La mise en page finale (polices, photos) arrive après : on remesure.
+    requestAnimationFrame(replier); setTimeout(replier, 250);
+    Array.prototype.forEach.call(corps.querySelectorAll('.ph img'), function(im){ im.addEventListener('load', replier); });
   }
+  /* Le nom d'une taxe vient du site (« TPS », « TVQ ») : en anglais, son nom anglais. */
+  var TAXES_EN = { 'TPS': 'GST', 'TVQ': 'QST', 'TVH': 'HST', 'TVP': 'PST', 'TVD': 'RST' };
+  function taxeNom(n){ var s = String(n || ''); return (document.documentElement.lang === 'en' && TAXES_EN[s.toUpperCase()]) ? TAXES_EN[s.toUpperCase()] : s; }
+  function replier(){
+    var L = document.getElementById('aff-liste'), plus = document.getElementById('aff-plus');
+    if (!L || !plus) return;
+    var lns = L.querySelectorAll('.ln'), cache = 0;
+    Array.prototype.forEach.call(lns, function(x){ x.hidden = false; });
+    plus.hidden = true;
+    // Le bas de la DERNIÈRE ligne contre le bas de la liste : on replie les plus anciennes une à une.
+    var bas = function(){ return L.getBoundingClientRect().bottom + 0.5; };
+    for (var i = 0; i < lns.length - 1 && lns[lns.length - 1].getBoundingClientRect().bottom > bas(); i++) {
+      lns[i].hidden = true; cache++;
+      plus.hidden = false;
+      plus.textContent = '+ ' + cache + ' ' + (cache > 1 ? '${T("articles")}' : '${T("article")}');
+    }
+  }
+  window.addEventListener('resize', function(){ clearTimeout(window.__affR); window.__affR = setTimeout(replier, 120); });
+  // La place réelle de la liste change aussi sans « resize » (plein écran, bas qui grandit) : on la SUIT.
+  try { new ResizeObserver(function(){ clearTimeout(window.__affR); window.__affR = setTimeout(replier, 60); }).observe(corps); } catch (e) {}
 
   corps.innerHTML = accueil();
 

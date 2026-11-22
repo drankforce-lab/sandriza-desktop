@@ -44,4 +44,6 @@ module.exports = {
   'Sous-total': 'Subtotal',
   'Livraison': 'Shipping',
   'Total': 'Total',
+  'article': 'item',
+  'articles': 'items',
 };

@@ -984,6 +984,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (auBout) { try { el.selectionStart = el.selectionEnd = s.length; } catch (e) {} }
   }
 
+  /* (2026-11-22, 9.1.3) LE CHANGEMENT DE LANGUE NE VIDE PLUS LA VENTE. La coquille photographie la page avant de la
+     refaire dans l'autre langue (main.js, _PHOTO_SAISIE) : les champs, et cet état-ci — les lignes vivent en mémoire,
+     aucun champ ne les porte. La reprise attend le contexte (CTX) : avant lui, rien ne se dessine. */
+  window.szEtatLangue = function(){
+    if (!LIGNES.length && !CLI) return null;
+    return { lignes: LIGNES, imgs: IMGS, cli: CLI, rabtype: RABTYPE, prov: PROV, liv: LIV };
+  };
+  window.szEtatLangueReprendre = function(e){
+    if (!CTX) return false;
+    if (!e) return true;
+    try {
+      LIGNES = Array.isArray(e.lignes) ? e.lignes : []; IMGS = e.imgs || {}; CLI = e.cli || null;
+      if (e.prov) PROV = e.prov; if (e.liv != null) LIV = e.liv;
+      poserRabType(e.rabtype);
+      dessinerLignes(); majTotaux();
+    } catch (x) {}
+    return true;
+  };
+
   function poserRabType(t){
     RABTYPE = (t === 'pct') ? 'pct' : 'montant';
     var a = document.getElementById('rt-montant'), b = document.getElementById('rt-pct');

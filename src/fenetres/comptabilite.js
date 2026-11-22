@@ -151,7 +151,7 @@ td.n input:disabled,.mois12 input:disabled,html.jour td.n input:disabled,html.jo
  * exactement comme ça qu'un écran entier passe des mois sans être regardé.
  */
 function pageComptabilite(onglet) {
-  const ok = ['comparer', 'budget'];
+  const ok = ['comparer', 'budget', 'ia'];
   const depart = (ok.indexOf(String(onglet || '')) >= 0) ? String(onglet) : 'resultats';
   return `${TETE()}
 <title>${T("Rapports et budget — Administration Sandriza")}</title>
@@ -172,6 +172,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
   var elSous = document.getElementById('sous');
 
   var D = null;              /* le rapport, tel que le site le rend */
+  var IA = null, IA_OCC = false;   /* (2026-11-22) les coûts d'IA, lus à la première visite de leur onglet */
   var ONGLET = '${depart}';
   var ANNEES = [];           /* les exercices demandes, tries */
   var RO = true;             /* pas de droit d ecriture tant qu on ne l a pas lu */
@@ -467,7 +468,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
   }
 
   function onglets(){
-    var L = [['resultats', '${T("Résultats")}'], ['comparer', '${T("Comparer")}'], ['budget', '${T("Budget")}']];
+    var L = [['resultats', '${T("Résultats")}'], ['comparer', '${T("Comparer")}'], ['budget', '${T("Budget")}'], ['ia', '${T("Coûts d’IA")}']];
     elOnglets.innerHTML = L.map(function(o){
       return '<button data-o="' + o[0] + '" class="' + (ONGLET === o[0] ? 'on' : '') + '">' + o[1] + '</button>';
     }).join('');
@@ -862,9 +863,46 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     var h = '';
     if (ONGLET === 'comparer') h = vueComparer();
     else if (ONGLET === 'budget') h = vueBudget();
+    else if (ONGLET === 'ia') h = vueIa();
     else h = vueResultats();
     corps.innerHTML = h;
     brancher();
+  }
+
+  /* ══ LES COÛTS D'IA (2026-11-22, sa demande : « je dois avoir les chiffres des coûts associés dans ma comptabilité ») ══
+     Le journal des appels à Claude (recherche par photo, conseillère de style, rédaction, réceptionniste), mois par mois
+     et par fonction, en $ US et en $ CA au taux du jour. Des ESTIMATIONS d'après les jetons : la facture du fournisseur
+     fait foi et se saisit dans les Dépenses — ici, on ne l'écrit pas (elle compterait deux fois). */
+  var GESTES = { 'recherche-photo': '${T("Recherche par photo")}', 'conseillere': '${T("Conseillère de style")}',
+    'telephone': '${T("Réceptionniste téléphonique")}', 'assistante': '${T("Assistante de rédaction")}', 'fibres': '${T("Analyse des fibres")}',
+    'campagne': '${T("Campagnes courriel")}', 'fantome': '${T("Rédaction de fiches")}' };
+  function usd(n){ return (Math.round((Number(n) || 0) * 10000) / 10000).toLocaleString('${LIEU()}', { minimumFractionDigits: 2, maximumFractionDigits: 4 }) + ' $ US'; }
+  function vueIa(){
+    if (!IA) {
+      if (!IA_OCC) { IA_OCC = true; appeler('compta:coutsIa', []).then(function(r){ IA_OCC = false; IA = r; if (ONGLET === 'ia') dessiner(); }); }
+      return '<div class="vide">${T("Chargement des coûts d’IA…")}</div>';
+    }
+    if (!IA.ok) return '<div class="vide">' + esc(expliquer(IA)) + '</div>';
+    var t = Number(IA.taux) || 1.36, parMois = {}, ordre = [];
+    (IA.lignes || []).forEach(function(l){ if (!parMois[l.mois]) { parMois[l.mois] = []; ordre.push(l.mois); } parMois[l.mois].push(l); });
+    var h = '';
+    if (IA.budget) {
+      h += '<div class="limite">' + '${T("Ce mois-ci : {0} dépensés sur un plafond de {1}.")}'.split('{0}').join(usd(IA.budget.depense)).split('{1}').join(usd(IA.budget.plafond)) + '</div>';
+    }
+    if (!ordre.length) return h + '<div class="vide">${T("Aucun appel à l’IA enregistré depuis 12 mois.")}</div>';
+    h += '<table><thead><tr><th>${T("Mois")}</th><th>${T("Fonction")}</th><th class="n">${T("Appels")}</th><th class="n">${T("Coût ($ US)")}</th><th class="n">${T("Coût ($ CA)")}</th></tr></thead><tbody>';
+    ordre.forEach(function(m){
+      var tot = 0, n = 0;
+      parMois[m].forEach(function(l){
+        tot += Number(l.cout) || 0; n += Number(l.appels) || 0;
+        h += '<tr><td>' + esc(m) + '</td><td>' + esc(GESTES[l.geste] || l.geste || '—') + '</td><td class="n">' + (Number(l.appels) || 0) + '</td>'
+          + '<td class="n">' + usd(l.cout) + '</td><td class="n">' + argent((Number(l.cout) || 0) * t) + '</td></tr>';
+      });
+      h += '<tr class="tot"><td><b>' + esc(m) + '</b></td><td><b>${T("Total du mois")}</b></td><td class="n"><b>' + n + '</b></td><td class="n"><b>' + usd(tot) + '</b></td><td class="n"><b>' + argent(tot * t) + '</b></td></tr>';
+    });
+    h += '</tbody></table>';
+    h += '<div class="limite">${T("Estimations calculées d’après le nombre de jetons de chaque appel. La facture du fournisseur fait foi : saisissez-la dans les Dépenses à sa réception. Le $ CA suit le taux du jour.")}</div>';
+    return h;
   }
 
   function brancher(){
