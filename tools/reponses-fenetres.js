@@ -7216,6 +7216,16 @@ const JEU = {
         identite: IDENTITE,
       },
     },
+    {
+      // (2026-11-22) Configuration › Communications › Messagerie clients : la durée de conservation seule.
+      nom: 'configuration (conservation)',
+      id: 'config',
+      reponses: {
+        'messagerie:liste': { ok: true, onglet: 'pending', comptes: { attente: 0, repondues: 0, toutes: 0 }, lignes: [], retention: 12, peutModifier: true },
+        'messagerie:retention': { ok: true, retention: 18 },
+        identite: IDENTITE,
+      },
+    },
   ],
 
   // ── AVIS PRODUITS ──────────────────────────────────────────────────────────

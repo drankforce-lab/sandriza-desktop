@@ -128,10 +128,16 @@ tbody td{padding:.32rem .4rem;border-top:1px solid var(--v055);vertical-align:mi
   display:flex;flex-direction:column;gap:.35rem;overflow:hidden}
 .gc-carte::after{content:"";position:absolute;right:-2.5rem;top:-2.5rem;width:9rem;height:9rem;border-radius:50%;
   border:1px solid rgba(240,214,160,.35)}
-.gc-marque{font:700 .78rem/1 Georgia,serif;letter-spacing:.32em;color:#f0d6a0}
+.gc-marque{font:700 .78rem/1 Georgia,serif;letter-spacing:.32em;color:var(--gc-ac,#f0d6a0)}
+.gc-themes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.35rem;margin-bottom:.8rem}
+.gc-th{display:flex;align-items:center;gap:.45rem;height:auto;padding:.3rem .45rem;border-radius:9px;border:1px solid var(--v08);
+  background:var(--f-carte);color:var(--tx);font:inherit;font-size:.74rem;cursor:pointer;text-align:left;min-width:0}
+.gc-th i{flex:0 0 1.5rem;height:1.5rem;border-radius:6px;box-shadow:inset 0 0 0 1px rgba(0,0,0,.08)}
+.gc-th span{min-width:0;line-height:1.15;overflow-wrap:break-word}
+.gc-th.on{border-color:var(--tx);box-shadow:0 0 0 1px var(--tx)}
 .gc-montant{font-size:2rem;font-weight:800;margin-top:auto;font-variant-numeric:tabular-nums}
 .gc-pour{font-size:.84rem}
-.gc-de{font-size:.74rem;color:rgba(247,239,226,.75)}
+.gc-de{font-size:.74rem;color:var(--gc-ts,rgba(247,239,226,.75))}
 /* La liste refaite (2026-10-15, lot B) : un rang par carte, qui commence par la carte elle-meme en petit. */
 .cc-rang{grid-template-columns:1.3rem minmax(0,1.9fr) 10rem minmax(0,1fr) minmax(0,1fr) 1.2rem;cursor:pointer}
 /* Les cases a cocher (gestes groupes, 2026-10-29) : les rangs sont des <div> en grille, pas un tableau. La case
@@ -344,9 +350,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
      Recompense : << Activer >> devient un interrupteur. Les identifiants des
      champs ne changent pas (lecture, brouillon) ; cc-r-on est lu par .checked. */
   var MONTANTS_RAPIDES = [25, 50, 75, 100, 150, 200];
+  /* (2026-11-22, sa demande : « tu dois me permettre d'appliquer des thèmes ici aussi ») LES SIX THÈMES DE LA BOUTIQUE
+     (mêmes clés que GC_THEMES de promo.js et CB_GC_THEMES du courriel : le serveur n'en accepte pas d'autres). */
+  var THEMES = [
+    { k: 'noir',      n: '${T("Nuit étoilée")}',      bg: 'linear-gradient(135deg,#0b1026 0%,#1b2450 52%,#3a2d6b 100%)', tx: '#ffffff', ts: '#ffffffbd', ac: '#e7c980' },
+    { k: 'rose',      n: '${T("Coucher de soleil")}', bg: 'linear-gradient(135deg,#ffd08a 0%,#ff8f6b 46%,#e0578b 100%)', tx: '#4a1f2e', ts: '#4a1f2e9e',    ac: '#7a2748' },
+    { k: 'sauge',     n: '${T("Bord de mer")}',       bg: 'linear-gradient(135deg,#a8e6e2 0%,#4fb0c6 50%,#1a6b8f 100%)', tx: '#ffffff', ts: '#ffffffc7', ac: '#fdf6e3' },
+    { k: 'bordeaux',  n: '${T("Aurore boréale")}',    bg: 'linear-gradient(135deg,#041b2d 0%,#1f7a5c 46%,#6a4b9e 100%)', tx: '#ffffff', ts: '#ffffffc2', ac: '#8ef0c4' },
+    { k: 'champagne', n: '${T("Sable doré")}',        bg: 'linear-gradient(135deg,#fbf0d0 0%,#f0d59c 50%,#d9b06a 100%)', tx: '#5a4420', ts: '#5a44209e',    ac: '#8a6a2f' },
+    { k: 'marine',    n: '${T("Champ de lavande")}',  bg: 'linear-gradient(135deg,#c8b6e2 0%,#9b7fc7 50%,#6d5aa5 100%)', tx: '#ffffff', ts: '#ffffffc2', ac: '#f3ead9' }
+  ];
+  var THEME = 'noir';
+  function themeDe(k){ for (var i = 0; i < THEMES.length; i++) if (THEMES[i].k === k) return THEMES[i]; return THEMES[0]; }
+  function choixThemes(){
+    return '<div class="gc-themes" role="radiogroup" aria-label="${T("Thème de la carte")}">' + THEMES.map(function(t){
+      return '<button type="button" class="gc-th' + (t.k === THEME ? ' on' : '') + '" data-gcth="' + t.k + '" role="radio" aria-checked="' + (t.k === THEME) + '" title="' + esc(t.n) + '">'
+        + '<i style="background:' + t.bg + '"></i><span>' + esc(t.n) + '</span></button>';
+    }).join('') + '</div>';
+  }
   function apercuCarte(montant, dest, exp){
     var m = parseFloat(String(montant || '').replace(',', '.'));
-    return '<div class="gc-carte"><div class="gc-marque">SANDRIZA</div>'
+    var t = themeDe(THEME);
+    return '<div class="gc-carte" style="background:' + t.bg + ';color:' + t.tx + ';--gc-ts:' + t.ts + ';--gc-ac:' + t.ac + '"><div class="gc-marque">SANDRIZA</div>'
       + '<div class="gc-montant">' + (m > 0 ? fmt(m) : szArgentSymbole('—')) + '</div>'   // (2026-10-25, audit) « $— » en anglais
       + '<div class="gc-pour">${T("Pour")} <strong>' + esc(dest || '${T("le destinataire")}') + '</strong></div>'
       + '<div class="gc-de">${T("De la part de")} ' + esc(exp || '${T("la boutique")}') + '</div></div>';
@@ -382,7 +407,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       /* L APERÇU S ETIRE SUR TOUTE LA HAUTEUR (2026-10-11, lisibilité étape 2) : seul dans sa colonne, il
          laissait un grand vide sous lui ; la carte est maintenant centrée dans une section aussi haute
          que la colonne de gauche. */
-      + '<section class="sz-sect cc-apercu-sect"><h4>${T("Aperçu")}</h4><div id="cc-apercu">' + apercuCarte('', '', '') + '</div></section>'
+      + '<section class="sz-sect cc-apercu-sect"><h4>${T("Thème et aperçu")}</h4>' + choixThemes() + '<div id="cc-apercu">' + apercuCarte('', '', '') + '</div></section>'
       + '</div></div>'
       + '<div class="pied-boite"><button class="mini" id="cc-annuler">${T("Annuler")}</button>'
       + '<button class="mini prim" id="cc-creer">${T("Créer la carte")}</button></div>'
@@ -392,6 +417,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
     var maj = function(){ var z = document.getElementById('cc-apercu'); if (z) z.innerHTML = apercuCarte(v('cc-montant'), v('cc-dest'), v('cc-exp')); };
     ['cc-montant', 'cc-dest', 'cc-exp'].forEach(function(id){ var e = document.getElementById(id); if (e) e.addEventListener('input', maj); });
+    [].forEach.call(document.querySelectorAll('[data-gcth]'), function(bt){
+      bt.onclick = function(){
+        THEME = bt.getAttribute('data-gcth');
+        [].forEach.call(document.querySelectorAll('[data-gcth]'), function(o){ var on = o === bt; o.classList.toggle('on', on); o.setAttribute('aria-checked', on ? 'true' : 'false'); });
+        maj();
+      };
+    });
     [].forEach.call(document.querySelectorAll('.gc-rapide'), function(bt){
       bt.onclick = function(){ var m = document.getElementById('cc-montant'); if (m) { m.value = bt.getAttribute('data-montant'); m.dispatchEvent(new Event('input')); } };
     });
@@ -558,7 +590,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       b.onclick = function(){ STATUT = b.getAttribute('data-ccst') || ''; refiltrer(); };
     });
     var bn = document.getElementById('cc-nouvelle');
-    if (bn) bn.onclick = function(){ BOITE = 'creer'; dessiner(); szBrouillonProposer(); };
+    if (bn) bn.onclick = function(){ BOITE = 'creer'; THEME = 'noir'; dessiner(); szBrouillonProposer(); };
     var br = document.getElementById('cc-recompense');
     if (br) br.onclick = function(){ BOITE = 'recompense'; dessiner(); };
     var ba = document.getElementById('cc-annuler');
@@ -575,7 +607,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
         courriel: (document.getElementById('cc-mail') || {}).value,
         expediteur: (document.getElementById('cc-exp') || {}).value,
         note: (document.getElementById('cc-note') || {}).value,
-        statut: (document.getElementById('cc-statut') || {}).value
+        statut: (document.getElementById('cc-statut') || {}).value,
+        theme: THEME
       }]).then(function(r){
         bc.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }

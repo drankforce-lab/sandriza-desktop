@@ -84,6 +84,8 @@ module.exports = {
 
   /* ══ LA CONSERVATION ═══════════════════════════════════════════════════════ */
   'Réponses conservées': 'Replies kept',
+  'Configuration de la messagerie': 'Messaging settings',
+  'Configuration de la messagerie — Administration Sandriza': 'Messaging settings — Sandriza Administration',
   'mois': 'months',
   'Durée de conservation en mois': 'Retention in months',
   /* ⚠⚠ CE QU ELLE N EFFACE JAMAIS. */

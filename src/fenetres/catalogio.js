@@ -156,6 +156,16 @@ code{font:.76rem/1.4 Consolas,monospace;color:var(--tx-bleute)}
 .boite{background:var(--f-carte2);border:1px solid var(--v14);border-radius:13px;
   max-width:34rem;width:100%;max-height:88vh;overflow:auto;padding:.9rem 1rem}
 .boite h3{margin:0 0 .6rem;font:700 .98rem/1.3 Georgia,serif}
+.boite.cl-boite{max-width:min(74rem,96vw);width:min(74rem,96vw)}
+.cl-g{display:grid;grid-template-columns:repeat(auto-fill,minmax(20rem,1fr));gap:.3rem .45rem}
+.cl-r{display:flex;flex-direction:column;gap:.12rem;padding:.36rem .65rem;
+  border:1px solid var(--v08);border-radius:10px;background:var(--f-carte);font-size:.74rem;line-height:1.3;min-width:0}
+.cl-n{display:flex;flex-wrap:wrap;align-items:center;gap:.25rem .45rem;min-width:0}
+.cl-n strong{font-size:.8rem;overflow-wrap:anywhere}
+.cl-t{display:flex;flex-wrap:wrap;gap:.2rem}
+.cl-t .pill{font-size:.62rem;padding:.05rem .45rem;margin:0;white-space:nowrap}
+.cl-a{color:var(--tx2);min-width:0;overflow-wrap:break-word}
+
 .boite ul{margin:0 0 .7rem;padding-left:1.15rem;line-height:1.85;font-size:.86rem}
 .gare{padding:.5rem .65rem;border-radius:9px;background:rgba(148,163,184,.1);
   border:1px solid rgba(148,163,184,.22);font-size:.78rem;color:var(--tx-bleute);line-height:1.55}
@@ -376,8 +386,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
       if (c.info) tags += '<span class="pill inchange">${T("information")}</span> ';
       if (c.req)  tags += '<span class="pill maj">${T("requise à la création")}</span> ';
       if (c.priv) tags += '<span class="pill erreur">${T("donnée de marge")}</span> ';
-      return '<tr><td style="white-space:nowrap"><strong>' + esc(c.lbl) + '</strong></td><td>'
-        + tags + esc(c.aide || '') + '</td></tr>';
+      /* (2026-11-22, sa capture : « à corriger, c'est pas beau ») Une FICHE par colonne, sur deux colonnes : le nom
+         et ses pastilles à gauche (les pastilles ne collent plus au texte), le rôle à droite. Plus de débordement. */
+      return '<div class="cl-r"><div class="cl-n"><strong>' + esc(c.lbl) + '</strong>' + (tags ? '<span class="cl-t">' + tags + '</span>' : '') + '</div>'
+        + '<div class="cl-a">' + esc(c.aide || '') + '</div></div>';
     }).join('');
 
     return '<div class="centre">'
@@ -411,10 +423,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
          fenetre — et il grandit avec chaque colonne du catalogue. On le consulte,
          on le ferme : c est une boite, pas un etage. */
       +   (!COL_BOITE ? '' :
-            '<div class="voile" id="col-voile"><div class="boite" style="max-width:52rem"><h3>${T("Colonnes de la feuille")} ' + esc(nomFeuille(SHEET)) + '</h3>'
+            '<div class="voile" id="col-voile"><div class="boite cl-boite"><h3>${T("Colonnes de la feuille")} ' + esc(nomFeuille(SHEET)) + '</h3>'
           + '<div class="avis" style="margin:.7rem 0">${T("À l’import, <strong>seules les colonnes présentes dans votre fichier sont touchées</strong> : ")}'
           +   '${T("un fichier « SKU ; Prix » ne change que le prix. Les colonnes <em>information</em> sont exportées pour vous repérer et ignorées à la relecture.")}</div>'
-          + '<div class="carte"><table><thead><tr><th>${T("Colonne")}</th><th>${T("Rôle")}</th></tr></thead><tbody>' + lignesCol + '</tbody></table></div>'
+          + '<div class="cl-g">' + lignesCol + '</div>'
           + '<div style="display:flex;justify-content:flex-end;margin-top:.7rem"><button class="ghost" data-act="colrepli">${T("Fermer")}</button></div></div></div>')
       + '</div>'
       + '</div>';

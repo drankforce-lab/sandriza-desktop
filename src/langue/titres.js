@@ -73,5 +73,6 @@ module.exports = {
   'Gardien': 'Guard',
   'NIP': 'PINs',
   // (2026-10-25, audit) La barre de titre du décompte d’inactivité.
-  'Déconnexion imminente': 'Signing out soon'
+  'Déconnexion imminente': 'Signing out soon',
+  'Configuration de la messagerie': 'Messaging settings'
 };

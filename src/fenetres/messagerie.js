@@ -115,20 +115,33 @@ button .n.hi{background:rgba(245,158,11,.25);color:var(--tx-att)}
 `;
 
 /** Page complète de la fenêtre native « Messagerie clients ». */
-function pageMessagerie() {
+/* (2026-11-22, sa demande : « les paramètres de configuration devraient uniquement se retrouver en Configuration et
+   non dans le module ») mode 'config' : la fenêtre ne porte QUE la durée de conservation, ouverte depuis
+   Configuration › Communications › Messagerie clients. Le module, lui, n'a plus ce réglage dans son pied. */
+function pageMessagerie(mode) {
+  const CFG = mode === 'config';
+  const CORPS = CFG
+    ? '<div class="corps" id="corps"><div class="mc-carte" id="ret" hidden>'
+      + '<h2>' + T("Réponses conservées") + '</h2>'
+      + '<p>' + T("Les demandes répondues sont supprimées passé ce délai. Les demandes en attente ne le sont jamais.") + '</p>'
+      + '<div class="mc-l"><input id="ret-mois" aria-label="' + T("Durée de conservation en mois") + '" type="number" min="1" max="120"><span>' + T("mois") + '</span>'
+      + '<button id="ret-save">' + T("Enregistrer") + '</button></div></div></div>'
+    : '<div class="corps" id="corps"><div class="vide charge">' + T("Chargement… (les demandes se resynchronisent)") + '</div></div>';
   return `${TETE()}
-<title>${T("Messagerie clients — Administration Sandriza")}</title>
-<style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.support}</span><h1>${T("Messagerie clients")}</h1>
+<title>${CFG ? T("Configuration de la messagerie — Administration Sandriza") : T("Messagerie clients — Administration Sandriza")}</title>
+<style>${CSS}${CSS_JOUR}
+.mc-carte{max-width:34rem;margin:1.2rem auto;padding:1.1rem 1.3rem;border:1px solid var(--v08);border-radius:14px;background:var(--f-carte);display:flex;flex-direction:column;gap:.8rem}
+.mc-carte h2{margin:0;font-size:.98rem}
+.mc-carte p{margin:0;font-size:.8rem;color:var(--tx2);line-height:1.45}
+.mc-l{display:flex;align-items:center;gap:.55rem;font-size:.84rem}
+.mc-l input{width:5rem;font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.35rem .5rem}
+#ret-save{margin-left:auto;font:inherit;font-size:.8rem;font-weight:600;color:var(--sz-btn-prim-tx,#fff);background:var(--sz-btn-prim,#8a5a2b);border:0;border-radius:9px;padding:.45rem 1rem;cursor:pointer}
+#ret-save:disabled{opacity:.5;cursor:default}
+</style></head><body>
+<div class="tete"><span class="ico">${ICO.support}</span><h1>${CFG ? T("Configuration de la messagerie") : T("Messagerie clients")}</h1>
   <span class="sous" id="sous"></span></div>
-<div class="corps" id="corps"><div class="vide charge">${T("Chargement… (les demandes se resynchronisent)")}</div></div>
-<div class="pied"><span class="msg" id="msg"></span>
-  <span id="ret" hidden style="margin-left:auto;display:flex;align-items:center;gap:.4rem;font-size:.76rem;color:var(--tx2)">
-    <span title="${T("Les demandes répondues sont supprimées passé ce délai. Les demandes en attente ne le sont jamais.")}">${T("Réponses conservées")}</span>
-    <input id="ret-mois" aria-label="${T("Durée de conservation en mois")}" type="number" min="1" max="120" style="width:4.2rem;font:inherit;font-size:.78rem;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:6px;padding:.2rem .35rem">
-    <span>${T("mois")}</span>
-    <button id="ret-save" style="font:inherit;font-size:.74rem;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:6px;padding:.22rem .5rem;cursor:pointer">${T("Enregistrer")}</button>
-  </span></div>
+${CORPS}
+<div class="pied"><span class="msg" id="msg"></span></div>
 <script>
 (function(){
   'use strict';
@@ -546,7 +559,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   var sous = document.getElementById('sous');
   if (sous) sous.textContent = '';
-  charger();
+  if (${CFG ? 'true' : 'false'}) {
+    appeler('messagerie:liste', [{ onglet: ONGLET }]).then(function(r){
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      D = r; majRetention();
+    });
+  } else charger();
 })();
 </script>
 </body></html>`;

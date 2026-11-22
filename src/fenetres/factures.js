@@ -82,9 +82,11 @@ tbody td{vertical-align:middle}
 /* (2026-11-22, sa capture : « améliore l'affichage dans les factures ») Le numéro et le client ne se coupent plus
    (« FAC-0002-47040… », « Bobby Brouss… ») ; échéance, total et statut prennent leur largeur juste, le reste va au client. */
 [data-pages="factures"] table{table-layout:fixed;width:100%}
-[data-pages="factures"] th:nth-child(1){width:2.2rem}[data-pages="factures"] th:nth-child(2){width:11rem}
-[data-pages="factures"] th:nth-child(4){width:7.5rem}[data-pages="factures"] th:nth-child(5){width:6.5rem}
-[data-pages="factures"] th:nth-child(6){width:8.5rem}[data-pages="factures"] th:nth-child(7){width:12rem}
+/* ⚠ PAR CLASSE, PAS PAR POSITION : sans cases à cocher (vieux site, lecture seule) les colonnes se décalaient d'un cran
+   et le client tombait dans la largeur du numéro (contrastes, 2026-11-22). */
+[data-pages="factures"] th.szk-c{width:2.2rem}[data-pages="factures"] th.w-fac{width:11rem}
+[data-pages="factures"] th.w-ech{width:7.5rem}[data-pages="factures"] th.w-tot{width:6.5rem}
+[data-pages="factures"] th.w-st{width:8.5rem}[data-pages="factures"] th.w-ge{width:12rem}
 [data-pages="factures"] .cx-num{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}
 [data-pages="factures"] .cx-qui b,[data-pages="factures"] .cx-qui .cx-l2{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:break-word}
 [data-pages="factures"] td.fin{white-space:normal!important;text-align:right}
@@ -343,8 +345,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
          puis demande la page voisine au pont (window.szPagesCoeur.factures, plus bas). */
       t += '<div class="cx-pages" data-pages="factures"'
         + (PAGINE ? szPagesCoeurAttr({ pagine: true, page: PAGE, pages: PAGES, total: TOTAL, parPage: PAR_PAGE }) : '')
-        + '><table><thead><tr>' + CK.th() + '<th>${T("Facture")}</th><th>${T("Client")}</th>'
-        + '<th>${T("Échéance")}</th><th class="r">${T("Total")}</th><th>${T("Statut")}</th>' + (avecGestes ? '<th></th>' : '') + '</tr></thead><tbody>'
+        + '><table><thead><tr>' + CK.th() + '<th class="w-fac">${T("Facture")}</th><th class="w-cli">${T("Client")}</th>'
+        + '<th class="w-ech">${T("Échéance")}</th><th class="r w-tot">${T("Total")}</th><th class="w-st">${T("Statut")}</th>' + (avecGestes ? '<th class="w-ge"></th>' : '') + '</tr></thead><tbody>'
         + vue.map(function(r){
             var gestes = '';
             if (PEUT_ENC) {

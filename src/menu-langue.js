@@ -165,6 +165,7 @@ const MENU_APP_EN = {
   'Imprimantes': 'Printers',
   'Incidents de sécurité': 'Security incidents',
   'Infolettre': 'Newsletter',
+  'Tableau de bord et offre de bienvenue': 'Dashboard and welcome offer',
   'Inventaire': 'Inventory',
   'Journaux': 'Logs',
   'Lien comptable': 'Accounting link',

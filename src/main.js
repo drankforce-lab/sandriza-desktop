@@ -7967,6 +7967,10 @@ const actionApp = (nom, arg) => {
       ouvrirNative('invmeta-' + t, TF('Attributs produits'), () => pageInvMeta('seul:' + t), { width: 980, height: 720, minWidth: 720, minHeight: 520 });
       break;
     }
+    /* (2026-11-22) Configuration › Communications › Messagerie clients : la durée de conservation, sortie du module. */
+    case 'messagerie-config':
+      ouvrirNative('messagerie-config', TF('Configuration de la messagerie'), () => pageMessagerie('config'), { width: 640, height: 320, minWidth: 520, minHeight: 280 });
+      break;
     case 'invmeta':
     case 'newsletter':
     case 'publicite':
@@ -8313,7 +8317,9 @@ const _MODULES_OUVRABLES = ['generations', 'verrous', 'journaux', 'securite', 'i
   // Le calendrier (2026-11-18) : un evenement ouvre le module qui le porte.
   'calendrier', 'ramassages', 'produits', 'reglages',
   // Produits (Épuré, 2026-11-18) : « Importer d’un fournisseur », comme dans la maquette.
-  'import-fournisseur'];
+  'import-fournisseur',
+  // Les onglets de l'Infolettre (2026-11-22) : Abonnés, Campagnes et chaînes, Relance s'ouvrent depuis elle.
+  'abonnes', 'campagnes', 'relance'];
 ipcMain.handle('module:ouvrir', (e, nom) => {
   const n = String(nom || '').toLowerCase();
   if (_MODULES_OUVRABLES.indexOf(n) < 0) return false;

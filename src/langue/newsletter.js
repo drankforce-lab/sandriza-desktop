@@ -175,6 +175,16 @@ module.exports = {
   'Un code unique WB-XXXXXX par client, valide 1 commande, expire 30 j.':
     'A unique WB-XXXXXX code per customer, valid for 1 order, expires in 30 days.',
   'Mention légale': 'Legal notice',
+  'Abonnés': 'Subscribers',
+  'Campagnes et chaînes': 'Campaigns and sequences',
+  'Relance des clients endormis': 'Win back dormant customers',
+  'S’ouvre dans sa fenêtre': 'Opens in its own window',
+  'Un rabais offert à l’inscription à l’infolettre — un code unique par personne.': 'A discount offered when signing up to the newsletter — one unique code per person.',
+  'Le message': 'The message',
+  'L’image': 'The image',
+  '700 × 900 px recommandé (portrait). Max 600 Ko. Sans photo, le logo de la boutique est affiché.': '700 × 900 px recommended (portrait). Max 600 KB. Without a photo, the shop logo is shown.',
+  '↺ Réinitialiser': '↺ Reset',
+  'Réinitialiser pour re-tester': 'Reset to test again',
   'Aperçu du popup': 'Preview the popup',
   '↺ Réinitialiser pour re-tester': '↺ Reset to test again',
 
