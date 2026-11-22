@@ -7945,6 +7945,21 @@ const actionApp = (nom, arg) => {
     case 'encan-rapports': ouvrirNative('encan-rapports', TF('Rapports d’encan'), () => pageEncanRapports(''), { width: 1200, height: 820, minWidth: 820, minHeight: 560 }); break;
     // (2026-10-20) L'encan en direct : la console de l'animatrice (l'écran filmé s'ouvre depuis elle).
     case 'encan': _ouvrirAncre('encan'); break;
+    /* ⚠⚠ (2026-11-22, « gros bug : Tableau de bord ouvre les attributs de vêtement ») CES CAS VIVENT ICI, AVANT le
+       groupe des écrans ancrables qui suit — un `case` posé AU MILIEU d'une liste de `case` qui tombent les uns dans
+       les autres capture TOUS ceux qui le précèdent : Tableau de bord, Inventaire, Commandes, Produits… ouvraient les
+       attributs. Ne jamais insérer de bloc à l'intérieur d'une telle liste. */
+    /* (2026-11-22) Configuration › Produit : chaque attribut dans SA fenêtre, sans onglets (pageInvMeta('seul:…')). */
+    case 'attr-sizes': case 'attr-genres': case 'attr-ageGroups': case 'attr-styles': case 'attr-colors':
+    case 'attr-labels': case 'attr-categories': case 'attr-reachat': {
+      const t = nom.slice(5);
+      ouvrirNative('invmeta-' + t, TF('Attributs produits'), () => pageInvMeta('seul:' + t), { width: 980, height: 720, minWidth: 720, minHeight: 520 });
+      break;
+    }
+    /* (2026-11-22) Configuration › Communications › Messagerie clients : la durée de conservation, sortie du module. */
+    case 'messagerie-config':
+      ouvrirNative('messagerie-config', TF('Configuration de la messagerie'), () => pageMessagerie('config'), { width: 640, height: 320, minWidth: 520, minHeight: 280 });
+      break;
     /* ⚠ TOUS LES ECRANS ANCRABLES DU MENU PASSENT PAR LE FLUX D ANCRAGE
        (demande du 2026-08-09 : << si je passe par le menu, ca doit etre ancre,
        sauf si je l ai detache — l etat persiste par profil >>). On ne pose plus
@@ -7960,17 +7975,6 @@ const actionApp = (nom, arg) => {
     case 'promotions': case 'chat': case 'sociaux': case 'fidelisation':
     case 'liquidation':
     case 'catalogio':
-    /* (2026-11-22) Configuration › Produit : chaque attribut dans SA fenêtre, sans onglets (pageInvMeta('seul:…')). */
-    case 'attr-sizes': case 'attr-genres': case 'attr-ageGroups': case 'attr-styles': case 'attr-colors':
-    case 'attr-labels': case 'attr-categories': case 'attr-reachat': {
-      const t = nom.slice(5);
-      ouvrirNative('invmeta-' + t, TF('Attributs produits'), () => pageInvMeta('seul:' + t), { width: 980, height: 720, minWidth: 720, minHeight: 520 });
-      break;
-    }
-    /* (2026-11-22) Configuration › Communications › Messagerie clients : la durée de conservation, sortie du module. */
-    case 'messagerie-config':
-      ouvrirNative('messagerie-config', TF('Configuration de la messagerie'), () => pageMessagerie('config'), { width: 640, height: 320, minWidth: 520, minHeight: 280 });
-      break;
     case 'invmeta':
     case 'newsletter':
     case 'publicite':

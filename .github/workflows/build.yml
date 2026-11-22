@@ -793,6 +793,9 @@ jobs:
           node tools/banc-volume-memoire.js
           # (8.33.2) Import fournisseur : le prix à l'unité (pas celui à 30 pièces), les paliers, le prix des vignettes.
           node tools/banc-import-collecteur.js
+          # ⚠⚠ (9.1.7) L'AIGUILLAGE DU MENU : un `case` posé au milieu de la liste des écrans ancrables
+          # capturait tous ceux d'avant — Tableau de bord, Inventaire, Commandes… ouvraient les attributs.
+          node tools/banc-aiguillage-menu.js
 
       - name: Construire (${{ matrix.arch }})
         shell: bash

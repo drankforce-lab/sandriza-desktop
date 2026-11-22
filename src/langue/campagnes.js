@@ -741,4 +741,17 @@ module.exports = {
   // (2026-10-25, audit)
   "consultation seulement": "view only",
   "Le courriel n’a pas pu être assemblé. Réessayez.": "The email could not be assembled. Try again.",
+  "abonnés actifs": "active subscribers",
+  "segments composés": "custom segments",
+  "segment composé": "custom segment",
+  "Utilisation": "Usage",
+  "créée le": "created on",
+  "chaînes actives": "active chains",
+  "chaîne active": "active chain",
+  "Chaîne": "Chain",
+  "Déclencheur et parcours": "Trigger and journey",
+  "En cours": "In progress",
+  "Terminées": "Completed",
+  "Toutes": "All",
+  "Parties": "Sent",
 };

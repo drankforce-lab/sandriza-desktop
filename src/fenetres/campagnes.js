@@ -448,6 +448,67 @@ body.insp-large .ed-insp .it .gestes button[data-binsplarge]{border-color:rgba(v
 .etapes-choix button{font:inherit;font-size:.78rem;font-weight:600;padding:.32rem .75rem;border-radius:99px;
   border:1px solid var(--v12);background:var(--v05);color:var(--tx2);cursor:pointer}
 .etapes-choix button.on{background:var(--or);border-color:var(--or);color:#17202c}
+/* ══ REFONTE DES LISTES (2026-11-22, sa demande : « reprends le module de A à Z, améliore le rendu, le visuel et les
+   tableaux sérieusement ») De VRAIS TABLEAUX — en-têtes, colonnes alignées, chiffres à droite — au lieu de cartes
+   flottantes ; les chiffres en une ligne calme ; un filtre par statut avec ses comptes. */
+.cp-res{display:flex;align-items:center;gap:1rem;flex-wrap:wrap;margin:0 0 .7rem}
+.cp-filtre{display:inline-flex;gap:.25rem;padding:.2rem;border-radius:11px;background:var(--f-carte);border:1px solid var(--sz-bord)}
+.cp-filtre button{font:inherit;font-size:.8rem;font-weight:600;color:var(--tx2);background:transparent;border:0;border-radius:8px;padding:.32rem .75rem;cursor:pointer}
+.cp-filtre button span{font-variant-numeric:tabular-nums;font-weight:700;margin-left:.2rem}
+.cp-filtre button:hover{color:var(--tx)}
+.cp-filtre button.on{background:var(--f-pill);color:var(--tx)}
+.cp-chiffres{display:flex;gap:1.3rem;flex-wrap:wrap;margin-left:auto}
+.cp-chiffres.g{margin-left:0;margin-right:auto}
+.cp-ch{font-size:.8rem;color:var(--tx2);display:inline-flex;align-items:baseline;gap:.35rem}
+.cp-ch b{font-size:1rem;font-weight:750;color:var(--tx);font-variant-numeric:tabular-nums}
+.cp-ch.err b{color:var(--tx-err)}
+.cp-ch.att b{color:var(--tx-att)}
+.cp-tab{width:100%;border-collapse:separate;border-spacing:0;background:var(--f-carte);border:1px solid var(--sz-bord);border-radius:14px;overflow:hidden}
+.cp-tab thead th{background:var(--f-entete);font-size:.68rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--tx2);
+  text-align:left;padding:.6rem .85rem;border-bottom:1px solid var(--sz-bord);white-space:nowrap}
+.cp-tab td{padding:.55rem .85rem;border-top:1px solid var(--sz-bord);vertical-align:middle;font-size:.84rem;white-space:nowrap}
+.cp-tab tbody tr:first-child td{border-top:0}
+.cp-tab .dr{text-align:right;font-variant-numeric:tabular-nums}
+.cp-tab td b{font-weight:650}
+.cp-tab td small{display:block;font-size:.74rem;color:var(--tx2);margin-top:.12rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cp-tab td small.err{color:var(--tx-err)}
+.cp-tab td>.rf-pill+small{margin-top:.25rem}
+/* ⚠ Une pastille SEULE dans sa case devient, en Épuré, une case de statut pleine (socle) : ici on garde des pastilles. */
+.cp-tab td>div>.rf-pill{display:inline-flex}
+/* Le nom prend ce qui reste ; il s'abrège en dernier (max-width:0 + largeur : le tableau garde sa mise en page auto). */
+.cp-tab .c-nom{width:100%;max-width:0;min-width:11rem}
+.cp-tab td.c-parc{white-space:normal;min-width:21rem}
+.cp-dp{display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.cp-dp>em{font-style:normal;color:var(--tx2);font-size:.8rem}
+.cp-tab td.c-parc .cp-mu{display:block;min-width:9rem;line-height:1.35}
+.cp-tab .c-aud{max-width:14rem;overflow:hidden;text-overflow:ellipsis}
+.cp-tab .c-aud b{display:block;overflow:hidden;text-overflow:ellipsis}
+.cp-tab .c-ge{width:1%}
+.cp-tab .nm{display:flex;align-items:center;gap:.75rem;min-width:0}
+.cp-tab .nm .bico{width:2.1rem;height:2.1rem;border-radius:10px;background:var(--f-pill);color:var(--tx-or);display:flex;align-items:center;justify-content:center;
+  font-size:.74rem;font-weight:700;flex:0 0 auto}
+.cp-tab .nm .bico svg{width:1rem;height:1rem}
+.cp-tab .nm .tx{min-width:0;flex:1 1 auto}
+.cp-tab .nm .tx b{display:block;font-size:.9rem;overflow:hidden;text-overflow:ellipsis}
+.cp-tab .gestes{display:flex;gap:.35rem;justify-content:flex-end;flex-wrap:nowrap}
+.cp-tab .gestes button{height:1.9rem;padding:0 .7rem;border-radius:8px;font-size:.76rem}
+.cp-tab .gestes button.gic{width:1.9rem;padding:0;display:inline-flex;align-items:center;justify-content:center}
+.cp-tab .gestes button.gic svg{width:.95rem;height:.95rem}
+.cp-tab tr.eteinte .nm b,.cp-tab tr.eteinte .nm .bico{color:var(--tx2)}
+.cp-mu{color:var(--tx2);font-size:.8rem}
+.cp-mu.att{color:var(--tx-att)}
+/* Le parcours d'une chaîne : les délais reliés d'un trait. */
+.cp-parc{display:flex;align-items:center;flex-wrap:nowrap}
+.cp-parc span{font-size:.72rem;font-weight:650;padding:.18rem .5rem;border-radius:99px;background:var(--f-pill);color:var(--tx);white-space:nowrap;cursor:default}
+.cp-parc span.plus{color:var(--tx2)}
+.cp-parc i{display:block;width:.8rem;height:1px;background:var(--sz-bord-fort);flex:0 0 auto}
+/* La portée d'un segment : le nombre, une barre, la part. */
+.cp-tab .port{display:flex;align-items:center;gap:.6rem}
+.cp-tab .port b{min-width:2.2rem;text-align:right;font-variant-numeric:tabular-nums}
+.cp-tab .port small{margin:0;min-width:2.6rem}
+.cp-tab .barre{display:block;width:7rem;height:6px;border-radius:99px;background:var(--v08);overflow:hidden}
+.cp-tab .barre i{display:block;height:100%;border-radius:99px;background:var(--tx-or)}
+
 `;
 
 /** Page complète de la fenêtre native « Campagnes et chaînes ». */
@@ -487,6 +548,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
   var DS = null;             // donnees des segments
   var CRITERES = null;       // criteres en cours d edition (segment seulement)
   var Q = '';
+  var CF = 'toutes';   // (2026-11-22) le filtre des campagnes : toutes | brouillons | parties
   var ARME = '';             // un seul geste arme a la fois
   var OCCUPE = false;        // un envoi est en cours : on ne redessine pas
   // { type:'campagne'|'chaine', id:'' , d:{...} } — formulaire ouvert, ou null
@@ -1905,20 +1967,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
      une cliente qui franchit le seuil entre la creation et l envoi y entre
      d elle-meme. ⚠ Un segment ne fait que RETRECIR la liste des abonnees
      actives — il n ajoute jamais personne (consentement, LCAP / Loi 25). */
+  /* (2026-11-22, refonte) « Dupliquer » et « Supprimer » en ICÔNES (le nom au survol) : la colonne des gestes laisse la
+     place au nom. Armée (deux clics), la corbeille redit son nom en toutes lettres. */
+  var IC_DUP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="8" y="8" width="12" height="12" rx="2"/><path d="M16 8V6a2 2 0 00-2-2H6a2 2 0 00-2 2v8a2 2 0 002 2h2"/></svg>';
+  var IC_SUP = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2"/><path d="M6 6l1 14a2 2 0 002 2h6a2 2 0 002-2l1-14"/></svg>';
+  function btnIc(attr, id, ico, lib, danger, arme){
+    return '<button class="mini geste' + (arme ? ' arme' : ' gic') + (danger ? ' danger' : '') + '" ' + attr + '="' + esc(id) + '" title="' + lib + '" aria-label="' + lib + '">'
+      + (arme ? lib : ico) + '</button>';
+  }
   function vueSegments(){
     var D = DS;
     if (!D) return squelListe();
     var h = '<div class="ls">' + teteListe(D.peutModifier
       ? '<button class="ed-bt fort" id="cp-nouvseg">${T("+ Nouveau segment")}</button>' : '');
-    /* ⚠ szTuiles(...) ENVELOPPE, il ne remplace rien : le bandeau est ecrit tel
-       quel, la piece commune y ajoute le bouton de repli et l etat retenu pour
-       ce poste. Les TROIS bandeaux de cette fenetre partagent la meme cle et se
-       replient ensemble. Voir JS_TUILES dans socle.js. */
-    h += szTuiles('<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">${T("Abonnés actifs")}</div><div class="val bon">'
-      + (D.abonnesActifs || 0) + '</div><div class="dt">${T("le point de départ")}</div></div>'
-      + '<div class="tuile"><div class="lbl">${T("Segments composés")}</div><div class="val">'
-      + (D.segments || []).length + '</div></div></div>');
+    var segs = D.segments || [];
+    /* (2026-11-22, refonte : « reprends le module de A à Z, le visuel et les tableaux sérieusement ») Les chiffres en
+       UNE ligne calme au-dessus du tableau, au lieu de tuiles. */
+    h += '<div class="cp-res"><span class="cp-ch"><b>' + (D.abonnesActifs || 0) + '</b>${T("abonnés actifs")}</span>'
+      + '<span class="cp-ch"><b>' + segs.length + '</b>' + (segs.length > 1 ? '${T("segments composés")}' : '${T("segment composé")}') + '</span></div>';
 
     // ⚠ La phrase du consentement ne se resume pas (voir src/langue/campagnes.js) : elle reste entiere.
     h += '<div class="ls-note">${T("Un segment ne fait que <strong>restreindre</strong> la liste ")}'
@@ -1926,33 +1992,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       + '${T("à recevoir l’infolettre.")}</div>';
 
     h += '<div class="ls-liste sz-pagee">';
-    if (!(D.segments || []).length) {
+    if (!segs.length) {
       h += '<div class="ls-vide">${T("Aucun segment composé. Les campagnes")} '
         + '${T("disposent tout de même de « Tous les abonnés » et « Clients avec commandes ».")}</div>';
       return h + '</div>' + renvoi() + '</div>';
     }
 
-    // Les segments en PAGES mesurees (JS_PAGES du socle) : un rang par segment.
     var tous = Math.max(1, D.abonnesActifs || 0);
-    h += '<div data-pages="campagnes-segments">'
-      + D.segments.map(function(s){
+    h += '<div data-pages="campagnes-segments"><table class="cp-tab"><thead><tr>'
+      + '<th class="c-nom">${T("Segment")}</th><th class="c-port">${T("Portée")}</th><th>${T("Utilisation")}</th><th class="c-ge"></th>'
+      + '</tr></thead><tbody>'
+      + segs.map(function(s){
           var gestes = '';
           if (D.peutModifier) {
             gestes += '<button class="mini geste" data-segmodif="' + esc(s.id) + '">${T("Modifier")}</button>';
-            var armeS = (ARME === 'segsup:' + s.id);
-            gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-segsup="'
-              + esc(s.id) + '">' + '${T("Supprimer")}' + '</button>';
+            gestes += btnIc('data-segsup', s.id, IC_SUP, '${T("Supprimer")}', true, ARME === 'segsup:' + s.id);
           }
           var pc = Math.min(100, Math.round(100 * (s.compte || 0) / tous));
-          return '<div data-ctx-ligne class="ls-rang ls-seg">'
-            + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(initiales(s.nom)) + '</span>'
-            + '<div class="tx"><b>' + esc(s.nom) + '</b><span>' + esc(s.phrase || '—') + '</span></div></div>'
-            + '<div class="prt"><div class="ligne"><b>' + (s.compte || 0) + '</b><span>' + pc + ' ${T("% des abonnés actifs")}</span></div>'
-            + '<div class="barre"><i style="width:' + pc + '%"></i></div></div>'
-            + '<div class="bilan"><span>' + (s.utilisePar ? '${T("Utilisé par")} ' + pluriel(s.utilisePar, '${T("campagne")}', '${T("campagnes")}') : '${T("Inutilisé")}') + '</span></div>'
-            + '<div class="gestes">' + gestes + '</div></div>';
+          return '<tr data-ctx-ligne>'
+            + '<td class="c-nom"><div class="nm"><span class="bico" aria-hidden="true">' + esc(initiales(s.nom)) + '</span>'
+            + '<div class="tx"><b>' + esc(s.nom) + '</b><small>' + esc(s.phrase || '—') + '</small></div></div></td>'
+            + '<td class="c-port"><div class="port"><b>' + (s.compte || 0) + '</b><span class="barre"><i style="width:' + pc + '%"></i></span>'
+            + '<small>' + pc + ' %</small></div></td>'
+            + '<td><div>' + (s.utilisePar ? '<span class="rf-pill bleu">' + pluriel(s.utilisePar, '${T("campagne")}', '${T("campagnes")}') + '</span>' : '<span class="cp-mu">${T("Inutilisé")}</span>') + '</div></td>'
+            + '<td class="c-ge"><div class="gestes">' + gestes + '</div></td></tr>';
         }).join('')
-      + '</div></div>';
+      + '</tbody></table></div></div>';
     return h + renvoi() + '</div>';
   }
 
@@ -2112,28 +2177,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
     var D = DC;
     if (!D) return squelListe();
     var q = Q.trim().toLowerCase();
-    var rows = (D.campagnes || []).filter(function(c){
+    var toutes = D.campagnes || [];
+    var nBr = toutes.filter(function(c){ return c.etat !== 'sent' && c.etat !== 'sending'; }).length;
+    var nPa = toutes.length - nBr;
+    if (CF === 'brouillons' && !nBr) CF = 'toutes';
+    if (CF === 'parties' && !nPa) CF = 'toutes';
+    var rows = toutes.filter(function(c){
+      var br = (c.etat !== 'sent' && c.etat !== 'sending');
+      if (CF === 'brouillons' && !br) return false;
+      if (CF === 'parties' && br) return false;
       if (!q) return true;
       return (String(c.nom) + ' ' + String(c.sujet)).toLowerCase().indexOf(q) !== -1;
     });
 
-    // La recherche et la creation, dans la tete, juste au-dessus de ce sur quoi elles agissent.
     var h = '<div class="ls">' + teteListe(
         '<label class="ls-rch">${ICO.loupe}<input type="search" id="cp-q" aria-label="${T("Nom ou sujet")}" placeholder="${T("Nom ou sujet…")}" value="'
         + esc(Q) + '"></label>'
         + (D.peutModifier ? '<button class="ed-bt fort" id="cp-nouvelle">${T("+ Nouvelle campagne")}</button>' : ''));
 
-    h += szTuiles('<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">${T("Abonnés actifs")}</div><div class="val bon">'
-      + (D.abonnesActifs || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">${T("Brouillons")}</div><div class="val neutre">'
-      + (D.brouillons || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">${T("Campagnes parties")}</div><div class="val">'
-      + (D.envoyees || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">${T("Courriels partis")}</div><div class="val">'
-      + (D.courrielsEnvoyes || 0) + '</div>'
-      + (D.courrielsEchoues ? '<div class="dt">' + pluriel(D.courrielsEchoues, '${T("échec")}', '${T("échecs")}') + '</div>' : '')
-      + '</div></div>');
+    /* (2026-11-22, refonte) Le FILTRE par statut (avec ses comptes) à gauche, les chiffres de l'envoi à droite. */
+    var f = function(k, lib, n){ return '<button type="button" class="' + (CF === k ? 'on' : '') + '" data-cpf="' + k + '">' + lib + ' <span>' + n + '</span></button>'; };
+    h += '<div class="cp-res"><div class="cp-filtre" role="group" aria-label="${T("Statut")}">'
+      + f('toutes', '${T("Toutes")}', toutes.length) + f('brouillons', '${T("Brouillons")}', nBr) + f('parties', '${T("Parties")}', nPa) + '</div>'
+      + '<div class="cp-chiffres"><span class="cp-ch"><b>' + (D.abonnesActifs || 0) + '</b>${T("abonnés actifs")}</span>'
+      + '<span class="cp-ch"><b>' + (D.courrielsEnvoyes || 0) + '</b>${T("courriels partis")}</span>'
+      + (D.courrielsEchoues ? '<span class="cp-ch err"><b>' + D.courrielsEchoues + '</b>' + (D.courrielsEchoues > 1 ? '${T("échecs")}' : '${T("échec")}') + '</span>' : '')
+      + '</div></div>';
 
     /* Ce qui empeche un envoi, ou le detourne, se dit AVANT le clic. */
     if (!D.resendPret) {
@@ -2144,13 +2213,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         + ' (' + esc([D.courrielTest, D.telTest].filter(Boolean).join(' · ') || '—') + ')' + '${T(", jamais aux clients. La campagne restera en brouillon.")}</div>';
     }
 
-    // Les campagnes en PAGES mesurees (JS_PAGES du socle) : la liste prend la hauteur qui reste.
     h += '<div class="ls-liste sz-pagee">';
     if (!rows.length) {
-      h += '<div class="ls-vide">' + (q ? '${T("Rien ne correspond.")}'
+      h += '<div class="ls-vide">' + ((q || CF !== 'toutes') ? '${T("Rien ne correspond.")}'
         : '${T("Aucune campagne pour l’instant. Cliquez « + Nouvelle campagne ».")}') + '</div>';
     } else {
-      h += '<div data-pages="campagnes">' + rows.map(function(c){
+      h += '<div data-pages="campagnes"><table class="cp-tab"><thead><tr>'
+        + '<th class="c-nom">${T("Campagne")}</th><th class="c-aud">${T("Audience")}</th><th>${T("Statut")}</th>'
+        + '<th class="dr">${T("Destinataires")}</th><th class="dr">${T("Partis")}</th><th class="c-ge"></th></tr></thead><tbody>'
+        + rows.map(function(c){
         var gestes = '';
         if (D.peutModifier) {
           // ⚠ MEME REGLE QUE LE WEB : une campagne PARTIE ne se modifie plus.
@@ -2163,33 +2234,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
               + esc(c.id) + '"' + (D.resendPret || c.canal === 'sms' ? '' : ' disabled')
               + '>' + '${T("Envoyer")}' + '</button>';
           }
-          // (2026-10-15, sa demande) Une campagne, même ENVOYÉE, se duplique en brouillon.
           // (2026-10-15, sa demande) Les statistiques d une campagne partie : ouvertures, clics, liens, audience.
-          if (c.etat === 'sent') gestes += '<button class="mini geste" data-stats="' + esc(c.id) + '">${T("Statistiques")}</button>';
+          if (c.etat === 'sent') gestes += '<button class="mini geste prim" data-stats="' + esc(c.id) + '">${T("Statistiques")}</button>';
           if (c.peutRenvoyerEchecs) gestes += '<button class="mini geste" data-renvoyer="' + esc(c.id) + '">${T("Renvoyer les échecs")}</button>';
-          gestes += '<button class="mini geste" data-dupliquer="' + esc(c.id) + '">${T("Dupliquer")}</button>';
-          var armeS = (ARME === 'sup:' + c.id);
-          gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-suppr="'
-            + esc(c.id) + '">' + '${T("Supprimer")}' + '</button>';
+          // (2026-10-15, sa demande) Une campagne, même ENVOYÉE, se duplique en brouillon.
+          gestes += btnIc('data-dupliquer', c.id, IC_DUP, '${T("Dupliquer")}', false, false);
+          gestes += btnIc('data-suppr', c.id, IC_SUP, '${T("Supprimer")}', true, ARME === 'sup:' + c.id);
         }
         var nb = (c.canal === 'sms' ? (D.smsDestinataires || 0) : c.destinataires);
         var parti = (c.etat === 'sent' || c.envoyes);
-        return '<div data-ctx-ligne class="ls-rang ls-camp">'
-          /* (2026-10-15, sa capture : « C( » pour « Campagne Automne 2026 (copie) », lu comme un identifiant)
-             La pastille dit le CANAL — une enveloppe, un téléphone —, pas des lettres tirées du nom. */
-          + '<div class="qui"><span class="bico" aria-hidden="true">' + (c.canal === 'sms' ? '${ICO.telephone}' : '${ICO.newsletter}') + '</span>'
-          + '<div class="tx"><b>' + esc(c.nom) + '</b><span>' + esc(c.sujet) + '</span></div></div>'
-          + '<div class="ou"><b>' + esc(c.segmentLibelle) + '</b><span>' + esc(c.canalLibelle) + ' · '
-          + pluriel(nb, '${T("destinataire")}', '${T("destinataires")}') + (c.canal === 'both' ? ' + ' + (D.smsDestinataires || 0) + ' SMS' : '') + '</span></div>'
-          + '<div class="etat"><span class="rf-pill ' + (c.etat === 'sent' ? 'vert' : (c.etat === 'sending' ? 'ambre' : ''))
-          + '">' + esc(c.etatLibelle) + '</span>'
-          + (c.date ? '<span>' + esc(szQuand(c.date)) + '</span>' : '') + '</div>'
-          + '<div class="bilan">' + (parti
-              ? '<b>' + c.envoyes + '</b><span>' + pluriel(c.envoyes, '${T("courriel parti")}', '${T("courriels partis")}').replace(/^[0-9]+ /, '')
-                + (c.echecs ? ' · <em>' + pluriel(c.echecs, '${T("échec")}', '${T("échecs")}') + '</em>' : '') + '</span>'
-              : '<span>—</span>') + '</div>'
-          + '<div class="gestes">' + gestes + '</div></div>';
-      }).join('') + '</div>';
+        var quand = c.date ? szQuand(c.date) : (c.creeLe ? '${T("créée le")} ' + szQuand(c.creeLe) : '');
+        return '<tr data-ctx-ligne>'
+          /* (2026-10-15, sa capture : « C( » pour « Campagne Automne 2026 (copie) ») La pastille dit le CANAL. */
+          + '<td class="c-nom"><div class="nm"><span class="bico" aria-hidden="true">' + (c.canal === 'sms' ? '${ICO.telephone}' : '${ICO.newsletter}') + '</span>'
+          + '<div class="tx"><b>' + esc(c.nom) + '</b><small>' + esc(c.sujet) + '</small></div></div></td>'
+          + '<td class="c-aud"><b>' + esc(c.segmentLibelle) + '</b><small>' + esc(c.canalLibelle) + '</small></td>'
+          + '<td><span class="rf-pill ' + (c.etat === 'sent' ? 'vert' : (c.etat === 'sending' ? 'ambre' : '')) + '">' + esc(c.etatLibelle) + '</span>'
+          + (quand ? '<small>' + esc(quand) + '</small>' : '') + '</td>'
+          + '<td class="dr"><b>' + (nb || 0) + '</b>' + (c.canal === 'both' ? '<small>+ ' + (D.smsDestinataires || 0) + ' SMS</small>' : '') + '</td>'
+          + '<td class="dr">' + (parti
+              ? '<b>' + (c.envoyes || 0) + '</b>' + (c.echecs ? '<small class="err">' + pluriel(c.echecs, '${T("échec")}', '${T("échecs")}') + '</small>' : '')
+              : '<span class="cp-mu">—</span>') + '</td>'
+          + '<td class="c-ge"><div class="gestes">' + gestes + '</div></td></tr>';
+      }).join('') + '</tbody></table></div>';
     }
     h += '</div>';
     if (D.resendPret && D.expediteur) {
@@ -2209,15 +2276,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         + '<button class="ed-bt fort" id="cp-nouvchaine">${T("+ Nouvelle chaîne")}</button>'
       : '');
 
-    h += szTuiles('<div class="tuiles">'
-      + '<div class="tuile"><div class="lbl">${T("Chaînes actives")}</div><div class="val bon">'
-      + (D.actives || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">${T("Inscriptions en cours")}</div><div class="val">'
-      + (D.enAttente || 0) + '</div></div>'
-      + '<div class="tuile"><div class="lbl">${T("Étapes échues")}</div><div class="val '
-      + (D.dues ? 'att' : 'neutre') + '">' + (D.dues || 0) + '</div>'
-      + '<div class="dt">${T("prêtes à partir")}</div></div>'
-      + '</div>');
+    // Les chiffres en une ligne ; le geste qui ENVOIE n apparait que s il y a quelque chose a envoyer — arme en deux clics.
+    h += '<div class="cp-res"><div class="cp-chiffres g">'
+      + '<span class="cp-ch"><b>' + (D.actives || 0) + '</b>' + ((D.actives || 0) > 1 ? '${T("chaînes actives")}' : '${T("chaîne active")}') + '</span>'
+      + '<span class="cp-ch"><b>' + (D.enAttente || 0) + '</b>${T("inscriptions en cours")}</span>'
+      + '<span class="cp-ch' + (D.dues ? ' att' : '') + '"><b>' + (D.dues || 0) + '</b>' + ((D.dues || 0) > 1 ? '${T("étapes échues")}' : '${T("étape échue")}') + '</span></div>';
+    if (D.peutModifier && D.dues) {
+      var armeT = (ARME === 'traiter');
+      h += '<button class="ed-bt' + (armeT ? ' arme' : ' fort') + '" id="cp-traiter"'
+        + (!D.envoisPermis ? ' disabled' : '') + '>'
+        + '${T("Traiter les étapes échues")}' + '</button>';
+    }
+    h += '</div>';
 
     if (!D.envoisPermis) {
       h += '<div class="avis mal">${T("Les « Séquences automatisées » sont <strong>en pause</strong> dans les ")}'
@@ -2225,24 +2295,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
         + '${T("dans cet état abandonnerait les inscriptions sans rien envoyer.")}</div>';
     }
 
-    // Le geste qui ENVOIE n apparait que s il y a quelque chose a envoyer — arme en deux clics.
-    if (D.peutModifier && D.dues) {
-      var armeT = (ARME === 'traiter');
-      h += '<div class="ls-action"><span>' + pluriel(D.dues, '${T("étape échue")}', '${T("étapes échues")}')
-        + ', ${T("prêtes à partir")}</span>'
-        + '<button class="ed-bt' + (armeT ? ' arme' : ' fort') + '" id="cp-traiter"'
-        + (!D.envoisPermis ? ' disabled' : '') + '>'
-        + '${T("Traiter les étapes échues")}'
-        + '</button></div>';
-    }
-
     h += '<div class="ls-liste sz-pagee">';
     if (!(D.chaines || []).length) {
       h += '<div class="ls-vide">${T("Aucune chaîne pour l’instant.")} '
         + '${T("Cliquez « + Nouvelle chaîne ».")}</div>';
     } else {
-      // Les chaines en PAGES mesurees (JS_PAGES du socle) : un rang par chaine.
-      h += '<div data-pages="campagnes-chaines">' + (D.chaines || []).map(function(ch){
+      h += '<div data-pages="campagnes-chaines"><table class="cp-tab"><thead><tr>'
+        + '<th class="c-nom">${T("Chaîne")}</th><th class="c-parc">${T("Déclencheur et parcours")}</th>'
+        + '<th>${T("État")}</th><th class="dr">${T("En cours")}</th><th class="dr">${T("Terminées")}</th><th class="c-ge"></th></tr></thead><tbody>'
+        + (D.chaines || []).map(function(ch){
         var gestes = '';
         if (D.peutModifier) {
           gestes += '<button class="mini geste" data-chmodif="' + esc(ch.id) + '">${T("Modifier")}</button>';
@@ -2250,28 +2311,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
           gestes += '<button class="mini geste' + (armeB ? ' arme' : '') + '" data-basculer="' + esc(ch.id)
             + '" data-active="' + (ch.active ? '0' : '1') + '">'
             + (ch.active ? '${T("Suspendre")}' : '${T("Activer")}') + '</button>';
-          var armeS = (ARME === 'chsup:' + ch.id);
-          gestes += '<button class="mini geste danger' + (armeS ? ' arme' : '') + '" data-chsuppr="'
-            + esc(ch.id) + '">' + '${T("Supprimer")}' + '</button>';
+          gestes += btnIc('data-chsuppr', ch.id, IC_SUP, '${T("Supprimer")}', true, ARME === 'chsup:' + ch.id);
         }
-        // La ligne du temps : quatre etapes au plus, le reste en « +n ».
+        // Le parcours : une pastille par étape (son délai ; le sujet au survol), quatre au plus, le reste en « +n ».
         var et = ch.etapes || [];
-        var temps = et.length
-          ? '<div class="ls-temps">' + et.slice(0, 4).map(function(e){
-              return '<span class="pt"><i></i><b>' + esc(e.delai) + '</b><small>' + esc(e.sujet) + '</small></span>';
-            }).join('') + (et.length > 4 ? '<span class="plus">+' + (et.length - 4) + '</span>' : '') + '</div>'
-          : '<div class="ls-temps rien">${T("Aucune étape : cette chaîne n’enverra rien.")}</div>';
-        return '<div data-ctx-ligne class="ls-rang ls-ch' + (ch.active ? '' : ' eteinte') + '">'
-          + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(initiales(ch.nom)) + '</span>'
-          + '<div class="tx"><b>' + esc(ch.nom) + '</b><span>' + esc(ch.description || ch.declencheurLibelle) + '</span></div></div>'
-          + temps
-          + '<div class="etat"><span class="rf-pill ' + (ch.active ? 'vert' : '') + '">'
-          + (ch.active ? '${T("Active")}' : '${T("Suspendue")}') + '</span>'
-          + '<span class="rf-pill bleu">' + esc(ch.declencheurLibelle) + '</span></div>'
-          + '<div class="bilan"><b>' + (ch.inscriptionsActives || 0) + '</b><span>${T("en cours ·")} '
-          + pluriel(ch.inscriptionsFinies || 0, '${T("terminée")}', '${T("terminées")}') + '</span></div>'
-          + '<div class="gestes">' + gestes + '</div></div>';
-      }).join('') + '</div>';
+        var parc = et.length
+          ? '<div class="cp-parc">' + et.slice(0, 4).map(function(e, i){
+              return (i ? '<i aria-hidden="true"></i>' : '') + '<span title="' + esc(e.sujet) + '">' + esc(e.delai) + '</span>';
+            }).join('') + (et.length > 4 ? '<i aria-hidden="true"></i><span class="plus">+' + (et.length - 4) + '</span>' : '') + '</div>'
+          : '<span class="cp-mu att">${T("Aucune étape : cette chaîne n’enverra rien.")}</span>';
+        return '<tr data-ctx-ligne class="' + (ch.active ? '' : 'eteinte') + '">'
+          + '<td class="c-nom"><div class="nm"><span class="bico" aria-hidden="true">' + esc(initiales(ch.nom)) + '</span>'
+          + '<div class="tx"><b>' + esc(ch.nom) + '</b><small>' + esc(ch.description || ch.declencheurLibelle) + '</small></div></div></td>'
+          /* Le déclencheur OUVRE le parcours : une seule colonne, lue de gauche à droite. */
+          + '<td class="c-parc"><div class="cp-dp"><span class="rf-pill bleu">' + esc(ch.declencheurLibelle) + '</span><em aria-hidden="true">→</em>' + parc + '</div></td>'
+          + '<td><div><span class="rf-pill ' + (ch.active ? 'vert' : '') + '">' + (ch.active ? '${T("Active")}' : '${T("Suspendue")}') + '</span></div></td>'
+          + '<td class="dr"><b>' + (ch.inscriptionsActives || 0) + '</b></td>'
+          + '<td class="dr">' + (ch.inscriptionsFinies || 0) + '</td>'
+          + '<td class="c-ge"><div class="gestes">' + gestes + '</div></td></tr>';
+      }).join('') + '</tbody></table></div>';
     }
     h += '</div>';
     return h + renvoi() + '</div>';
@@ -2722,6 +2780,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('campagnes')}
       });
       return;
     }
+
+    var cfb = t.closest('[data-cpf]');
+    if (cfb) { CF = cfb.getAttribute('data-cpf'); dessiner(); return; }
 
     var og = t.closest('[data-onglet]');
     if (og) { ONGLET = og.getAttribute('data-onglet'); ARME = ''; STATS = null; charger(); return; }
