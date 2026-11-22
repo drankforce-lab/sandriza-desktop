@@ -430,4 +430,12 @@ module.exports = {
   'Tout est scanné : passez à l’étiquette.': 'Everything is scanned: move on to the label.',
   'Paiement confirmé': 'Payment confirmed',
   'Paiement en attente': 'Payment pending',
+  'Risque élevé': 'High risk',
+  'Risque modéré': 'Moderate risk',
+  'Vérifiée': 'Verified',
+  'Annuler la vérification': 'Undo verification',
+  'Marquer vérifiée': 'Mark as verified',
+  'Commande marquée vérifiée.': 'Order marked as verified.',
+  'Vérification retirée.': 'Verification removed.',
+  'Le serveur ne répond pas.': 'The server is not responding.',
 };

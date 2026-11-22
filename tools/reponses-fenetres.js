@@ -771,6 +771,12 @@ const JEU = {
           ],
           peutPreparer: true, peutExpedier: true,
         },
+        // (2026-11-22) Le score de risque : une bande « élevé » avec trois raisons, pour éprouver contraste et débordement.
+        'commande:risque': { ok: true, risque: { score: 65, niveau: 'eleve', final: true, verifie: null, raisons: [
+          { code: 'sq_modere', points: 25, fr: 'Square juge ce paiement à risque modéré', en: 'Square rates this payment as moderate risk' },
+          { code: 'pays_fact', points: 15, fr: 'Facturation dans un autre pays que la livraison', en: 'Billing country differs from shipping' },
+          { code: 'reexpedition', points: 20, fr: 'Adresse d’un service de réexpédition', en: 'Freight forwarder address' },
+          { code: 'nom_courriel', points: 5, fr: 'Nom de livraison très différent du titulaire du compte', en: 'Shipping name very different from the account holder' } ] } },
         'commande:lire': {
           ok: true,
           numero: 'SZ-100248',

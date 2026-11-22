@@ -36,6 +36,16 @@ const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, ICO, TETE } = require('./socle');
 const T = require('../langue').tr('commande');
 
 const CSS_PROPRE = `
+/* (2026-11-22) LE SCORE DE RISQUE : une bande sous l en-tete quand la commande est a risque modere ou eleve. */
+.rq{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;margin:.5rem 1.1rem 0;padding:.5rem .8rem;border-radius:10px;border:1px solid rgba(239,68,68,.38);background:rgba(239,68,68,.10);font-size:.85rem}
+.rq.modere{border-color:rgba(217,119,6,.40);background:rgba(217,119,6,.10)}
+.rq b{color:var(--tx-err);white-space:nowrap}
+.rq.modere b{color:var(--tx-att)}
+.rq .rs{flex:1 1 18rem;min-width:0;color:var(--tx)}
+.rq .rv{color:var(--tx2);white-space:nowrap}
+.rq button{margin-left:auto}
+html.jour .rq b{color:#a11d1d}
+html.jour .rq.modere b{color:#8a4b06}
 /* ══ L EN-TETE : la commande, le client, et le fil des 4 etapes ══ */
 .tete .qui{display:flex;flex-direction:column;gap:.1rem;min-width:0}
 .tete .qui .cli{font-size:.8rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -333,6 +343,7 @@ function pageCommande(id) {
   <span class="note-cli" id="note-cli" hidden></span>
   <span class="bas" id="bas" hidden title="${T("Les étiquettes de ce transporteur se créent avec les clés de test : rien n’est facturé.")}">${T("BAC À SABLE")}</span>
   <span class="sous" id="sous"></span></div>
+<div class="rq" id="rq" role="status" hidden></div>
 <div class="fil" id="fil" role="tablist" aria-label="${T("Étapes de la préparation")}"></div>
 <div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
@@ -1626,6 +1637,38 @@ function pageCommande(id) {
     });
   };
 
+  /* (2026-11-22) LE SCORE DE RISQUE (lib-risque.php, relu au serveur) : rien sous « modéré » ; sinon la note, les
+     raisons et « Marquer vérifiée ». Le score ne bloque rien : la préparation reste possible. */
+  var RQ = null;
+  function dessinerRisque(){
+    var b = document.getElementById('rq'); if (!b) return;
+    if (!RQ || (RQ.niveau !== 'eleve' && RQ.niveau !== 'modere')) { b.hidden = true; b.innerHTML = ''; return; }
+    var en = document.documentElement.lang === 'en';
+    var raisons = (RQ.raisons || []).map(function(x){ return esc(en ? x.en : x.fr); }).join(' · ');
+    var quand = '';
+    if (RQ.verifie && RQ.verifie.le) { try { quand = new Date(RQ.verifie.le).toLocaleString(en ? 'en-CA' : 'fr-CA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { quand = ''; } }
+    b.className = 'rq' + (RQ.niveau === 'modere' ? ' modere' : '');
+    b.innerHTML = '<b>' + (RQ.niveau === 'eleve' ? '${T("Risque élevé")}' : '${T("Risque modéré")}') + ' · ' + esc(String(RQ.score)) + '/100</b>'
+      + '<span class="rs">' + raisons + '</span>'
+      + (RQ.verifie ? '<span class="rv">${T("Vérifiée")}' + (quand ? ' — ' + esc(quand) : '') + '</span><button type="button" id="rq-non">${T("Annuler la vérification")}</button>'
+                    : '<button type="button" id="rq-oui">${T("Marquer vérifiée")}</button>');
+    b.hidden = false;
+    var bo = document.getElementById('rq-oui'), bn = document.getElementById('rq-non');
+    if (bo) bo.onclick = function(){ marquerRisque(true); };
+    if (bn) bn.onclick = function(){ marquerRisque(false); };
+  }
+  function marquerRisque(oui){
+    P.appeler('commande:risqueVerifier', ID, oui).then(function(r){
+      if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+      RQ.verifie = oui ? { le: new Date().toISOString() } : null;
+      dessinerRisque();
+      dire(oui ? '${T("Commande marquée vérifiée.")}' : '${T("Vérification retirée.")}', 'ok');
+    }).catch(function(){ dire('${T("Le serveur ne répond pas.")}', 'err'); });
+  }
+  function chargerRisque(){
+    P.appeler('commande:risque', ID).then(function(r){ if (r && r.ok) { RQ = r.risque || null; dessinerRisque(); } }).catch(function(){});
+  }
+
   function charger(){
     P.appeler('commande:contexte').then(function(c){
       if (!c || !c.ok) { vide('${T("Préparation indisponible")}', expliquer(c)); return; }
@@ -1633,6 +1676,7 @@ function pageCommande(id) {
       return P.appeler('commande:lire', ID).then(function(r){
         if (!r || !r.ok) { vide('${T("Commande indisponible")}', expliquer(r)); return; }
         CMD = r;
+        chargerRisque();
         PREP_REMISE_VUE = (r.prepRemise && r.prepRemise.au) || '';
         // L avancement GARDÉ AU SERVEUR : on reprend là où on s était arrêté.
         COMPTES = {};

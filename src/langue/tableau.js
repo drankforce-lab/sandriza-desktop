@@ -372,6 +372,8 @@ module.exports = {
   'ventes hors ligne pas encore envoyées': 'offline sales not yet sent',
   'écart dans les données': 'data discrepancy',
   'écarts dans les données': 'data discrepancies',
+  'commande à risque élevé à vérifier': 'high-risk order to review',
+  'commandes à risque élevé à vérifier': 'high-risk orders to review',
   'message vocal non écouté': 'unheard voicemail',
   'messages vocaux non écoutés': 'unheard voicemails',
   'À faire aujourd’hui': 'To do today',

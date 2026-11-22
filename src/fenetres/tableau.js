@@ -739,6 +739,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     brouillons: ['${T("bon de commande en brouillon")}', '${T("bons de commande en brouillon")}'],
     horsligne:  ['${T("vente hors ligne pas encore envoyée")}', '${T("ventes hors ligne pas encore envoyées")}'],
     donnees:    ['${T("écart dans les données")}', '${T("écarts dans les données")}'],
+    risque:     ['${T("commande à risque élevé à vérifier")}', '${T("commandes à risque élevé à vérifier")}'],
     vocaux:     ['${T("message vocal non écouté")}', '${T("messages vocaux non écoutés")}']
   };
   function bandeAttention(){

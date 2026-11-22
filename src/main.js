@@ -2913,7 +2913,7 @@ const OPS_PONT = new Set([
   'produit:brouillonLire', 'produit:brouillonEcrire', 'produit:brouillonJeter',
   'produit:changements', 'produit:historique', 'produit:ajustement',
   'caisse:etat',
-  'commande:contexte', 'commande:lire', 'commande:bon',
+  'commande:contexte', 'commande:lire', 'commande:bon', 'commande:risque', 'commande:risqueVerifier',
   'commande:etiquette', 'commande:prete', 'commande:expedier',
   // Le code scanne se resout DANS LE SITE (Barcode.payload) : la forme compacte
   // du SKU n est pas la forme affichee, et la reecrire ici cesserait de marcher
@@ -4319,7 +4319,7 @@ const LIMITES_PONT = {
   'tresorerie:donnees': 20000, 'tresorerie:reglages': 30000,
   'prevision:donnees': 30000, 'prevision:reappro': 15000, 'config:ouvrir': 15000,
   'demarque:donnees': 30000, 'demarque:appliquer': 60000,
-  'assistante:demander': 110000, 'assistante:ouvrir': 15000, 'fiabilite:rapport': 20000, 'fiabilite:lancer': 95000,
+  'assistante:demander': 110000, 'assistante:ouvrir': 15000, 'fiabilite:rapport': 20000, 'fiabilite:lancer': 95000, 'commande:risque': 45000, 'commande:risqueVerifier': 20000,
   /* Les bons de commande fournisseurs : lecture locale ; chaque geste est UNE operation serveur (la reception fait
      monter le stock de chaque ligne dans le meme lot) ; « Creer tous les bons » en enchaine une par fournisseur. */
   'bc:donnees': 15000, 'bc:propositions': 15000, 'bc:chercher': 15000, 'bc:voeu': 15000,
