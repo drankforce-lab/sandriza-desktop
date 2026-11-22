@@ -4025,7 +4025,7 @@ const JEU = {
         lignes: [{ analyseId: 'fib_x', no: 'AF-0003', nom: 'Cardigan crème', resume: '70 % laine, 30 % nylon', taille: '', n: 21, rattache: false, supprimee: true }] } ] };
     var donnees = function(liste, o){
       return Object.assign({ ok: true, analyses: liste, fibres: FIB, pays: PAYS, paysDefaut: 'CN', fonds: FONDS,
-        modes: [{ cle: 'vinyle', nom: 'Cricut — vinyle thermocollant', parFeuille: 18 }], etiquette: { l: 60, h: 40 },
+        modes: [{ cle: 'vinyle', nom: 'Cricut — vinyle thermocollant', parFeuille: 24 }], etiquette: { l: 60, h: 40 },
         entretien: ENT, entretienGroupes: GROUPES, ca: { numero: '', manquant: true, gabarit: 'xxxxxxx' }, historique: HIST,
         peutAjouter: true, peutModifier: true, peutSupprimer: true }, o || {});
     };
@@ -4035,9 +4035,10 @@ const JEU = {
       symboles: ['lav_froid', 'pas_javel', 'sech_bas', 'rep_bas', 'pas_sec'], pays: 'FAIT EN CHINE / MADE IN CHINA', identite: 'SANDRIZA · CA xxxxxxx', caManquant: true,
       // « AF0012 », encodé par Barcode.code128Modules (assets/js/barcode.js du site), sans zone de silence
       code: 'AF0012', modules: 90, barres: [[0,2],[3,1],[6,1],[11,1],[13,1],[17,2],[22,1],[26,2],[31,1],[33,1],[35,3],[39,4],[44,2],[47,2],[51,2],[55,1],[57,2],[61,3],[66,3],[70,1],[74,2],[77,2],[82,3],[86,1],[88,2]] }; };
-    var cases = []; for (var r = 0; r < 6; r++) for (var c = 0; c < 3; c++) cases.push({ x: c * 66, y: r * 45 });
+    // (2026-11-22) La feuille de vinyle de 30,5 × 30,5 cm : 4 × 6 = 24 étiquettes (forme rendue par assets/js/fibres.js).
+    var cases = []; for (var r = 0; r < 6; r++) for (var c = 0; c < 4; c++) cases.push({ x: c * 66, y: r * 45 });
     var PLANCHE = { ok: true, mode: 'vinyle', caManquant: true, invalides: [],
-      disposition: { mode: 'vinyle', cols: 3, rangs: 6, parFeuille: 18, page: { l: 192, h: 265 }, etiquette: { l: 60, h: 40 }, cases: cases, zone: { l: 215.9, h: 279.4 } },
+      disposition: { mode: 'vinyle', cols: 4, rangs: 6, parFeuille: 24, page: { l: 258, h: 265 }, etiquette: { l: 60, h: 40 }, cases: cases, zone: { l: 305, h: 305 } },
       feuilles: [
         { fond: 'fonce', miroir: false, papier: 'Vinyle blanc', utilisees: [0], cases: cases.map(function(x, i){ return i === 0 || i > 8 ? null : { id: 'fib_1', taille: 'M', etiquette: ETQ('fonce') }; }) },
         { fond: 'pale', miroir: false, papier: 'Vinyle noir', utilisees: [], cases: cases.map(function(x, i){ return i > 3 ? null : { id: 'fib_2', taille: '', etiquette: ETQ('pale') }; }) },

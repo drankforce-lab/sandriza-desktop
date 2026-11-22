@@ -7,7 +7,7 @@
  * fibres, rattachée à un produit (ou à un NOM PROVISOIRE quand le produit n'est
  * pas encore créé), puis des étiquettes bilingues conformes, DÉCOUPÉES à la
  * Cricut dans du VINYLE THERMOCOLLANT noir ou blanc (2026-11-17, sa décision :
- * plus de papier de transfert imprimé) — 60 × 40 mm, 18 par feuille Lettre.
+ * plus de papier de transfert imprimé) — 60 × 40 mm, 24 par feuille de vinyle de 30,5 × 30,5 cm (2026-11-22).
  * Esquisses approuvées (époque papier) : https://claude.ai/artifact/L8LS7JfrhWwrRcunzqgmBb
  *
  * TROIS VUES : la BANQUE des analyses (cocher pour une planche), l'ANALYSE
@@ -1118,7 +1118,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function parFeuille(mode){
     var L = (D && D.modes) || [];
     for (var i = 0; i < L.length; i++) if (L[i].cle === mode && L[i].parFeuille > 0) return L[i].parFeuille;
-    return 18;
+    return 24;
   }
   function creerGabarit(fd){
     var s = { composition: [{ fibre: 'mixte', pct: 100 }], entretien: [], fond: fd, pays: (D && D.paysDefaut) || 'CN',
@@ -1203,7 +1203,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="boutons" style="margin-top:0"><button type="button" class="gauche" id="pl-dossier">${T("Ouvrir le dossier des exports")}</button>'
       + '<button type="button" class="prim" id="pl-export"' + (!bloque && nf ? '' : ' disabled') + '>' + '${T("Exporter pour Cricut (PNG)")}' + '</button></div>';
   }
-  /* L aperçu d une feuille : la feuille Lettre de vinyle, les étiquettes centrées dedans. */
+  /* L aperçu d une feuille : la feuille de vinyle de 30,5 × 30,5 cm, les étiquettes centrées dedans. */
   function geoFeuille(){
     var d = PL.R.disposition;
     var cadre = d.zone ? { l: d.zone.l, h: d.zone.h } : { l: d.page.l, h: d.page.h };
@@ -1221,7 +1221,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="scene"><canvas class="plan" id="cv-plan" role="img" aria-label="${T("Aperçu de la feuille")}"></canvas>'
       + '<div class="note"><strong>' + esc(f.papier) + '</strong>'
       + '<span class="badge">${T("Aperçu à l’endroit — activez « Miroir » dans Design Space")}</span>'
-      + '<span>${T("Le pointillé est la feuille Lettre de vinyle. Le fichier ne contient que les étiquettes remplies, recadrées : posez-le où il reste de la matière.")}</span>'
+      + '<span>${T("Le pointillé est la feuille de vinyle de 30,5 × 30,5 cm. Le fichier ne contient que les étiquettes remplies, recadrées : posez-le où il reste de la matière.")}</span>'
       + (f.utilisees && f.utilisees.length ? '<span>' + f.utilisees.length + ' ${T("case(s) marquée(s) comme déjà utilisée(s).")}</span>' : '')
       + '</div></div></div>';
   }
@@ -1350,6 +1350,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         ['${T("Taille")}', '${T("Régler la largeur exactement à celle écrite dans le nom du fichier (en po), cadenas fermé. Ne pas accepter de redimensionnement automatique.")}'],
         ['${T("Miroir")}', '${T("ACTIVER « Miroir » sur l’écran du tapis, pour chaque tapis. Sans lui, l’étiquette sera à l’envers sur le vêtement.")}'],
         ['${T("Matériau")}', '${T("Vinyle thermocollant (« Iron-On »), côté BRILLANT (la pellicule transparente) CONTRE le tapis, côté mat vers la lame.")}'],
+        // (2026-11-22) La feuille de vinyle est carrée : 30,5 × 30,5 cm (12 × 12 po).
+        ['${T("Tapis")}', '${T("Tapis de 12 × 12 po : la feuille de vinyle de 30,5 × 30,5 cm, posée bien d’équerre dans le coin en haut à gauche.")}'],
         ['${T("Écheniller")}', '${T("Retirer le vinyle autour et dans les lettres (crochet), puis couper la pellicule aux ciseaux entre les étiquettes.")}'],
         ['${T("Presser")}', '${T("Pellicule en haut, papier de protection par-dessus. La température du vinyle, sans dépasser celle de la fibre (étiquette temporaire de l’analyse) ; essai d’abord sur une couture cachée.")}']
       ],

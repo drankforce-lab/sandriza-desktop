@@ -356,8 +356,8 @@ module.exports = {
     'Sheet already started? Click the spots already used in the preview: they stay empty. Each vinyl colour has its own.',
   'Aperçu à l’endroit — activez « Miroir » dans Design Space':
     'Preview shown right way round — turn on “Mirror” in Design Space',
-  'Le pointillé est la feuille Lettre de vinyle. Le fichier ne contient que les étiquettes remplies, recadrées : posez-le où il reste de la matière.':
-    'The dotted line is the Letter vinyl sheet. The file holds only the filled labels, cropped: place it where there is vinyl left.',
+  'Le pointillé est la feuille de vinyle de 30,5 × 30,5 cm. Le fichier ne contient que les étiquettes remplies, recadrées : posez-le où il reste de la matière.':
+    'The dotted line is the 30.5 × 30.5 cm (12 × 12 in) vinyl sheet. The file holds only the filled labels, cropped: place it where there is vinyl left.',
   'Les cases utilisées se marquent sur la première feuille de chaque couleur de vinyle.':
     'Used spots are marked on the first sheet of each vinyl colour.',
   'Pour une bonne découpe du vinyle dans Design Space':
@@ -382,4 +382,6 @@ module.exports = {
     'Press',
   'Pellicule en haut, papier de protection par-dessus. La température du vinyle, sans dépasser celle de la fibre (étiquette temporaire de l’analyse) ; essai d’abord sur une couture cachée.':
     'Carrier on top, protective sheet over it. Use the vinyl temperature without going above the fibre one (the analysis temporary label); test on a hidden seam first.',
+  'Tapis': 'Mat',
+  'Tapis de 12 × 12 po : la feuille de vinyle de 30,5 × 30,5 cm, posée bien d’équerre dans le coin en haut à gauche.': '12 × 12 in mat: the 30.5 × 30.5 cm (12 × 12 in) vinyl sheet, placed square in the top-left corner.',
 };
