@@ -29,7 +29,7 @@
  * script vit dans un littéral de gabarit.
  */
 
-const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, ICO, TETE } = require('./socle');
+const { CSS_SOCLE, CSS_JOUR, JS_SOCLE, ICO, TETE, LIEU } = require('./socle');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -1646,7 +1646,7 @@ function pageCommande(id) {
     var en = document.documentElement.lang === 'en';
     var raisons = (RQ.raisons || []).map(function(x){ return esc(en ? x.en : x.fr); }).join(' · ');
     var quand = '';
-    if (RQ.verifie && RQ.verifie.le) { try { quand = new Date(RQ.verifie.le).toLocaleString(en ? 'en-CA' : 'fr-CA', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { quand = ''; } }
+    if (RQ.verifie && RQ.verifie.le) { try { quand = new Date(RQ.verifie.le).toLocaleString('${LIEU()}', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); } catch (e) { quand = ''; } }
     b.className = 'rq' + (RQ.niveau === 'modere' ? ' modere' : '');
     b.innerHTML = '<b>' + (RQ.niveau === 'eleve' ? '${T("Risque élevé")}' : '${T("Risque modéré")}') + ' · ' + esc(String(RQ.score)) + '/100</b>'
       + '<span class="rs">' + raisons + '</span>'
