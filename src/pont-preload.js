@@ -320,6 +320,8 @@ contextBridge.exposeInMainWorld('szPont', {
   ouvrirPromoEditeur: (id) => ipcRenderer.invoke('fenetre:promoEditeur', String(id || '')).catch(() => false),
   // (2026-11-22) Recommandations : « regle:new|<id> », « liaison:new|<id> » dans leur fenêtre.
   ouvrirRecoForme: (id) => ipcRenderer.invoke('fenetre:recoForme', String(id || '')).catch(() => false),
+  // (2026-11-22) Ramassages : la planification dans sa fenêtre.
+  ouvrirRamassagePlan: () => ipcRenderer.invoke('fenetre:ramassagePlan').catch(() => false),
   // (2026-11-22) Photothèque : l aperçu détaché ({ url, nom, code }, ouvrir).
   photoApercu: (d, ouvrir) => ipcRenderer.invoke('fenetre:photoApercu', d && typeof d === 'object' ? { url: String(d.url || ''), nom: String(d.nom || ''), code: String(d.code || '') } : {}, !!ouvrir).catch(() => false),
 

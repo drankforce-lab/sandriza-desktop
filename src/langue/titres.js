@@ -78,5 +78,6 @@ module.exports = {
   'Nouvelle règle': 'New rule',
   'Modifier la règle': 'Edit rule',
   'Associer des produits': 'Link products',
-  'Aperçu de la photo': 'Photo preview'
+  'Aperçu de la photo': 'Photo preview',
+  'Planifier un ramassage': 'Schedule a pickup'
 };

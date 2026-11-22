@@ -3813,6 +3813,12 @@ ipcMain.handle('fenetre:photoApercu', (e, d, ouvrir) => {
   return true;
 });
 
+/* (2026-11-22, sa demande : « de vraies fenêtres séparées pour la planification ») Planifier un ramassage : SA fenêtre. */
+ipcMain.handle('fenetre:ramassagePlan', () => {
+  ouvrirNative('ramassage-plan', TF('Planifier un ramassage'), () => pageRamassagePlan(), { width: 980, height: 660, minWidth: 640, minHeight: 480 });
+  return true;
+});
+
 ipcMain.handle('fenetre:etatcompte', (e, id) => {
   const brut = String(id || '');
   if (!brut) return false;
@@ -4900,6 +4906,7 @@ async function executerOpSite0(nom, args, emetteur) {
       if (nom === 'fournisseur:enregistrer') fenetres.push('fournisseurs');
       // (2026-11-22) Les fenêtres détachées des Recommandations préviennent la liste.
       if (nom === 'reco:creer' || nom === 'reco:editer' || nom === 'reco:liaisons') fenetres.push('recommandations');
+      if (nom === 'ramassages:planifier') fenetres.push('ramassages');
       if (fenetres.length) actualiserFenetres(fenetres, emetteur);
       /* (2026-10-15, trouvé par l'audit des opérations) La fenêtre Maintenance appelait
          « tableau:rafraichirMaintenance », qui n'existait NULLE PART : refusé en silence, et le bouton
@@ -7703,7 +7710,7 @@ const { pageFactures } = require('./fenetres/factures');
 const { pageProduits } = require('./fenetres/produits');
 const { pageClients } = require('./fenetres/clients');
 const { pageCodesbarres } = require('./fenetres/codesbarres');
-const { pageRamassages } = require('./fenetres/ramassages');
+const { pageRamassages, pageRamassagePlan } = require('./fenetres/ramassages');
 const { pageAvis } = require('./fenetres/avis');
 const { pageMessagerie } = require('./fenetres/messagerie');
 const { pageNotes } = require('./fenetres/notes');

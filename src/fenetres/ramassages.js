@@ -349,6 +349,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       /* NATIF (1.59.1) : le formulaire s ouvre ICI — le renvoi a l assistant
          web contredisait la regle << plus rien au format web >> (releve du
          2026-08-09). */
+      /* (2026-11-22) La planification a SA fenêtre ; une coquille sans le verbe garde la boîte d avant. */
+      if (P && typeof P.ouvrirRamassagePlan === 'function') { P.ouvrirRamassagePlan(); return; }
       dire('${T("Lecture des colis prêts…")}');
       appeler('ramassages:preparer', []).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -471,4 +473,165 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 </body></html>`;
 }
 
-module.exports = { pageRamassages };
+/* ══ LA PLANIFICATION, DANS SA PROPRE FENÊTRE (2026-11-22, sa demande : « améliore la planification et fais de vraies
+   fenêtres séparées pour la planification ») ═════════════════════════════════════════════════════════════════════
+   QUAND (la date — prochain jour ouvrable par défaut, trois raccourcis —, la plage horaire), OÙ (l endroit, le poids par
+   colis, l adresse d origine), QUOI (les colis par transporteur, à cocher un par un ou par transporteur). Le site
+   recalcule tout à l envoi (Admin._ramassagePlanifierCoeur) : un choix ne peut pas ajouter un colis qui n est pas prêt.
+   Envoyé : la fenêtre se ferme, la liste des Ramassages se relit (main.js, ramassages:planifier). */
+const CSS_PLAN = `
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--f-page);color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;display:flex;flex-direction:column;overflow:hidden}
+.tete{flex:0 0 auto;display:flex;align-items:center;gap:.7rem;padding:.6rem 1.1rem;border-bottom:1px solid var(--v08);background:var(--f-pied)}
+.tete h1{margin:0;font:700 .95rem/1.2 system-ui}
+.tete .ico{display:inline-flex;width:19px;height:19px;color:var(--or)}
+.tete .ico svg{width:100%;height:100%}
+.pl{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(17rem,22rem) minmax(0,1fr);gap:.8rem;padding:.9rem 1rem;overflow:hidden}
+.pl-g{display:flex;flex-direction:column;gap:.8rem;min-height:0}
+.pl-c{background:var(--f-carte);border:1px solid var(--v08);border-radius:14px;padding:.85rem .95rem;display:flex;flex-direction:column;gap:.55rem;min-width:0}
+.pl-c h2{margin:0;font-size:.74rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--tx2)}
+.pl-c label{display:flex;flex-direction:column;gap:.25rem;font-size:.78rem;font-weight:600;color:var(--tx2)}
+.pl-c input,.pl-c select{font:inherit;font-size:.86rem;color:var(--tx);background:var(--f-champ);border:1px solid var(--v16);border-radius:9px;padding:.42rem .6rem;height:2.3rem}
+.pl-2{display:grid;grid-template-columns:1fr 1fr;gap:.55rem}
+.pl-jours{display:flex;gap:.35rem;flex-wrap:wrap}
+.pl-jours button{font:inherit;font-size:.76rem;font-weight:600;border:1px solid var(--v16);background:var(--v05);color:var(--tx);border-radius:99px;padding:.3rem .7rem;cursor:pointer}
+.pl-jours button.on{background:var(--f-pill);border-color:var(--or)}
+.pl-org{font-size:.78rem;color:var(--tx2);line-height:1.4}
+.pl-colis{min-height:0;overflow:hidden}
+.pl-gr{border:1px solid var(--v08);border-radius:12px;padding:.6rem .7rem;display:flex;flex-direction:column;gap:.45rem}
+.pl-gr.off{opacity:1;background:var(--v03)}
+.pl-gr .t{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap;font-size:.86rem}
+.pl-gr .t b{font-weight:700}
+.pl-cmd{display:grid;grid-template-columns:repeat(auto-fill,minmax(13.5rem,1fr));gap:.3rem .6rem}
+.pl-cmd label{flex-direction:row;align-items:center;gap:.45rem;font-size:.8rem;font-weight:500;color:var(--tx);min-width:0}
+.pl-cmd label span{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0}
+.pl-cmd label small{color:var(--tx2)}
+input[type=checkbox]{width:auto;height:auto;accent-color:var(--or)}
+.pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.6rem 1rem;border-top:1px solid var(--v08);background:var(--f-pied)}
+.pied .res{flex:1 1 auto;min-width:0;font-size:.84rem}
+.pied .res b{font-variant-numeric:tabular-nums}
+.pied button{font:inherit;font-size:.84rem;font-weight:600;border-radius:10px;padding:.5rem 1rem;cursor:pointer;border:1px solid var(--v16);background:var(--v05);color:var(--tx)}
+.pied button.prim{background:var(--or);border-color:var(--or);color:var(--tx-sur-accent,#1a1208)}
+.pied button:disabled{opacity:.5;cursor:default}
+.msg{font-size:.79rem;color:var(--tx2)}
+.msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
+.vide{margin:auto;text-align:center;color:var(--tx2);font-size:.9rem;line-height:1.6;padding:2rem}
+@media (max-width:760px){.pl{grid-template-columns:1fr}}
+`;
+function pageRamassagePlan() {
+  return `${TETE()}
+<title>${T("Planifier un ramassage")}</title>
+<style>${CSS_PLAN}${CSS_JOUR}</style></head><body>
+<div class="tete"><span class="ico">${ICO.orders}</span><h1>${T("Planifier un ramassage")}</h1></div>
+<div class="pl" id="pl"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
+<div class="pied"><span class="res" id="res"></span><span class="msg" id="msg"></span>
+  <button type="button" id="pl-annuler">${T("Annuler")}</button>
+  <button type="button" class="prim" id="pl-envoyer" disabled>${T("Envoyer les demandes")}</button></div>
+<script>
+(function(){
+  'use strict';
+  var PP = window.szPont;
+${JS_ACTIVITE()}${JS_DIRE()}
+  var zone = document.getElementById('pl');
+  var D = null, CHOIX = {}, TR = {};
+  var MOIS = ['${T("janvier")}', '${T("février")}', '${T("mars")}', '${T("avril")}', '${T("mai")}', '${T("juin")}', '${T("juillet")}', '${T("août")}', '${T("septembre")}', '${T("octobre")}', '${T("novembre")}', '${T("décembre")}'];
+  var JOURS = ['${T("dim.")}', '${T("lun.")}', '${T("mar.")}', '${T("mer.")}', '${T("jeu.")}', '${T("ven.")}', '${T("sam.")}'];
+  function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+  function appeler(op, args){
+    var p; try { p = PP.appeler.apply(PP, [op].concat(args || [])); } catch (e) { return Promise.resolve({ ok: false, motif: 'pont_indisponible' }); }
+    if (!p || typeof p.then !== 'function') return Promise.resolve({ ok: false, motif: 'pont_indisponible' });
+    return p.then(function(r){ return r || { ok: false, motif: 'echec' }; }).catch(function(){ return { ok: false, motif: 'echec' }; });
+  }
+  function versDate(iso){ var q = String(iso).split('-'); return new Date(+q[0], +q[1] - 1, +q[2]); }
+  function iso(d){ return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
+  function libJour(isoD){ var d = versDate(isoD); return JOURS[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()]; }
+  function ouvrables(n){ var d = new Date(), l = []; while (l.length < n) { d.setDate(d.getDate() + 1); if (d.getDay() !== 0 && d.getDay() !== 6) l.push(iso(d)); } return l; }
+  function heures(sel){ var h = ''; for (var m = 7 * 60; m <= 19 * 60; m += 30) { var t = ('0' + Math.floor(m / 60)).slice(-2) + ':' + ('0' + (m % 60)).slice(-2); h += '<option' + (t === sel ? ' selected' : '') + '>' + t + '</option>'; } return h; }
+  function val(id){ var e = document.getElementById(id); return e ? e.value : ''; }
+
+  function dessiner(){
+    if (!D.total) {
+      zone.innerHTML = '<div class="vide" style="grid-column:1/-1">${T("Aucun colis à ramasser pour l’instant.")}<br>${T("Une commande doit être marquée Expédiée et avoir un numéro de suivi.")}</div>';
+      majResume(); return;
+    }
+    var jr = ouvrables(3);
+    var h = '<div class="pl-g">'
+      + '<section class="pl-c"><h2>${T("Quand")}</h2>'
+      + '<div class="pl-jours" role="group" aria-label="${T("Jours ouvrables")}">' + jr.map(function(j){ return '<button type="button" data-jour="' + j + '">' + esc(libJour(j)) + '</button>'; }).join('') + '</div>'
+      + '<label>${T("Date du ramassage")}<input type="date" id="pl-date" value="' + esc(D.date) + '" min="' + esc(D.aujourdhui || '') + '" max="' + esc(D.max || '') + '"></label>'
+      + '<div class="pl-2"><label>${T("À partir de")}<select id="pl-de">' + heures(D.de || '09:00') + '</select></label>'
+      + '<label>${T("Jusqu’à")}<select id="pl-a">' + heures(D.a || '17:00') + '</select></label></div></section>'
+      + '<section class="pl-c"><h2>${T("Où")}</h2>'
+      + '<label>${T("Endroit du ramassage")}<input type="text" id="pl-endroit" maxlength="80" value="Porte principale"></label>'
+      + '<label>${T("Poids estimé par colis (kg)")}<input type="number" id="pl-poids" value="0.5" min="0.05" step="0.05"></label>'
+      + (D.adresse ? '<div class="pl-org">${T("Adresse de la boutique :")} ' + esc(D.adresse) + '</div>' : '')
+      + '</section></div>'
+      + '<section class="pl-c pl-colis"><h2>${T("Colis à faire ramasser")}</h2>'
+      + (D.groupes || []).map(function(g){
+          var on = TR[g.cle] !== false;
+          return '<div class="pl-gr' + (on ? '' : ' off') + '"><div class="t"><input type="checkbox" data-tr="' + esc(g.cle) + '"' + (on ? ' checked' : '') + ' aria-label="' + esc(g.nom) + '">'
+            + '<span>' + g.logo + '</span><b>' + esc(g.nom) + '</b><span class="rf-pill">' + g.colis + ' ${T("colis")}</span>'
+            + (g.api ? '<span class="rf-pill vert">${T("demande automatique")}</span>' : '<span class="rf-pill ambre">${T("à contacter manuellement")}</span>') + '</div>'
+            + '<div class="pl-cmd">' + (g.detail || (g.commandes || []).map(function(n){ return { id: n, numero: n }; })).map(function(c){
+                return '<label><input type="checkbox" data-cmd="' + esc(c.id) + '" data-gr="' + esc(g.cle) + '"' + (CHOIX[c.id] !== false ? ' checked' : '') + (on ? '' : ' disabled') + '>'
+                  + '<span><b>' + esc(c.numero) + '</b>' + (c.client || c.ville ? ' <small>' + esc([c.client, c.ville].filter(Boolean).join(' · ')) + '</small>' : '') + '</span></label>';
+              }).join('') + '</div></div>';
+        }).join('')
+      + '</section>';
+    zone.innerHTML = h;
+    majJours(); majResume();
+  }
+  function choisis(){
+    var ids = [], trs = {};
+    (D.groupes || []).forEach(function(g){
+      if (TR[g.cle] === false) return;
+      (g.detail || []).forEach(function(c){ if (CHOIX[c.id] !== false) { ids.push(c.id); trs[g.cle] = 1; } });
+    });
+    return { ids: ids, transporteurs: Object.keys(trs) };
+  }
+  function majJours(){ var d = val('pl-date'); Array.prototype.forEach.call(zone.querySelectorAll('[data-jour]'), function(b){ b.className = b.getAttribute('data-jour') === d ? 'on' : ''; }); }
+  function majResume(){
+    var c = D && D.total ? choisis() : { ids: [], transporteurs: [] };
+    var r = document.getElementById('res');
+    var dt = val('pl-date');
+    r.innerHTML = c.ids.length ? '<b>' + c.ids.length + '</b> ' + (c.ids.length > 1 ? '${T("colis")}' : '${T("colis")}') + ' · ' + c.transporteurs.length + ' ' + (c.transporteurs.length > 1 ? '${T("transporteurs")}' : '${T("transporteur")}')
+      + (dt ? ' · ' + esc(libJour(dt)) + ', ' + esc(val('pl-de')) + '–' + esc(val('pl-a')) : '') : '${T("Aucun colis choisi.")}';
+    document.getElementById('pl-envoyer').disabled = !c.ids.length;
+  }
+
+  zone.addEventListener('click', function(ev){
+    var b = ev.target.closest && ev.target.closest('[data-jour]');
+    if (b) { document.getElementById('pl-date').value = b.getAttribute('data-jour'); majJours(); majResume(); }
+  });
+  zone.addEventListener('change', function(ev){
+    var t = ev.target;
+    if (t.hasAttribute('data-tr')) { TR[t.getAttribute('data-tr')] = t.checked; dessiner(); return; }
+    if (t.hasAttribute('data-cmd')) { CHOIX[t.getAttribute('data-cmd')] = t.checked; majResume(); return; }
+    if (t.id === 'pl-date') majJours();
+    majResume();
+  });
+  document.getElementById('pl-annuler').onclick = function(){ try { window.close(); } catch (e) {} };
+  document.getElementById('pl-envoyer').onclick = function(){
+    var c = choisis(); if (!c.ids.length) return;
+    var de = val('pl-de'), a = val('pl-a');
+    if (a <= de) { szDire('${T("L’heure de fin doit suivre l’heure de début (au moins 2 h d’écart).")}', 'err'); return; }
+    var btn = this; btn.disabled = true; szDire('${T("Demandes envoyées aux transporteurs…")}', 'att');
+    appeler('ramassages:planifier', [{ date: val('pl-date'), de: de, a: a, poids: parseFloat(val('pl-poids')) || 0.5,
+      endroit: val('pl-endroit').trim(), transporteurs: c.transporteurs, commandes: c.ids }]).then(function(r){
+      if (!r.ok) { btn.disabled = false; szDire(r.motif === 'aucun_colis' ? '${T("Aucun colis à ramasser.")}' : r.motif === 'deja_en_cours' ? '${T("Ces colis sont déjà en cours de planification sur un autre poste.")}' : '${T("L’opération a échoué.")}', 'err'); return; }
+      szDire('${T("Ramassage")} ' + libJour(r.date) + ' — ' + r.total + ' ${T("colis")}' + ((r.parties || []).length ? ' · ' + r.parties.join(' · ') : ''), r.echec ? 'err' : 'bon');
+      if (!r.echec) setTimeout(function(){ try { window.close(); } catch (e) {} }, 1600); else btn.disabled = false;
+    });
+  };
+  document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape') { try { window.close(); } catch (e) {} } });
+  appeler('ramassages:preparer', []).then(function(r){
+    if (!r || !r.ok) { zone.innerHTML = '<div class="vide" style="grid-column:1/-1">${T("Les colis prêts n’ont pas pu être lus.")}</div>'; return; }
+    D = r; dessiner();
+  });
+})();
+</script></body></html>`;
+}
+
+module.exports = { pageRamassages, pageRamassagePlan };
