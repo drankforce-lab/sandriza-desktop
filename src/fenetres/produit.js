@@ -443,6 +443,17 @@ html.jour .vue .x:hover:not(:disabled),html.jour .vign .x:hover:not(:disabled){b
 .cadre-fibre img{width:100%;height:100%;object-fit:cover}
 .pv-fibre-g{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
 .pv-etat{font-size:.78rem;color:var(--tx2)}
+/* Les paliers de resserrement (voir _ajusterPhotos). */
+.pf-serre .pf-3d{padding:.4rem .7rem}
+.pf-serre .ligne-photos{row-gap:.45rem}
+.pf-serre .pf-3d .aide{white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1 1 0}
+.pf-serre .pf-3d .pf-med-l{flex-wrap:nowrap}
+.pf-serre .pf-3d button{padding-top:.3rem;padding-bottom:.3rem}
+.pf-serre .pv-fibre{margin-top:.5rem;padding-top:.5rem}
+.pf-serre .pv-t{margin-bottom:.25rem}
+.pf-serre .pv-fibre-g .pv-etat{display:none}
+.pf-serre2 .pf-3d .aide,.pf-serre2 .pf-cab .aide{display:none}
+.pf-serre2 .pf-cab{padding:.35rem .7rem}
 .pv-demarquer{display:block;width:100%;margin-top:.25rem;height:1.75rem;font-size:.74rem!important;padding:0 .4rem}
 /* Une fenêtre basse : des cases un peu plus petites, pour que la fibre reste au-dessus du pied. */
 .lgstk{display:flex;align-items:center;gap:.5rem;padding:.2rem .3rem;border-radius:6px}
@@ -3626,9 +3637,17 @@ function pageProduit(id, importId) {
      (moins ses gestes), puis on cherche la PLUS GRANDE case (3:4) qui tient — grille du dos et des photos
      additionnelles, puis la fibre — dans la colonne de droite. Recalculée au dessin, à l'ouverture de l'étape, au
      redimensionnement. */
-  function ajusterPhotos(){
+  /* ⚠⚠ (2026-11-22, sa capture en 9.1.6 : « toujours pas corrigé » — Fibre agrandie encore sous le pied) Rapetisser les cases
+     ne suffit pas quand ce sont les CARTES fixes (cabine, 3D, vidéo) qui mangent la hauteur : sur un petit écran, même à
+     48 px la fibre sortait. Deux paliers de RESSERREMENT, essayés seulement si le bas sort encore : 1) cartes et fibre
+     resserrées, explications sur une ligne ; 2) les explications des cartes tombent (le bouton reste, le texte au survol).
+     Chaque calcul repart du palier 0 : agrandir la fenêtre rend la mise en page aérée. */
+  function ajusterPhotos(){ _ajusterPhotos(0); }
+  function _ajusterPhotos(niv){
     var lp = document.querySelector('.carte.pf-photos .ligne-photos');
     if (!lp || !lp.offsetParent) return;
+    var cp = lp.closest('.carte');
+    if (cp) { cp.classList.toggle('pf-serre', niv >= 1); cp.classList.toggle('pf-serre2', niv >= 2); }
     // La hauteur OFFERTE : du haut de la rangée au bas de la CARTE (qui remplit l'étape) — pas la hauteur de la
     // rangée elle-même, qui ne mesure que son contenu.
     var carte = lp.closest('.carte') || lp, rc = carte.getBoundingClientRect(), rl = lp.getBoundingClientRect();
@@ -3673,6 +3692,7 @@ function pageProduit(id, importId) {
       meilleur -= 4;
       lp.style.setProperty('--pv-w', meilleur + 'px');
     }
+    if (basReel() > bas && niv < 2) _ajusterPhotos(niv + 1);
   }
   window.addEventListener('resize', function(){ clearTimeout(window.__pvT); window.__pvT = setTimeout(ajusterPhotos, 80); });
   /* La case FIBRE (2026-10-26). FIBRE : l'image (data: neuve, ou adresse déjà en ligne) — vide, rien n'est envoyé. */
