@@ -2581,8 +2581,8 @@ const _porteEpure = (p) => {
        et, la nuit, le logo inversé pour rester lisible sur la carte bleu nuit. Sans quoi passer de la connexion à la mise
        à jour fait disparaître le halo, et de nuit le logo noir lui-même. */
     + '.plate::before{display:block!important;filter:blur(18px)!important;background:radial-gradient(60% 70% at 50% 50%,'
-    +   (j ? 'rgba(' + rgbA + ',.16) 0%,rgba(' + rgbA + ',.07) 45%' : 'rgba(255,255,255,.10) 0%,rgba(' + rgbA + ',.10) 40%')
-    +   ',transparent 75%)!important}'
+    +   (j ? 'rgba(' + rgbA + ',.34) 0%,rgba(' + rgbA + ',.17) 45%' : 'rgba(255,255,255,.18) 0%,rgba(' + rgbA + ',.20) 40%')
+    +   ',transparent 78%)!important}'
     + (j ? '' : '.plate-img{filter:invert(1) hue-rotate(180deg)}');
 };
 const portePage = (titre, message, progression) => {

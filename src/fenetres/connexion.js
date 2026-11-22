@@ -403,11 +403,12 @@ html[data-sz-theme="epure"]:not(.jour) .admlogin-nipbox .npr button{background:#
 html[data-sz-theme="epure"]:not(.jour) .admlogin-maint{background:#33270f;border-color:#5a4520}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-maint .amt,html[data-sz-theme="epure"]:not(.jour) .admlogin-maint .amd{color:#f2c27e}
 /* (2026-11-19, sa demande : « je n'ai plus mon halo derrière mon logo, je le veux, adapte-le ») Le halo revient, à la manière
-   d'Épuré : une lueur douce de l'accent du thème le jour, une lumière claire teintée la nuit — sans animation. */
+   d'Épuré : une lueur douce de l'accent du thème le jour, une lumière claire teintée la nuit — sans animation.
+   (2026-11-22, « le halo n'apparaît pas assez ») Intensité doublée, jour comme nuit. */
 html[data-sz-theme="epure"] .admlogin-logo-plate::before{display:block!important;filter:blur(18px);
-  background:radial-gradient(60% 70% at 50% 50%,rgba(var(--cx-a-rgb,138,90,43),.16) 0%,rgba(var(--cx-a-rgb,138,90,43),.07) 45%,transparent 75%)!important}
+  background:radial-gradient(60% 70% at 50% 50%,rgba(var(--cx-a-rgb,138,90,43),.34) 0%,rgba(var(--cx-a-rgb,138,90,43),.17) 45%,transparent 78%)!important}
 html[data-sz-theme="epure"]:not(.jour) .admlogin-logo-plate::before{
-  background:radial-gradient(60% 70% at 50% 50%,rgba(255,255,255,.10) 0%,rgba(var(--cx-a-rgb,201,162,122),.10) 40%,transparent 75%)!important}
+  background:radial-gradient(60% 70% at 50% 50%,rgba(255,255,255,.18) 0%,rgba(var(--cx-a-rgb,201,162,122),.20) 40%,transparent 78%)!important}
 /* (2026-11-19, banc des contrastes au rendu) Le libellé « Se souvenir… » et le sélecteur FR/EN gardaient les bruns de l'ancien écran. */
 html[data-sz-theme="epure"] .cx-souvenir label{color:#5b6273}
 html[data-sz-theme="epure"]:not(.jour) .cx-souvenir label{color:#9aa4b5}
