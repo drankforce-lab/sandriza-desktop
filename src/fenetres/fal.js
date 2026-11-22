@@ -164,7 +164,6 @@ function pageFal(ouverture) {
 <div class="onglets" role="tablist">
   <button id="o-ens" data-vue="ens" role="tab" class="on">${T("Vue d’ensemble")}</button>
   <button id="o-fal" data-vue="fal" role="tab">Fal.ai</button>
-  <button id="o-pr" data-vue="pr" role="tab">Photoroom</button>
   <button id="o-tnb" data-vue="tnb" role="tab">The New Black</button>
 </div>
 <div class="corps" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
@@ -186,7 +185,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
   var OUV = ${dep};
   /* L onglet (un fournisseur) et, pour chacun, son sous-onglet retenu : revenir sur un fournisseur rouvre la
      vue qu on y regardait. */
-  var VUE = OUV === 'tnb' ? 'tnb' : OUV === 'fal' ? 'fal' : OUV === 'photoroom' ? 'pr' : 'ens';
+  var VUE = OUV === 'tnb' ? 'tnb' : OUV === 'fal' ? 'fal' : 'ens';   // (2026-11-22) Photoroom retiré : n est plus appelé depuis 7.70.6
   var SOUS = { ens: OUV === 'historique' ? 'journal' : 'resume', fal: 'apercu', pr: 'apercu', tnb: 'apercu' };
   var SOUS_LISTE = {
     ens: [['resume', '${T("Résumé")}'], ['traitements', '${T("Par traitement")}'], ['journal', '${T("Journal complet")}']],
@@ -283,12 +282,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
   }
   function resumeCredits(){
     var morceaux = [];
-    if (PR && PR.compte && PR.compte.available != null) {
-      morceaux.push('${T("Photoroom : {0} crédits")}'.split('{0}').join(PR.compte.available
-        + (PR.compte.subscription != null ? ' / ' + PR.compte.subscription : '')));
-    } else {
-      morceaux.push('${T("Photoroom : solde non lu")}');
-    }
     var rf = soldeFal();
     morceaux.push(rf != null ? '${T("fal.ai : {0} restants")}'.split('{0}').join(sous_(rf))
       : '${T("fal.ai : solde à saisir en Configuration")}');
@@ -354,7 +347,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
   function filtreProv(){
     var opt = function(v, t){ return '<option value="' + v + '"' + (FILT_PROV === v ? ' selected' : '') + '>' + t + '</option>'; };
     return '<select id="h-prov" aria-label="${T("Filtrer par service")}">'
-      + opt('tous', '${T("Tous les fournisseurs")}') + opt('fal', 'Fal.ai') + opt('pr', 'Photoroom') + opt('tnb', 'The New Black') + '</select>';
+      + opt('tous', '${T("Tous les fournisseurs")}') + opt('fal', 'Fal.ai') + opt('tnb', 'The New Black') + '</select>';
   }
 
   /* La photo d un appel : sa vignette quand la photothèque de la session l a encore, son code, son nom. */
@@ -475,7 +468,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
     return '<div class="carte"><h2>${T("Par fournisseur")}<span class="cpt">${T("depuis le début")}</span></h2>'
       + '<table><thead><tr><th>${T("Fournisseur")}</th><th class="num">${T("Appels")}</th><th class="num">${T("Réussis")}</th>'
       + '<th class="num">${T("Coût")}</th><th>${T("Part du coût")}</th><th class="num">${T("Solde")}</th></tr></thead><tbody>'
-      + ['fal', 'pr', 'tnb'].map(function(p){
+      + ['fal', 'tnb'].map(function(p){
           var t = tot[p], pct = total > 0 ? Math.round(t.c * 100 / total) : 0;
           return '<tr class="aller" data-aller="' + p + '" title="${T("Ouvrir l’onglet de ce fournisseur")}">'
             + '<td><strong>' + NOMS_PROV[p] + '</strong></td><td class="num">' + nbr(t.a) + '</td><td class="num">' + nbr(t.r) + '</td>'
@@ -731,7 +724,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
     var vJ = besoinJournal(), vT = besoinTnb(), vP = besoinPhotos();
     Promise.all([
       appeler('fal:suivi', [vJ ? 'journal' : 'resume']),
-      appeler('photoroom:compte'),
+      Promise.resolve(null),   // (2026-11-22) Photoroom retiré : son compte n est plus lu (il tenait l écran en « Lecture… »)
       vT ? appeler('fal:suivi', ['tnb']) : Promise.resolve(null),
       vP ? appeler('photos:liste') : Promise.resolve(null)
     ]).then(function(rs){
@@ -800,7 +793,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('fal')}
       if (VEILLE_TIC > 0 && document.hasFocus && !document.hasFocus() && (VEILLE_TIC % 4)) return;
       if (saisieActive()) return;
       var avant = signatureCourante();
-      Promise.all([appeler('fal:suivi', ['resume']), appeler('photoroom:compte')]).then(function(rs){
+      Promise.all([appeler('fal:suivi', ['resume']), Promise.resolve(null)]).then(function(rs){
         var r = rs[0];
         if (!r || !r.ok) return;   // une lecture ratée ne casse pas l écran affiché
         if (r.voeu === 'tnb' && VUE !== 'tnb') { aller('tnb', 'apercu'); return; }

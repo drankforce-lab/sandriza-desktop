@@ -550,11 +550,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var cl = 'solde' + (bas ? ' bas' : '') + (txt ? '' : ' muet');
       return ouvre ? '<button type="button" class="' + cl + ' lien" data-ouvre="' + ouvre + '" title="' + esc(titre + ' — ' + '${T("voir le détail")}') + '"><b>' + nom + '</b> ' + esc(txt || '—') + '</button>'
         : '<span class="' + cl + '" title="' + esc(titre) + '"><b>' + nom + '</b> ' + esc(txt || '—') + '</span>'; };
-    var t = SOLDES.twilio || {}, f = SOLDES.fal || {}, p = SOLDES.photoroom || {}, nb = SOLDES.tnb || {};
+    var t = SOLDES.twilio || {}, f = SOLDES.fal || {}, nb = SOLDES.tnb || {};   // (2026-11-22) Photoroom retiré (plus utilisé depuis 7.70.6)
     var tw = t.erreur ? '' : szArgentSymbole(szArgentNombre(t.solde, 2)) + (t.devise && t.devise !== 'USD' ? ' ' + t.devise : ' US');
     // le vrai solde (api.fal.ai) quand Fal.ai le donne ; sinon l estimation, précédée de « ≈ »
     var fa = f.erreur ? '' : (f.estime ? '≈ ' : '') + szArgentSymbole(szArgentNombre(f.restant, 2)) + ' US';
-    var ph = p.erreur || p.disponibles == null ? '' : '${T("{0} crédits")}'.split('{0}').join(p.disponibles);
     /* (2026-10-18) THE NEW BLACK : le VRAI solde en crédits, et son équivalent en $ d après le forfait (prix du mois ÷
        crédits du mois, lu au serveur) — le détail (forfait, cumul, dépenses par génération) s ouvre au clic. */
     var fo = nb.forfait || {};
