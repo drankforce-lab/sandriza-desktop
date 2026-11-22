@@ -679,6 +679,8 @@ ipcMain.on('win:glisse:bouge', (e) => {
     _glisseFenetre = { dx, dy, width: av.width, height: av.height };
   }
   // Position qui suit le curseur, TAILLE figée à celle du départ.
+  w._szPoseT = Date.now();   // geste de la personne : le garde anti-rapetissement le laisse passer
+  w._szVoulu = null;
   w.setBounds({
     x: c.x - _glisseFenetre.dx,
     y: c.y - _glisseFenetre.dy,
@@ -722,10 +724,50 @@ ipcMain.on('win:togglemax', (e) => {
 const _pleineZoneSeuil = (a, b) => a && b && Math.abs(a.x - b.x) <= 2 && Math.abs(a.y - b.y) <= 2
   && Math.abs(a.width - b.width) <= 2 && Math.abs(a.height - b.height) <= 2;
 const _poserApresRetour = (w, bornes) => {
+  w._szPoseT = Date.now();   // un redimensionnement VOULU par la coquille : le garde anti-rapetissement le laisse passer
   w.once('unmaximize', () => setTimeout(() => {
-    try { if (!w.isDestroyed()) w.setBounds(bornes); } catch (e) {}
+    try { if (!w.isDestroyed()) { w._szPoseT = Date.now(); w.setBounds(bornes); w._szVoulu = { ...bornes }; } } catch (e) {}
   }, 60));
   w.unmaximize();
+};
+const _journalFenetre = (texte) => {
+  try { require('fs').appendFileSync(path.join(app.getPath('userData'), 'fenetre.log'), new Date().toISOString() + ' ' + texte + '\n'); } catch (e) {}
+};
+/* ══ LE GARDE ANTI-RAPETISSEMENT DES FENÊTRES DE TRAVAIL (2026-11-22, 9.1.2) ══
+   Son signalement, encore en 9.1.1 : « le détail de la commande s'ouvre et quelques secondes plus tard se réduit
+   automatiquement ». Les parades des 8.55 / 8.60.2 visaient le faux « maximize » ; l'essai isolé (Electron 31.7.7,
+   1440 × 912, fenêtre sans cadre, recolorations de la bande, va-et-vient du focus) ne rapetisse PAS — la cause exacte
+   n'est donc pas prouvée. ➡ On protège le RÉSULTAT : pendant les 30 s qui suivent l'ouverture, une fenêtre qui devient
+   plus petite SANS geste de la personne (Windows annonce chaque glisser de bord par « will-resize ») et SANS
+   redimensionnement voulu par la coquille (_szPoseT) reprend sa taille. Chaque événement va dans fenetre.log, avec ce
+   qui l'a précédé : au prochain signalement, le journal dira d'où il vient. */
+const _gardeRapetissement = (w, cle) => {
+  const t0 = Date.now();
+  let geste = 0;
+  w.on('will-resize', () => { geste = Date.now(); });
+  w.on('will-move', () => { geste = Date.now(); });
+  const retenirVoulu = () => { try { if (!w.isDestroyed() && !w.isMinimized() && !w.isFullScreen()) w._szVoulu = w.getBounds(); } catch (e) {} };
+  w.once('show', () => setTimeout(retenirVoulu, 50));
+  w.on('resized', () => { if (Date.now() - geste < 1500) retenirVoulu(); });
+  ['minimize', 'restore', 'maximize', 'unmaximize', 'enter-full-screen', 'leave-full-screen', 'hide'].forEach((ev) => {
+    w.on(ev, () => { if (Date.now() - t0 < 60000) _journalFenetre(cle + ' ' + ev + ' +' + (Date.now() - t0) + 'ms bornes=' + JSON.stringify(w.getBounds())); });
+  });
+  w.on('resize', () => {
+    try {
+      if (w.isDestroyed() || w.isMinimized() || w.isFullScreen() || w.isMaximized()) return;
+      const v = w._szVoulu, b = w.getBounds(), dt = Date.now() - t0;
+      if (!v || dt > 30000) return;
+      // Une taille posée par la coquille (hauteur ajustée, pleine zone…) devient la nouvelle taille voulue.
+      if (Date.now() - (w._szPoseT || 0) < 1500) { clearTimeout(w._szVouluT); w._szVouluT = setTimeout(retenirVoulu, 120); return; }
+      const plusPetite = (b.width < v.width - 40) || (b.height < v.height - 40);
+      if (!plusPetite) return;
+      const parGeste = Date.now() - geste < 1500, parCoquille = Date.now() - (w._szPoseT || 0) < 1500;
+      _journalFenetre(cle + ' rapetisse +' + dt + 'ms ' + JSON.stringify(v) + ' -> ' + JSON.stringify(b)
+        + ' geste=' + parGeste + ' coquille=' + parCoquille + ' depuisBande=' + (Date.now() - (w._szOvlT || 0)) + 'ms');
+      if (parGeste || parCoquille) return;
+      setTimeout(() => { try { if (!w.isDestroyed() && !w.isMinimized() && !w.isMaximized()) { w._szPoseT = Date.now(); w.setBounds(v); } } catch (e) {} }, 30);
+    } catch (e) {}
+  });
 };
 /* ⚠⚠ (2026-11-18, son signalement : « le bug de rapetissage est généralisé partout où une fenêtre popup s'ouvre ou qu'un
    verrou s'applique » — la FENÊTRE ELLE-MÊME rapetisse, plein écran ou pas). Une fenêtre sans cadre qui couvre toute la
@@ -746,7 +788,7 @@ function _pleineZoneQuitter(w) {
   w._szPleineZone = null;
   if (!avant) return;
   if (w.isMaximized()) _poserApresRetour(w, avant);
-  else { try { w.setBounds(avant); } catch (e) {} }
+  else { try { w._szPoseT = Date.now(); w.setBounds(avant); w._szVoulu = { ...avant }; } catch (e) {} }
 }
 const _pleineZoneArmer = (w) => {
   w.on('maximize', () => {
@@ -6173,6 +6215,7 @@ const ouvrirNative = (cle, titre, page, opts = {}) => {
      son `id` lèverait — on ne pourrait donc plus retirer le drapeau. */
   const wcId = win.webContents.id;
   _suivrePleinEcran(win);
+  _gardeRapetissement(win, cle);
   // Le titre reste celui qu'on a demandé, pas celui que la page annonce.
   win.on('page-title-updated', (ev) => { ev.preventDefault(); });
   win.setTitle(titre);
@@ -6214,6 +6257,7 @@ const ouvrirNative = (cle, titre, page, opts = {}) => {
           const { screen } = require('electron');
           const zone = screen.getDisplayMatching(win.getBounds()).workArea;
           win._szPleineZone = { avant: win.getBounds(), zone: { ...zone } };
+          win._szPoseT = Date.now();
           win.setBounds(zone);
         } else win.maximize();
       } catch {}
@@ -8788,6 +8832,7 @@ ipcMain.on('fenetre:hauteur', (e, h, garder) => {
     const ecran = screen.getDisplayMatching(win.getBounds());
     const dispo = ecran.workAreaSize.height;
     const [larg] = win.getContentSize();
+    win._szPoseT = Date.now();
     win.setContentSize(larg, Math.min(Math.max(320, Math.round(h)), dispo - 60));
     // ⚠ `garder` : la fenetre reste OU ELLE EST (l assistant Produit se recale a
     // chaque etape — la recentrer arracherait la fenetre des mains de la

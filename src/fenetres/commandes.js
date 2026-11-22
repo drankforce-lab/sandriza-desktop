@@ -229,6 +229,8 @@ tbody tr.attente{background:rgba(124,92,255,.09)}
 .mq .pay.a{background:var(--ep-ambre-f,rgba(245,158,11,.16));color:var(--ep-ambre-t,var(--tx-att))}
 .mq .act button{width:100%;height:28px;border-radius:7px;font-size:12px;font-weight:700;white-space:nowrap;padding:0 8px}
 .mq .act button.prep{background:var(--sz-btn-prim,#8a5a2b);border:0;color:var(--sz-btn-prim-txt,#fff)}
+.mq .act .tenu-puce,.tenu-puce{display:inline-flex;align-items:center;gap:6px;padding:4px 10px 4px 8px;border-radius:99px;background:var(--ep-ambre-f,rgba(245,158,11,.12));color:var(--tx-att);font-size:12px;font-weight:600;white-space:nowrap;cursor:default}
+.tenu-puce svg{flex:none}
 .mq .act button.tenu{background:var(--ep-ambre-f,rgba(245,158,11,.12));border:1px dashed var(--tx-att);color:var(--tx-att);cursor:default;opacity:1!important}
 /* La barre d'outils : les boutons gardent leur largeur (la recherche passe dessous si la place manque, elle ne les recouvre pas). */
 html[data-sz-theme="epure"] .cx-barre>*:not(.droite){flex-shrink:0}
@@ -339,6 +341,47 @@ html.jour .cm-chr .cm-et .cours i{background:#c25e00}
 .cm-cote .gestes button{flex:1;height:38px;justify-content:center}
 .cm-cote .gestes button.sup{color:var(--ep-rouge-t)}
 .cm button:disabled{opacity:.55;cursor:default}
+/* ══ LA FICHE PLUS ÉPURÉE (2026-11-22, 9.1.2 — sa capture : « refait le détail plus épuré ») ══════════════════════
+   Moins de boîtes, moins de contours : les cartes deviennent des surfaces sans bordure ; client, paiement et livraison
+   n'en font plus qu'UNE ; les gestes secondaires sont des boutons sans cadre ; le total a un trait continu ; la
+   chronologie ne coupe plus ses libellés (« Commande p… »). */
+.cm{gap:12px}
+.cm-c{border-color:transparent;background:var(--v03);border-radius:14px;padding:16px 18px}
+.cm-tete{gap:8px}
+.cm-tete h1{font-size:24px}
+.cm-p{font-size:11px;padding:4px 9px;border-radius:99px}
+.cm-tete button:not(.go):not(.tenu):not(.ret){height:36px;padding:0 12px;border:0;background:transparent;color:var(--tx2);font-weight:600}
+.cm-tete button:not(.go):not(.tenu):not(.ret):hover:not(:disabled){background:var(--v06);color:var(--tx)}
+.cm-tete button.go,.cm-tete button.tenu{height:40px;padding:0 16px;font-size:13px}
+.cm-tete button.tenu{border-style:solid;border-color:transparent}
+.cm-art .th{border-bottom-color:var(--v06)}
+.cm-art .r{border-bottom-color:var(--v04,var(--v06))}
+.cm-art .ph{width:48px;height:48px;border-radius:12px}
+.cm-art .l{grid-template-columns:48px minmax(0,1fr) 60px 110px}
+.cm-tot{column-gap:0;min-width:300px}
+.cm-tot span.v,.cm-tot b.v{padding-left:24px}
+.cm-tot b{border-top-color:var(--v08)}
+.cm-chr{gap:12px}
+.cm-chr .cm-et{gap:10px}
+.cm-chr .cm-et i{height:4px}
+.cm-chr .cm-et b{white-space:normal;overflow:visible;line-height:1.25;font-size:12px}
+.cm-chr .cm-et span{white-space:normal;overflow:visible;font-size:11px}
+.cm-fiche{gap:0;padding:0}
+.cm-fiche>div{padding:14px 18px}
+.cm-fiche>div+div{border-top:1px solid var(--v06)}
+.cm-fiche h2{font-size:12px;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.cm-fiche .cm-pl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:6px 14px;font-size:13px}
+.cm-fiche .cm-pl h2{grid-column:span 2;margin-bottom:2px}
+.cm-note{background:transparent;border:0;border-left:3px solid var(--ep-ambre-t);border-radius:0 10px 10px 0;padding:8px 14px}
+.cm-note b{font-size:11px;text-transform:uppercase;letter-spacing:.05em}
+.cm-cote .gestes{gap:4px;justify-content:flex-end}
+.cm-cote .gestes button{flex:0 0 auto;height:34px;padding:0 12px;border:0;background:transparent;color:var(--tx2);font-weight:600}
+.cm-cote .gestes button:hover:not(:disabled){background:var(--v06);color:var(--tx)}
+.cm-cote .gestes button.sup{color:var(--ep-rouge-t)}
+/* Le verrou, dans la bande du haut : un cadenas et un nom, plus une phrase. */
+.sz-verrou-puce{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:99px;background:var(--v06);color:var(--tx2);font-size:12px;font-weight:600;white-space:nowrap}
+.sz-verrou-puce svg{flex:none;opacity:.85}
+.sz-verrou-puce.autre{background:var(--ep-ambre-f,rgba(201,140,40,.16));color:var(--ep-ambre-t,#e0a24a)}
 
 /* ══ LA VUE KANBAN (2026-11-18, relooking — ajout choisi par elle) ════════════════════════════════
    Une colonne par statut ; glisser une carte = le MÊME geste qu'un clic droit › statut (flowStatut :
@@ -980,7 +1023,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var r = mqRecue(o.date);
     var act = '';
     if (o.statut !== 'cancelled') {
-      if (o.enTraitement) act = '<button type="button" class="tenu" disabled>' + esc((o.par || '${T("Quelqu’un")}') + ' ${T("prépare")}') + '</button>';
+      /* (2026-11-22, 9.1.2, sa capture : « pas beau… un petit cadenas, épuré ») Plus de bouton en pointillé : un cadenas et
+         le nom, sans cadre ; la phrase complète reste en infobulle. */
+      if (o.enTraitement) act = '<span class="tenu-puce" title="' + esc((o.par || '${T("Quelqu’un")}') + ' ${T("prépare")}') + '">'
+        + '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" aria-hidden="true"><rect x="5" y="11" width="14" height="10" rx="2"></rect><path d="M8 11V8a4 4 0 0 1 8 0v3"></path></svg>'
+        + esc(o.par || '${T("Quelqu’un")}') + '</span>';
       else if (CTX && CTX.peutEditer && o.statut !== 'pending') act = '<button type="button" class="prep" data-prep="' + esc(o.id) + '">${T("Préparer")}</button>';
     }
     return '<tr class="' + ck.classe(o) + '" data-id="' + esc(o.id) + '" style="--mq-ton:' + g.ton + '" title="${T("Clic : détails · clic droit : changer le statut")}">'
@@ -1167,12 +1214,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var prep = (st === 'preparing' || st === 'verification') ? 'cours' : ((apres || etq) ? 'fait' : 'avenir');
     function e(l, q, etat){ return { l: l, q: q, etat: etat }; }
     return [
-      e('${T("Commande passée")}', szQuand(quand('passee') || c.creeLe), 'fait'),
+      e('${T("Commande passée")}', dateCourte(quand('passee') || c.creeLe), 'fait'),
       e(prep === 'cours' ? '${T("En préparation")}' : '${T("Préparation")}', prep === 'cours' ? (ro ? VERROU_PAR : '${T("en cours")}') : (prep === 'fait' ? '✓' : '${T("à faire")}'), prep),
-      e('${T("Étiquette créée")}', etq ? szQuand(etq) : '—', etq ? 'fait' : 'avenir'),
-      e('${T("Expédiée")}', exp ? szQuand(exp) : '—', (exp || apres) ? 'fait' : 'avenir'),
-      e('${T("Livrée")}', liv ? szQuand(liv) : '—', (liv || st === 'delivered' || st === 'completed') ? 'fait' : 'avenir'),
-      e('${T("Terminée")}', fin ? szQuand(fin) : '—', (fin || st === 'completed') ? 'fait' : 'avenir')
+      e('${T("Étiquette créée")}', etq ? dateCourte(etq) : '—', etq ? 'fait' : 'avenir'),
+      e('${T("Expédiée")}', exp ? dateCourte(exp) : '—', (exp || apres) ? 'fait' : 'avenir'),
+      e('${T("Livrée")}', liv ? dateCourte(liv) : '—', (liv || st === 'delivered' || st === 'completed') ? 'fait' : 'avenir'),
+      e('${T("Terminée")}', fin ? dateCourte(fin) : '—', (fin || st === 'completed') ? 'fait' : 'avenir')
     ];
   }
   function dessinerDetailMaq(d, c, ro){
@@ -1247,17 +1294,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     /* La colonne de droite : client, paiement et livraison, note, remboursements, gestes. */
     var a = c.adresse || {};
     var adr = [a.rue, [a.ville, a.province ? '(' + a.province + ')' : '', a.cp].filter(Boolean).join(' ')].filter(Boolean).join(', ');
-    h += '<aside class="cm-cote"><section class="cm-c"><div class="cm-cli"><span class="cm-av">' + esc(initiales(c.client.nom)) + '</span>'
+    h += '<aside class="cm-cote"><section class="cm-c cm-fiche"><div><div class="cm-cli"><span class="cm-av">' + esc(initiales(c.client.nom)) + '</span>'
       + '<span class="n"><b>' + esc(c.client.nom || '—') + '</b><span>' + (c.membre ? '${T("membre")}' : '${T("invité")}')
       + (c.compte && c.compte.nom && c.compte.nom !== c.client.nom ? ' · ' + esc(c.compte.nom) : '') + (c.client.entreprise ? ' · ' + esc(c.client.entreprise) : '') + '</span></span>'
       + (d.droits.lier && !ro ? '<button type="button" id="det-lier">' + (c.compte ? '${T("Changer")}' : '${T("Lier")}') + '</button>' : '') + '</div>'
-      + '<span class="co">' + esc([c.client.courriel, c.client.tel].filter(Boolean).join(' · ')) + '</span></section>'
-      + '<section class="cm-c cm-pl"><h2>${T("Paiement et livraison")}</h2>'
+      + '<span class="co">' + esc([c.client.courriel, c.client.tel].filter(Boolean).join(' · ')) + '</span></div>'
+      + '<div class="cm-pl"><h2>${T("Paiement et livraison")}</h2>'
       + '<span>${T("Paiement")}</span><strong>' + (c.paiementSquare ? 'Square' + (c.afterpay ? ' · Afterpay' : '') + ((v && v.ok) ? ' · ${T("vérifié")}' : '') : '${T("aucun paiement Square")}') + '</strong>'
       + (c.suivi ? '<span>${T("Suivi")}</span><strong>' + esc(c.suivi) + (c.suiviStatut ? ' · ' + esc(c.suiviStatut) : '') + '</strong>' : '')
       + '<span>${T("Adresse")}</span><strong>' + esc(adr || '—') + '</strong>'
       + (pvHtml(c) && !(v && v.ok) ? '<div style="grid-column:span 2">' + pvHtml(c) + '</div>' : '')
-      + '</section>'
+      + '</div></section>'
       + (c.notes ? '<section class="cm-c cm-note"><b>${T("Notes")}</b><span>' + esc(c.notes) + '</span></section>' : '')
       + (rb.lignes.length ? '<section class="cm-c cm-rb"><h2>${T("Remboursements")}</h2>'
           + rb.lignes.slice(-3).map(function(r){ return '<div class="x"><span>' + esc(r.numero) + ' · ' + esc(dateCourte(r.date)) + '</span><b>−' + argent(r.montant) + '</b></div>'; }).join('')
@@ -1572,13 +1619,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function prendreVerrou(id){
     appeler('verrou:prendre', ['orders', id]).then(function(v){
       if (!v || !v.ok) { sous.textContent = ''; return; }
+      /* (2026-11-22, 9.1.2, sa demande : « ça peut être mieux avec un petit cadenas… épuré ») La phrase « Section
+         verrouillée en modification par : X » devient une puce : un cadenas et un nom. La phrase reste en infobulle. */
+      var puce = function(nom, autre, titre){
+        return '<span class="sz-verrou-puce' + (autre ? ' autre' : '') + '" title="' + esc(titre) + '">' + CADENAS.replace('width="11" height="11"', 'width="12" height="12"') + esc(nom) + '</span>';
+      };
       if (v.obtenu) {
         VERROU_PRIS = true; VERROU_PAR = '';
-        sous.textContent = v.horsLigne ? '${T("hors ligne")}'
-          : '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}');
+        if (v.horsLigne) sous.textContent = '${T("hors ligne")}';
+        else sous.innerHTML = puce(v.par || '${T("vous")}', false, '${T("Section verrouillée en modification par :")} ' + (v.par || '${T("vous")}'));
       } else {
         VERROU_PRIS = false; VERROU_PAR = v.parQui || '${T("quelqu’un d’autre")}';
-        sous.textContent = '${T("en traitement par")} ' + VERROU_PAR;
+        sous.innerHTML = puce(VERROU_PAR, true, '${T("en traitement par")} ' + VERROU_PAR);
       }
       if (VUE === 'detail') dessiner();
     });

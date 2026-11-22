@@ -346,6 +346,8 @@ module.exports = {
    * le texte rendu, le POSEUR la source : il faut les deux formes.
    * ══════════════════════════════════════════════════════════════════════════ */
   'Rédiger avec l’IA': 'Write with AI',
+  'Rédiger la fiche avec l’IA': 'Write the listing with AI',
+  ' Rédiger la fiche avec l’IA': ' Write the listing with AI',
   'Ton de la description': 'Description tone',
   'Chaleureux': 'Warm',
   'Sobre': 'Plain',

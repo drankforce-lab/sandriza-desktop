@@ -105,7 +105,13 @@ const CSS_PROPRE = `
 .carte.pf-photos{flex:1 1 auto;display:flex;flex-direction:column;min-height:0}
 .carte.pf-photos>.ligne-photos{flex:1 1 auto;min-height:0}
 .ligne-photos{display:grid!important;grid-template-columns:var(--pv-main-w,15.5rem) minmax(0,1fr);column-gap:1.3rem;row-gap:.8rem;align-items:start;align-content:start}
-.ligne-photos>.vue-principale{grid-column:1;grid-row:1 / span 4;width:auto}
+/* (2026-11-22, sa capture : un grand vide entre la cabine et l'aperçu 3D, et « Fibre agrandie » coupée en bas) La principale
+   couvrait 4 rangées : sa hauteur s'étalait ENTRE les cartes de droite. Six rangées à leur taille, puis une rangée souple
+   qui prend le reste — les cartes de droite restent serrées en haut. */
+.ligne-photos{grid-template-rows:auto auto auto auto auto auto 1fr}
+.ligne-photos>.vue-principale{grid-column:1;grid-row:1 / -1;width:auto}
+.ligne-photos .vue-principale .mini-decor.pf-ia-photo{opacity:1;margin-top:.5rem;padding:.55rem .6rem;font-size:.8rem;font-weight:600;border-color:var(--or);color:var(--tx-or)}
+.ligne-photos .vue-principale .mini-decor.pf-ia-photo:disabled{opacity:.4;border-color:var(--v08);color:inherit}
 .ligne-photos>:not(.vue-principale){grid-column:2}
 .ligne-photos .vue-principale .vign{width:var(--pv-main-w,15.5rem);height:var(--pv-main-h,19.5rem);border-radius:16px}
 .ligne-photos .vue-principale .mini-decor{width:100%}
@@ -778,7 +784,11 @@ function pageProduit(id, importId) {
       + '<button type="button" id="p-detourer" class="mini-decor" disabled '
       + '><span class="ic">✂</span> ${T("Décor")}</button>'
       + '<button type="button" id="p-studio" class="mini-decor" disabled '
-      + '><span class="ic">📷</span> ${T("Créer au studio")}</button></div>'
+      + '><span class="ic">📷</span> ${T("Créer au studio")}</button>'
+      /* (2026-11-22, sa question : « où est le bouton pour lancer la création automatique par IA une fois l'image placée ? »)
+         Il vivait seulement à l'étape 2, sous la description. Le même geste est offert ICI, là où la photo vient d'être posée :
+         la proposition (nom + description) s'ouvre dans la boîte de révision, puis on passe à l'étape 2 pour la voir. */
+      + '<button type="button" id="p-ia-photo" class="mini-decor pf-ia-photo" disabled><span class="ic">✨</span> ${T("Rédiger la fiche avec l’IA")}</button></div>'
       + '<div class="aide p-studio-attente" id="p-studio-attente" style="display:none"></div>'
       /* LA CABINE D ESSAYAGE (2026-10-30, ses décisions) : obligatoire pour les vêtements et les accessoires de tête ;
          le coût affiché PENDANT la création est celui du serveur (cabine:etat). Dessinée par dessinerCabine. */
@@ -1547,6 +1557,8 @@ function pageProduit(id, importId) {
     majNom();
     var bIa = document.getElementById('p-ia');
     if (bIa) bIa.onclick = rediger;
+    var bIa2 = document.getElementById('p-ia-photo');
+    if (bIa2) bIa2.onclick = rediger;
     var tons = document.getElementById('p-ia-ton');
     if (tons) tons.onclick = function(ev){
       var b = ev.target.closest && ev.target.closest('[data-ton]'); if (!b) return;
@@ -1827,19 +1839,22 @@ function pageProduit(id, importId) {
   // Le bouton de redaction n a de sens qu avec une photo : le service regarde
   // le vetement. On le DIT plutot que de laisser cliquer pour rien.
   function majIa(){
-    var b = document.getElementById('p-ia');
-    if (!b) return;
     var pret = !!IMAGE;
-    b.disabled = !pret;
+    // (2026-11-22) Le bouton de l'étape Photos suit le même état que celui de l'étape 2.
+    ['p-ia', 'p-ia-photo'].forEach(function(id){ var e = document.getElementById(id); if (e) e.disabled = !pret; });
     // ⚠ L explication passe par l INFOBULLE, pas par une ligne sous le bouton.
     // Une phrase d aide permanente occupe la place du formulaire pour dire une
     // chose qu on n a besoin de lire qu une fois.
 
   }
 
-  function rediger(){
+  function rediger(ev){
     var b = document.getElementById('p-ia');
-    b.disabled = true; dire('${T("Rédaction en cours…")}');
+    // (2026-11-22) Lancée depuis l'étape Photos : après « Approuver », on montre l'étape 2 où le texte vient de se poser.
+    var depuisPhotos = !!(ev && ev.currentTarget && ev.currentTarget.id === 'p-ia-photo');
+    var b2 = document.getElementById('p-ia-photo');
+    var occupe = function(oui){ if (b) b.disabled = oui; if (b2) b2.disabled = oui; };
+    occupe(true); dire('${T("Rédaction en cours…")}');
     var cat = (CTX.categories.find(function(c){ return c.cle === val('p-cat'); }) || {}).libelle || '';
     var cNom = document.getElementById('p-ia-nom');
     var avecNom = !!(cNom && cNom.checked);
@@ -1848,13 +1863,13 @@ function pageProduit(id, importId) {
       nom: ancienNom, categorie: cat, couleurs: couleurs(), imageDataUrl: IMAGE, avecNom: avecNom,
       ton: ((document.querySelector('#p-ia-ton .on') || {}).getAttribute ? document.querySelector('#p-ia-ton .on').getAttribute('data-ton') : 'chaleureux')
     }).then(function(r){
-      b.disabled = false;
+      occupe(false);
       if (!r || !r.ok) { dire(expliquer(r) + (r && r.detail ? ' — ' + r.detail : ''), 'err'); return; }
       /* (2026-11-04) La consigne interdit les noms de fibre ; le site redemande une fois. S il en reste, on le dit. */
       var resteF = (r.fibres && r.fibres.length) ? ' ${T("Le texte nomme encore")} ' + guillemets(r.fibres) + ' ${T("— retirez-le, ou inscrivez la composition.")}' : '';
       /* (2026-11-22, sa demande : « on doit pouvoir réviser et approuver avant la création ») La proposition ne s écrit
          plus d elle-même dans la fiche : elle s ouvre dans la boîte de révision (reviserIa). */
-      reviserIa(r, avecNom, ancienNom, resteF);
+      reviserIa(r, avecNom, ancienNom, resteF, depuisPhotos);
     });
   }
 
@@ -1864,7 +1879,7 @@ function pageProduit(id, importId) {
      la fiche — qui ne sera créée qu à « Enregistrer », comme toujours ; « Rejeter » (ou Échap) ne touche à rien.
      L ancien nom et le début de l ancienne description restent sous les yeux : un texte tapé avec soin ne disparaît
      pas sans qu on l ait vu. */
-  function reviserIa(r, avecNom, ancienNom, resteF){
+  function reviserIa(r, avecNom, ancienNom, resteF, depuisPhotos){
     var ancDesc = val('p-desc') || '';
     var v = document.createElement('div');
     v.className = 'szbr-voile';
@@ -1897,6 +1912,7 @@ function pageProduit(id, importId) {
       }
       majCompo();
       fermer();
+      if (depuisPhotos) { try { Assist.aller(1); } catch (e) {} }
       dire('${T("Proposition approuvée et appliquée — elle sera enregistrée avec la fiche.")}' + (resteF || ''), resteF ? 'att' : 'bon');
     };
   }
@@ -3634,7 +3650,8 @@ function pageProduit(id, importId) {
     var rw = W - mw - 21, haut = 0;
     // ⚠ (2026-11-19, sa capture : « Photo 4 » sortie sous la carte) La carte Cabine d'essayage n'était pas comptée : les cases
     // se croyaient de la place qu'elles n'avaient pas.
-    ['p-studio-attente', 'p-3d-carte', 'p-cab-carte'].forEach(function(id){ var e = document.getElementById(id); if (e && e.offsetParent) haut += e.offsetHeight + 13; });
+    // (2026-11-22, sa capture : « Fibre agrandie » coupée en bas) La carte de la vidéo par l'IA n'était pas comptée non plus.
+    ['p-studio-attente', 'p-3d-carte', 'p-cab-carte', 'p-vidia-carte'].forEach(function(id){ var e = document.getElementById(id); if (e && e.offsetParent) haut += e.offsetHeight + 13; });
     var n = Math.max(1, document.querySelectorAll('#p-vues .vue').length);
     var demarquer = document.querySelector('.pv-demarquer') ? 32 : 0;
     var fibre = document.getElementById('p-fibre-bloc'), fibreTete = fibre ? 64 : 0;
