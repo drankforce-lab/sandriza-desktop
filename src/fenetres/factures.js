@@ -81,7 +81,7 @@ tbody tr{cursor:pointer}
 tbody td{vertical-align:middle}
 /* (2026-11-22, sa capture : « améliore l'affichage dans les factures ») Le numéro et le client ne se coupent plus
    (« FAC-0002-47040… », « Bobby Brouss… ») ; échéance, total et statut prennent leur largeur juste, le reste va au client. */
-[data-pages="factures"] table{table-layout:fixed;width:100%}
+[data-pages="factures"] table{width:100%}
 /* ⚠ PAR CLASSE, PAS PAR POSITION : sans cases à cocher (vieux site, lecture seule) les colonnes se décalaient d'un cran
    et le client tombait dans la largeur du numéro (contrastes, 2026-11-22). */
 [data-pages="factures"] th.szk-c{width:2.2rem}[data-pages="factures"] th.w-fac{width:11rem}
