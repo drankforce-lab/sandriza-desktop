@@ -733,4 +733,10 @@ module.exports = {
   "fiche": "record",
   "illisible": "unreadable",
   "origine inconnue": "unknown source",
+  "Agrandir (visionneuse)": "Enlarge (viewer)",
+  "Détacher l’aperçu dans sa propre fenêtre": "Detach the preview into its own window",
+  "Aperçu de la photo": "Photo preview",
+  "Ajuster": "Fit",
+  "Taille réelle": "Actual size",
+  "Choisissez une photo dans la Photothèque : elle s’affiche ici.": "Choose a photo in the Photo library: it shows up here.",
 };

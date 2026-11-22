@@ -77,5 +77,6 @@ module.exports = {
   'Configuration de la messagerie': 'Messaging settings',
   'Nouvelle règle': 'New rule',
   'Modifier la règle': 'Edit rule',
-  'Associer des produits': 'Link products'
+  'Associer des produits': 'Link products',
+  'Aperçu de la photo': 'Photo preview'
 };

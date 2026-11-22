@@ -194,6 +194,34 @@ html.jour .boite .apercu{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6
 .jetons button{font-size:.75rem;padding:.16rem .5rem}
 .jetons button.on{border-color:var(--or);background:rgba(var(--or-rgb),.16)}
 .boite .pied-boite{display:flex;gap:.5rem;flex-wrap:wrap;margin-top:.75rem;justify-content:flex-end}
+/* ══ L INSPECTEUR REFAIT (2026-11-22) ═══════════════════════════════════════ */
+.insp2{display:flex;flex-direction:column;gap:.65rem}
+.insp2 .i-tete{display:flex;align-items:center;gap:.5rem;flex-wrap:wrap}
+.insp2 .i-tete .num{font-weight:800;font-size:.95rem;letter-spacing:.02em}
+.insp2 .i-nav{margin-left:auto;display:inline-flex;align-items:center;gap:.3rem}
+.insp2 .i-nav button{width:1.9rem;height:1.9rem;padding:0;font-size:1rem;line-height:1}
+.insp2 .i-pos{font-size:.74rem;color:var(--tx2);min-width:3rem;text-align:center;font-variant-numeric:tabular-nums}
+.insp2 #p-fermer-insp{width:1.9rem;height:1.9rem;padding:0}
+.insp2 .i-nom{display:flex;gap:.4rem;align-items:center}
+.insp2 .i-nom input{flex:1 1 auto;min-width:0;font:inherit;font-size:.95rem;font-weight:600}
+.insp2 .i-nom b{font-size:1rem;overflow-wrap:anywhere}
+.insp2 .i-ap{position:relative;min-height:16rem;max-height:none;flex:1 1 auto;margin:0;border:1px solid var(--v08)}
+.insp2 .i-ap img{max-height:min(46vh,30rem)}
+.insp2 .i-ap-g{position:absolute;top:.5rem;right:.5rem;display:flex;gap:.35rem}
+.insp2 .i-ap-g button{width:2.1rem;height:2.1rem;padding:0;border-radius:9px;font-size:1rem;background:var(--f-carte);border-color:var(--v16);color:var(--tx)}
+.insp2 .i-infos{margin:0;display:grid;grid-template-columns:1fr 1fr;gap:.55rem 1rem;padding:.65rem .1rem;border-top:1px solid var(--v08);border-bottom:1px solid var(--v08)}
+.insp2 .i-infos div{min-width:0}
+.insp2 .i-infos dt{font-size:.68rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);margin:0 0 .15rem}
+.insp2 .i-infos dd{margin:0;font-size:.86rem;font-weight:600;overflow-wrap:anywhere}
+.insp2 .i-gestes{display:grid;grid-template-columns:1fr 1fr;gap:.5rem}
+.insp2 .i-gestes button{height:2.4rem;font-weight:650}
+.insp2 .i-gestes button:only-child{grid-column:1 / -1}
+.insp2 .i-second{display:flex;gap:.5rem;justify-content:space-between;flex-wrap:wrap}
+.insp2 .i-second button{border-color:transparent;background:transparent;font-size:.78rem}
+.insp2 .i-second button.danger{margin-left:auto}
+/* L inspecteur ouvert, la barre de commande a moins de place : elle passe sur deux lignes au lieu de rogner la recherche. */
+body.insp div.cmd{flex-wrap:wrap;row-gap:.4rem}
+body.insp .cmd #p-q{min-width:10rem}
 .choix{max-height:17rem;overflow:auto;margin-top:.5rem;display:flex;
   flex-direction:column;gap:.28rem}
 .choix .p{display:flex;align-items:center;gap:.55rem;padding:.3rem .4rem;
@@ -800,6 +828,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     else if (RETRAIT_OUVERT) h += retraitHtml();
     else if (LOTS) h += lotsHtml();
     document.body.classList.toggle('insp', !!DETAIL && !ASSIST);
+    if (APERCU_DETACHE && DETAIL) apercuDetacher(false);
     corps.innerHTML = h;
     brancher();
     // La page automatique : mesuree une fois la zone dessinee.
@@ -2003,29 +2032,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     /* ⚠ LE CODE RESTE, LE NOM SE CHANGE. << PH-000001 >> est ce qu on retrouve
        sur une fiche produit, dans un journal et sur une etiquette imprimee : le
        laisser bouger casserait la seule chose qui relie tout cela. */
-    var h = '<div class="voile" id="p-voile"><div class="boite">'
-      + '<div class="sz-plein-ici" style="display:flex;align-items:center;gap:.4rem;margin-bottom:.4rem">'
-      + '<span class="dt" style="flex:1 1 auto">${T("Inspecteur")}</span>'
-      + '<button class="mini" id="p-fermer-insp" title="${T("Fermer le panneau")}">✕</button></div>'
-      + '<h3><span class="num">' + esc(r.code) + '</span> '
-      + (ro ? esc(r.nom)
-            : '<input id="p-nom" type="text" value="' + esc(r.nom) + '" maxlength="120"'
-              + ' style="width:auto;min-width:14rem;font:inherit" title="${T("Renommer cette photo")}">'
-              + ' <button class="mini" id="p-nom-ok">${T("Renommer")}</button>')
-      + ' ' + etat(r) + '</h3>'
-      + '<div class="apercu">'
+    /* ══ (2026-11-22, sa demande : « améliore l’aperçu des photos, c’est pas beau et pas pratique ; ce serait intéressant
+       d’avoir l’option de détacher l’aperçu ») L INSPECTEUR REFAIT : une tête (code, état, photo précédente / suivante,
+       fermer), le NOM modifiable sur toute la largeur, l APERÇU en grand avec ses deux gestes posés dessus (agrandir dans la
+       visionneuse, DÉTACHER dans sa propre fenêtre — qui suit ensuite la photo choisie), les faits en liste, puis les
+       gestes : les deux principaux en haut, les secondaires discrets dessous. Identifiants conservés. */
+    var pos = -1, L = D.lignes || [];
+    L.forEach(function(x, k){ if (x.id === r.id) pos = k; });
+    var h = '<div class="voile" id="p-voile"><div class="boite insp2">'
+      + '<div class="i-tete sz-plein-ici"><span class="num">' + esc(r.code) + '</span>' + etat(r)
+      + '<span class="i-nav">'
+      + '<button type="button" class="mini" id="p-insp-prec"' + (pos <= 0 ? ' disabled' : '') + ' title="${T("Photo précédente")}" aria-label="${T("Photo précédente")}">‹</button>'
+      + '<span class="i-pos">' + (pos >= 0 ? (pos + 1) + ' / ' + L.length : '') + '</span>'
+      + '<button type="button" class="mini" id="p-insp-suiv"' + (pos < 0 || pos >= L.length - 1 ? ' disabled' : '') + ' title="${T("Photo suivante")}" aria-label="${T("Photo suivante")}">›</button></span>'
+      + '<button class="mini" id="p-fermer-insp" title="${T("Fermer le panneau")}" aria-label="${T("Fermer le panneau")}">✕</button></div>'
+      + (ro ? '<div class="i-nom"><b>' + esc(r.nom) + '</b></div>'
+            : '<div class="i-nom"><input id="p-nom" type="text" value="' + esc(r.nom) + '" maxlength="120" aria-label="${T("Renommer cette photo")}" title="${T("Renommer cette photo")}">'
+              + '<button class="mini" id="p-nom-ok" title="${T("Renommer")}">${T("Renommer")}</button></div>')
+      + '<div class="apercu i-ap">'
       + (r.apercu ? '<img src="' + esc(r.apercu) + '" alt="">'
                   : '<span class="aide" style="padding:1rem;text-align:center">${T("Cette photo n’a pas atteint le stockage.")}<br>'
                     + '${T("Elle reste ouverte dans la fenêtre principale ; réessayez l’import.")}</span>')
+      + (r.apercu ? '<div class="i-ap-g">'
+          + '<button type="button" id="p-agrandir" title="${T("Agrandir (visionneuse)")}" aria-label="${T("Agrandir (visionneuse)")}">⤢</button>'
+          + '<button type="button" id="p-detacher" title="${T("Détacher l’aperçu dans sa propre fenêtre")}" aria-label="${T("Détacher l’aperçu dans sa propre fenêtre")}">⧉</button>'
+          + '</div>' : '')
       + '</div>'
-      + '<div class="grille">'
-      + '<div><div class="l">${T("Poids rangé")}</div><div class="v">' + gain(r) + '</div></div>'
-      + (r.poidsSrc ? '<div><div class="l">${T("Avant compression")}</div><div class="v">' + poids(r.poidsSrc) + '</div></div>' : '')
-      + '<div><div class="l">${T("Traitements")}</div><div class="v">'
-      + (traits(r).join(' · ') || (r.isole ? '${T("détourée")}' : '${T("aucun")}')) + '</div></div>'
-      + (r.lieId ? '<div><div class="l">${T("Article")}</div><div class="v">' + esc(r.lieNom)
-          + (r.lieSku ? ' · ' + esc(r.lieSku) : '') + '</div></div>' : '')
-      + '</div>';
+      + '<dl class="i-infos">'
+      + '<div><dt>${T("Poids rangé")}</dt><dd>' + gain(r) + '</dd></div>'
+      + (r.poidsSrc ? '<div><dt>${T("Avant compression")}</dt><dd>' + poids(r.poidsSrc) + '</dd></div>' : '')
+      + '<div><dt>${T("Traitements")}</dt><dd>' + (traits(r).join(' · ') || (r.isole ? '${T("détourée")}' : '${T("aucun")}')) + '</dd></div>'
+      + '<div><dt>${T("Article")}</dt><dd>' + (r.lieId ? esc(r.lieNom) + (r.lieSku ? ' <span class="dt">· ' + esc(r.lieSku) + '</span>' : '') : '<span class="dt">—</span>') + '</dd></div>'
+      + '</dl>';
 
     // (2026-10-25, audit) Le choix du fond de l inspecteur (désactivé par « if (false && …) ») est retiré : il se fait au studio virtuel.
 
@@ -2036,14 +2074,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + '<div class="choix" id="p-choix">' + listeProduits() + '</div></div>';
     }
 
-    h += '<div class="pied-boite">'
-      + (ro ? '' : '<button class="danger" id="p-suppr">'
-          + '${T("✕ Retirer de la médiathèque")}' + '</button>')
-      + (D.bureau ? '<button id="p-enreg">${T("⤓ Enregistrer le fichier")}</button>' : '')
-      + (ro ? '' : '<button id="p-vers-studio">${T("Envoyer au studio virtuel")}</button>')
-      + (ro ? '' : '<button class="' + (r.isole ? 'prim' : '') + '" id="p-attacher">'
+    h += '<div class="i-gestes">'
+      + (ro ? '' : '<button class="prim" id="p-attacher">'
           + (ATTACHE ? '${T("Annuler l’attache")}' : '${T("Attacher à un article")}') + '</button>')
-      + '<button id="p-fermer">${T("Fermer")}</button>'
+      + (ro ? '' : '<button id="p-vers-studio">${T("Envoyer au studio virtuel")}</button>')
+      + '</div>'
+      + '<div class="i-second">'
+      + (D.bureau ? '<button class="mini" id="p-enreg">${T("⤓ Enregistrer le fichier")}</button>' : '')
+      + (ro ? '' : '<button class="mini danger" id="p-suppr">${T("✕ Retirer de la médiathèque")}</button>')
       + '</div>';
 
     if (SUPPR_ARME_INSP) {
@@ -2626,6 +2664,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
     var fx = document.getElementById('p-fermer-insp');
     if (fx) fx.onclick = fermerDetail;
+    var ipr = document.getElementById('p-insp-prec'), isv = document.getElementById('p-insp-suiv');
+    var inspAller = function(d){
+      if (!DETAIL) return; var L = D.lignes || [], k = -1;
+      L.forEach(function(x, j){ if (x.id === DETAIL.id) k = j; });
+      var n = L[k + d]; if (!n) return;
+      DETAIL = n; SUPPR_ARME = ''; SUPPR_ARME_INSP = false; ATTACHE = false; dessiner();
+    };
+    if (ipr) ipr.onclick = function(){ inspAller(-1); };
+    if (isv) isv.onclick = function(){ inspAller(1); };
+    var bag = document.getElementById('p-agrandir');
+    if (bag) bag.onclick = function(){ if (DETAIL) visioOuvrir(DETAIL.id); };
+    var bdt = document.getElementById('p-detacher');
+    if (bdt) bdt.onclick = function(){ APERCU_DETACHE = true; apercuDetacher(true); };
 
     var nomOk = document.getElementById('p-nom-ok');
     if (nomOk) nomOk.onclick = function(){
@@ -2814,6 +2865,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     };
   }
 
+  /* L APERÇU DÉTACHÉ (2026-11-22) : une fenêtre à part (fenetre:photoApercu) qui montre en grand la photo de
+     l inspecteur et la SUIT tant qu elle est ouverte. Fermée par la personne, le principal répond « false » au
+     prochain envoi : on cesse d envoyer. Une coquille sans le verbe ouvre la visionneuse à la place. */
+  var APERCU_DETACHE = false, APERCU_DERNIER = '';
+  function apercuDetacher(ouvrir){
+    if (!DETAIL || !DETAIL.apercu) return;
+    if (!P || typeof P.photoApercu !== 'function') { if (ouvrir) visioOuvrir(DETAIL.id); APERCU_DETACHE = false; return; }
+    var cle = DETAIL.id + '|' + DETAIL.apercu + '|' + DETAIL.nom;
+    if (!ouvrir && cle === APERCU_DERNIER) return;
+    APERCU_DERNIER = cle;
+    P.photoApercu({ url: DETAIL.apercu, nom: DETAIL.nom || '', code: DETAIL.code || '' }, !!ouvrir).then(function(ok){
+      if (!ok && !ouvrir) { APERCU_DETACHE = false; APERCU_DERNIER = ''; }
+    });
+  }
   function fermerDetail(){
     DETAIL = null; ATTACHE = false; PRODUITS = null; PQ = '';
     SUPPR_ARME = ''; SUPPR_ARME_INSP = false;
@@ -3272,4 +3337,60 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 </body></html>`;
 }
 
-module.exports = { pagePhotos };
+/* ══ L APERÇU DÉTACHÉ (2026-11-22, sa demande : « l’option de détacher l’aperçu ») ═══════════════════════════════
+   Une fenêtre qui ne montre QUE la photo de l inspecteur, en grand, sur le damier de transparence. Le principal
+   (fenetre:photoApercu) lui pose la photo par window.szPoser({ url, nom, code }) à l ouverture puis à chaque
+   changement dans la Photothèque. Deux gestes : Ajuster à la fenêtre, ou Taille réelle (clic sur la photo aussi). */
+const CSS_AP = `
+:root{color-scheme:dark}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:var(--f-page);color:var(--tx);font:14px/1.4 system-ui,-apple-system,'Segoe UI',sans-serif;display:flex;flex-direction:column}
+.ap-tete{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem .9rem;border-bottom:1px solid var(--v08);background:var(--f-pied)}
+.ap-tete .num{font-weight:800;letter-spacing:.02em}
+.ap-tete .nm{color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-width:0;flex:1 1 auto}
+.ap-tete button{font:inherit;font-size:.78rem;font-weight:600;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;padding:.3rem .7rem;cursor:pointer}
+.ap-tete button.on{background:var(--f-pill);border-color:var(--or)}
+.ap-cadre{flex:1 1 auto;min-height:0;overflow:hidden;display:flex;align-items:center;justify-content:center;
+  background:conic-gradient(#3a4354 25%,#2b3444 0 50%,#3a4354 0 75%,#2b3444 0) 0 0/18px 18px}
+html.jour .ap-cadre{background:conic-gradient(#e6e1d6 25%,#f4f2ec 0 50%,#e6e1d6 0 75%,#f4f2ec 0) 0 0/18px 18px}
+.ap-cadre img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-in}
+.ap-cadre.reel{overflow:auto;align-items:flex-start;justify-content:flex-start}
+.ap-cadre.reel img{max-width:none;max-height:none;cursor:zoom-out}
+.ap-vide{color:var(--tx2);font-size:.9rem;padding:2rem;text-align:center;background:var(--f-carte);border-radius:12px}
+`;
+function pagePhotoApercu() {
+  return `${TETE()}
+<title>${T("Aperçu de la photo")}</title>
+<style>${CSS_AP}${CSS_JOUR}</style></head><body>
+<div class="ap-tete"><span class="num" id="ap-code"></span><span class="nm" id="ap-nom"></span>
+<button type="button" id="ap-ajuster" class="on">${T("Ajuster")}</button><button type="button" id="ap-reel">${T("Taille réelle")}</button></div>
+<div class="ap-cadre" id="ap-cadre"><span class="ap-vide">${T("Choisissez une photo dans la Photothèque : elle s’affiche ici.")}</span></div>
+<script>
+(function(){
+  'use strict';
+  var cadre = document.getElementById('ap-cadre'), REEL = false;
+  function poserMode(){
+    cadre.classList.toggle('reel', REEL);
+    document.getElementById('ap-ajuster').className = REEL ? '' : 'on';
+    document.getElementById('ap-reel').className = REEL ? 'on' : '';
+  }
+  window.szPoser = function(d){
+    d = d || {};
+    var u = String(d.url || '');
+    if (!/^(https:|data:image)/.test(u)) return;
+    document.getElementById('ap-code').textContent = String(d.code || '');
+    document.getElementById('ap-nom').textContent = String(d.nom || '');
+    var img = cadre.querySelector('img');
+    if (!img) { cadre.textContent = ''; img = document.createElement('img'); img.alt = ''; cadre.appendChild(img);
+      img.onclick = function(){ REEL = !REEL; poserMode(); }; }
+    img.src = u;
+    try { document.title = (d.code ? d.code + ' · ' : '') + (d.nom || ''); } catch (e) {}
+  };
+  document.getElementById('ap-ajuster').onclick = function(){ REEL = false; poserMode(); };
+  document.getElementById('ap-reel').onclick = function(){ REEL = true; poserMode(); };
+})();
+</script></body></html>`;
+}
+
+module.exports = { pagePhotos, pagePhotoApercu };

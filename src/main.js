@@ -3792,6 +3792,27 @@ ipcMain.handle('fenetre:recoForme', (e, id) => {
   return true;
 });
 
+/* (2026-11-22, Photothèque : « l’option de détacher l’aperçu ») La photo de l inspecteur dans SA fenêtre, qui la suit.
+   ouvrir = true : on ouvre (ou on ramène) la fenêtre ; false : on ne fait que la mettre à jour SI elle est ouverte —
+   la réponse « false » dit à la Photothèque qu elle a été fermée. */
+ipcMain.handle('fenetre:photoApercu', (e, d, ouvrir) => {
+  const url = String((d && d.url) || '');
+  if (!/^(https:|data:image)/.test(url)) return false;
+  const donnee = { url, nom: String((d && d.nom) || '').slice(0, 160), code: String((d && d.code) || '').slice(0, 40) };
+  const js = 'window.szPoser && window.szPoser(' + JSON.stringify(donnee) + ')';
+  const deja = fenetresNatives.get('photo-apercu');
+  if (deja && !deja.isDestroyed()) {
+    deja.webContents.executeJavaScript(js, true).catch(() => {});
+    if (ouvrir) { try { deja.show(); deja.focus(); } catch {} }
+    return true;
+  }
+  if (!ouvrir) return false;
+  const win = ouvrirNative('photo-apercu', TF('Aperçu de la photo'), () => pagePhotoApercu(),
+    { width: 900, height: 900, minWidth: 420, minHeight: 420 });
+  if (win && !win.isDestroyed()) win.webContents.once('did-finish-load', () => { win.webContents.executeJavaScript(js, true).catch(() => {}); });
+  return true;
+});
+
 ipcMain.handle('fenetre:etatcompte', (e, id) => {
   const brut = String(id || '');
   if (!brut) return false;
@@ -7709,7 +7730,7 @@ const { pageImages } = require('./fenetres/images');
 const { pageAbonnes } = require('./fenetres/abonnes');
 const { pageCampagnes } = require('./fenetres/campagnes');
 const { pageStatistiques } = require('./fenetres/statistiques');
-const { pagePhotos } = require('./fenetres/photos');
+const { pagePhotos, pagePhotoApercu } = require('./fenetres/photos');
 const { pagePromo } = require('./fenetres/promo');
 const { pagePromoEditeur } = require('./fenetres/promo-editeur');
 const { pageCadre } = require('./fenetres/cadre');
