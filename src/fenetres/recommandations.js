@@ -147,6 +147,22 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 .reg-grille .champ select,.reg-grille .champ input{width:100%;min-height:2.2rem}
 /* Refaite (2026-10-15, lot E) : un rang par regle, son numero d ordre en tete. */
 .reco-rang{grid-template-columns:minmax(0,1.5fr) minmax(0,1.2fr) 7rem 6.5rem auto}
+/* (2026-11-22, refonte) Les liaisons en rangs ; le numéro d'ordre RESTE visible en compact (c'est lui qui décide). */
+.reco-li{grid-template-columns:minmax(0,1.1fr) minmax(0,2fr) auto}
+.reco-ls{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:.6rem}
+.ls.compacte .reco-rang .reco-no{display:flex!important;width:1.7rem;height:1.7rem;border-radius:8px;font-size:.8rem!important}
+.ls.compacte .reco-rang .bilan b{font-size:.92rem}
+.reco-vue{display:inline-flex;border:1px solid var(--sz-bord-fort);border-radius:9px;overflow:hidden;margin-right:.3rem}
+.reco-vue button{font:inherit;font-size:.78rem;font-weight:600;border:0;border-radius:0;background:transparent;color:var(--tx2);padding:.35rem .8rem;cursor:pointer;height:auto}
+.reco-vue>button{background:transparent!important;box-shadow:none!important}
+.reco-vue>button.on{background:var(--f-pill)!important;color:var(--tx)!important;box-shadow:inset 0 0 0 1px var(--sz-bord-fort)!important}
+/* LA FENÊTRE DÉTACHÉE (regle:… / liaison:…) : le formulaire remplit la fenêtre, sans voile. */
+body.forme .corps{padding:1rem 1.2rem;display:flex;flex-direction:column;min-height:0}
+body.forme .voile{position:static;inset:auto;background:none;display:flex;align-items:stretch;justify-content:stretch;flex:1 1 auto;padding:0;min-height:0}
+body.forme .boite{width:100%;max-width:none;max-height:none;flex:1 1 auto;box-shadow:none}
+body.forme .carte{flex:0 0 auto;margin:0}
+/* La liste enveloppée garde l'alignement de la tête (le .ls du socle ajoute ses marges). */
+.ls.reco-ls{padding:0}
 .reco-no{font-size:.95rem!important;color:var(--tx)!important}
 .reco-ou{flex-direction:row!important;flex-wrap:wrap;gap:.3rem!important;align-items:center}
 .reco-rang .gestes button[data-monter],.reco-rang .gestes button[data-descendre]{width:2.1rem;padding:0}
@@ -172,8 +188,11 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
  * avait disparu — resterait invisible pour lui.
  */
 function pageRecommandations(onglet) {
-  const depart = (['liaisons', 'stats', 'agencement'].indexOf(String(onglet || '')) >= 0)
-    ? String(onglet) : 'regles';
+  /* (2026-11-22, sa demande : « des fenêtres détachées pour la création ») « regle:new », « regle:<id> »,
+     « liaison:new », « liaison:<id> » : la fenêtre ne porte QUE le formulaire (fenetre:recoForme, main.js). */
+  const forme = /^(regle|liaison):[\w-]{1,80}$/.test(String(onglet || '')) ? String(onglet) : '';
+  const depart = forme ? (forme.indexOf('liaison:') === 0 ? 'liaisons' : 'regles')
+    : (['liaisons', 'stats', 'agencement'].indexOf(String(onglet || '')) >= 0) ? String(onglet) : 'regles';
   return `${TETE()}
 <title>${T("Recommandations — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -193,6 +212,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
   var D = null;
   var STATS = null;
   var ONGLET = '${depart}';  // regles | liaisons | stats | agencement
+  var FORME = '${forme}';    // '' (la fenêtre entière) | regle:… | liaison:… (fenêtre détachée)
+  var COMPACT = true; try { COMPACT = localStorage.getItem('sz-reco-compact') !== '0'; } catch (e) {}
+  /* Ouvre le formulaire dans SA fenêtre ; une coquille sans le verbe retombe sur le formulaire en place. */
+  function ouvrirForme(cle, repli){
+    if (P && typeof P.ouvrirRecoForme === 'function') { P.ouvrirRecoForme(cle); return; }
+    repli();
+  }
+  function fermerForme(){ setTimeout(function(){ try { window.close(); } catch (e) {} }, 650); }
   /* ── GENERATEUR D AGENCEMENT (#33) ──────────────────────────────────────────
      ⚠ IL N ETAIT JOIGNABLE NULLE PART : cette fenetre affichait << Generateur
      d agencement : ecran Recommandations, fenetre principale >> en designant un
@@ -303,13 +330,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
         if (!r || !r.ok) { if (btn) btn.disabled = false; dire('${T("Échec :")} ' + expliquer(r), 'err'); return; }
         /* ⚠ LE BROUILLON MEURT ICI, et seulement ici : le garder ferait
            concurrence a la fiche enregistree sans qu on sache laquelle fait foi. */
-        szBrouillonJeter(); REG_FORM = null; VOIR = { nom: r.nom || payload.name }; charger(); dire('${T("Règle «")} ' + (r.nom || '') + ' ${T("» créée.")}', 'bon');
+        szBrouillonJeter(); dire('${T("Règle «")} ' + (r.nom || '') + ' ${T("» créée.")}', 'bon');
+        if (FORME) { fermerForme(); return; }
+        REG_FORM = null; VOIR = { nom: r.nom || payload.name }; charger();
       });
     } else {
       var REG_ID = REG_FORM.r.id;   // le formulaire est ferme a la reponse : on garde l id
       appeler('reco:editer', [REG_ID, payload]).then(function(r){
         if (!r || !r.ok) { if (btn) btn.disabled = false; dire('${T("Échec :")} ' + expliquer(r), 'err'); return; }
-        szBrouillonJeter(); REG_FORM = null; VOIR = { id: REG_ID }; charger(); dire('${T("Règle mise à jour.")}', 'bon');
+        szBrouillonJeter(); dire('${T("Règle mise à jour.")}', 'bon');
+        if (FORME) { fermerForme(); return; }
+        REG_FORM = null; VOIR = { id: REG_ID }; charger();
       });
     }
   }
@@ -488,23 +519,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
           ? '<button class="mini danger" id="rc-vider">'
             + '${T("Tout effacer")}' + '</button>' : '')
       + '<span>' + ls.length + '${T(" produit")}' + (ls.length > 1 ? '${T("s liés")}' : '${T(" lié")}') + '</span></div></div>';
-    // Les liaisons en PAGES mesurees : une liaison = un element de page.
-    h += '<div class="carte sz-pagee">';
+    /* (2026-11-22, refonte : « meilleur visuel, des listes compactes ») Une liaison = un RANG : le produit source, ses
+       articles liés en pastilles (quatre au plus, le reste en « +n »), le geste. En pages mesurées. */
+    h += '<div class="ls-liste sz-pagee">';
     if (!ls.length) {
-      h += '<div class="vide">${T("Aucune liaison manuelle.")}'
-        + '<div style="margin-top:.35rem">${T("Les recommandations automatiques s’appliquent seules.")}</div></div>';
+      h += '<div class="ls-vide">${T("Aucune liaison manuelle.")} ${T("Les recommandations automatiques s’appliquent seules.")}</div>';
     } else {
       h += '<div data-pages="reco-liaisons">' + ls.map(function(l){
-        return '<div data-liaison="' + esc(l.id) + '" style="border-top:1px solid var(--v055);padding:.4rem 0">'
-          + '<div style="display:flex;align-items:center;gap:.5rem;flex-wrap:wrap">'
-          + '<strong>' + esc(l.nom) + '</strong>'
-          + '<span class="dt">' + l.lies.length + ' '
-          + (l.lies.length > 1 ? '${T("articles")}' : '${T("article")}') + '</span>'
-          + (D.peutModifier
-              ? '<button class="mini geste" style="margin-left:auto" data-modifier-liaison="' + esc(l.id) + '">${T("Modifier")}</button>'
-              : '') + '</div>'
-          + '<div class="dt" style="margin-top:.15rem">'
-          + l.lies.map(function(x){ return esc(x.nom); }).join(' · ') + '</div></div>';
+        var lies = l.lies || [];
+        return '<div data-ctx-ligne class="ls-rang reco-li" data-liaison="' + esc(l.id) + '">'
+          + '<div class="qui"><span class="bico" aria-hidden="true">' + esc(String(l.nom || '?').slice(0, 2).toUpperCase()) + '</span>'
+          + '<div class="tx"><b>' + esc(l.nom) + '</b><span>' + lies.length + ' '
+          + (lies.length > 1 ? '${T("articles liés")}' : '${T("article lié")}') + '</span></div></div>'
+          + '<div class="ou reco-ou">' + lies.slice(0, 4).map(function(x){ return '<span class="rf-pill">' + esc(x.nom) + '</span>'; }).join('')
+          + (lies.length > 4 ? '<span class="rf-pill">+' + (lies.length - 4) + '</span>' : '') + '</div>'
+          + '<div class="gestes">' + (D.peutModifier ? '<button class="mini geste" data-modifier-liaison="' + esc(l.id) + '">${T("Modifier")}</button>' : '') + '</div></div>';
       }).join('') + '</div>';
     }
     h += '</div>';
@@ -606,6 +635,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
   function dessiner(){
     if (!D) { corps.innerHTML = '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>'; return; }
     if (sous) sous.textContent = D.peutModifier ? '' : '${T("consultation seulement")}';
+    if (FORME) {
+      document.body.classList.add('forme');
+      // La fenêtre EST le formulaire : pas de bouton « Plein écran » sur la boîte (socle).
+      document.documentElement.setAttribute('data-sans-plein', '1');
+      corps.innerHTML = REG_FORM ? formulaireRegle() : LIAISON ? boiteLiaison()
+        : '<div class="vide">${T("Cet élément n’existe plus.")}</div>';
+      brancher();
+      return;
+    }
 
     /* ══ LA TETE REFAITE (2026-10-15, lot E) : les onglets en boutons a choix — le mot seul, sans compte
        (le generateur garde le sien : c est la selection en cours, pas un compte de liste). HORS de
@@ -617,13 +655,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
       + og('regles', '${T("Règles")}') + og('liaisons', '${T("Liaisons manuelles")}') + og('stats', '${T("Statistiques")}')
       + og('agencement', '${T("Générateur d’agencement")}' + (LOOK.length ? ' <span class="n hi">' + LOOK.length + '</span>' : ''))
       + '</div><div class="droite">'
+      + ((ONGLET === 'regles' || ONGLET === 'liaisons')
+          ? '<span class="reco-vue" role="group" aria-label="${T("Affichage")}"><button type="button" data-recovue="detail" class="' + (COMPACT ? '' : 'on') + '">${T("Détaillé")}</button>'
+            + '<button type="button" data-recovue="compact" class="' + (COMPACT ? 'on' : '') + '">${T("Compact")}</button></span>' : '')
       + (ONGLET === 'regles' && D.peutModifier && !REG_FORM ? '<button class="ed-bt fort" id="reg-nouvelle">${T("+ Nouvelle règle")}</button>' : '')
       + '</div></div>';
 
-    h += ONGLET === 'liaisons' ? vueLiaisons()
+    var corpsOnglet = ONGLET === 'liaisons' ? vueLiaisons()
        : ONGLET === 'stats' ? vueStats()
        : ONGLET === 'agencement' ? vueAgencement()
        : vueRegles();
+    h += (ONGLET === 'regles' || ONGLET === 'liaisons') ? '<div class="ls reco-ls' + (COMPACT ? ' compacte' : '') + '">' + corpsOnglet + '</div>' : corpsOnglet;
     if (LIAISON) h += boiteLiaison();
     corps.innerHTML = h;
     CK.apres(); lotSurligner();
@@ -681,9 +723,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
   }
   function brancher(){
     var bl = document.getElementById('rc-lier');
-    if (bl) bl.onclick = function(){ LIAISON = { id: '', nom: '', choisis: [] }; QPROD = ''; dessiner(); };
+    if (bl) bl.onclick = function(){ ouvrirForme('liaison:new', function(){ LIAISON = { id: '', nom: '', choisis: [] }; QPROD = ''; dessiner(); }); };
     var ba = document.getElementById('rc-annuler');
-    if (ba) ba.onclick = function(){ LIAISON = null; dessiner(); };
+    if (ba) ba.onclick = function(){ if (FORME) { try { window.close(); } catch (e) {} return; } LIAISON = null; dessiner(); };
     var vo = document.getElementById('rc-voile');
 
     var qs = document.getElementById('rc-qsrc');
@@ -735,6 +777,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
       appeler('reco:liaisons', [LIAISON.id, LIAISON.choisis]).then(function(r){
         be.disabled = false;
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        if (FORME) {
+          dire(r.nb ? ('« ' + r.nom + ' » : ' + r.nb + '${T(" article")}' + (r.nb > 1 ? '${T("s liés.")}' : '${T(" lié.")}')) : ('${T("Liaisons de «")} ' + r.nom + ' ${T("» retirées.")}'), 'bon');
+          fermerForme(); return;
+        }
         LIAISON = null;
         VOIR = { liaison: idLie };
         dire(r.nb ? ('« ' + r.nom + ' » : ' + r.nb + '${T(" article")}' + (r.nb > 1 ? '${T("s liés.")}' : '${T(" lié.")}'))
@@ -765,6 +811,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
     var t = ev.target;
     if (!t || !t.closest || t.closest('.boite')) return;
     if (CK.clic(ev)) { lotSurligner(); return; }   // une case, << tout cocher >> ou la barre d actions
+
+    var rv = t.closest('[data-recovue]');
+    if (rv) { COMPACT = rv.getAttribute('data-recovue') === 'compact'; try { localStorage.setItem('sz-reco-compact', COMPACT ? '1' : '0'); } catch (e) {} dessiner(); return; }
 
     var og = t.closest('[data-onglet]');
     if (og) {
@@ -799,12 +848,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
 
     /* ⚠ << dessiner() >> D ABORD, << szBrouillonProposer() >> ENSUITE : la boite de reprise
        remplit des champs, et ces champs n existent qu apres le dessin. */
-    if (t.closest('#reg-nouvelle')) { REG_FORM = { mode: 'creer' }; ARME = ''; dessiner(); szBrouillonProposer(); return; }
+    if (t.closest('#reg-nouvelle')) { ouvrirForme('regle:new', function(){ REG_FORM = { mode: 'creer' }; ARME = ''; dessiner(); szBrouillonProposer(); }); return; }
     var bed = t.closest('[data-editer]');
     if (bed) {
       var idE = bed.getAttribute('data-editer');
       var rr = (D.regles || []).filter(function(x){ return x.id === idE; })[0];
-      if (rr) { REG_FORM = { mode: 'editer', r: rr }; ARME = ''; dessiner(); szBrouillonProposer(); }
+      if (rr) ouvrirForme('regle:' + idE, function(){ REG_FORM = { mode: 'editer', r: rr }; ARME = ''; dessiner(); szBrouillonProposer(); });
       return;
     }
     /* ⚠ << Annuler >> N EFFACE PAS LE BROUILLON, et c est voulu : la personne
@@ -814,7 +863,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
        ⚠ ET L ECRITURE EST IMMEDIATE, avec les valeurs prises MAINTENANT : trois
        lignes plus bas le formulaire n existe plus. C est le defaut n°1 des
        Depenses, qui ne gardait que la categorie. */
-    if (t.closest('#reg-annuler')) { szFermerBoite(function(){ REG_FORM = null; dessiner(); }); return; }
+    if (t.closest('#reg-annuler')) { szFermerBoite(function(){ if (FORME) { try { window.close(); } catch (e) {} return; } REG_FORM = null; dessiner(); }); return; }
     if (t.closest('#reg-ok')) { soumettreRegle(); return; }
 
     var bm = t.closest('[data-monter]');
@@ -884,7 +933,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
     if (bml) {
       var idL = bml.getAttribute('data-modifier-liaison');
       var l = (D.liaisons || []).filter(function(x){ return x.id === idL; })[0];
-      if (l) { LIAISON = { id: l.id, nom: l.nom, choisis: l.lies.map(function(x){ return x.id; }) }; QPROD = ''; dessiner(); }
+      if (l) ouvrirForme('liaison:' + idL, function(){ LIAISON = { id: l.id, nom: l.nom, choisis: l.lies.map(function(x){ return x.id; }) }; QPROD = ''; dessiner(); });
       return;
     }
 
@@ -902,6 +951,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'ag-nom':60})}${JS_BROUILLON()}
     appeler('reco:liste', []).then(function(r){
       if (!r || !r.ok) { vide('${T("Recommandations indisponibles")}', expliquer(r)); return; }
       D = r;
+      if (FORME) {
+        var k = FORME.split(':'), idF = k.slice(1).join(':');
+        if (k[0] === 'regle') {
+          if (idF === 'new') REG_FORM = { mode: 'creer' };
+          else { var rf = (D.regles || []).filter(function(x){ return x.id === idF; })[0]; REG_FORM = rf ? { mode: 'editer', r: rf } : null; }
+          if (sous) sous.textContent = REG_FORM && REG_FORM.mode === 'editer' ? '${T("Modifier la règle")}' : '${T("Nouvelle règle")}';
+        } else {
+          if (idF === 'new') LIAISON = { id: '', nom: '', choisis: [] };
+          else { var lf = (D.liaisons || []).filter(function(x){ return x.id === idF; })[0]; LIAISON = lf ? { id: lf.id, nom: lf.nom, choisis: lf.lies.map(function(x){ return x.id; }) } : null; }
+        }
+        dessiner(); if (REG_FORM) szBrouillonProposer(); return;
+      }
       if (ONGLET === 'stats') { chargerStats(); return; }
       dessiner();
       if (ONGLET === 'agencement' && !AGEN) chargerAgencement();

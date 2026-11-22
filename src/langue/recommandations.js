@@ -264,4 +264,9 @@ module.exports = {
   "Supprimer les règles": "Delete the rules",
   "Supprimer {0} règle": "Delete {0} rule",
   "Supprimer {0} règles": "Delete {0} rules",
+  "Détaillé": "Detailed",
+  "Compact": "Compact",
+  "articles liés": "linked items",
+  "article lié": "linked item",
+  "Affichage": "Display",
 };

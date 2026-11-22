@@ -62,7 +62,6 @@ const DERRIERE_UN_GESTE = {
   'coupons.js':          'boutons « Nouveau coupon » et « Modifier »',
   'liens.js':            'bascule du formulaire des liens',
   'promotions.js':       'bouton « Nouvelle offre »',
-  'recommandations.js':  'boutons « Nouvelle règle » et « Éditer »',
   'sociaux.js':          'boutons « Nouveau patron » et « Modifier »',
 };
 

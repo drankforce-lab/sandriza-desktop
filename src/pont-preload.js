@@ -318,6 +318,8 @@ contextBridge.exposeInMainWorld('szPont', {
      mauvais clic et qu on recommence. C est `verifier-verbes-pont` qui l a
      attrapé, pas la relecture. */
   ouvrirPromoEditeur: (id) => ipcRenderer.invoke('fenetre:promoEditeur', String(id || '')).catch(() => false),
+  // (2026-11-22) Recommandations : « regle:new|<id> », « liaison:new|<id> » dans leur fenêtre.
+  ouvrirRecoForme: (id) => ipcRenderer.invoke('fenetre:recoForme', String(id || '')).catch(() => false),
 
   /* Ouvre un AUTRE module depuis une fenêtre (#35 : le bouton « Verrous » des
      Journaux, qui pointe vers l'écran sorti de là). Le nom est filtré côté

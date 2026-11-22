@@ -3779,6 +3779,19 @@ ipcMain.handle('fenetre:promoEditeur', (e, id) => {
   return true;
 });
 
+/* (2026-11-22, sa demande : « des fenêtres détachées pour la création » — Recommandations) Une règle à créer ou modifier,
+   une liaison à faire : LEUR fenêtre. Une fenêtre par élément ; rouvrir la même la ramène. L enregistrement relit la
+   fenêtre Recommandations (voir reco:creer / reco:editer / reco:liaisons dans executerOpSite). */
+ipcMain.handle('fenetre:recoForme', (e, id) => {
+  const brut = String(id || '');
+  if (!/^(regle|liaison):[\w-]{1,80}$/.test(brut)) return false;
+  const regle = brut.indexOf('regle:') === 0, neuf = /:new$/.test(brut);
+  const titre = regle ? (neuf ? 'Nouvelle règle' : 'Modifier la règle') : 'Associer des produits';
+  ouvrirNative('reco-forme-' + brut.replace(/[^\w-]/g, '-'), TF(titre), () => pageRecommandations(brut),
+    regle ? { width: 760, height: 520, minWidth: 600, minHeight: 440 } : { width: 720, height: 720, minWidth: 560, minHeight: 520 });
+  return true;
+});
+
 ipcMain.handle('fenetre:etatcompte', (e, id) => {
   const brut = String(id || '');
   if (!brut) return false;
@@ -4864,6 +4877,8 @@ async function executerOpSite0(nom, args, emetteur) {
       // Les assistants collection et fournisseur previennent leur liste.
       if (nom === 'collection:enregistrer') fenetres.push('collections');
       if (nom === 'fournisseur:enregistrer') fenetres.push('fournisseurs');
+      // (2026-11-22) Les fenêtres détachées des Recommandations préviennent la liste.
+      if (nom === 'reco:creer' || nom === 'reco:editer' || nom === 'reco:liaisons') fenetres.push('recommandations');
       if (fenetres.length) actualiserFenetres(fenetres, emetteur);
       /* (2026-10-15, trouvé par l'audit des opérations) La fenêtre Maintenance appelait
          « tableau:rafraichirMaintenance », qui n'existait NULLE PART : refusé en silence, et le bouton

@@ -5732,6 +5732,7 @@ const JEU = {
       reponses: {
         'reco:liste': {
           ok: true, peutModifier: true,
+          types: [{ v: 'bought_together', l: 'Achetés ensemble' }, { v: 'same_category', l: 'Même catégorie' }],
           regles: [
             { id: 'r1', nom: 'Achetés ensemble', type: 'bought_together',
               typeLibelle: 'Achetés ensemble', ou: ['Fiche produit', 'Panier'], max: 4,
@@ -9712,6 +9713,11 @@ const CAS_REPRISE = [
     },
   },
   {
+    /* (2026-11-22) La règle se crée dans SA fenêtre, qui propose la reprise dès l'ouverture. */
+    fichier: 'recommandations.js', depuis: 'fenêtre détachée — nouvelle règle', quoi: 'Une saisie',
+    brouillon: { 'reg-nom': 'Accessoires tendance', 'reg-titre': 'Vous aimerez aussi', 'reg-sous': '', 'reg-max': '4' },
+  },
+  {
     fichier: 'collection.js', depuis: 'création', quoi: 'Une collection',
     brouillon: {
       'c-nom': 'Hiver — mailles', 'c-desc': 'Cachemire et alpaga.',
@@ -9818,6 +9824,17 @@ const CAS_REPRISE = [
     },
   },
 ];
+
+(function(){
+  /* (2026-11-22) Recommandations : les fenêtres détachées de création (règle neuve, règle à modifier, liaison). */
+  (function(){
+    var L = JEU['recommandations.js']; if (!Array.isArray(L)) return;
+    var base = L.filter(function(c){ return c.nom === 'regles garnies'; })[0]; if (!base) return;
+    L.push({ nom: 'fenêtre détachée — nouvelle règle', id: 'regle:new', reponses: base.reponses, exige: ['id="reg-ok"', 'id="reg-type"'] });
+    L.push({ nom: 'fenêtre détachée — modifier une règle', id: 'regle:r1', reponses: base.reponses, exige: ['id="reg-ok"'] });
+    L.push({ nom: 'fenêtre détachée — liaison', id: 'liaison:p1', reponses: base.reponses, exige: ['id="rc-enr"'] });
+  })();
+})();
 
 for (const c of CAS_REPRISE) {
   const liste = JEU[c.fichier];

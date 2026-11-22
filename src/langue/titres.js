@@ -74,5 +74,8 @@ module.exports = {
   'NIP': 'PINs',
   // (2026-10-25, audit) La barre de titre du décompte d’inactivité.
   'Déconnexion imminente': 'Signing out soon',
-  'Configuration de la messagerie': 'Messaging settings'
+  'Configuration de la messagerie': 'Messaging settings',
+  'Nouvelle règle': 'New rule',
+  'Modifier la règle': 'Edit rule',
+  'Associer des produits': 'Link products'
 };
