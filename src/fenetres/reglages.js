@@ -42,7 +42,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.45 system-ui,-apple-sy
 .rg-rch svg{flex:none;color:var(--tx2)}
 .rg-rch input{border:0!important;outline:none;background:transparent!important;font:inherit;font-size:14px;width:100%;color:var(--tx);padding:0!important;height:auto!important}
 /* (2026-11-18) Trois colonnes qui se TASSENT (plus de rangées fixes) : une carte courte ne laisse plus un trou sous elle. */
-.rg-grille{display:block;columns:4 14.5rem;column-gap:14px;column-fill:balance;flex:none!important;height:auto!important;min-height:0}
+.rg-grille{display:block;columns:4 16.5rem;column-gap:14px;column-fill:balance;flex:none!important;height:auto!important;min-height:0}
 .rg-grille>.rg-carte{break-inside:avoid;margin:0 0 14px}
 .rg-carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:16px;padding:14px 16px 12px;display:flex;flex-direction:column;gap:8px;min-width:0}
 .rg-carte[hidden]{display:none}
@@ -54,6 +54,13 @@ html.jour .rg-ic{background:#3d4456}
 .rg-ct{flex-wrap:wrap;row-gap:2px}
 .rg-ct h2{margin:0;font-size:15px;font-weight:800;line-height:1.25;min-width:0;flex:1 1 auto}
 .rg-ct .nb{margin-left:auto;flex:none;font-size:12px;font-weight:600;color:var(--tx2)}
+/* (2026-11-22, sa capture : « les tuiles débordent et ne tiennent pas le texte sur une ligne ») Le TITRE et son compte
+   restent sur une ligne (le compte devient une pastille : « 7 », le détail au survol) ; chaque ENTRÉE tient sur UNE
+   ligne — larges() la mesure, et une carte dont une entrée ne tient pas dans la demi-colonne passe en une colonne. */
+.rg-ct{flex-wrap:nowrap!important}
+.rg-ct h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.rg-ct .nb{min-width:22px;height:20px;padding:0 7px;border-radius:99px;background:var(--v08);display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
+.rg-e span{white-space:nowrap;overflow:hidden}
 .rg-ent{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:6px}
 .rg-ent.une{grid-template-columns:minmax(0,1fr)}
 .rg-e{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;font:inherit;font-size:13px;font-weight:500;
@@ -116,7 +123,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       n += g.entrees.length;
       var k = sansAccent(g.cle).split(/[^a-z]/)[0]; if (PICTOS.indexOf(k) < 0) k = 'systeme';
       return '<section class="rg-carte" data-g="' + gi + '"><div class="rg-ct"><span class="rg-ic"><svg width="15" height="15" aria-hidden="true"><use href="#rg-' + k + '"></use></svg></span>'
-        + '<h2>' + esc(g.nom) + '</h2><span class="nb">' + g.entrees.length + ' ' + (g.entrees.length > 1 ? '${T("réglages")}' : '${T("réglage")}') + '</span></div>'
+        + '<h2>' + esc(g.nom) + '</h2><span class="nb" title="' + g.entrees.length + ' ' + (g.entrees.length > 1 ? '${T("réglages")}' : '${T("réglage")}') + '">' + g.entrees.length + '</span></div>'
         + '<div class="rg-ent">' + g.entrees.map(function(e, ei){
             if (e.choix) return '<label class="rg-ch" data-k="' + esc(sansAccent(e.t + ' ' + e.choix.map(function(x){ return x.t; }).join(' '))) + '"><span>' + esc(e.t) + '</span>'
               + '<select data-choix="' + gi + '.' + ei + '">' + e.choix.map(function(x, xi){ return '<option value="' + xi + '"' + (x.on ? ' selected' : '') + '>' + esc(x.t) + '</option>'; }).join('') + '</select></label>';
