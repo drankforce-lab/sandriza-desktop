@@ -84,13 +84,17 @@ tbody td{vertical-align:middle}
 [data-pages="factures"] table{width:100%}
 /* ⚠ PAR CLASSE, PAS PAR POSITION : sans cases à cocher (vieux site, lecture seule) les colonnes se décalaient d'un cran
    et le client tombait dans la largeur du numéro (contrastes, 2026-11-22). */
-[data-pages="factures"] th.szk-c{width:2.2rem}[data-pages="factures"] th.w-fac{width:11rem}
-[data-pages="factures"] th.w-ech{width:7.5rem}[data-pages="factures"] th.w-tot{width:6.5rem}
-[data-pages="factures"] th.w-st{width:8.5rem}[data-pages="factures"] th.w-ge{width:12rem}
+[data-pages="factures"] th.szk-c{width:2.2rem}[data-pages="factures"] th.w-fac{width:11.5rem}
+[data-pages="factures"] th.w-ech{width:7rem}[data-pages="factures"] th.w-tot{width:6.5rem}
+[data-pages="factures"] th.w-st{width:7rem}[data-pages="factures"] th.w-ge{width:12rem}
+[data-pages="factures"] td.fin{white-space:nowrap;text-align:right}
+[data-pages="factures"] td.fin .fac-sup{width:1.9rem;padding:0;display:inline-flex;align-items:center;justify-content:center;vertical-align:middle}
+[data-pages="factures"] td:has(> .cx-num) .cx-l2{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}
 [data-pages="factures"] .cx-num{white-space:nowrap!important;overflow:visible!important;text-overflow:clip!important}
 [data-pages="factures"] .cx-qui b,[data-pages="factures"] .cx-qui .cx-l2{white-space:normal!important;overflow:visible!important;text-overflow:clip!important;overflow-wrap:break-word}
-[data-pages="factures"] td.fin{white-space:normal!important;text-align:right}
-[data-pages="factures"] td.fin .geste{display:block;margin:.15rem 0 .15rem auto;white-space:nowrap}
+[data-pages="factures"] td.fin{white-space:nowrap!important;text-align:right}
+[data-pages="factures"] td.fin .geste{display:inline-flex;align-items:center;vertical-align:middle;margin:0 0 0 .3rem;white-space:nowrap}
+[data-pages="factures"] td.fin .geste:first-child{margin-left:0}
 .vide{padding:1.2rem .6rem;text-align:center;color:var(--tx2);font-size:.84rem}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;
   padding:.5rem 1.05rem;border-top:1px solid var(--v08);background:var(--f-pied)}
@@ -355,7 +359,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
                  plus longue laisse l autre moitie en francais. */
               else if (r.statut === 'paid') gestes += '<button class="mini geste" data-depayer="' + esc(r.id) + '" title="${T("Annuler le statut de paiement")}">${T("Annuler le paiement")}</button> ';
             }
-            if (PEUT_SUP) gestes += '<button class="mini geste danger" data-suppr="' + esc(r.id) + '">' + '${T("Supprimer")}' + '</button>';
+            /* (2026-11-22, listes qui se resserrent) « Supprimer » en icône : les deux gestes tiennent sur UNE rangée —
+               empilés, ils doublaient la hauteur de chaque facture et le second était rogné. */
+            if (PEUT_SUP) gestes += '<button class="mini geste danger fac-sup" data-suppr="' + esc(r.id) + '" title="${T("Supprimer")}" aria-label="${T("Supprimer")}">'
+              + '<svg viewBox="0 0 24 24" width="14" height="14" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 6h18"/><path d="M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2"/><path d="M6 6l1 14a2 2 0 002 2h6a2 2 0 002-2l1-14"/></svg></button>';
             return '<tr data-id="' + esc(r.id) + '" class="' + CK.classe(r) + '" title="${T("Ouvrir la facture")}">'
               + CK.td(r)
               + '<td><span class="cx-num">' + esc(r.numero) + '</span>'

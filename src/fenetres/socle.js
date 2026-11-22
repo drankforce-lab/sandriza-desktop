@@ -1118,6 +1118,18 @@ function szPagesAjuster(c){
   var st = _szPg.pages[cle] || (_szPg.pages[cle] = { page: 0, n: -1 });
   var els = _szPgElements(c);
   var pied = _szPgPied(c);
+  /* ══ LA DENSITÉ SUIT LE NOMBRE (2026-11-22, sa règle : « une cinquantaine de produits doit entrer facilement dans une
+     page ; s il y en a moins, espace ; plus il y en a, resserre — partout, sans rien déformer ») Le compte (celui du coeur
+     quand la liste est paginée au serveur) choisit l allure AVANT la mesure : aérée (8 et moins), normale, serrée (21 à 40),
+     très serrée (plus de 40). Seuls les espacements, les boutons et les vignettes des lignes bougent — jamais les colonnes.
+     data-densite-fixe sur le conteneur garde son allure (une liste qui a déjà son propre mode Compact, par exemple). */
+  if (!c.hasAttribute('data-densite-fixe')) {
+    var _coD = _szPgCoeur(c), _nD = _coD ? _coD.total : els.length;
+    var _dens = _nD <= 8 ? 'aeree' : _nD <= 20 ? '' : _nD <= 40 ? 'serree' : 'tres-serree';
+    // L air ne se donne que s il ne coûte pas une page : essayé une fois pour ce compte, retiré s il en crée une.
+    if (_dens === 'aeree' && c.__szAirKo === _nD) _dens = '';
+    if ((c.getAttribute('data-densite') || '') !== _dens) { if (_dens) c.setAttribute('data-densite', _dens); else c.removeAttribute('data-densite'); }
+  }
   /* data-pages-fin : une liste qui s ALLONGE montre sa DERNIERE page (la caisse : l article qu on vient de
      scanner doit se voir). Sinon un changement de compte ramene a la page 1. */
   var co = _szPgCoeur(c);
@@ -1159,6 +1171,11 @@ function szPagesAjuster(c){
     for (var m = 0; m < lignes[k].el.length; m++) lignes[k].el[m].style.display = 'none';
   }
   st.nbVis = pages.length;
+  if (pages.length > 1 && c.getAttribute('data-densite') === 'aeree' && !c.__szPgRe) {
+    c.__szAirKo = els.length; c.removeAttribute('data-densite');
+    c.__szPgRe = true; try { szPagesAjuster(c); } finally { c.__szPgRe = false; }
+    return;
+  }
   if (pages.length < 2 && !(co && co.pages > 1)) { pied.innerHTML = ''; pied.style.display = 'none'; return; }
   var premier = 0;
   for (var a = 0; a < pg[0]; a++) premier += lignes[a].el.length;
@@ -4894,6 +4911,24 @@ body{line-height:1.55}
 /* Un element pagine garde SA hauteur : s il pouvait retrecir (enfant flex, rangee de grille a carte
    overflow:hidden), tout << tiendrait >> en s ecrasant — vu le 2026-10-12, 120 logos aplatis a 26 px. */
 [data-pages]>*{flex-shrink:0}
+/* LA DENSITÉ (voir szPagesAjuster) — tableaux, rangées .ls-rang, cartes de liste .ligne. */
+[data-densite="aeree"] tbody td{padding-top:.85rem;padding-bottom:.85rem}
+[data-densite="aeree"]>.ls-rang{margin-bottom:.75rem}
+[data-densite="serree"] tbody td{padding-top:.38rem;padding-bottom:.38rem}
+[data-densite="serree"]>.ls-rang{min-height:3.4rem;padding-top:.45rem;padding-bottom:.45rem;margin-bottom:.35rem}
+[data-densite="serree"]>.ligne{padding-top:.45rem;padding-bottom:.45rem}
+[data-densite="tres-serree"] tbody td{padding-top:.2rem;padding-bottom:.2rem;line-height:1.3}
+[data-densite="serree"] table{border-spacing:0 4px}[data-densite="tres-serree"] table{border-spacing:0 2px}
+[data-densite="tres-serree"] tbody td button,[data-densite="tres-serree"] tbody td .mini{height:auto;min-height:1.6rem;padding-top:.12rem;padding-bottom:.12rem}
+[data-densite="tres-serree"] tbody td img,[data-densite="tres-serree"] tbody td .vign,[data-densite="tres-serree"] tbody td .vig{max-height:1.9rem;max-width:1.9rem}
+[data-densite="tres-serree"] tbody td .rf-pill{padding-top:.05rem;padding-bottom:.05rem}
+[data-densite="tres-serree"]>.ls-rang{min-height:2.5rem;padding-top:.25rem;padding-bottom:.25rem;margin-bottom:.22rem;gap:1rem}
+[data-densite="tres-serree"]>.ls-rang .bico{width:1.8rem;height:1.8rem}
+[data-densite="tres-serree"]>.ls-rang button{height:1.75rem}
+[data-densite="tres-serree"]>.ligne{padding-top:.3rem;padding-bottom:.3rem}
+/* Serrée et très serrée : les pastilles d initiales et les gestes d une ligne restent sur UNE rangée, plus petits. */
+[data-densite="serree"] tbody td .av,[data-densite="tres-serree"] tbody td .av,[data-densite="tres-serree"] tbody td .ini,[data-densite="tres-serree"] tbody td .rf-av,[data-densite="tres-serree"] tbody td .cx-av{width:1.6rem;height:1.6rem;font-size:.62rem}
+[data-densite="tres-serree"] tbody td small,[data-densite="tres-serree"] tbody td .dt,[data-densite="tres-serree"] tbody td .sous{font-size:.72rem;line-height:1.2}
 .sz-pages{flex:0 0 auto;display:flex;align-items:center;gap:.5rem;padding-top:.45rem;
   margin-top:.35rem;border-top:1px solid var(--v08);font-size:.78rem;color:var(--tx2)}
 .sz-pages button.pgf{min-width:2rem;padding:.15rem .5rem;font-size:1rem;line-height:1.1}
