@@ -93,7 +93,21 @@ button.mini{padding:.12rem .5rem;font-size:.76rem}
 .at-carte .vig svg{position:absolute;left:.9rem;right:.9rem;top:.9rem;bottom:.6rem;width:calc(100% - 1.8rem);height:calc(100% - 1.5rem);display:block}
 .at-carte .tx{display:block;padding:.65rem .85rem .75rem;border-top:1px solid var(--sz-bord)}
 .at-carte .tx .l1{display:flex;align-items:center;gap:.45rem;min-width:0}
-.at-carte .tx .l1 b{flex:1 1 auto;min-width:0;font-size:.9rem;font-weight:650;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.at-carte .tx .l1 b{flex:1 1 auto;min-width:0;font-size:.9rem;font-weight:650;line-height:1.25;white-space:normal;overflow:hidden;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow-wrap:anywhere}
+/* (2026-11-22) La pastille d état sous le nom, avec le type et les tailles : le nom garde toute la largeur. */
+.at-carte .tx .l15{display:flex;align-items:center;gap:.45rem;min-width:0;margin-top:.3rem}
+.at-carte .tx .l15 .at-puce{flex:none}
+.at-carte .tx .l15 .l2{margin-top:0;min-width:0;flex:1 1 auto}
+/* LA BARRE SUR UNE LIGNE */
+.at-barre{display:flex;align-items:center;gap:.6rem;flex-wrap:nowrap}
+.at-barre .at-rch{flex:1 1 16rem;min-width:9rem;width:auto}
+.at-filtre{display:inline-flex;align-items:center;gap:.4rem;flex:none;font-size:.76rem;font-weight:600;color:var(--tx2);white-space:nowrap}
+.at-filtre select{height:2.2rem;min-width:9.5rem;font:inherit;font-size:.84rem;color:var(--tx)}
+.at-barre .at-vue{flex:none;margin-left:auto;display:inline-flex;border:1px solid var(--v16);border-radius:9px;overflow:hidden}
+.at-vue>button{font:inherit;font-size:.8rem;font-weight:600;border:0!important;border-radius:0!important;background:transparent!important;color:var(--tx2);padding:.4rem .85rem;cursor:pointer;box-shadow:none!important}
+.at-vue>button.on{background:var(--f-pill)!important;color:var(--tx)!important;box-shadow:inset 0 0 0 1px var(--v20)!important}
+@media (max-width:980px){.at-barre{flex-wrap:wrap}.at-filtre span{display:none}}
 .at-carte .tx .l2,.at-carte .tx .l3{display:block;font-size:.74rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:.2rem}
 .at-carte .tx .l3{font-size:.7rem}
 .at-carte.nouveau{border-style:dashed;background:transparent;align-items:center;justify-content:center;gap:.4rem;padding:1rem;text-align:center;color:var(--tx2)}
@@ -127,7 +141,9 @@ button.mini{padding:.12rem .5rem;font-size:.76rem}
 .at-scene.pret:hover .at-scene-aide{opacity:1}
 .at-scene .at-scene-3d{position:absolute;right:.5rem;top:.5rem;font-size:.64rem;font-weight:700;letter-spacing:.08em;padding:.12rem .45rem;border-radius:6px;background:rgba(28,27,24,.86);color:#F6F1E8;opacity:0;transition:opacity .35s ease}
 .at-scene.pret .at-scene-3d{opacity:1}
-.at-actions{display:flex;gap:.45rem;padding:0 1.1rem}
+.at-actions{display:flex;gap:.45rem;padding:0 1.1rem;flex-wrap:wrap}
+/* (2026-11-22) « Ouvrir le modèle » sur toute la largeur ; « Éditer le patron » et « … » dessous : plus rien de coupé. */
+.at-actions button.prim{flex:1 1 100%}
 .at-actions button{display:inline-flex;align-items:center;justify-content:center;gap:.45rem;padding:.5rem .8rem;font-size:.84rem;border-radius:10px;white-space:nowrap}
 .at-actions button{min-width:0;flex:1 1 0}
 /* (2026-10-25, audit) « Éditer le patron » et son icône (~150 px) dépassaient du bouton (~133 px dans la colonne de 22 rem) :
@@ -137,11 +153,12 @@ button.mini{padding:.12rem .5rem;font-size:.76rem}
 .at-actions button svg,.at-outil svg{width:1.05rem;height:1.05rem;flex:0 0 auto}
 .at-actions .at-plus{flex:0 0 auto;padding:.5rem .55rem}
 .at-outils{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.35rem;padding:0 1.1rem}
+.at-outil{font-size:.7rem!important;padding-left:.15rem!important;padding-right:.15rem!important}
 .at-outil{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:.3rem;padding:.55rem .2rem .5rem;border-radius:10px;
   background:var(--f-carte2);border:1px solid var(--sz-bord);color:var(--tx2);font-size:.7rem;line-height:1.1;text-align:center;min-width:0;cursor:pointer;
   transition:background .14s ease,color .14s ease,border-color .14s ease}
 .at-outil svg{width:1.25rem;height:1.25rem}
-.at-outil span{display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.at-outil span{display:block;max-width:100%;overflow:hidden;white-space:normal;text-align:center;line-height:1.2;overflow-wrap:anywhere}
 .at-outil:hover{color:var(--tx);border-color:rgba(var(--or-rgb),.55);background:color-mix(in srgb,var(--f-carte2) 86%,var(--or) 10%)}
 .at-outil:disabled{opacity:.5;cursor:default}
 .at-fiche>.ed-note{margin:0 1.1rem}
@@ -153,9 +170,10 @@ button.mini{padding:.12rem .5rem;font-size:.76rem}
 .at-onglets .n{font-size:.66rem;padding:0 .4rem;border-radius:999px;background:var(--v08);color:var(--tx);font-weight:600}
 .at-onglet-corps{flex:1 1 0;min-height:0;overflow:auto;padding:.3rem 1.1rem 1.1rem;display:flex;flex-direction:column;gap:.55rem}
 .at-onglet-corps h3{margin:.55rem 0 .1rem;font-size:.72rem;font-weight:650;letter-spacing:.06em;text-transform:uppercase;color:var(--tx2)}
-.at-fiche-dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:.35rem 1rem;margin:0;font-size:.82rem}
-.at-fiche-dl dt{color:var(--tx2)}
-.at-fiche-dl dd{margin:0;text-align:right;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.at-fiche-dl{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.35rem 1rem;margin:0;font-size:.82rem}
+/* (2026-11-22) La valeur garde sa largeur (une date ne se coupe plus) ; c est le libellé qui passe à la ligne. */
+.at-fiche-dl dt{color:var(--tx2);min-width:0}
+.at-fiche-dl dd{margin:0;text-align:right;white-space:nowrap}
 .at-pieces{display:flex;flex-direction:column;border:1px solid var(--sz-bord);border-radius:10px;overflow:hidden}
 .at-pieces>div{display:flex;justify-content:space-between;gap:.6rem;padding:.42rem .7rem;font-size:.82rem}
 .at-pieces>div+div{border-top:1px solid var(--sz-bord)}
@@ -915,13 +933,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var seg = function(attr, v, lib, actif){
       return '<button type="button" class="' + (actif ? 'on' : '') + '" ' + attr + '="' + v + '">' + lib + '</button>';
     };
-    var h = '<div class="cx-barre"><div class="ed-seg" role="group" aria-label="${T("Catégorie")}">'
-      + seg('data-cat', '', '${T("Tous")}', !CAT)
-      + (D.categories || []).map(function(c){ return seg('data-cat', c.cle, LCAT[c.cle] || szTd(c.nom), CAT === c.cle); }).join('')
-      + '</div><div class="ed-seg" role="group" aria-label="${T("État")}">'
-      + (D.etats || []).map(function(e){ return seg('data-etat', e.cle, LETATS[e.cle] || szTd(e.nom), ETAT === e.cle); }).join('')
-      + '</div><div class="ed-seg" role="group" aria-label="${T("Affichage")}">' + seg('data-vueb', 'cartes', '${T("Cartes")}', VUEB === 'cartes') + seg('data-vueb', 'liste', '${T("Liste")}', VUEB === 'liste')
-      + '</div><div class="droite"><label class="rf-rch">${ICO.loupe}<input type="search" id="a-q" maxlength="60" aria-label="${T("Rechercher un modèle")}" placeholder="${T("Nom, référence, base…")}" value="' + esc(Q) + '"></label></div></div>';
+    /* (2026-11-22, sa capture : « on a perdu du texte, refais-moi une nouvelle interface ») LES FILTRES SUR UNE LIGNE : la
+       recherche d abord (c est elle qu on utilise), puis la catégorie et l état en listes déroulantes — avec leurs comptes —,
+       et l affichage Cartes / Liste au bout. Avant : trois rangées de boutons. */
+    var compte = function(f){ return LEGER ? '' : ' (' + tous.filter(f).length + ')'; };
+    var opt = function(v, lib, actif){ return '<option value="' + esc(v) + '"' + (actif ? ' selected' : '') + '>' + esc(lib) + '</option>'; };
+    var h = '<div class="cx-barre at-barre"><label class="rf-rch at-rch">${ICO.loupe}<input type="search" id="a-q" maxlength="60" aria-label="${T("Rechercher un modèle")}" placeholder="${T("Nom, référence, base…")}" value="' + esc(Q) + '"></label>'
+      + '<label class="at-filtre"><span>${T("Catégorie")}</span><select id="a-cat" aria-label="${T("Catégorie")}">'
+      + opt('', '${T("Toutes")}' + compte(function(m){ return m.etat !== 'archive'; }), !CAT)
+      + (D.categories || []).map(function(c){ return opt(c.cle, (LCAT[c.cle] || szTd(c.nom)) + compte(function(m){ return m.categorie === c.cle && m.etat !== 'archive'; }), CAT === c.cle); }).join('')
+      + '</select></label>'
+      + '<label class="at-filtre"><span>${T("État")}</span><select id="a-etat" aria-label="${T("État")}">'
+      + opt('', '${T("En cours")}', !ETAT)
+      + (D.etats || []).map(function(e){ return opt(e.cle, (LETATS[e.cle] || szTd(e.nom)) + compte(function(m){ return m.etat === e.cle; }), ETAT === e.cle); }).join('')
+      + '</select></label>'
+      + '<div class="at-vue" role="group" aria-label="${T("Affichage")}">' + seg('data-vueb', 'cartes', '${T("Cartes")}', VUEB === 'cartes') + seg('data-vueb', 'liste', '${T("Liste")}', VUEB === 'liste') + '</div></div>';
 
     var liste = filtres();
     var t = '<div class="cx-carte sz-pagee">';
@@ -935,9 +961,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<button type="button" class="at-carte' + (SEL === m.id ? ' on' : '') + '" data-sel="' + esc(m.id) + '" data-ctx-ligne="' + esc(m.id) + '" title="${T("Clic : détails · double-clic : ouvrir")}">'
         // le croquis de face (le vêtement qu on reconnaît) ; à défaut, les pièces à plat
         + '<span class="vig">' + (m.vignette || svgPieces([{ pieces: m.pieces || [] }], 176, 150, { mini: true, titre: m.nom })) + '</span>'
-        + '<span class="tx"><span class="l1"><b>' + esc(m.nom) + '</b>' + (m.verrouille ? '<span class="ic" title="${T("Protégé par NIP")}" aria-label="${T("Protégé par NIP")}">🔒</span>' : '')
-        + '<span class="at-puce ' + esc(m.etat) + '">' + esc(LETAT[m.etat] || m.etat) + '</span></span>'
-        + '<span class="l2">' + esc([LBASE[m.base] || '', m.ref, 'v' + (m.version || 1), (m.tailles || []).join(' ')].filter(Boolean).join(' · ')) + '</span>'
+        + '<span class="tx"><span class="l1"><b title="' + esc(m.nom) + '">' + esc(m.nom) + '</b>' + (m.verrouille ? '<span class="ic" title="${T("Protégé par NIP")}" aria-label="${T("Protégé par NIP")}">🔒</span>' : '') + '</span>'
+        + '<span class="l15"><span class="at-puce ' + esc(m.etat) + '">' + esc(LETAT[m.etat] || m.etat) + '</span>'
+        + '<span class="l2" title="' + esc((m.tailles || []).join(' ')) + '">' + esc([LBASE[m.base] || '', m.ref, 'v' + (m.version || 1), (m.tailles || []).join(' ')].filter(Boolean).join(' · ')) + '</span></span>'
         + '<span class="l3">' + esc('${T("modifié le {0}")}'.split('{0}').join(jour(m.updatedAt))) + '</span></span></button>';
     }).join('') + '</div>';
     // (2026-10-17, sa demande « retire ça » : la carte « Partir d un patron de base » doublait le bouton « Nouveau modèle » de la tête.)
@@ -1481,6 +1507,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     memoM(); t._szMemo = true;
   });
   corps.addEventListener('change', function(ev){
+    var tf = ev.target;
+    if (tf && (tf.id === 'a-cat' || tf.id === 'a-etat')) {
+      if (tf.id === 'a-cat') CAT = tf.value; else ETAT = tf.value;
+      if (LEGER) { PG_PAGE = 0; charger(); } else dessiner();
+      return;
+    }
     if (VUE !== 'modele' || !M) return;
     var t = ev.target; if (t && t.hasAttribute && t.hasAttribute('data-taille')) { memoM(); setTimeout(majEtat, 0); }
   });

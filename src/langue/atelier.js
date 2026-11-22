@@ -167,6 +167,7 @@ module.exports = {
   'Aperçu': 'Preview',
   'Taille de l’aperçu': 'Preview size',
   'Toutes': 'All',
+  'En cours': 'In progress',
   'Base, options ou mesures changées : les pièces seront retracées à l’enregistrement.':
     'Block, options or measurements changed: the pieces will be redrafted when saved.',
   'Toutes les tailles emboîtées': 'All sizes nested',
