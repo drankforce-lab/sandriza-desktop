@@ -3744,6 +3744,8 @@ const OPS_PONT = new Set([
   'objectifs:donnees', 'objectifs:etat', 'objectifs:ecrire', 'objectifs:supprimer',
   // Employés et paie (fenetre Employes, 2026-11-22) ; `employes:pointer` et `monEtat` servent aussi a la caisse.
   'employes:donnees', 'employes:paie', 'employes:paieCsv', 'employes:periode', 'employes:fiche', 'employes:reglages', 'employes:quart', 'employes:quartSupprimer', 'employes:copierSemaine', 'employes:pointage', 'employes:pointageSupprimer', 'employes:monEtat', 'employes:pointer',
+  // (2026-11-23, refonte piste A) taux daté, congés, approbation d'une période.
+  'employes:taux', 'employes:conge', 'employes:congeSupprimer', 'employes:approuver', 'employes:rouvrir',
   // Relance des clients endormis (fenetre Relance, 2026-11-20). `relance:envoyer` passe par Resend (infolettre).
   'relance:donnees', 'relance:apercu', 'relance:envoyer', 'relance:reglages',
   // Fermeture de caisse (fenetre Fermeture, 2026-11-21) : journee de comptoir, tiroir, rapport Z.
@@ -4766,6 +4768,7 @@ const OPS_QUI_CHANGENT_LE_TABLEAU = new Set([
   'objectifs:ecrire', 'objectifs:supprimer',
   // (2026-11-22) Un pointage fait a la caisse se voit dans la fenetre Employes ouverte.
   'employes:pointer', 'employes:pointage', 'employes:fiche', 'employes:quart',
+  'employes:conge', 'employes:taux', 'employes:approuver', 'employes:rouvrir',
 ]);
 
 /* ══ LES LIBELLÉS TRADUITS SUR LE TRAJET ════════════════════════════════════

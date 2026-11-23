@@ -4280,38 +4280,70 @@ const JEU = {
   })(),
   /* (2026-11-22) Employés et paie : formes copiées de assets/js/employes.js (donnees, paie). */
   'employes.js': (function(){
+    /* (2026-11-23, refonte piste A) Formes copiées de assets/js/employes.js : donnees() et paie(). La journée du lundi 23 :
+       une personne en poste, une à venir, un trou de couverture le soir, une personne en vacances, des anomalies. */
+    var RG = { periodeJours: 14, debutRef: '2026-01-04', seuilHS: 40, tauxHS: 1.5, vacancesMode: 'paie', salaireMin: 16.1, pauseAuto: true, pauseApresH: 5, pauseMin: 30,
+      paques: 'vendredi', retardMin: 10, modeles: [{ id: 'm1', nom: 'Ouverture', debut: '09:00', fin: '17:00' }, { id: 'm2', nom: 'Fermeture', debut: '12:00', fin: '20:00' }] };
     var PERS = [
-      { id: 'st1', nom: 'Brigitte Brousseau', role: 'Super-administrateur', actif: true, fiche: { id: 'st1', taux: 0, commission: 0, inclus: false } },
-      { id: 'st2', nom: 'Camille Tremblay', role: 'Administrateur', actif: true, fiche: { id: 'st2', taux: 18.5, commission: 3, inclus: true, embauche: '2026-09-02' } },
-      { id: 'st3', nom: 'Léa Gagnon', role: 'Administrateur', actif: true, fiche: { id: 'st3', taux: 17.75, commission: 2.5, inclus: true, embauche: '2026-10-14' } } ];
+      { id: 'st1', nom: 'Brigitte Brousseau', role: 'Super-administrateur', actif: true, taux: 0, ans: 0, mois: null, vacancesPct: 4, maladiePayees: 0,
+        fiche: { id: 'st1', taux: 0, commission: 0, inclus: false, tauxHist: [{ taux: 0, des: '2000-01-01' }] } },
+      { id: 'st2', nom: 'Camille Tremblay', role: 'Administrateur', actif: true, taux: 18.5, ans: 0, mois: 2, vacancesPct: 4, dateSixPct: '2029-09-02', maladiePayees: 1,
+        tauxProchain: { taux: 19.25, des: '2026-12-01' },
+        fiche: { id: 'st2', taux: 18.5, commission: 3, inclus: true, embauche: '2026-09-02', poste: 'Conseillère', emploi: 'plein', urgence: 'Marc Tremblay · 418 555-0199',
+          tauxHist: [{ taux: 18.5, des: '2026-09-02' }, { taux: 19.25, des: '2026-12-01' }] } },
+      { id: 'st3', nom: 'Léa Gagnon', role: 'Administrateur', actif: true, taux: 17.75, ans: 0, mois: 1, vacancesPct: 4, dateSixPct: '2029-10-14', maladiePayees: 0,
+        fiche: { id: 'st3', taux: 17.75, commission: 2.5, inclus: true, embauche: '2026-10-14', poste: 'Conseillère', emploi: 'partiel', tauxHist: [{ taux: 17.75, des: '2026-10-14' }] } },
+      { id: 'st4', nom: 'Maude Roy', role: 'Employé', actif: true, taux: 21, ans: 3, mois: 40, vacancesPct: 6, maladiePayees: 2,
+        fiche: { id: 'st4', taux: 21, commission: 0, inclus: true, embauche: '2023-07-10', poste: 'Couturière', emploi: 'partiel', tauxHist: [{ taux: 21, des: '2023-07-10' }] } } ];
     var SEM = ['2026-11-22', '2026-11-23', '2026-11-24', '2026-11-25', '2026-11-26', '2026-11-27', '2026-11-28'];
     var HOR = [
-      { id: 'qt1', staffId: 'st2', date: '2026-11-23', debut: '10:00', fin: '17:00', note: '' },
-      { id: 'qt2', staffId: 'st2', date: '2026-11-25', debut: '12:00', fin: '20:00', note: 'Fermeture' },
-      { id: 'qt3', staffId: 'st3', date: '2026-11-27', debut: '09:00', fin: '17:00', note: '' },
-      { id: 'qt4', staffId: 'st3', date: '2026-11-28', debut: '10:00', fin: '18:00', note: '' } ];
+      { id: 'qt1', staffId: 'st3', date: '2026-11-23', debut: '09:00', fin: '17:00', note: 'Ouverture' },
+      { id: 'qt2', staffId: 'st2', date: '2026-11-23', debut: '12:00', fin: '20:00', note: 'Fermeture' },
+      { id: 'qt3', staffId: 'st2', date: '2026-11-25', debut: '12:00', fin: '20:00', note: 'Fermeture' },
+      { id: 'qt4', staffId: 'st3', date: '2026-11-27', debut: '09:00', fin: '17:00', note: '' },
+      { id: 'qt5', staffId: 'st3', date: '2026-11-28', debut: '10:00', fin: '18:00', note: '' } ];
+    var CG = [ { id: 'cg1', staffId: 'st4', date: '2026-11-23', type: 'conge', motif: 'vacances', paye: false }, { id: 'cg2', staffId: 'st4', date: '2026-11-24', type: 'conge', motif: 'vacances', paye: false } ];
+    var PTSEM = [ { id: 'pt1', staffId: 'st3', entree: '2026-11-23T14:02:00.000Z', sortie: null, source: 'caisse', note: '', jour: '2026-11-23', de: '09:02', a: '', heures: 0 } ];
     var PTS = [
-      { id: 'pt1', staffId: 'st3', entree: '2026-11-22T14:02:00.000Z', sortie: null, source: 'caisse', note: '', heures: 0 },
-      { id: 'pt2', staffId: 'st2', entree: '2026-11-21T15:00:00.000Z', sortie: '2026-11-21T22:05:00.000Z', source: 'caisse', note: '', heures: 7.08 },
-      { id: 'pt3', staffId: 'st2', entree: '2026-11-19T14:00:00.000Z', sortie: '2026-11-19T22:00:00.000Z', source: 'saisie', note: 'Oubli de pointage', corrigePar: 'Brigitte Brousseau', heures: 8 } ];
-    var D = { ok: true, peutModifier: true, moi: 'st1', reglages: { periodeJours: 14, debutRef: '2026-01-04', seuilHS: 40, tauxHS: 1.5 },
-      personnel: PERS, semaine: SEM, horaires: HOR, periode: { debut: '2026-11-15', fin: '2026-11-28', jours: 14 }, pointages: PTS, enPoste: ['st3'], aujourdhui: '2026-11-22' };
-    var PAIE = { ok: true, debut: '2026-11-15', fin: '2026-11-28', reglages: D.reglages,
-      totaux: { heures: 72.5, heuresSup: 2, commissions: 61.86, brut: 1452.73 },
-      lignes: [
-        { staffId: 'st2', nom: 'Camille Tremblay', taux: 18.5, pct: 3, heures: 40, heuresSup: 2, salaire: 795.5, nbVentes: 14, ventes: 1420.4, commissions: 42.61, brut: 838.11, pointages: 6, ouverts: 0 },
-        { staffId: 'st3', nom: 'Léa Gagnon', taux: 17.75, pct: 2.5, heures: 32.5, heuresSup: 0, salaire: 576.88, nbVentes: 7, ventes: 770.1, commissions: 19.25, brut: 596.13, pointages: 4, ouverts: 1 } ] };
-    var rep = function(d){ return { identite: IDENTITE, 'employes:donnees': d, 'employes:paie': PAIE,
-      'employes:paieCsv': { ok: true, csv: 'Employé;Taux' }, 'employes:periode': { ok: true, debut: '2026-11-01', fin: '2026-11-14', jours: 14 },
+      { id: 'pt1', staffId: 'st3', entree: '2026-11-23T14:02:00.000Z', sortie: null, source: 'caisse', note: '', jour: '2026-11-23', heures: 0, payees: 0 },
+      { id: 'pt2', staffId: 'st2', entree: '2026-11-21T15:00:00.000Z', sortie: null, source: 'caisse', note: '', jour: '2026-11-21', heures: 0, payees: 0 },
+      { id: 'pt3', staffId: 'st3', entree: '2026-11-20T14:32:00.000Z', sortie: '2026-11-20T22:00:00.000Z', source: 'caisse', note: '', jour: '2026-11-20', heures: 7.47, payees: 6.97 } ];
+    var COUV = { '2026-11-22': { connue: true, ferme: true, trous: [] }, '2026-11-23': { connue: true, ferme: false, debut: '09:00', fin: '21:00', trous: [{ debut: '20:00', fin: '21:00' }] } };
+    SEM.slice(2).forEach(function(j){ COUV[j] = { connue: true, ferme: false, debut: '09:00', fin: '21:00', trous: [{ debut: '09:00', fin: '21:00' }] }; });
+    var ANOM = [ { type: 'sortie', staffId: 'st2', nom: 'Camille Tremblay', date: '2026-11-21', pointageId: 'pt2', entree: '10:00' },
+      { type: 'retard', staffId: 'st3', nom: 'Léa Gagnon', date: '2026-11-20', pointageId: 'pt3', minutes: 32, prevu: '09:00', entree: '09:32' },
+      { type: 'absent', staffId: 'st2', nom: 'Camille Tremblay', date: '2026-11-19', quartId: 'qt0', prevu: '12:00–20:00' } ];
+    var D = { ok: true, peutModifier: true, moi: 'st1', reglages: RG, personnel: PERS, semaine: SEM, horaires: HOR, conges: CG, pointagesSemaine: PTSEM,
+      couvertures: COUV, feriesSemaine: [], periode: { debut: '2026-11-22', fin: '2026-12-05', jours: 14, approuvee: null }, pointages: PTS,
+      enPoste: [{ staffId: 'st3', depuis: '2026-11-23T14:02:00.000Z', id: 'pt1' }], anomalies: ANOM, brutPeriode: 1453.13,
+      prochainsFeries: [{ date: '2026-12-25', nom: 'Noël' }],
+      historique: [{ debut: '2026-11-08', fin: '2026-11-21', le: '2026-11-22T15:00:00Z', par: 'Brigitte Brousseau', brut: 1388.4, personnes: 3 }], aujourdhui: '2026-11-23' };
+    var LIG = [
+      { staffId: 'st2', nom: 'Camille Tremblay', poste: 'Conseillère', taux: 18.5, pct: 3, heures: 38, heuresSup: 2, salaireReg: 703, salaireSup: 55.5, salaire: 758.5, nbVentes: 14, ventes: 1420.4,
+        commissions: 42.61, feries: [], ferie: 0, maladies: [{ date: '2026-11-26', montant: 71.2 }], maladie: 71.2, vacancesPct: 4, vacancesAcquises: 34.89, vacancesVersees: 34.89, vacancesSolde: 0, brut: 907.2, pointages: 6, ouverts: 1 },
+      { staffId: 'st3', nom: 'Léa Gagnon', poste: 'Conseillère', taux: 17.75, pct: 2.5, heures: 32.5, heuresSup: 0, salaireReg: 576.88, salaireSup: 0, salaire: 576.88, nbVentes: 7, ventes: 770.1,
+        commissions: 19.25, feries: [], ferie: 0, maladies: [], maladie: 0, vacancesPct: 4, vacancesAcquises: 23.85, vacancesVersees: 23.85, vacancesSolde: 0, brut: 619.98, pointages: 4, ouverts: 1 },
+      { staffId: 'st4', nom: 'Maude Roy', poste: 'Couturière', taux: 21, pct: 0, heures: 12, heuresSup: 0, salaireReg: 252, salaireSup: 0, salaire: 252, nbVentes: 0, ventes: 0,
+        commissions: 0, feries: [{ date: '2026-12-25', nom: 'Noël', montant: 50.4 }], ferie: 50.4, maladies: [], maladie: 0, vacancesPct: 6, vacancesAcquises: 18.14, vacancesVersees: 18.14, vacancesSolde: 0, brut: 320.54, pointages: 3, ouverts: 0 } ];
+    var PAIE = { ok: true, debut: '2026-11-22', fin: '2026-12-05', reglages: RG, feries: [], approuvee: null, lignes: LIG,
+      totaux: { heures: 82.5, heuresSup: 2, commissions: 61.86, ferie: 50.4, maladie: 71.2, vacances: 76.88, brut: 1847.72 } };
+    var PAIE_OK = Object.assign({}, PAIE, { approuvee: { le: '2026-11-22T15:00:00Z', par: 'Brigitte Brousseau' } });
+    var rep = function(d, paie){ return { identite: IDENTITE, 'employes:donnees': d, 'employes:paie': paie || PAIE,
+      'employes:paieCsv': { ok: true, csv: 'Employé;Taux' }, 'employes:periode': { ok: true, debut: '2026-11-08', fin: '2026-11-21', jours: 14 },
       'employes:fiche': { ok: true, id: 'st2' }, 'employes:quart': { ok: true, id: 'qt9' }, 'employes:quartSupprimer': { ok: true },
       'employes:copierSemaine': { ok: true, copies: 3 }, 'employes:pointage': { ok: true, id: 'pt9' }, 'employes:pointageSupprimer': { ok: true },
-      'employes:reglages': { ok: true } }; };
+      'employes:reglages': { ok: true }, 'employes:taux': { ok: true }, 'employes:conge': { ok: true, jours: 1 }, 'employes:congeSupprimer': { ok: true },
+      'employes:approuver': { ok: true }, 'employes:rouvrir': { ok: true } }; };
+    var FINIE = Object.assign({}, D, { aujourdhui: '2026-12-08' });
     return [
-      { nom: 'équipe', id: 'equipe', reponses: rep(D), exige: ['data-enrfiche="st2"', 'data-c="taux"'] },
-      { nom: 'horaires de la semaine', id: 'horaires', reponses: rep(D), exige: ['data-qplus="st2|2026-11-23"', 'id="em-copier"'] },
-      { nom: 'pointages de la période', id: 'pointages', reponses: rep(D), exige: ['id="fp-ok"', 'data-pmod="pt2"'] },
-      { nom: 'rapport de paie', id: 'paie', reponses: rep(D), exige: ['id="em-csv"', 'id="rg-ok"'] },
-      { nom: 'aucun personnel', id: 'equipe', reponses: rep(Object.assign({}, D, { personnel: [], horaires: [], pointages: [], enPoste: [] })) },
+      { nom: 'aujourd’hui', id: 'aujourdhui', reponses: rep(D), exige: ['data-pmod="pt2"', 'data-absent="2"'] },
+      { nom: 'horaire du jour', id: 'horaire', reponses: rep(D), exige: ['data-zone="st2"', 'data-qmod="qt2"', 'data-cgx="cg1"', 'data-mod="m1"', 'id="em-copier"'] },
+      { nom: 'équipe et fiche', id: 'equipe', reponses: rep(D), exige: ['data-fiche="st2"', 'data-act="taux"'] },
+      { nom: 'paie en cours', id: 'paie', reponses: rep(D), exige: ['id="em-csv"', 'id="bulletin"', 'data-ligne="st4"'] },
+      { nom: 'paie prête à approuver', id: 'paie', reponses: rep(Object.assign({}, FINIE, { anomalies: [] })), exige: ['id="em-approuver"'] },
+      { nom: 'paie approuvée', id: 'paie', reponses: rep(D, PAIE_OK), exige: ['id="em-rouvrir"', 'data-allerper="2026-11-08"'] },
+      { nom: 'réglages de la paie', id: 'reglages', reponses: rep(D), exige: ['id="r-mi"', 'id="r-mods"'] },
+      { nom: 'aucun personnel', id: 'equipe', reponses: rep(Object.assign({}, D, { personnel: [], horaires: [], pointages: [], enPoste: [], anomalies: [] })) },
       { nom: 'droit absent', id: '', reponses: { identite: IDENTITE, 'employes:donnees': { ok: false, motif: 'droit' } } },
     ];
   })(),

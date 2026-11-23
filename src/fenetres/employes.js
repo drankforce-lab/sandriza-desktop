@@ -1,25 +1,23 @@
 'use strict';
 /*
- * EMPLOYÉS ET PAIE — fenêtre native (2026-11-22)
+ * EMPLOYÉS ET PAIE — fenêtre native (2026-11-22 ; refaite le 2026-11-23, piste A)
  * =============================================================================
- * Sa demande : « le module Employés : horaires, pointage à la caisse, commissions
- * sur les ventes et rapport prêt pour la paie — prêt le jour où j'embaucherai ».
+ * Sa demande : « le module employé et paie devra être revu côté fonctionnalité et design »,
+ * puis « Piste A » (https://claude.ai/artifact/2WmgSpkWuoNtT8QLF1YSp5).
  *
  * Quatre onglets, un seul cœur (assets/js/employes.js, par le pont) :
- *   Équipe     taux horaire, % de commission, inclus à la paie, embauche.
- *   Horaires   la semaine (dimanche → samedi) : les quarts prévus, copier la semaine d'avant.
- *   Pointages  les heures faites dans la période (la caisse les pointe) : saisir, corriger.
- *   Paie       la période : heures régulières, supplémentaires (> 40 h/semaine à 150 %),
- *              commissions sur les ventes au comptoir, brut — et l'export CSV.
- *
- *   employes:donnees(semaine, periode) → { personnel[], horaires[], pointages[], periode, reglages, … }
- *   employes:paie(debut, fin)          → { lignes[], totaux }
+ *   Aujourd'hui  la journée : qui travaille, qui arrive, les trous de couverture, ce qui est à régler.
+ *   Horaire      une ligne de temps PAR JOUR : le quart prévu, le pointage réel dessous, les congés
+ *                hachurés, les modèles de quart à poser d'un clic ; la semaine en résumé dessous.
+ *   Équipe       des fiches, et le détail dans un panneau : taux daté, vacances, maladie, contact.
+ *   Paie         la période : fériés, maladie, vacances, commissions, brut ; le bulletin de chacun ;
+ *                « Approuver » fige la période ; l'export CSV ; l'historique ; les réglages.
  *
  * ⚠ LE RAPPORT EST UN BRUT AVANT RETENUES. RRQ, AE, RQAP et impôts se calculent dans
  *   le logiciel de paie : l'écran le dit, l'export aussi.
  *
  * États d'ouverture (pour les bancs de rendu, qui ne cliquent pas) :
- *   'horaires' | 'pointages' | 'paie' → l'onglet ouvert d'emblée.
+ *   'aujourdhui' | 'horaire' | 'equipe' | 'paie' | 'reglages' → l'onglet (ou la boîte) ouvert d'emblée.
  */
 const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 const T = require('../langue').tr('employes');
@@ -39,68 +37,38 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 select,input,button,textarea{font:inherit;color:var(--tx);background:var(--v05);border:1px solid var(--v16);border-radius:8px;
   padding:.3rem .5rem;cursor:pointer}
 input,textarea{cursor:text}
-input[type=checkbox]{width:auto;padding:0;cursor:pointer}
-select:focus,input:focus,button:focus{outline:none;border-color:var(--or)}
+input[type=checkbox],input[type=radio]{width:auto;padding:0;cursor:pointer}
+select:focus,input:focus,button:focus-visible{outline:none;border-color:var(--or)}
 button:hover:not(:disabled){background:var(--v10)}
 button:disabled{opacity:.45;cursor:default}
-button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
+button.prim{background:var(--sz-btn-prim,var(--or));border-color:transparent;color:var(--sz-btn-prim-txt,#1a1208);font-weight:700}
+button.prim:hover:not(:disabled){background:var(--sz-btn-prim-fort,var(--or))}
 button.dang{color:var(--tx-err2)}
-button.mini{padding:.12rem .45rem;font-size:.76rem}
-#corps{flex:1 1 auto;min-height:0;overflow:hidden;padding:.85rem 1.1rem .7rem;display:flex;flex-direction:column;gap:.75rem}
+button.mini{padding:.15rem .55rem;font-size:.78rem}
+#corps{flex:1 1 auto;min-height:0;overflow:auto;padding:.85rem 1.1rem .8rem;display:flex;flex-direction:column;gap:.9rem}
 .pied{flex:0 0 auto;padding:.35rem 1.1rem;border-top:1px solid var(--v08);min-height:1.9rem;font-size:.8rem}
 .msg.bon{color:var(--tx-ok)} .msg.err{color:var(--tx-err)}
-.em-tete{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
-.em-tete .ed-seg button{height:2rem;padding:0 .9rem}
-.em-tete .ed-seg button.on{background:var(--or);color:#1a1208;font-weight:700}
-.em-tete .droite{margin-left:auto;display:flex;align-items:center;gap:.45rem}
-.em-nav{display:flex;align-items:center;gap:.45rem}
-.em-nav b{font-size:.9rem;min-width:13rem;text-align:center}
-.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:14px;padding:.8rem .9rem;min-width:0}
-.em-t{width:100%;border-collapse:separate;border-spacing:0 4px;font-size:.82rem}
-.em-t th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;padding:0 .55rem}
-.em-t th.n,.em-t td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
-.em-t td{background:var(--f-carte);padding:.4rem .55rem;border-top:1px solid var(--v07);border-bottom:1px solid var(--v07);vertical-align:middle}
-.em-t td:first-child{border-left:1px solid var(--v07);border-radius:9px 0 0 9px}
-.em-t td:last-child{border-right:1px solid var(--v07);border-radius:0 9px 9px 0}
-.em-t tfoot td{font-weight:800;background:transparent;border:0}
-.em-t input[type=number]{width:6.2rem;text-align:right}
-.em-t input[type=date]{width:9.5rem}
-.nom b{display:block}.nom span{font-size:.72rem;color:var(--tx2)}
-.pill{display:inline-flex;align-items:center;font-size:.7rem;font-weight:700;padding:.1rem .5rem;border-radius:999px;white-space:nowrap;background:var(--v08);color:var(--tx2)}
-.pill.ok{background:rgba(74,222,128,.14);color:var(--tx-ok)}
-.pill.att{background:rgba(251,191,36,.14);color:var(--tx-att)}
-html.jour .pill{color:#47505e} html.jour .pill.ok{color:#1d6a3b}
-.em-sem{display:grid;grid-template-columns:11rem repeat(7,minmax(0,1fr)) 4.5rem;gap:4px;font-size:.78rem}
-.em-sem .h{font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;padding:.2rem .35rem}
-.em-sem .h.auj{color:var(--tx-or)}
-.em-sem .c{background:var(--f-carte);border:1px solid var(--v07);border-radius:8px;padding:.3rem;min-height:3rem;display:flex;flex-direction:column;gap:3px;min-width:0}
-.em-sem .c.nm{justify-content:center;font-weight:700}
-.em-sem .c.tot{justify-content:center;align-items:flex-end;font-variant-numeric:tabular-nums;font-weight:700}
-.em-q{display:flex;align-items:center;gap:.2rem;padding:.1rem .3rem;border-radius:6px;background:rgba(var(--or-rgb),.14);font-variant-numeric:tabular-nums;white-space:nowrap}
-.em-q button{border:0;background:transparent;padding:0 .15rem;font-size:.7rem;color:var(--tx2)}
-.em-sem .plus{align-self:flex-start;border:1px dashed var(--v16);background:transparent;padding:0 .4rem;font-size:.72rem;color:var(--tx2)}
-.em-f{display:flex;align-items:flex-end;gap:.5rem;flex-wrap:wrap;font-size:.8rem}
-.em-f label{display:flex;flex-direction:column;gap:.15rem;font-size:.7rem;color:var(--tx2);font-weight:600}
-.em-f input[type=time]{width:7rem}
-.em-f input.note{width:14rem}
-.em-note{font-size:.76rem;color:var(--tx2)}
-.em-tot{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem}
-.em-tot .k{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:.5rem .7rem}
-.em-tot .k span{display:block;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
-.em-tot .k b{font-size:1.05rem;font-variant-numeric:tabular-nums}
 .vide{color:var(--tx2);text-align:center;padding:1.4rem 1rem}
-/* ══ LE RENDU VIVANT (2026-11-23, 9.2.10 — sa capture : « améliore le rendu des horaires, du pointage et de la paie ») ══
-   Même famille que la fiche de commande « Vivant » : tuiles colorées (cycle --vv), pastilles d'initiales d'une couleur par
-   personne, cartes en relief, réglages en vraie carte (champs alignés, unités, note dedans, bouton à droite). */
-#corps{gap:.9rem}
-.em-tete .ed-seg{display:inline-flex;gap:2px;padding:3px;border-radius:11px;background:var(--f-carte);border:1px solid var(--v08)}
-.em-tete .ed-seg button{height:2rem;padding:0 1rem;border:0;background:transparent;border-radius:8px;color:var(--tx2);font-weight:600}
-.em-tete .ed-seg button.on{background:var(--sz-btn-prim,var(--or));color:var(--sz-btn-prim-txt,#1a1208);font-weight:700}
-.em-nav{gap:2px;padding:3px;border-radius:10px;background:var(--f-carte);border:1px solid var(--v08)}
-.em-nav button.mini{border:0;background:transparent;height:1.75rem;padding:0 .6rem;font-size:.8rem}
-.em-nav b{min-width:12rem;font-size:.85rem}
-.carte{border-radius:16px;box-shadow:0 14px 30px -20px rgba(0,0,0,.55),inset 0 1px 0 var(--v03)}
+.carte{background:var(--f-carte);border:1px solid var(--v08);border-radius:16px;padding:.85rem .95rem;min-width:0;
+  box-shadow:0 14px 30px -20px rgba(0,0,0,.55),inset 0 1px 0 var(--v03)}
 html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
+.carte h3{margin:0;font-size:.92rem;font-weight:800;display:flex;align-items:center;gap:.5rem}
+.carte h3 .dr{margin-left:auto;font-weight:600}
+.note{font-size:.76rem;color:var(--tx2);line-height:1.45}
+
+/* La tête : les onglets à gauche, les gestes de l'onglet à droite. */
+.em-tete{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap}
+.ed-seg{display:inline-flex;gap:2px;padding:3px;border-radius:11px;background:var(--f-carte);border:1px solid var(--v08)}
+.ed-seg button{height:2rem;padding:0 1rem;border:0;background:transparent;border-radius:8px;color:var(--tx2);font-weight:600}
+.ed-seg button.on{background:var(--sz-btn-prim,var(--or));color:var(--sz-btn-prim-txt,#1a1208);font-weight:700}
+.ed-seg button .nb{display:inline-grid;place-items:center;min-width:1.2rem;height:1.2rem;margin-left:.35rem;padding:0 .3rem;border-radius:99px;
+  font-size:.7rem;font-weight:800;background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+.em-tete .droite{margin-left:auto;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
+.em-nav{display:flex;align-items:center;gap:2px;padding:3px;border-radius:10px;background:var(--f-carte);border:1px solid var(--v08)}
+.em-nav button{border:0;background:transparent;height:1.75rem;padding:0 .6rem;font-size:.8rem}
+.em-nav b{min-width:11rem;text-align:center;font-size:.85rem}
+
+/* Les tuiles (szTuiles) */
 .em-tuiles{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.75rem}
 .em-tu{--emt:var(--vv-1,#5fd4a4);min-width:0;border-radius:14px;padding:.7rem .85rem;display:flex;flex-direction:column;gap:.15rem;
   background:color-mix(in srgb,var(--emt,var(--vv-1,#5fd4a4)) var(--vv-pct,20%),var(--f-carte));border:1px solid color-mix(in srgb,var(--emt,var(--vv-1,#5fd4a4)) 30%,var(--f-carte))}
@@ -110,61 +78,160 @@ html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
 .em-tu span:not(.k){font-size:.74rem;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:1rem}
 .em-tu.att{background:var(--ep-ambre-f);border-color:color-mix(in srgb,var(--ep-ambre-t) 30%,var(--ep-ambre-f))}
 .em-tu.att .k,.em-tu.att b{color:var(--ep-ambre-t)}
+
+/* Les personnes : initiales d'une couleur par personne. */
 .em-av{--emc:var(--vv-1,#5fd4a4);flex:none;width:2rem;height:2rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
   font-size:.72rem;font-weight:800;background:color-mix(in srgb,var(--emc,var(--vv-1,#5fd4a4)) 22%,var(--f-carte));color:color-mix(in srgb,var(--emc,var(--vv-1,#5fd4a4)) 40%,var(--tx))}
-.em-av.c2{--emc:var(--vv-2,#7cb4f5)} .em-av.c3{--emc:var(--vv-3,#b49cf7)} .em-av.c4{--emc:var(--vv-4,#f08fb8)}
+.c2{--emc:var(--vv-2,#7cb4f5)} .c3{--emc:var(--vv-3,#b49cf7)} .c4{--emc:var(--vv-4,#f08fb8)}
 .em-qui{display:flex;align-items:center;gap:.55rem;min-width:0}
-.em-qui b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.em-qui span.s{display:block;font-size:.72rem;color:var(--tx2);white-space:nowrap}
-.em-t td{padding:.5rem .6rem}
-.em-t td.or{color:var(--tx-or,var(--tx));font-weight:800}
-.em-t th{color:var(--tx-or,var(--tx2))}
-.pill.src{background:color-mix(in srgb,var(--vv-2,#7cb4f5) 18%,var(--f-carte));color:color-mix(in srgb,var(--vv-2,#7cb4f5) 40%,var(--tx))}
-.pill.ok{position:relative;padding-left:1.1rem}
-.pill.ok::before{content:"";position:absolute;left:.45rem;top:50%;width:.4rem;height:.4rem;margin-top:-.2rem;border-radius:50%;background:currentColor;animation:em-pouls 1.6s ease-in-out infinite}
+.em-qui .n{display:flex;flex-direction:column;min-width:0;line-height:1.3}
+.em-qui b{font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.em-qui small{font-size:.72rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pill{display:inline-flex;align-items:center;gap:.3rem;font-size:.7rem;font-weight:700;padding:.12rem .55rem;border-radius:999px;white-space:nowrap;
+  background:var(--ep-neutre-f,var(--v08));color:var(--ep-neutre-t,var(--tx2))}
+.pill.v{background:var(--ep-vert-f,rgba(74,222,128,.14));color:var(--ep-vert-t,var(--tx-ok))}
+.pill.a{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+.pill.r{background:var(--ep-rouge-f);color:var(--ep-rouge-t)}
+.pill.v.pouls::before{content:"";width:.4rem;height:.4rem;border-radius:50%;background:currentColor;animation:em-pouls 1.6s ease-in-out infinite}
 @keyframes em-pouls{50%{opacity:.25}}
-@media (prefers-reduced-motion:reduce){.pill.ok::before{animation:none}}
-/* La semaine : une rangée par personne, aujourd'hui en relief, les quarts aux couleurs de la personne. */
-.em-sem{grid-template-columns:12.5rem repeat(7,minmax(0,1fr)) 7rem;gap:5px}
-.em-sem .h{text-align:center;padding:.3rem .2rem;border-radius:8px}
-.em-sem .h.auj{background:color-mix(in srgb,var(--or) 18%,transparent);color:var(--tx)}
-.em-sem .c{border-radius:10px;min-height:3.4rem;padding:.35rem}
-.em-sem .c.auj{border-color:color-mix(in srgb,var(--or) 45%,var(--v07));background:color-mix(in srgb,var(--or) 6%,var(--f-carte))}
-.em-sem .c.nm{flex-direction:row;align-items:center;justify-content:flex-start;gap:.55rem}
-.em-sem .c.tot{align-items:stretch;justify-content:center;gap:.3rem}
-.em-sem .c.tot b{text-align:right;font-variant-numeric:tabular-nums}
-.em-barre{height:5px;border-radius:99px;background:var(--v08);overflow:hidden}
-.em-barre i{display:block;height:100%;border-radius:99px;background:var(--emc,var(--vv-1,#5fd4a4))}
-.em-barre.trop i{background:var(--ep-ambre-t)}
-.em-q{--emc:var(--vv-1,#5fd4a4);background:color-mix(in srgb,var(--emc,var(--vv-1,#5fd4a4)) 20%,var(--f-carte));color:var(--tx);border-left:3px solid var(--emc,var(--vv-1,#5fd4a4));
-  border-radius:6px;padding:.15rem .35rem;font-size:.74rem;font-weight:600;justify-content:space-between}
-.em-q button{color:var(--tx)}   /* le ✕ sur la pastille teintée : --tx2 y tombait à 4,1:1 (contrastes, 2026-11-23) */
-.em-q.c2,.em-barre.c2 i{--emc:var(--vv-2,#7cb4f5)} .em-q.c3,.em-barre.c3 i{--emc:var(--vv-3,#b49cf7)} .em-q.c4,.em-barre.c4 i{--emc:var(--vv-4,#f08fb8)}
-.em-sem .plus{align-self:stretch;margin-top:auto;border-radius:6px;color:var(--tx2)}
-.em-sem .c:hover .plus{color:var(--tx);border-color:var(--v20,var(--v16))}
-.em-sem .pied-j{text-align:center;font-size:.72rem;color:var(--tx2);font-variant-numeric:tabular-nums;padding:.25rem 0}
-.em-sem .pied-j.t{text-align:left;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:.66rem}
-/* Les formulaires (quart, pointage) et les réglages : une carte, des champs de même hauteur, une rangée de gestes. */
-.em-form{display:flex;flex-direction:column;gap:.75rem}
-.em-form .tt{display:flex;flex-direction:column;gap:.1rem}
-.em-form .tt b{font-size:.95rem;font-weight:800}
-.em-form .tt span{font-size:.76rem;color:var(--tx2);line-height:1.45}
-.em-champs{display:grid;grid-template-columns:repeat(auto-fit,minmax(10.5rem,1fr));gap:.65rem .8rem;align-items:end}
-.em-ch{display:flex;flex-direction:column;gap:.3rem;font-size:.72rem;font-weight:600;color:var(--tx2);min-width:0}
-.em-ch.large{grid-column:span 2}
-.em-champs.cinq{grid-template-columns:minmax(0,1.6fr) minmax(0,1fr) minmax(0,.8fr) minmax(0,.8fr) minmax(0,1.6fr)}
-.em-ch select,.em-ch input{height:2.3rem;width:100%;border-radius:9px}
-.em-in{position:relative;display:flex;align-items:center}
-.em-in input{padding-right:3.6rem;text-align:right}
-.em-in i{position:absolute;right:.65rem;font-style:normal;font-size:.74rem;color:var(--tx2);pointer-events:none}
-.em-gestes{display:flex;align-items:center;gap:.5rem;padding-top:.65rem;border-top:1px solid var(--v06)}
-.em-gestes .em-note{margin-right:auto;line-height:1.45}
-.em-gestes button{height:2.3rem;padding:0 1rem;border-radius:9px}
+@media (prefers-reduced-motion:reduce){.pill.v.pouls::before{animation:none}}
+
+/* AUJOURD'HUI */
+.g2{display:grid;grid-template-columns:minmax(0,1.45fr) minmax(0,1fr);gap:.8rem;align-items:start}
+.ln{display:flex;align-items:center;gap:.7rem;padding:.55rem 0;border-top:1px solid var(--v06)}
+.ln:first-of-type{border-top:0}
+.ln .em-qui{margin-right:auto}
+.al{display:flex;gap:.65rem;align-items:center;padding:.55rem .65rem;border-radius:11px;background:var(--v04,var(--v05))}
+.al+.al{margin-top:.4rem}
+.al i{flex:none;width:.5rem;height:.5rem;border-radius:50%;background:var(--ep-ambre-t)}
+.al i.b{background:var(--vv-2,#7cb4f5)}
+.al .tx{display:flex;flex-direction:column;line-height:1.35;margin-right:auto;min-width:0}
+.al .tx b{font-size:.84rem}
+.al .tx small{font-size:.74rem;color:var(--tx2)}
+.liste{display:flex;flex-direction:column;margin-top:.55rem}
+
+/* HORAIRE : la ligne de temps d'un jour */
+.jours{display:flex;gap:4px;flex-wrap:wrap}
+.jours button{display:flex;flex-direction:column;align-items:center;line-height:1.2;padding:.3rem .65rem;border-radius:10px;border:1px solid var(--v08);background:var(--f-carte);min-width:4.6rem}
+.jours button b{font-size:.8rem}
+.jours button small{font-size:.68rem;color:var(--tx2);font-variant-numeric:tabular-nums}
+.jours button.on{border-color:var(--or);background:color-mix(in srgb,var(--or) 14%,var(--f-carte))}
+.jours button.auj b{color:var(--tx-or,var(--tx))}
+.modeles{display:flex;align-items:center;gap:.4rem;flex-wrap:wrap;font-size:.78rem;color:var(--tx2)}
+.modeles button{border-radius:99px;font-size:.76rem;font-weight:700;padding:.18rem .7rem;border:1px solid color-mix(in srgb,var(--vv-2,#7cb4f5) 35%,var(--f-carte));
+  background:color-mix(in srgb,var(--vv-2,#7cb4f5) 14%,var(--f-carte));color:var(--tx)}
+.modeles button.arme{border-color:var(--or);background:color-mix(in srgb,var(--or) 22%,var(--f-carte))}
+.tl{display:grid;grid-template-columns:13rem minmax(0,1fr) 4.5rem;align-items:stretch}
+.tl .hh{display:flex;font-size:.68rem;color:var(--tx2);padding-bottom:.25rem;font-variant-numeric:tabular-nums}
+.tl .hh span{flex:1 1 0;border-left:1px solid var(--v06);padding-left:3px}
+.tl .qui{display:flex;align-items:center;padding:.35rem .4rem .35rem 0;border-top:1px solid var(--v06);min-height:3.4rem}
+.tl .zone{position:relative;border-top:1px solid var(--v06);min-height:3.4rem;cursor:copy;
+  background-image:linear-gradient(90deg,var(--v06) 1px,transparent 1px);background-size:var(--pas,8.33%) 100%}
+.tl .zone.ferme{cursor:default}
+.tl .tot{display:flex;align-items:center;justify-content:flex-end;border-top:1px solid var(--v06);font-weight:800;font-variant-numeric:tabular-nums;font-size:.85rem}
+.tl .tot.sec{color:var(--tx2);font-weight:600}
+.bq{position:absolute;top:.45rem;height:1.8rem;border-radius:8px;display:flex;align-items:center;gap:.35rem;padding:0 .55rem;font-size:.76rem;font-weight:700;
+  white-space:nowrap;overflow:hidden;cursor:pointer;border:1px solid color-mix(in srgb,var(--emc,var(--vv-1,#5fd4a4)) 40%,var(--f-carte));
+  background:color-mix(in srgb,var(--emc,var(--vv-1,#5fd4a4)) 22%,var(--f-carte));color:var(--tx)}
+.bq:hover{border-color:var(--emc,var(--vv-1,#5fd4a4))}
+.br{position:absolute;bottom:.3rem;height:.38rem;border-radius:99px;background:var(--ep-vert-t,var(--tx-ok));cursor:pointer}
+.br.ouvert{background:repeating-linear-gradient(90deg,var(--ep-vert-t,var(--tx-ok)) 0 6px,transparent 6px 10px)}
+.bc{position:absolute;inset:.45rem .2rem auto .2rem;height:1.8rem;border-radius:8px;display:flex;align-items:center;padding:0 .7rem;font-size:.76rem;font-weight:700;
+  color:var(--tx);border:1px dashed var(--v16);cursor:pointer;
+  background:repeating-linear-gradient(135deg,var(--v06) 0 6px,transparent 6px 12px)}
+.bt{position:absolute;top:.45rem;height:1.8rem;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:.72rem;font-weight:700;
+  background:var(--ep-ambre-f);color:var(--ep-ambre-t);border:1px solid color-mix(in srgb,var(--ep-ambre-t) 35%,var(--ep-ambre-f));overflow:hidden;white-space:nowrap}
+.tl .couv{color:var(--tx2);font-size:.78rem;font-weight:700}
+.legende{display:flex;gap:1rem;flex-wrap:wrap;font-size:.74rem;color:var(--tx2);align-items:center}
+.legende i{display:inline-block;width:1.4rem;height:.5rem;border-radius:99px;margin-right:.35rem;vertical-align:middle}
+.sem{display:grid;grid-template-columns:13rem repeat(7,minmax(0,1fr)) 4.5rem;gap:3px;font-size:.76rem}
+.sem .h{font-size:.66rem;text-transform:uppercase;letter-spacing:.05em;color:var(--tx2);font-weight:700;text-align:center;padding:.15rem 0}
+.sem .c{background:var(--v04,var(--v05));border-radius:7px;padding:.25rem .35rem;text-align:center;font-variant-numeric:tabular-nums;cursor:pointer;min-height:1.8rem;
+  border:1px solid transparent;color:var(--tx)}
+.sem .c.on{border-color:var(--or)}
+.sem .c.cg{background:repeating-linear-gradient(135deg,var(--v06) 0 5px,transparent 5px 10px);color:var(--tx2)}
+.sem .nm{display:flex;align-items:center;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sem .t{text-align:right;font-weight:800;font-variant-numeric:tabular-nums;align-self:center}
+.sem .nm{align-self:center}
+.sem .t.trop{color:var(--ep-ambre-t)}
+
+/* ÉQUIPE : des fiches, et le détail à droite */
+.g3{display:grid;grid-template-columns:minmax(0,1fr) 22rem;gap:.8rem;align-items:start}
+.cartes{display:grid;grid-template-columns:repeat(auto-fill,minmax(17rem,1fr));gap:.6rem;align-content:start}
+.pc{display:flex;align-items:center;gap:.65rem;padding:.7rem .8rem;border-radius:13px;border:1px solid var(--v08);background:var(--f-carte);cursor:pointer;text-align:left;width:100%;color:var(--tx)}
+.pc.on{border-color:var(--or);box-shadow:0 0 0 1px var(--or) inset}
+.pc .em-qui{margin-right:auto}
+.pc .tx{font-weight:800;font-variant-numeric:tabular-nums}
+.sec-t{font-size:.7rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);margin:.2rem 0 -.2rem}
+.fiche{display:flex;flex-direction:column;gap:.75rem;position:sticky;top:0}
+.kv{display:grid;grid-template-columns:1fr auto;gap:.4rem .8rem;font-size:.82rem}
+.kv span{color:var(--tx2)} .kv b{text-align:right;font-variant-numeric:tabular-nums}
+.jauge{height:6px;border-radius:99px;background:var(--v08);overflow:hidden}
+.jauge i{display:block;height:100%;background:var(--or)}
+.hist{display:flex;flex-direction:column;gap:.25rem;font-size:.78rem;color:var(--tx2);border-top:1px solid var(--v06);padding-top:.6rem}
+.hist b{color:var(--tx);font-size:.8rem}
+.hist .fut{color:var(--tx-or,var(--tx))}
+.gestes{display:flex;gap:.45rem;flex-wrap:wrap}
+
+/* PAIE */
+.bandeau{display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;border-radius:12px;font-size:.84rem}
+.bandeau.v{background:var(--ep-vert-f,rgba(74,222,128,.12));color:var(--ep-vert-t,var(--tx-ok))}
+.bandeau.a{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
+.bandeau b{font-weight:800}
+.bandeau button{margin-left:auto}
+.em-t{width:100%;border-collapse:collapse;font-size:.82rem}
+.em-t th{text-align:left;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx-or,var(--tx2));font-weight:700;padding:.35rem .55rem;border-bottom:1px solid var(--v08);white-space:nowrap}
+.em-t td{padding:.5rem .55rem;border-bottom:1px solid var(--v06);vertical-align:middle;white-space:nowrap}
+.em-t th.n,.em-t td.n{text-align:right;font-variant-numeric:tabular-nums}
+.em-t tbody tr{cursor:pointer}
+.em-t tbody tr:hover td{background:var(--v04,var(--v05))}
+.em-t tbody tr.on td{background:color-mix(in srgb,var(--or) 12%,var(--f-carte))}
+.em-t tfoot td{font-weight:800;border-bottom:0}
+.em-t td.or{color:var(--tx-or,var(--tx));font-weight:800}
+.bul{display:flex;flex-direction:column;gap:.45rem;font-size:.82rem}
+.bul .l{display:flex;justify-content:space-between;gap:.8rem}
+.bul .l span{color:var(--tx2)}
+.bul .l b{font-variant-numeric:tabular-nums;white-space:nowrap}
+.bul .l.t{border-top:1px solid var(--v08);padding-top:.5rem;font-weight:800}
+.bul .l.t span{color:var(--tx)}
+.hp{display:flex;flex-direction:column}
+.hp button{display:flex;justify-content:space-between;gap:.6rem;border:0;border-top:1px solid var(--v06);border-radius:0;background:transparent;padding:.45rem .1rem;font-size:.8rem;text-align:left}
+.hp button:first-child{border-top:0}
+.hp button span{color:var(--tx2)}
+
+/* Les boîtes (quart, pointage, congé, taux, fiche, réglages) */
+.voile{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(5,8,14,.55)}
+.boite{width:min(34rem,94vw);max-height:92vh;overflow:auto;border-radius:16px;padding:1.1rem 1.2rem;border:1px solid var(--v12,var(--v16));background:var(--f-carte);
+  display:flex;flex-direction:column;gap:.85rem;box-shadow:0 30px 60px -20px rgba(0,0,0,.6)}
+.boite.large{width:min(48rem,94vw)}
+.boite h3{margin:0;font-size:1rem}
+.boite .sous{font-size:.78rem;color:var(--tx2);margin-top:-.55rem}
+.champs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.7rem .8rem}
+.champs.trois{grid-template-columns:repeat(3,minmax(0,1fr))}
+.ch{display:flex;flex-direction:column;gap:.3rem;font-size:.74rem;font-weight:600;color:var(--tx2);min-width:0}
+.ch.large{grid-column:1 / -1}
+.ch input:not([type=checkbox]):not([type=radio]),.ch select{height:2.3rem;width:100%;border-radius:9px;color:var(--tx)}
+.ch.case{flex-direction:row;align-items:center;gap:.5rem;font-size:.82rem;color:var(--tx)}
+.unite{position:relative;display:flex;align-items:center}
+.unite input{padding-right:3.4rem;text-align:right}
+.unite i{position:absolute;right:.6rem;font-style:normal;font-size:.74rem;color:var(--tx2);pointer-events:none}
+.pied-b{display:flex;gap:.5rem;align-items:center;padding-top:.7rem;border-top:1px solid var(--v06)}
+.pied-b .gauche{margin-right:auto}
+.pied-b button{height:2.3rem;padding:0 1rem;border-radius:9px}
+.mods{display:flex;flex-direction:column;gap:.35rem}
+.mods .m{display:grid;grid-template-columns:minmax(0,1fr) 7rem 7rem auto;gap:.4rem;align-items:center}
+.mods .m input{height:2.1rem}
+@media (max-width:980px){ .g2,.g3{grid-template-columns:1fr} .em-tuiles{grid-template-columns:repeat(2,minmax(0,1fr))} .tl,.sem{grid-template-columns:9rem minmax(0,1fr) 3.6rem} .sem{grid-template-columns:9rem repeat(7,minmax(0,1fr)) 3.6rem} }
+@media print{ body{overflow:visible;background:#fff;color:#000} .tete,.pied,.em-tete,#corps>*:not(.imp){display:none!important}
+  #corps{overflow:visible} .imp{display:block!important} .imp>*:not(#bulletin){display:none!important} #bulletin{box-shadow:none;border:0} }
 `;
 
 function pageEmployes(ouverture) {
-  const ok = ['equipe', 'horaires', 'pointages', 'paie'];
-  const depart = ok.indexOf(String(ouverture || '')) >= 0 ? String(ouverture) : 'equipe';
+  const ok = ['aujourdhui', 'horaire', 'equipe', 'paie', 'reglages'];
+  // Les anciens noms d'onglets (bancs, liens) mènent au plus proche.
+  const ancien = { horaires: 'horaire', pointages: 'horaire' };
+  const o = ancien[String(ouverture || '')] || String(ouverture || '');
+  const depart = ok.indexOf(o) >= 0 ? o : 'aujourdhui';
   return `${TETE()}
 <title>${T("Employés et paie — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -180,9 +247,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
   var corps = document.getElementById('corps');
   var elSous = document.getElementById('sous');
   var D = null, PAIE = null;
-  var ONGLET = '${depart}';
-  var SEMAINE = '', PERIODE = '';
-  var FQ = null, FP = null;   // le quart / le pointage en cours de saisie
+  var ONGLET = '${depart}' === 'reglages' ? 'paie' : '${depart}';
+  var OUVRIR_REGLAGES = '${depart}' === 'reglages';
+  var SEMAINE = '', PERIODE = '', JOUR = '';
+  var CHOISI = '';          // la fiche ouverte (Équipe) ou la ligne de paie choisie
+  var ARME = null;          // le modèle de quart « armé » : le prochain clic sur une ligne le pose
+  var BOITE = false;        // une boîte est ouverte : on ne recharge pas sous elle
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -197,12 +267,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     operation_inconnue: '${T("Cette version de l’application ne connaît pas cette opération.")}',
     introuvable:        '${T("Ce membre du personnel n’existe plus. La liste a été relue.")}',
     taux:               '${T("Le taux horaire doit être entre 0 et 500 $.")}',
+    sous_minimum:       '${T("Ce taux est sous le salaire minimum réglé dans la paie.")}',
     commission:         '${T("La commission doit être entre 0 et 50 %.")}',
     date:               '${T("La date est invalide.")}',
     heures:             '${T("La fin du quart doit suivre son début.")}',
+    chevauchement:      '${T("Ce quart chevauche un autre quart de la même personne.")}',
+    en_conge:           '${T("Cette personne est en congé ce jour-là.")}',
+    duree:              '${T("Un congé se saisit sur 60 jours au plus, et sa fin suit son début.")}',
+    motif:              '${T("Choisissez le type de congé.")}',
+    maladie_max:        '${T("Les 2 jours de maladie payés de l’année sont déjà pris. Saisissez ce congé sans le payer.")}',
+    maladie_service:    '${T("Les jours de maladie sont payés après 3 mois de service.")}',
     entree:             '${T("L’heure d’entrée est invalide.")}',
     sortie:             '${T("La sortie doit suivre l’entrée.")}',
     trop_long:          '${T("Un pointage ne peut pas dépasser 16 heures.")}',
+    periode_approuvee:  '${T("Cette date est dans une période de paie approuvée. Rouvrez la période dans l’onglet Paie pour la modifier.")}',
+    pas_finie:          '${T("La période n’est pas terminée : elle s’approuve à partir du lendemain de son dernier jour.")}',
+    deja:               '${T("Cette période est déjà approuvée.")}',
+    pointage_ouvert:    '${T("Un pointage de la période est encore ouvert. Fermez-le (oubli de sortie) avant d’approuver.")}',
     nuage:              '${T("Le nuage a refusé l’écriture : elle n’existe que sur ce poste. Vérifiez la connexion, puis refaites le geste.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
@@ -217,16 +298,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
 
   var JSEM = ['${T("dim.")}', '${T("lun.")}', '${T("mar.")}', '${T("mer.")}', '${T("jeu.")}', '${T("ven.")}', '${T("sam.")}'];
   var MOIS = ['${T("janv.")}', '${T("févr.")}', '${T("mars")}', '${T("avr.")}', '${T("mai")}', '${T("juin")}', '${T("juill.")}', '${T("août")}', '${T("sept.")}', '${T("oct.")}', '${T("nov.")}', '${T("déc.")}'];
+  var MOTIF_NOM = { vacances: '${T("Vacances")}', maladie: '${T("Maladie")}', sans_solde: '${T("Sans solde")}', autre: '${T("Autre absence")}' };
   function deux(n){ return (n < 10 ? '0' : '') + n; }
   function jourDe(iso){ var p = String(iso).split('-'); return new Date(+p[0], +p[1] - 1, +p[2]); }
   function isoDe(d){ return d.getFullYear() + '-' + deux(d.getMonth() + 1) + '-' + deux(d.getDate()); }
   function plus(iso, n){ var d = jourDe(iso); d.setDate(d.getDate() + n); return isoDe(d); }
   function court(iso){ var d = jourDe(iso); return d.getDate() + ' ' + MOIS[d.getMonth()]; }
+  function jourLong(iso){ var d = jourDe(iso); return JSEM[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()]; }
   function hm(isoT){ var d = new Date(isoT); return isNaN(d) ? '' : deux(d.getHours()) + ':' + deux(d.getMinutes()); }
-  function jourLocal(isoT){ var d = new Date(isoT); return isNaN(d) ? '' : isoDe(d); }
-  function hdec(a, b){ var x = String(a).split(':'), y = String(b).split(':'); return Math.max(0, ((+y[0]) * 60 + (+y[1]) - (+x[0]) * 60 - (+x[1])) / 60); }
+  function hmLisible(x){ var p = String(x || '').split(':'); return p.length < 2 ? '' : (+p[0]) + ' h' + (p[1] !== '00' ? ' ' + p[1] : ''); }
+  function minDe(x){ var p = String(x).split(':'); return (+p[0]) * 60 + (+p[1] || 0); }
+  function hdec(a, b){ return Math.max(0, (minDe(b) - minDe(a)) / 60); }
   function h2(n){ return szNombre(n || 0, 2) + ' h'; }
-  function nomDe(id){ var l = (D && D.personnel) || []; for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i].nom; return id; }
+  function pers(id){ var l = (D && D.personnel) || []; for (var i = 0; i < l.length; i++) if (l[i].id === id) return l[i]; return null; }
+  function nomDe(id){ var s = pers(id); return s ? s.nom : id; }
+  function inclus(s){ return !s.fiche || s.fiche.inclus !== false; }
+  function equipe(){ return ((D && D.personnel) || []).filter(inclus); }
+  function coul(id){ var l = equipe(); for (var i = 0; i < l.length; i++) if (l[i].id === id) return ' c' + ((i % 4) + 1); return ' c1'; }
+  function init(nom){ var p = String(nom || '?').trim().split(' ').filter(Boolean); return ((p[0] || '?').charAt(0) + (p.length > 1 ? p[p.length - 1].charAt(0) : '')).toUpperCase(); }
+  function qui(id, nom, sous){ return '<span class="em-qui"><span class="em-av' + coul(id) + '">' + esc(init(nom)) + '</span><span class="n"><b>' + esc(nom) + '</b>'
+    + (sous ? '<small>' + sous + '</small>' : '') + '</span></span>'; }
+  function tuile(cl, k, v, s){ return '<div class="em-tu ' + cl + '"><span class="k">' + k + '</span><b>' + v + '</b><span>' + (s || '') + '</span></div>'; }
+  function anciennete(s){
+    if (s.mois == null) return '';
+    if (s.ans >= 1) return s.ans + ' ' + (s.ans > 1 ? '${T("ans")}' : '${T("an")}');
+    return s.mois + ' ${T("mois")}';
+  }
+  function emploi(f){ return f.emploi === 'plein' ? '${T("temps plein")}' : (f.emploi === 'partiel' ? '${T("temps partiel")}' : ''); }
 
   function charger(){
     appeler('employes:donnees', [SEMAINE, PERIODE]).then(function(r){
@@ -234,209 +332,538 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       D = r;
       if (!SEMAINE) SEMAINE = r.semaine[0];
       if (!PERIODE) PERIODE = r.periode.debut;
-      var n = (r.personnel || []).length, ep = (r.enPoste || []).length;
-      elSous.textContent = n + ' ' + (n > 1 ? '${T("membres du personnel")}' : '${T("membre du personnel")}') + (ep ? ' · ' + ep + ' ${T("en poste")}' : '');
+      if (!JOUR || r.semaine.indexOf(JOUR) < 0) JOUR = r.semaine.indexOf(r.aujourdhui) >= 0 ? r.aujourdhui : r.semaine[1];
+      var n = equipe().length, ep = (r.enPoste || []).length;
+      elSous.textContent = n + ' ' + (n > 1 ? '${T("personnes à la paie")}' : '${T("personne à la paie")}') + (ep ? ' · ' + ep + ' ${T("en poste")}' : '');
       if (ONGLET === 'paie') chargerPaie(); else dessiner();
+      if (OUVRIR_REGLAGES) { OUVRIR_REGLAGES = false; setTimeout(boiteReglages, 0); }
     });
   }
   function chargerPaie(){
     appeler('employes:paie', [D.periode.debut, D.periode.fin]).then(function(r){
       PAIE = (r && r.ok) ? r : { erreur: r };
+      if (PAIE.lignes && PAIE.lignes.length && !PAIE.lignes.some(function(l){ return l.staffId === CHOISI; })) CHOISI = PAIE.lignes[0].staffId;
       dessiner();
     });
   }
 
+  /* ── La tête : onglets, puis les gestes de l'onglet ── */
   function tete(){
-    var og = function(v, l){ return '<button type="button" class="' + (ONGLET === v ? 'on' : '') + '" data-og="' + v + '">' + l + '</button>'; };
-    var h = '<div class="em-tete"><div class="ed-seg">' + og('equipe', '${T("Équipe")}') + og('horaires', '${T("Horaires")}')
-      + og('pointages', '${T("Pointages")}') + og('paie', '${T("Paie")}') + '</div><div class="droite">';
-    if (ONGLET === 'horaires') {
-      h += '<div class="em-nav"><button class="mini" data-sem="-7" aria-label="${T("Semaine précédente")}">‹</button><b>'
-        + esc(court(D.semaine[0]) + ' – ' + court(D.semaine[6])) + '</b><button class="mini" data-sem="7" aria-label="${T("Semaine suivante")}">›</button>'
-        + '<button class="mini" data-sem="0">${T("Cette semaine")}</button></div>'
-        + '<button class="mini" id="em-copier" title="${T("Reprend les quarts de la semaine précédente (ceux déjà posés restent).")}">${T("Copier la semaine précédente")}</button>';
-    } else if (ONGLET === 'pointages' || ONGLET === 'paie') {
-      h += '<div class="em-nav"><button class="mini" data-per="-1" aria-label="${T("Période précédente")}">‹</button><b>'
-        + esc('${T("Période du ")}' + court(D.periode.debut) + ' ${T("au")} ' + court(D.periode.fin)) + '</b><button class="mini" data-per="1" aria-label="${T("Période suivante")}">›</button></div>';
-      if (ONGLET === 'paie') h += '<button class="prim" id="em-csv">${T("Exporter pour la paie (CSV)")}</button>';
+    var nA = (D.anomalies || []).length;
+    var og = function(v, l, nb){ return '<button type="button" class="' + (ONGLET === v ? 'on' : '') + '" data-og="' + v + '">' + l + (nb ? '<span class="nb">' + nb + '</span>' : '') + '</button>'; };
+    var h = '<div class="em-tete"><div class="ed-seg">' + og('aujourdhui', '${T("Aujourd’hui")}', nA) + og('horaire', '${T("Horaire")}')
+      + og('equipe', '${T("Équipe")}') + og('paie', '${T("Paie")}') + '</div><div class="droite">';
+    if (ONGLET === 'aujourdhui') {
+      if (D.peutModifier) h += '<button class="mini" data-act="pointage">${T("Ajouter un pointage")}</button><button class="mini" data-act="conge">${T("Ajouter un congé")}</button>';
+    } else if (ONGLET === 'horaire') {
+      h += '<div class="em-nav"><button data-sem="-7" aria-label="${T("Semaine précédente")}">‹</button><b>'
+        + esc(court(D.semaine[0]) + ' – ' + court(D.semaine[6])) + '</b><button data-sem="7" aria-label="${T("Semaine suivante")}">›</button>'
+        + '<button data-sem="0">${T("Cette semaine")}</button></div>';
+      if (D.peutModifier) h += '<button class="mini" id="em-copier" title="${T("Reprend les quarts de la semaine précédente (ceux déjà posés et les congés restent).")}">${T("Copier la semaine précédente")}</button>'
+        + '<button class="mini" data-act="conge">${T("Ajouter un congé")}</button>';
+    } else if (ONGLET === 'paie') {
+      h += '<div class="em-nav"><button data-per="-1" aria-label="${T("Période précédente")}">‹</button><b>'
+        + esc('${T("Du ")}' + court(D.periode.debut) + ' ${T("au")} ' + court(D.periode.fin)) + '</b><button data-per="1" aria-label="${T("Période suivante")}">›</button></div>'
+        + '<button class="mini" id="em-reg">${T("Réglages de la paie")}</button><button class="mini" id="em-csv">${T("Exporter (CSV)")}</button>';
+    } else if (ONGLET === 'equipe') {
+      var hors = ((D && D.personnel) || []).length - equipe().length;
+      if (hors) h += '<span class="pill">' + hors + ' ' + (hors > 1 ? '${T("personnes hors paie")}' : '${T("personne hors paie")}') + '</span>';
     }
     return h + '</div></div>';
   }
 
-  function vueEquipe(){
-    var l = D.personnel || [];
-    if (!l.length) return '<div class="carte vide">${T("Aucun compte du personnel. Ajoutez-les dans Configuration → Sécurité → Accès utilisateurs ; ils paraîtront ici.")}</div>';
-    return '<div class="carte"><table class="em-t"><thead><tr><th>${T("Membre du personnel")}</th><th>${T("État")}</th><th class="n">${T("Taux horaire ($)")}</th>'
-      + '<th class="n">${T("Commission (%)")}</th><th>${T("À la paie")}</th><th>${T("Embauche")}</th><th></th></tr></thead><tbody>'
-      + l.map(function(s){
-          var f = s.fiche || {}, ep = (D.enPoste || []).indexOf(s.id) >= 0;
-          return '<tr data-fid="' + esc(s.id) + '"><td class="nom"><b>' + esc(s.nom) + '</b><span>' + esc(szTd(s.role || '')) + '</span></td>'
-            + '<td>' + (ep ? '<span class="pill ok">${T("en poste")}</span>' : (s.actif ? '<span class="pill">${T("actif")}</span>' : '<span class="pill">${T("inactif")}</span>')) + '</td>'
-            + '<td class="n"><input type="number" min="0" max="500" step="0.01" data-c="taux" value="' + esc(f.taux || 0) + '" aria-label="${T("Taux horaire ($)")}"></td>'
-            + '<td class="n"><input type="number" min="0" max="50" step="0.1" data-c="commission" value="' + esc(f.commission || 0) + '" aria-label="${T("Commission (%)")}"></td>'
-            + '<td><input type="checkbox" data-c="inclus"' + (f.inclus === false ? '' : ' checked') + ' aria-label="${T("À la paie")}"></td>'
-            + '<td><input type="date" data-c="embauche" value="' + esc(f.embauche || '') + '" aria-label="${T("Embauche")}"></td>'
-            + '<td><button class="mini" data-enrfiche="' + esc(s.id) + '">${T("Enregistrer")}</button></td></tr>';
-        }).join('') + '</tbody></table>'
-      + '<div class="em-note">${T("La commission se calcule sur les ventes au comptoir de la personne, avant taxes, rabais déduits.")}</div></div>';
+  /* ══ AUJOURD'HUI ══ */
+  function etatDuJour(s){
+    var auj = D.aujourdhui;
+    var cg = (D.conges || []).filter(function(c){ return c.staffId === s.id && c.date === auj; })[0];
+    if (cg) return { cl: '', t: MOTIF_NOM[cg.motif] || '${T("Congé")}', sous: '${T("en congé aujourd’hui")}' };
+    var qs = (D.horaires || []).filter(function(q){ return q.staffId === s.id && q.date === auj; }).sort(function(a, b){ return a.debut < b.debut ? -1 : 1; });
+    var ep = (D.enPoste || []).filter(function(e){ return e.staffId === s.id; })[0];
+    var pts = (D.pointagesSemaine || []).filter(function(p){ return p.staffId === s.id && p.jour === auj; });
+    var prevu = qs.map(function(q){ return hmLisible(q.debut) + ' – ' + hmLisible(q.fin); }).join(', ');
+    if (ep) return { cl: 'v pouls', t: '${T("en poste")}', sous: (prevu ? '${T("prévu")} ' + prevu + ' · ' : '') + '${T("pointé à")} ' + hmLisible(hm(ep.depuis)), prevu: true };
+    if (!qs.length) return pts.length ? { cl: '', t: '${T("terminé")}', sous: '${T("sans quart prévu")}' } : null;
+    var now = new Date(), m = now.getHours() * 60 + now.getMinutes();
+    if (pts.length && pts.every(function(p){ return p.sortie; })) return { cl: '', t: '${T("terminé")}', sous: '${T("prévu")} ' + prevu };
+    if (m < minDe(qs[0].debut)) return { cl: '', t: '${T("arrive à")} ' + hmLisible(qs[0].debut), sous: '${T("prévu")} ' + prevu };
+    if (m > minDe(qs[qs.length - 1].fin)) return { cl: 'a', t: '${T("absent")}', sous: '${T("prévu")} ' + prevu + ' · ${T("aucun pointage")}' };
+    return { cl: 'a', t: '${T("en retard")}', sous: '${T("prévu à")} ' + hmLisible(qs[0].debut) + ' · ${T("pas encore pointé")}' };
   }
-
-  /* Une couleur par personne (cycle des quatre teintes vivantes), et ses initiales. */
-  function coul(id){ var l = (D && D.personnel) || []; for (var i = 0; i < l.length; i++) if (l[i].id === id) return ' c' + ((i % 4) + 1); return ' c1'; }
-  function init(nom){ var p = String(nom || '?').trim().split(' ').filter(Boolean);   /* pas de barre oblique : le gabarit la mange */ return ((p[0] || '?').charAt(0) + (p.length > 1 ? p[p.length - 1].charAt(0) : '')).toUpperCase(); }
-  function qui(id, nom, sous){ return '<span class="em-qui"><span class="em-av' + coul(id) + '">' + esc(init(nom)) + '</span><span><b>' + esc(nom) + '</b>'
-    + (sous ? '<span class="s">' + sous + '</span>' : '') + '</span></span>'; }
-  function tuile(cl, k, v, s){ return '<div class="em-tu ' + cl + '"><span class="k">' + k + '</span><b>' + v + '</b><span>' + (s || '') + '</span></div>'; }
-  function jourLong(iso){ var d = jourDe(iso); return JSEM[d.getDay()] + ' ' + d.getDate() + ' ' + MOIS[d.getMonth()]; }
-
-  function vueHoraires(){
-    var l = D.personnel || [];
-    if (!l.length) return '<div class="carte vide">${T("Aucun compte du personnel.")}</div>';
-    var parJour = D.semaine.map(function(){ return 0; }), totSem = 0, nbQ = 0;
-    var h = '<div class="em-sem"><div class="h"></div>' + D.semaine.map(function(j, i){
-      return '<div class="h' + (j === D.aujourdhui ? ' auj' : '') + '">' + JSEM[jourDe(j).getDay()] + ' ' + jourDe(j).getDate() + '</div>';
-    }).join('') + '<div class="h" style="text-align:right">${T("Semaine")}</div>';
-    l.forEach(function(s){
-      var tot = 0, cells = '';
-      D.semaine.forEach(function(j, k){
-        var qs = (D.horaires || []).filter(function(q){ return q.staffId === s.id && q.date === j; })
-          .sort(function(a, b){ return a.debut < b.debut ? -1 : 1; });
-        cells += '<div class="c' + (j === D.aujourdhui ? ' auj' : '') + '">' + qs.map(function(q){ var hq = hdec(q.debut, q.fin); tot += hq; parJour[k] += hq; nbQ++;
-          return '<span class="em-q' + coul(s.id) + '" title="' + esc((q.note ? q.note + ' · ' : '') + h2(hq)) + '">' + esc(q.debut + '–' + q.fin)
-            + (D.peutModifier ? '<button data-qx="' + esc(q.id) + '" aria-label="${T("Retirer ce quart")}" title="${T("Retirer ce quart")}">✕</button>' : '') + '</span>'; }).join('')
-          + (D.peutModifier ? '<button class="plus" data-qplus="' + esc(s.id) + '|' + j + '" aria-label="${T("Ajouter un quart")}" title="${T("Ajouter un quart")}">+</button>' : '') + '</div>';
-      });
-      totSem += tot;
-      h += '<div class="c nm">' + qui(s.id, s.nom, esc(szTd(s.role || ''))) + '</div>' + cells
-        + '<div class="c tot"><b>' + h2(tot) + '</b><span class="em-barre' + coul(s.id) + (tot > 40 ? ' trop' : '') + '" title="' + esc(h2(tot) + ' / 40 h') + '"><i style="width:' + Math.min(100, Math.round(tot / 40 * 100)) + '%"></i></span></div>';
+  function phraseAnomalie(a){
+    if (a.type === 'sortie') return ['${T("Sortie non pointée")}', jourLong(a.date) + ', ${T("entrée à")} ' + hmLisible(a.entree)];
+    if (a.type === 'long') return ['${T("Pointage de plus de 10 heures")}', jourLong(a.date) + ' · ' + h2(a.heures)];
+    if (a.type === 'retard') return [a.minutes + ' ${T("min de retard")}', jourLong(a.date) + ', ${T("prévu")} ' + hmLisible(a.prevu) + ', ${T("pointé")} ' + hmLisible(a.entree)];
+    if (a.type === 'absent') return ['${T("Quart sans pointage")}', jourLong(a.date) + ', ${T("prévu")} ' + esc(a.prevu)];
+    return ['${T("Pointage sans quart prévu")}', jourLong(a.date)];
+  }
+  function vueAujourdhui(){
+    var auj = D.aujourdhui;
+    var surSemaine = D.semaine.indexOf(auj) >= 0;
+    var qsAuj = surSemaine ? (D.horaires || []).filter(function(q){ return q.date === auj; }) : [];
+    var hPrevu = qsAuj.reduce(function(a, q){ return a + hdec(q.debut, q.fin); }, 0);
+    var ep = D.enPoste || [];
+    var nA = (D.anomalies || []).length;
+    var h = szTuiles('<div class="em-tuiles">'
+      + tuile('t1', '${T("En poste")}', String(ep.length), ep.map(function(e){ return nomDe(e.staffId).split(' ')[0] + ' ${T("depuis")} ' + hmLisible(hm(e.depuis)); }).join(', ') || '${T("personne pour l’instant")}')
+      + tuile('t2', '${T("Prévu aujourd’hui")}', h2(hPrevu), qsAuj.length + ' ' + (qsAuj.length > 1 ? '${T("quarts")}' : '${T("quart")}'))
+      + tuile(nA ? 'att' : 't3', '${T("À régler")}', String(nA), nA ? '${T("avant la paie du")} ' + court(D.periode.fin) : '${T("rien à corriger")}')
+      + tuile('t4', '${T("Paie en cours")}', szArgent(D.brutPeriode || 0), esc(court(D.periode.debut) + ' – ' + court(D.periode.fin)) + ' · ${T("brut")}') + '</div>');
+    // La journée
+    var c = (D.couvertures || {})[auj];
+    var j = '<div class="carte"><h3>${T("La journée")}' + (c && c.connue ? '<span class="dr pill">' + (c.ferme ? '${T("boutique fermée")}' : hmLisible(c.debut) + ' – ' + hmLisible(c.fin) + ' · ${T("boutique ouverte")}') + '</span>' : '') + '</h3><div class="liste">';
+    var lignes = 0;
+    equipe().forEach(function(s){
+      var e = etatDuJour(s); if (!e) return; lignes++;
+      j += '<div class="ln">' + qui(s.id, s.nom, esc(e.sous)) + '<span class="pill ' + e.cl + '">' + esc(e.t) + '</span></div>';
     });
-    h += '<div class="pied-j t">${T("Heures planifiées")}</div>' + parJour.map(function(x){ return '<div class="pied-j">' + (x ? h2(x) : '—') + '</div>'; }).join('')
-      + '<div class="pied-j" style="text-align:right;font-weight:800">' + h2(totSem) + '</div></div>';
-    var tete = szTuiles('<div class="em-tuiles">' + tuile('t1', '${T("Heures planifiées")}', h2(totSem), nbQ + ' ' + (nbQ > 1 ? '${T("quarts")}' : '${T("quart")}'))
-      + tuile('t2', '${T("Personnel à l’horaire")}', String(l.filter(function(s){ return (D.horaires || []).some(function(q){ return q.staffId === s.id && D.semaine.indexOf(q.date) >= 0; }); }).length), '${T("sur")} ' + l.length)
-      + tuile('t3', '${T("Aujourd’hui")}', h2(parJour[D.semaine.indexOf(D.aujourdhui)] || 0), D.semaine.indexOf(D.aujourdhui) >= 0 ? jourLong(D.aujourdhui) : '${T("hors de cette semaine")}')
-      + tuile('t4', '${T("En poste maintenant")}', String((D.enPoste || []).length), (D.enPoste || []).map(nomDe).join(', ')) + '</div>');
-    h = tete + h;
-    if (FQ) {
-      h += '<div class="carte em-form"><div class="tt"><b>' + esc('${T("Nouveau quart")}' + ' · ' + nomDe(FQ.staffId)) + '</b><span>' + esc(jourLong(FQ.date)) + '</span></div>'
-        + '<div class="em-champs"><label class="em-ch">${T("Début")}<input type="time" id="fq-d" value="' + esc(FQ.debut) + '"></label>'
-        + '<label class="em-ch">${T("Fin")}<input type="time" id="fq-f" value="' + esc(FQ.fin) + '"></label>'
-        + '<label class="em-ch large">${T("Note")}<input id="fq-n" maxlength="120" value="" placeholder="${T("Ex. : ouverture, inventaire")}"></label></div>'
-        + '<div class="em-gestes"><span class="em-note">${T("Le quart s’ajoute à ceux déjà posés ce jour-là.")}</span><button id="fq-x">${T("Annuler")}</button><button class="prim" id="fq-ok">${T("Ajouter le quart")}</button></div></div>';
-    }
-    return h;
+    if (c && c.connue && !c.ferme) (c.trous || []).forEach(function(t){
+      lignes++;
+      j += '<div class="ln"><span class="em-qui"><span class="em-av" style="--emc:var(--ep-ambre-t)">!</span><span class="n"><b>' + esc(hmLisible(t.debut) + ' – ' + hmLisible(t.fin)) + '</b><small>${T("personne au comptoir")}</small></span></span>'
+        + '<span class="pill a">${T("trou de couverture")}</span></div>';
+    });
+    if (!lignes) j += '<div class="vide">' + (surSemaine ? '${T("Aucun quart prévu aujourd’hui.")}' : '') + '</div>';
+    if (c && !c.connue) j += '<div class="note" style="margin-top:.5rem">${T("Les heures d’ouverture ne sont pas réglées (Configuration → Heures d’ouverture) : les trous de couverture ne se calculent pas.")}</div>';
+    j += '</div></div>';
+    // À régler
+    var r = '<div class="carte"><h3>${T("À régler")}' + (nA ? '<span class="dr pill a">' + nA + '</span>' : '') + '</h3><div class="liste">';
+    if (!nA) r += '<div class="vide">${T("Rien à corriger dans la période.")}</div>';
+    (D.anomalies || []).slice(0, 8).forEach(function(a, i){
+      var p = phraseAnomalie(a);
+      r += '<div class="al"><i></i><span class="tx"><b>' + esc(nomDe(a.staffId).split(' ')[0]) + ' : ' + esc(p[0]) + '</b><small>' + p[1] + '</small></span>'
+        + (D.peutModifier ? (a.pointageId ? '<button class="mini" data-pmod="' + esc(a.pointageId) + '">${T("Corriger")}</button>'
+          : (a.type === 'absent' ? '<button class="mini" data-absent="' + i + '">${T("Régler")}</button>' : '')) : '') + '</div>';
+    });
+    if (nA > 8) r += '<div class="note" style="margin-top:.4rem">' + (nA - 8) + ' ${T("autres dans la période.")}</div>';
+    (D.prochainsFeries || []).slice(0, 2).forEach(function(f){
+      r += '<div class="al"><i class="b"></i><span class="tx"><b>' + esc(f.nom) + '</b><small>' + esc(jourLong(f.date)) + ' · ${T("jour férié : l’indemnité se calcule à la paie")}</small></span></div>';
+    });
+    r += '</div></div>';
+    return h + '<div class="g2">' + j + r + '</div>';
   }
 
-  function vuePointages(){
-    var l = D.pointages || [];
-    var hTot = 0, corr = 0; l.forEach(function(p){ if (p.sortie) hTot += +p.heures || 0; if (p.corrigePar) corr++; });
-    var h = szTuiles('<div class="em-tuiles">' + tuile('t1', '${T("Heures pointées")}', h2(hTot), '${T("pointages fermés de la période")}')
-      + tuile('t2', '${T("Pointages")}', String(l.length), '${T("dans la période")}')
-      + tuile((D.enPoste || []).length ? 't3' : 't3', '${T("En poste maintenant")}', String((D.enPoste || []).length), (D.enPoste || []).map(nomDe).join(', '))
-      + tuile(corr ? 'att' : 't4', '${T("Corrigés")}', String(corr), corr ? '${T("à garder en tête à la paie")}' : '${T("aucune correction")}') + '</div>');
-    if (D.peutModifier) {
-      var F = FP || { staffId: ((D.personnel || [])[0] || {}).id || '', date: D.aujourdhui, entree: '09:00', sortie: '17:00', note: '' };
-      h += '<div class="carte em-form"><div class="tt"><b>' + (FP && FP.id ? '${T("Corriger le pointage")}' : '${T("Saisir un pointage")}') + '</b>'
-        + '<span>${T("Une sortie plus tôt que l’entrée compte pour le lendemain (quart de nuit). Sans sortie, la personne reste « en poste ».")}</span></div>'
-        + '<div class="em-champs cinq"><label class="em-ch">${T("Membre du personnel")}<select id="fp-s">' + (D.personnel || []).map(function(s){
-            return '<option value="' + esc(s.id) + '"' + (s.id === F.staffId ? ' selected' : '') + '>' + esc(s.nom) + '</option>'; }).join('') + '</select></label>'
-        + '<label class="em-ch">${T("Date")}<input type="date" id="fp-j" value="' + esc(F.date) + '"></label>'
-        + '<label class="em-ch">${T("Entrée")}<input type="time" id="fp-e" value="' + esc(F.entree) + '"></label>'
-        + '<label class="em-ch">${T("Sortie")}<input type="time" id="fp-o" value="' + esc(F.sortie) + '"></label>'
-        + '<label class="em-ch">${T("Note")}<input id="fp-n" maxlength="200" value="' + esc(F.note || '') + '"></label></div>'
-        + '<div class="em-gestes"><span class="em-note"></span>' + (FP && FP.id ? '<button id="fp-x">${T("Annuler")}</button>' : '')
-        + '<button class="prim" id="fp-ok">' + (FP && FP.id ? '${T("Enregistrer la correction")}' : '${T("Ajouter le pointage")}') + '</button></div></div>';
+  /* ══ HORAIRE : la ligne de temps du jour choisi ══ */
+  function bornes(jour){
+    var c = (D.couvertures || {})[jour];
+    var a = 24 * 60, b = 0;
+    if (c && c.connue && !c.ferme) { a = Math.min(a, minDe(c.debut)); b = Math.max(b, minDe(c.fin)); }
+    (D.horaires || []).forEach(function(q){ if (q.date === jour) { a = Math.min(a, minDe(q.debut)); b = Math.max(b, minDe(q.fin)); } });
+    (D.pointagesSemaine || []).forEach(function(p){ if (p.jour === jour) { a = Math.min(a, minDe(p.de)); if (p.a) b = Math.max(b, minDe(p.a)); } });
+    if (b <= a) { a = 9 * 60; b = 21 * 60; }
+    a = Math.floor(a / 60) * 60; b = Math.ceil(b / 60) * 60;
+    if (b - a < 8 * 60) { b = Math.min(24 * 60, a + 8 * 60); if (b - a < 8 * 60) a = b - 8 * 60; }
+    return [a, b];
+  }
+  function pct(m, B){ return Math.max(0, Math.min(100, (m - B[0]) / (B[1] - B[0]) * 100)); }
+  function vueHoraire(){
+    var l = equipe();
+    if (!l.length) return '<div class="carte vide">${T("Personne à la paie. Ajoutez les comptes du personnel (Configuration → Sécurité → Accès utilisateurs), puis ouvrez leur fiche dans l’onglet Équipe.")}</div>';
+    var h = '';
+    // Les jours de la semaine, avec leurs heures prévues.
+    h += '<div class="jours" role="tablist" aria-label="${T("Jours de la semaine")}">' + D.semaine.map(function(j){
+      var t = (D.horaires || []).filter(function(q){ return q.date === j; }).reduce(function(a, q){ return a + hdec(q.debut, q.fin); }, 0);
+      var fer = (D.feriesSemaine || []).filter(function(f){ return f.date === j; })[0];
+      return '<button type="button" role="tab" aria-selected="' + (j === JOUR) + '" class="' + (j === JOUR ? 'on ' : '') + (j === D.aujourdhui ? 'auj' : '') + '" data-jour="' + j + '"><b>' + esc(jourLong(j)) + '</b><small>'
+        + (fer ? '${T("férié")}' : (t ? h2(t) : '—')) + '</small></button>';
+    }).join('') + '</div>';
+    if (D.peutModifier) h += '<div class="modeles"><span>' + (ARME ? '${T("Cliquez une ligne pour poser")} « ' + esc(ARME.nom) + ' »' : '${T("Poser un modèle :")}') + '</span>'
+      + (D.reglages.modeles || []).map(function(m){ return '<button type="button" draggable="true" data-mod="' + esc(m.id) + '" class="' + (ARME && ARME.id === m.id ? 'arme' : '') + '">'
+        + esc(m.nom + ' ' + hmLisible(m.debut) + ' – ' + hmLisible(m.fin)) + '</button>'; }).join('')
+      + '<button type="button" class="mini" style="background:transparent;border-style:dashed" id="em-mods">${T("Modèles…")}</button></div>';
+    var B = bornes(JOUR), nH = (B[1] - B[0]) / 60;
+    var c = (D.couvertures || {})[JOUR] || {};
+    var fer = (D.feriesSemaine || []).filter(function(f){ return f.date === JOUR; })[0];
+    var t = '<div class="carte"><h3>' + esc(jourLong(JOUR)) + (fer ? ' <span class="pill" style="--x:0">' + esc(fer.nom) + '</span>' : '')
+      + '<span class="dr legende"><span><i style="background:color-mix(in srgb,var(--vv-2,#7cb4f5) 40%,var(--f-carte))"></i>${T("prévu")}</span>'
+      + '<span><i style="background:var(--ep-vert-t,var(--tx-ok))"></i>${T("pointé")}</span>'
+      + '<span><i style="background:repeating-linear-gradient(135deg,var(--v16) 0 4px,transparent 4px 8px)"></i>${T("congé")}</span></span></h3>'
+      + '<div class="tl" style="--pas:' + (100 / nH) + '%;margin-top:.6rem"><div></div><div class="hh">';
+    for (var k = 0; k < nH; k++) t += '<span>' + ((B[0] / 60 + k) % 24) + ' h</span>';
+    t += '</div><div></div>';
+    l.forEach(function(s){
+      var tot = 0, z = '';
+      var cg = (D.conges || []).filter(function(x){ return x.staffId === s.id && x.date === JOUR; })[0];
+      if (cg) z += '<div class="bc" data-cgx="' + esc(cg.id) + '" title="${T("Retirer ce congé")}">' + esc((MOTIF_NOM[cg.motif] || '') + (cg.paye ? ' · ${T("payé")}' : '')) + '</div>';
+      (D.horaires || []).filter(function(q){ return q.staffId === s.id && q.date === JOUR; }).forEach(function(q){
+        var a = pct(minDe(q.debut), B), b = pct(minDe(q.fin), B); tot += hdec(q.debut, q.fin);
+        z += '<div class="bq' + coul(s.id) + '" data-qmod="' + esc(q.id) + '" style="left:' + a + '%;width:' + Math.max(2, b - a) + '%" title="' + esc((q.note ? q.note + ' · ' : '') + h2(hdec(q.debut, q.fin))) + '">'
+          + esc(hmLisible(q.debut) + ' – ' + hmLisible(q.fin)) + (q.note ? ' · ' + esc(q.note) : '') + '</div>';
+      });
+      (D.pointagesSemaine || []).filter(function(p){ return p.staffId === s.id && p.jour === JOUR; }).forEach(function(p){
+        var fin = p.a ? minDe(p.a) : (JOUR === D.aujourdhui ? new Date().getHours() * 60 + new Date().getMinutes() : minDe(p.de) + 30);
+        var a = pct(minDe(p.de), B), b = pct(fin, B);
+        z += '<div class="br' + (p.a ? '' : ' ouvert') + '" data-pmod="' + esc(p.id) + '" style="left:' + a + '%;width:' + Math.max(1, b - a) + '%" title="' + esc('${T("Pointé")} ' + hmLisible(p.de) + (p.a ? ' – ' + hmLisible(p.a) : ' · ${T("en poste")}')) + '"></div>';
+      });
+      t += '<div class="qui">' + qui(s.id, s.nom, esc([s.fiche.poste || '', emploi(s.fiche)].filter(Boolean).join(' · ') || szTd(s.role || ''))) + '</div>'
+        + '<div class="zone' + (cg ? ' ferme' : '') + '" data-zone="' + esc(s.id) + '" data-b0="' + B[0] + '" data-b1="' + B[1] + '">' + z + '</div>'
+        + '<div class="tot' + (cg ? ' sec' : '') + '">' + (cg ? '${T("congé")}' : (tot ? h2(tot) : '—')) + '</div>';
+    });
+    // La couverture
+    if (c.connue && !c.ferme) {
+      var zz = ''; (c.trous || []).forEach(function(tr){ var a = pct(minDe(tr.debut), B), b = pct(minDe(tr.fin), B);
+        zz += '<div class="bt" style="left:' + a + '%;width:' + Math.max(3, b - a) + '%">${T("à couvrir")}</div>'; });
+      t += '<div class="qui couv">${T("Couverture")}</div><div class="zone ferme">' + zz + '</div><div class="tot sec">' + ((c.trous || []).length ? '<span class="pill a">' + c.trous.length + '</span>' : '✓') + '</div>';
     }
-    if (!l.length) return h + '<div class="carte vide">${T("Aucun pointage dans cette période. Le bouton « Pointer » de la caisse les enregistre ; on peut aussi les saisir ici.")}</div>';
-    h += '<div class="carte" data-pages="employes-pointages"><table class="em-t"><thead><tr><th>${T("Membre du personnel")}</th><th>${T("Date")}</th><th>${T("Entrée")}</th><th>${T("Sortie")}</th>'
-      + '<th class="n">${T("Heures")}</th><th>${T("Source")}</th><th>${T("Note")}</th><th></th></tr></thead><tbody>'
-      + l.map(function(p){
-          return '<tr><td>' + qui(p.staffId, nomDe(p.staffId), '') + '</td><td>' + esc(jourLong(jourLocal(p.entree))) + '</td><td>' + esc(hm(p.entree)) + '</td>'
-            + '<td>' + (p.sortie ? esc(hm(p.sortie)) : '<span class="pill ok">${T("en poste")}</span>') + '</td>'
-            + '<td class="n"><b>' + (p.sortie ? h2(p.heures) : '—') + '</b></td>'
-            + '<td>' + (p.source === 'caisse' ? '<span class="pill src">${T("caisse")}</span>' : '<span class="pill">${T("saisie")}</span>') + (p.corrigePar ? ' <span class="pill att" title="' + esc(p.corrigePar) + '">${T("corrigé")}</span>' : '') + '</td>'
-            + '<td>' + esc(p.note || '') + '</td>'
-            + '<td class="n">' + (D.peutModifier ? '<button class="mini" data-pmod="' + esc(p.id) + '">${T("Corriger")}</button> <button class="mini dang" data-psup="' + esc(p.id) + '">${T("Supprimer")}</button>' : '') + '</td></tr>';
-        }).join('') + '</tbody></table></div>';
-    return h;
+    t += '</div>';
+    if (D.peutModifier) t += '<div class="note" style="margin-top:.5rem">${T("Cliquez une ligne vide pour ajouter un quart à cette heure, un quart pour le modifier, la ligne verte pour corriger le pointage.")}</div>';
+    t += '</div>';
+    // La semaine en résumé
+    var w = '<div class="carte"><h3>${T("La semaine")}<span class="dr note">${T("Cliquez un jour pour l’ouvrir.")}</span></h3><div class="sem" style="margin-top:.55rem"><div></div>'
+      + D.semaine.map(function(j){ return '<div class="h">' + esc(JSEM[jourDe(j).getDay()] + ' ' + jourDe(j).getDate()) + '</div>'; }).join('') + '<div class="h" style="text-align:right">${T("Total")}</div>';
+    l.forEach(function(s){
+      var tot = 0;
+      w += '<div class="nm">' + esc(s.nom) + '</div>';
+      D.semaine.forEach(function(j){
+        var cg = (D.conges || []).filter(function(x){ return x.staffId === s.id && x.date === j; })[0];
+        var qs = (D.horaires || []).filter(function(q){ return q.staffId === s.id && q.date === j; }).sort(function(a, b){ return a.debut < b.debut ? -1 : 1; });
+        qs.forEach(function(q){ tot += hdec(q.debut, q.fin); });
+        var txt = cg ? (MOTIF_NOM[cg.motif] || '${T("congé")}') : qs.map(function(q){ return (+q.debut.slice(0, 2)) + '–' + (+q.fin.slice(0, 2)); }).join(', ');
+        w += '<button type="button" class="c' + (cg ? ' cg' : '') + (j === JOUR ? ' on' : '') + '" data-jour="' + j + '">' + esc(txt || '·') + '</button>';
+      });
+      w += '<div class="t' + (tot > (D.reglages.seuilHS || 40) ? ' trop' : '') + '">' + h2(tot) + '</div>';
+    });
+    w += '</div></div>';
+    return h + t + w;
   }
 
+  /* ══ ÉQUIPE : des fiches et un panneau ══ */
+  function vueEquipe(){
+    var tous = (D && D.personnel) || [];
+    if (!tous.length) return '<div class="carte vide">${T("Aucun compte du personnel. Ajoutez-les dans Configuration → Sécurité → Accès utilisateurs ; ils paraîtront ici.")}</div>';
+    if (!CHOISI || !pers(CHOISI)) CHOISI = (equipe()[0] || tous[0]).id;
+    var carte = function(s){
+      var f = s.fiche || {}, ep = (D.enPoste || []).some(function(e){ return e.staffId === s.id; });
+      var sous = [f.poste || szTd(s.role || ''), emploi(f), anciennete(s)].filter(Boolean).join(' · ');
+      return '<button type="button" class="pc' + (s.id === CHOISI ? ' on' : '') + '" data-fiche="' + esc(s.id) + '">' + qui(s.id, s.nom, esc(sous))
+        + (ep ? '<span class="pill v pouls">${T("en poste")}</span>' : '') + (s.sousMinimum ? '<span class="pill r">${T("sous le minimum")}</span>' : '')
+        + (inclus(s) ? '<span class="tx">' + szArgent(s.taux || 0) + '</span>' : '') + '</button>';
+    };
+    var g = '<div class="cartes">' + equipe().map(carte).join('') + '</div>';
+    var hors = tous.filter(function(s){ return !inclus(s); });
+    if (hors.length) g += '<div class="sec-t">${T("Hors paie")}</div><div class="cartes">' + hors.map(carte).join('') + '</div>';
+    return '<div class="g3"><div style="display:flex;flex-direction:column;gap:.7rem">' + g + '</div>' + panneau(pers(CHOISI)) + '</div>';
+  }
+  function panneau(s){
+    if (!s) return '';
+    var f = s.fiche || {}, R = D.reglages || {};
+    var h = '<div class="carte fiche"><div style="display:flex;align-items:center;gap:.6rem">' + qui(s.id, s.nom, esc(f.embauche ? '${T("embauche le")} ' + court(f.embauche) + ' ' + f.embauche.slice(0, 4) : '${T("date d’embauche à saisir")}')) + '</div>';
+    if (!inclus(s)) {
+      h += '<div class="note">${T("Hors paie : cette personne n’entre ni à l’horaire ni dans le rapport de paie (propriétaire, compte technique…).")}</div>';
+    } else {
+      h += '<div class="kv"><span>${T("Taux horaire")}</span><b>' + szArgent(s.taux || 0) + '</b>'
+        + '<span>${T("Commission")}</span><b>' + szNombre(f.commission || 0, 1) + ' %</b>'
+        + '<span>${T("Emploi")}</span><b>' + esc(emploi(f) || '—') + '</b>'
+        + '<span>${T("Vacances")}</span><b>' + s.vacancesPct + ' % · ' + (R.vacancesMode === 'accumule' ? '${T("accumulées")}' : '${T("versées à chaque paie")}') + '</b>'
+        + (R.vacancesMode === 'accumule' ? '<span>${T("Solde accumulé")}</span><b>' + szArgent(s.vacancesSolde || 0) + '</b>' : '')
+        + '<span>${T("Maladie payée cette année")}</span><b>' + (s.maladiePayees || 0) + ' ${T("sur")} 2</b>'
+        + '<span>${T("Contact d’urgence")}</span><b>' + esc(f.urgence || '—') + '</b></div>';
+      if (f.embauche && s.vacancesPct < 6) {
+        var p = Math.min(100, Math.round((s.mois || 0) / 36 * 100));
+        h += '<div><div class="jauge"><i style="width:' + p + '%"></i></div><div class="note" style="margin-top:.3rem">${T("Passe à 6 % de vacances le")} ' + esc(court(s.dateSixPct) + ' ' + String(s.dateSixPct).slice(0, 4)) + '</div></div>';
+      }
+      if (s.sousMinimum) h += '<div class="bandeau a">${T("Taux sous le salaire minimum réglé")} (' + szArgent(R.salaireMin) + ').</div>';
+      if (!(R.salaireMin > 0)) h += '<div class="note">${T("Le salaire minimum n’est pas réglé : réglez-le dans Paie → Réglages pour être averti d’un taux trop bas (il change chaque 1er mai).")}</div>';
+      h += '<div class="hist"><b>${T("Historique du taux")}</b>' + (f.tauxHist || []).slice().reverse().map(function(x){
+        var futur = x.des > D.aujourdhui;
+        return '<span class="' + (futur ? 'fut' : '') + '">' + szArgent(x.taux) + ' ' + (x.des <= '2000-01-01' ? '${T("depuis le début")}' : (futur ? '${T("à partir du")} ' : '${T("depuis le")} ') + esc(court(x.des) + ' ' + x.des.slice(0, 4))) + (futur ? ' · ${T("prévu")}' : '') + '</span>';
+      }).join('') + '</div>';
+    }
+    if (f.note) h += '<div class="note">' + esc(f.note) + '</div>';
+    if (D.peutModifier) h += '<div class="gestes"><button class="mini" data-act="fiche">${T("Modifier la fiche")}</button>' + (inclus(s) ? '<button class="mini" data-act="taux">${T("Nouveau taux")}</button><button class="mini" data-act="conge">${T("Ajouter un congé")}</button>' : '') + '</div>';
+    return h + '</div>';
+  }
+
+  /* ══ PAIE ══ */
   function vuePaie(){
     if (!PAIE) return '<div class="carte vide">${T("Calcul de la paie…")}</div>';
     if (PAIE.erreur) return '<div class="carte vide">' + esc(expliquer(PAIE.erreur)) + '</div>';
     var t = PAIE.totaux || {}, R = PAIE.reglages || {};
     var l = PAIE.lignes || [];
-    var h = szTuiles('<div class="em-tuiles">' + tuile('t2', '${T("Heures régulières")}', h2(t.heures), l.length + ' ' + (l.length > 1 ? '${T("personnes à la paie")}' : '${T("personne à la paie")}'))
-      + tuile((t.heuresSup || 0) > 0 ? 'att' : 't3', '${T("Heures supplémentaires")}', h2(t.heuresSup), (t.heuresSup || 0) > 0 ? '${T("payées à")} ' + szNombre((R.tauxHS || 1.5) * 100, 0) + ' %' : '${T("aucune cette période")}')
-      + tuile('t4', '${T("Commissions")}', szArgent(t.commissions || 0), '${T("ventes au comptoir")}')
-      + tuile('t1', '${T("Brut avant retenues")}', szArgent(t.brut || 0), esc(court(D.periode.debut) + ' – ' + court(D.periode.fin))) + '</div>');
-    if (!l.length) h += '<div class="carte vide">${T("Rien à payer dans cette période : aucun pointage fermé et aucune vente au comptoir attribuée.")}</div>';
-    else h += '<div class="carte"><table class="em-t"><thead><tr><th>${T("Membre du personnel")}</th><th class="n">${T("Heures")}</th>'
-      + '<th class="n">${T("Supp.")}</th><th class="n">${T("Salaire")}</th><th class="n">${T("Ventes comptoir")}</th><th class="n">${T("Commissions")}</th><th class="n">${T("Brut")}</th></tr></thead><tbody>'
+    var h = '';
+    var finie = D.periode.fin < D.aujourdhui;
+    var nA = (D.anomalies || []).length;
+    if (PAIE.approuvee) h += '<div class="bandeau v"><span>✓</span><span><b>${T("Période approuvée")}</b> ${T("le")} ' + esc(court(String(PAIE.approuvee.le).slice(0, 10))) + ' ${T("par")} ' + esc(PAIE.approuvee.par || '') + ' · ${T("les chiffres sont figés.")}</span>'
+      + (D.peutModifier ? '<button class="mini" id="em-rouvrir">${T("Rouvrir")}</button>' : '') + '</div>';
+    else if (!finie) h += '<div class="bandeau a"><span>${T("Période en cours : les chiffres bougent jusqu’au")} <b>' + esc(court(D.periode.fin)) + '</b>' + (nA ? ' ' + nA + ' ${T("à régler dans Aujourd’hui.")}' : '') + '</span></div>';
+    else h += '<div class="bandeau a"><span>' + (nA ? '<b>' + nA + ' ${T("à régler")}</b> ${T("avant d’approuver.")}' : '<b>${T("Prête à approuver.")}</b> ${T("Vérifiez les bulletins, puis approuvez : la période sera figée.")}') + '</span>'
+      + (D.peutModifier ? (nA ? '<button class="mini" data-og="aujourdhui">${T("Voir")}</button>' : '') + '<button class="prim mini" id="em-approuver">${T("Approuver la période")}</button>' : '') + '</div>';
+    h += szTuiles('<div class="em-tuiles">'
+      + tuile('t2', '${T("Heures")}', h2((t.heures || 0) + (t.heuresSup || 0)), (t.heuresSup || 0) > 0 ? h2(t.heuresSup) + ' ${T("supplémentaires")}' : '${T("aucune supplémentaire")}')
+      + tuile('t3', '${T("Fériés et maladie")}', szArgent((t.ferie || 0) + (t.maladie || 0)), (PAIE.feries || []).length ? (PAIE.feries || []).map(function(f){ return esc(f.nom); }).join(', ') : '${T("aucun férié dans la période")}')
+      + tuile('t4', '${T("Vacances")}', szArgent(t.vacances || 0), R.vacancesMode === 'accumule' ? '${T("versées au départ en vacances")}' : '${T("versées à chaque paie")}')
+      + tuile('t1', '${T("Brut avant retenues")}', szArgent(t.brut || 0), l.length + ' ' + (l.length > 1 ? '${T("personnes")}' : '${T("personne")}')) + '</div>');
+    if (!l.length) return h + '<div class="carte vide">${T("Rien à payer dans cette période : aucun pointage fermé et aucune vente au comptoir attribuée.")}</div>' + historique();
+    var tab = '<div class="carte" style="padding:.5rem .6rem"><table class="em-t"><thead><tr><th>${T("Personne")}</th><th class="n">${T("Heures")}</th><th class="n">${T("Supp.")}</th>'
+      + '<th class="n">${T("Férié")}</th><th class="n">${T("Vacances")}</th><th class="n">${T("Commissions")}</th><th class="n">${T("Brut")}</th></tr></thead><tbody>'
       + l.map(function(x){
-          return '<tr><td>' + qui(x.staffId || x.nom, x.nom, szArgent(x.taux) + ' ${T("/ h")}' + (x.ouverts ? ' · <span class="pill att" title="${T("Un pointage est encore ouvert : il n’entre pas dans la paie tant qu’il n’est pas fermé.")}">${T("pointage ouvert")}</span>' : '')) + '</td>'
-            + '<td class="n">' + h2(x.heures) + '</td><td class="n">' + ((x.heuresSup || 0) > 0 ? '<span class="pill att">' + h2(x.heuresSup) + '</span>' : '—') + '</td>'
-            + '<td class="n">' + szArgent(x.salaire) + '</td><td class="n">' + szArgent(x.ventes) + ' <span class="em-note">(' + x.nbVentes + ')</span></td>'
-            + '<td class="n">' + szArgent(x.commissions) + ' <span class="em-note">' + szNombre(x.pct, 1) + ' %</span></td><td class="n or">' + szArgent(x.brut) + '</td></tr>';
-        }).join('') + '</tbody></table></div>';
-    h += '<div class="carte em-form"><div class="tt"><b>${T("Réglages de la paie")}</b>'
-      + '<span>${T("Ils s’appliquent au calcul de toutes les périodes affichées.")}</span></div>'
-      + '<div class="em-champs"><label class="em-ch">${T("Période")}<select id="rg-p"><option value="14"' + (R.periodeJours === 14 ? ' selected' : '') + '>${T("Aux deux semaines")}</option>'
-      + '<option value="7"' + (R.periodeJours === 7 ? ' selected' : '') + '>${T("Chaque semaine")}</option></select></label>'
-      + '<label class="em-ch">${T("Première période commence le")}<input type="date" id="rg-d" value="' + esc(R.debutRef || '') + '"></label>'
-      + '<label class="em-ch">${T("Heures supplémentaires après")}<span class="em-in"><input type="number" id="rg-s" min="30" max="60" step="1" value="' + esc(R.seuilHS) + '"><i>${T("h / sem.")}</i></span></label>'
-      + '<label class="em-ch">${T("Payées à")}<span class="em-in"><input type="number" id="rg-t" min="100" max="300" step="5" value="' + esc(Math.round((+R.tauxHS || 1.5) * 100)) + '"><i>${T("% du taux")}</i></span></label></div>'
-      + '<div class="em-gestes"><span class="em-note">${T("Montants BRUTS, avant retenues (RRQ, AE, RQAP, impôts) : l’export sert à les saisir dans votre logiciel de paie. Normes du travail du Québec : heures supplémentaires au-delà de 40 heures par semaine, payées à 150 %.")}</span>'
-      + '<button class="prim" id="rg-ok"' + (D.peutModifier ? '' : ' disabled') + '>${T("Enregistrer")}</button></div></div>';
+          return '<tr class="' + (x.staffId === CHOISI ? 'on' : '') + '" data-ligne="' + esc(x.staffId) + '"><td>' + qui(x.staffId, x.nom, szArgent(x.taux) + ' ${T("/ h")}'
+            + (x.ouverts ? ' · <span class="pill a" title="${T("Un pointage est encore ouvert : il n’entre pas dans la paie tant qu’il n’est pas fermé.")}">${T("pointage ouvert")}</span>' : '')) + '</td>'
+            + '<td class="n">' + h2(x.heures) + '</td><td class="n">' + ((x.heuresSup || 0) > 0 ? '<span class="pill a">' + h2(x.heuresSup) + '</span>' : '—') + '</td>'
+            + '<td class="n">' + ((x.ferie || 0) + (x.maladie || 0) ? szArgent((x.ferie || 0) + (x.maladie || 0)) : '—') + '</td>'
+            + '<td class="n">' + szArgent(x.vacancesVersees || 0) + '</td>'
+            + '<td class="n">' + (x.commissions ? szArgent(x.commissions) : '—') + '</td><td class="n or">' + szArgent(x.brut) + '</td></tr>';
+        }).join('') + '</tbody><tfoot><tr><td>${T("Total")}</td><td class="n">' + h2(t.heures) + '</td><td class="n">' + h2(t.heuresSup) + '</td><td class="n">' + szArgent((t.ferie || 0) + (t.maladie || 0))
+      + '</td><td class="n">' + szArgent(t.vacances || 0) + '</td><td class="n">' + szArgent(t.commissions || 0) + '</td><td class="n or">' + szArgent(t.brut || 0) + '</td></tr></tfoot></table>'
+      + '<div class="note" style="padding:.5rem .55rem 0">${T("Montants BRUTS, avant retenues (RRQ, AE, RQAP, impôts) : l’export sert à les saisir dans votre logiciel de paie.")}</div></div>';
+    return h + '<div class="g3 imp">' + tab + bulletin(l.filter(function(x){ return x.staffId === CHOISI; })[0] || l[0]) + '</div>' + historique();
+  }
+  function bulletin(x){
+    if (!x) return '';
+    var R = PAIE.reglages || {};
+    var ln = function(k, v){ return '<div class="l"><span>' + k + '</span><b>' + v + '</b></div>'; };
+    var h = '<div class="carte bul" id="bulletin"><h3>${T("Bulletin")} · ' + esc(x.nom) + '</h3><div class="note" style="margin-top:-.3rem">' + esc('${T("Du ")}' + court(PAIE.debut) + ' ${T("au")} ' + court(PAIE.fin) + ' ' + String(PAIE.fin).slice(0, 4)) + '</div>';
+    h += ln('${T("Heures régulières")} ' + szNombre(x.heures, 2) + ' h', szArgent(x.salaireReg != null ? x.salaireReg : x.salaire));
+    if (x.heuresSup) h += ln('${T("Supplémentaires")} ' + szNombre(x.heuresSup, 2) + ' h ${T("à")} ' + szNombre((R.tauxHS || 1.5) * 100, 0) + ' %', szArgent(x.salaireSup || 0));
+    (x.feries || []).forEach(function(f){ h += ln(esc(f.nom), szArgent(f.montant)); });
+    (x.maladies || []).forEach(function(m){ h += ln('${T("Maladie payée,")} ' + esc(court(m.date)), szArgent(m.montant)); });
+    if (x.commissions) h += ln('${T("Commissions")} ' + szNombre(x.pct, 1) + ' % ${T("de")} ' + szArgent(x.ventes), szArgent(x.commissions));
+    if (R.vacancesMode === 'accumule') {
+      h += ln('${T("Vacances acquises")} (' + x.vacancesPct + ' %)', '<span class="note">' + szArgent(x.vacancesAcquises || 0) + '</span>');
+      if (x.vacancesVersees) h += ln('${T("Vacances versées")}', szArgent(x.vacancesVersees));
+    } else h += ln('${T("Vacances")} ' + x.vacancesPct + ' % ${T("versées")}', szArgent(x.vacancesVersees || 0));
+    h += '<div class="l t"><span>${T("Brut")}</span><b>' + szArgent(x.brut) + '</b></div>';
+    h += '<div class="note">${T("Avant retenues : RRQ, AE, RQAP et impôts se calculent dans le logiciel de paie.")}</div>';
+    h += '<div class="gestes"><button class="mini" id="em-imprimer">${T("Imprimer le bulletin")}</button></div></div>';
     return h;
+  }
+  function historique(){
+    var l = D.historique || [];
+    if (!l.length) return '';
+    return '<div class="carte"><h3>${T("Paies approuvées")}</h3><div class="hp" style="margin-top:.4rem">' + l.slice(0, 8).map(function(p){
+      return '<button type="button" data-allerper="' + esc(p.debut) + '"><b>' + esc(court(p.debut) + ' – ' + court(p.fin) + ' ' + p.fin.slice(0, 4)) + '</b><span>'
+        + p.personnes + ' ' + (p.personnes > 1 ? '${T("personnes")}' : '${T("personne")}') + ' · ' + szArgent(p.brut) + '</span></button>';
+    }).join('') + '</div></div>';
   }
 
   function dessiner(){
     if (!D) return;
     var h = tete();
-    if (ONGLET === 'horaires') h += vueHoraires();
-    else if (ONGLET === 'pointages') h += vuePointages();
+    if (ONGLET === 'horaire') h += vueHoraire();
+    else if (ONGLET === 'equipe') h += vueEquipe();
     else if (ONGLET === 'paie') h += vuePaie();
-    else h += vueEquipe();
+    else h += vueAujourdhui();
     corps.innerHTML = h;
+  }
+
+  /* ══ LES BOÎTES ══ */
+  function boite(titre, sous, interieur, bouton, large, gauche){
+    BOITE = true;
+    var v = document.createElement('div');
+    v.className = 'voile';
+    v.innerHTML = '<div class="boite' + (large ? ' large' : '') + '" role="dialog" aria-modal="true" aria-labelledby="bx-t"><h3 id="bx-t">' + titre + '</h3>'
+      + (sous ? '<div class="sous">' + sous + '</div>' : '') + interieur
+      + '<div class="pied-b"><span class="gauche">' + (gauche || '') + '</span><button type="button" id="bx-x">${T("Annuler")}</button><button type="button" class="prim" id="bx-ok">' + bouton + '</button></div></div>';
+    document.body.appendChild(v);
+    var fermer = function(){ document.removeEventListener('keydown', clav, true); v.remove(); BOITE = false; };
+    var clav = function(ev){ if (ev.key === 'Escape') { ev.preventDefault(); fermer(); } };
+    document.addEventListener('keydown', clav, true);
+    v.addEventListener('mousedown', function(ev){ if (ev.target === v) fermer(); });
+    v.querySelector('#bx-x').onclick = fermer;
+    var premier = v.querySelector('input:not([type=checkbox]),select');
+    try { if (premier) premier.focus(); } catch (e) {}
+    return { el: v, fermer: fermer, ok: v.querySelector('#bx-ok'), val: function(id){ var e = v.querySelector('#' + id); return e ? (e.type === 'checkbox' ? e.checked : e.value) : ''; } };
+  }
+  function optionsPersonnes(sel){
+    return equipe().map(function(s){ return '<option value="' + esc(s.id) + '"' + (s.id === sel ? ' selected' : '') + '>' + esc(s.nom) + '</option>'; }).join('');
+  }
+  function envoyer(b, op, args, ok){
+    b.ok.disabled = true;
+    appeler(op, args).then(function(r){
+      b.ok.disabled = false;
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      b.fermer(); if (ok) dire(ok, 'bon'); PAIE = null; charger();
+    });
+  }
+  function boiteQuart(q){
+    var neuf = !q.id;
+    var b = boite(neuf ? '${T("Nouveau quart")}' : '${T("Modifier le quart")}', esc(nomDe(q.staffId) + ' · ' + jourLong(q.date)),
+      '<div class="champs trois"><label class="ch">${T("Début")}<input type="time" id="q-d" value="' + esc(q.debut) + '"></label>'
+      + '<label class="ch">${T("Fin")}<input type="time" id="q-f" value="' + esc(q.fin) + '"></label>'
+      + '<label class="ch">${T("Date")}<input type="date" id="q-j" value="' + esc(q.date) + '"></label>'
+      + '<label class="ch large">${T("Note")}<input id="q-n" maxlength="120" value="' + esc(q.note || '') + '" placeholder="${T("Ex. : ouverture, inventaire")}"></label></div>',
+      neuf ? '${T("Ajouter le quart")}' : '${T("Enregistrer")}', false, neuf ? '' : '<button type="button" class="dang" id="q-sup">${T("Retirer ce quart")}</button>');
+    b.ok.onclick = function(){ envoyer(b, 'employes:quart', [{ id: q.id || '', staffId: q.staffId, date: b.val('q-j'), debut: b.val('q-d'), fin: b.val('q-f'), note: b.val('q-n') }], neuf ? '${T("Quart ajouté.")}' : '${T("Quart modifié.")}'); };
+    var sup = b.el.querySelector('#q-sup');
+    if (sup) sup.onclick = function(){ envoyer(b, 'employes:quartSupprimer', [q.id], '${T("Quart retiré.")}'); };
+  }
+  function boitePointage(p){
+    var neuf = !p.id;
+    var b = boite(neuf ? '${T("Ajouter un pointage")}' : '${T("Corriger le pointage")}', '${T("Une sortie plus tôt que l’entrée compte pour le lendemain (quart de nuit). Sans sortie, la personne reste « en poste ».")}',
+      '<div class="champs"><label class="ch large">${T("Personne")}<select id="p-s">' + optionsPersonnes(p.staffId) + '</select></label>'
+      + '<label class="ch">${T("Date")}<input type="date" id="p-j" value="' + esc(p.date) + '"></label><span></span>'
+      + '<label class="ch">${T("Entrée")}<input type="time" id="p-e" value="' + esc(p.entree) + '"></label>'
+      + '<label class="ch">${T("Sortie")}<input type="time" id="p-o" value="' + esc(p.sortie) + '"></label>'
+      + '<label class="ch large">${T("Note")}<input id="p-n" maxlength="200" value="' + esc(p.note || '') + '" placeholder="${T("Ex. : oubli de pointage")}"></label>'
+      + '<label class="ch case large"><input type="checkbox" id="p-sp"' + (p.sansPause ? ' checked' : '') + '>${T("Sans pause repas (la personne ne pouvait pas quitter son poste)")}</label></div>',
+      neuf ? '${T("Ajouter le pointage")}' : '${T("Enregistrer la correction")}', false, neuf ? '' : '<button type="button" class="dang" id="p-sup">${T("Supprimer")}</button>');
+    b.ok.onclick = function(){
+      var j = b.val('p-j'), e = b.val('p-e'), o = b.val('p-o');
+      if (!j || !e) { dire('${T("Indiquez la date et l’heure d’entrée.")}', 'att'); return; }
+      var sortie = o ? (o > e ? j : plus(j, 1)) + 'T' + o : '';
+      envoyer(b, 'employes:pointage', [{ id: p.id || '', staffId: b.val('p-s'), entree: j + 'T' + e, sortie: sortie, note: b.val('p-n'), sansPause: b.val('p-sp') }], '${T("Pointage enregistré.")}');
+    };
+    var sup = b.el.querySelector('#p-sup');
+    if (sup) sup.onclick = function(){ envoyer(b, 'employes:pointageSupprimer', [p.id], '${T("Pointage supprimé.")}'); };
+  }
+  function pointageDe(id){
+    var l = (D.pointages || []).concat(D.pointagesSemaine || []);
+    var p = l.filter(function(x){ return x.id === id; })[0]; if (!p) return null;
+    return { id: p.id, staffId: p.staffId, date: p.jour || isoDe(new Date(p.entree)), entree: hm(p.entree), sortie: p.sortie ? hm(p.sortie) : '', note: p.note || '', sansPause: !!p.sansPause };
+  }
+  function boiteConge(staffId, date){
+    var b = boite('${T("Ajouter un congé")}', '${T("Les quarts de ces jours-là sont retirés de l’horaire.")}',
+      '<div class="champs"><label class="ch large">${T("Personne")}<select id="c-s">' + optionsPersonnes(staffId) + '</select></label>'
+      + '<label class="ch">${T("Du")}<input type="date" id="c-d" value="' + esc(date) + '"></label>'
+      + '<label class="ch">${T("Au")}<input type="date" id="c-f" value="' + esc(date) + '"></label>'
+      + '<label class="ch large">${T("Type")}<select id="c-m"><option value="vacances">${T("Vacances")}</option><option value="maladie">${T("Maladie")}</option>'
+      + '<option value="sans_solde">${T("Sans solde")}</option><option value="autre">${T("Autre absence")}</option></select></label>'
+      + '<label class="ch case large"><input type="checkbox" id="c-p">${T("Jour de maladie PAYÉ (2 par année, après 3 mois de service)")}</label>'
+      + '<label class="ch large">${T("Note")}<input id="c-n" maxlength="120" value=""></label></div>',
+      '${T("Ajouter le congé")}');
+    b.ok.onclick = function(){
+      var m = b.val('c-m');
+      envoyer(b, 'employes:conge', [{ staffId: b.val('c-s'), debut: b.val('c-d'), fin: b.val('c-f') || b.val('c-d'), motif: m, paye: m === 'maladie' && b.val('c-p'), note: b.val('c-n') }], '${T("Congé ajouté.")}');
+    };
+  }
+  function boiteFiche(s){
+    var f = s.fiche || {};
+    var b = boite('${T("Modifier la fiche")}', esc(s.nom),
+      '<div class="champs"><label class="ch">${T("Poste")}<input id="f-po" maxlength="60" value="' + esc(f.poste || '') + '" placeholder="${T("Ex. : conseillère, couturière")}"></label>'
+      + '<label class="ch">${T("Emploi")}<select id="f-em"><option value="">—</option><option value="plein"' + (f.emploi === 'plein' ? ' selected' : '') + '>${T("Temps plein")}</option>'
+      + '<option value="partiel"' + (f.emploi === 'partiel' ? ' selected' : '') + '>${T("Temps partiel")}</option></select></label>'
+      + '<label class="ch">${T("Embauche")}<input type="date" id="f-eb" value="' + esc(f.embauche || '') + '"></label>'
+      + '<label class="ch">${T("Commission")}<span class="unite"><input type="number" id="f-co" min="0" max="50" step="0.1" value="' + esc(f.commission || 0) + '" aria-label="${T("Commission")}"><i>%</i></span></label>'
+      + '<label class="ch">${T("Taux horaire actuel")}<span class="unite"><input type="number" id="f-tx" min="0" max="500" step="0.01" value="' + esc(s.taux || 0) + '" aria-label="${T("Taux horaire actuel")}"><i>$ / h</i></span></label>'
+      + '<label class="ch">${T("Contact d’urgence")}<input id="f-ur" maxlength="120" value="' + esc(f.urgence || '') + '" placeholder="${T("Nom et téléphone")}"></label>'
+      + '<label class="ch large">${T("Note")}<input id="f-no" maxlength="300" value="' + esc(f.note || '') + '"></label>'
+      + '<label class="ch case large"><input type="checkbox" id="f-in"' + (f.inclus === false ? '' : ' checked') + '>${T("À la paie (décochez pour la propriétaire ou un compte technique)")}</label></div>'
+      + '<div class="note">${T("Le taux saisi ici CORRIGE le taux en vigueur. Pour une augmentation à une date, utilisez « Nouveau taux » : les périodes déjà payées ne bougent pas.")}</div>',
+      '${T("Enregistrer")}');
+    b.ok.onclick = function(){
+      envoyer(b, 'employes:fiche', [{ id: s.id, poste: b.val('f-po'), emploi: b.val('f-em'), embauche: b.val('f-eb'), commission: b.val('f-co'), taux: b.val('f-tx'),
+        urgence: b.val('f-ur'), note: b.val('f-no'), inclus: b.val('f-in') }], '${T("Fiche enregistrée : ")}' + s.nom);
+    };
+  }
+  function boiteTaux(s){
+    var b = boite('${T("Nouveau taux")}', esc(s.nom + ' · ${T("taux actuel")} ' + szArgent(s.taux || 0)),
+      '<div class="champs"><label class="ch">${T("Nouveau taux")}<span class="unite"><input type="number" id="t-tx" min="0" max="500" step="0.01" value="" aria-label="${T("Nouveau taux")}"><i>$ / h</i></span></label>'
+      + '<label class="ch">${T("À partir du")}<input type="date" id="t-de" value="' + esc(D.aujourdhui) + '"></label></div>'
+      + '<div class="note">${T("Les heures faites avant cette date restent payées à l’ancien taux.")}</div>',
+      '${T("Enregistrer le taux")}');
+    b.ok.onclick = function(){ envoyer(b, 'employes:taux', [{ staffId: s.id, taux: b.val('t-tx'), des: b.val('t-de') }], '${T("Nouveau taux enregistré.")}'); };
+  }
+  function boiteReglages(){
+    var R = (D && D.reglages) || {};
+    var mods = (R.modeles || []).slice();
+    var ligneMod = function(m, i){ return '<div class="m" data-mi="' + i + '"><input data-mk="nom" maxlength="30" value="' + esc(m.nom) + '" aria-label="${T("Nom du modèle")}">'
+      + '<input type="time" data-mk="debut" value="' + esc(m.debut) + '" aria-label="${T("Début")}"><input type="time" data-mk="fin" value="' + esc(m.fin) + '" aria-label="${T("Fin")}">'
+      + '<button type="button" class="mini" data-mx="' + i + '" aria-label="${T("Retirer ce modèle")}">✕</button></div>'; };
+    var b = boite('${T("Réglages de la paie")}', '${T("Ils s’appliquent aux périodes qui ne sont pas encore approuvées.")}',
+      '<div class="champs trois"><label class="ch">${T("Période")}<select id="r-p"><option value="14"' + (R.periodeJours === 14 ? ' selected' : '') + '>${T("Aux deux semaines")}</option>'
+      + '<option value="7"' + (R.periodeJours === 7 ? ' selected' : '') + '>${T("Chaque semaine")}</option></select></label>'
+      + '<label class="ch">${T("Première période commence le")}<input type="date" id="r-d" value="' + esc(R.debutRef || '') + '"></label>'
+      + '<label class="ch">${T("Salaire minimum")}<span class="unite"><input type="number" id="r-mi" min="0" max="100" step="0.01" value="' + esc(R.salaireMin || '') + '" aria-label="${T("Salaire minimum")}"><i>$ / h</i></span></label>'
+      + '<label class="ch">${T("Supplémentaires après")}<span class="unite"><input type="number" id="r-s" min="30" max="60" step="1" value="' + esc(R.seuilHS) + '" aria-label="${T("Supplémentaires après")}"><i>${T("h / sem.")}</i></span></label>'
+      + '<label class="ch">${T("Payées à")}<span class="unite"><input type="number" id="r-t" min="100" max="300" step="5" value="' + esc(Math.round((+R.tauxHS || 1.5) * 100)) + '" aria-label="${T("Payées à")}"><i>%</i></span></label>'
+      + '<label class="ch">${T("Vacances")}<select id="r-v"><option value="paie"' + (R.vacancesMode !== 'accumule' ? ' selected' : '') + '>${T("Versées à chaque paie")}</option>'
+      + '<option value="accumule"' + (R.vacancesMode === 'accumule' ? ' selected' : '') + '>${T("Accumulées, versées au départ")}</option></select></label>'
+      + '<label class="ch case"><input type="checkbox" id="r-pa"' + (R.pauseAuto !== false ? ' checked' : '') + '>${T("Pause repas déduite")}</label>'
+      + '<label class="ch">${T("Après")}<span class="unite"><input type="number" id="r-ph" min="3" max="12" step="0.5" value="' + esc(R.pauseApresH) + '" aria-label="${T("Pause après")}"><i>h</i></span></label>'
+      + '<label class="ch">${T("Durée")}<span class="unite"><input type="number" id="r-pm" min="0" max="90" step="5" value="' + esc(R.pauseMin) + '" aria-label="${T("Durée de la pause")}"><i>min</i></span></label>'
+      + '<label class="ch">${T("Pâques : congé le")}<select id="r-pq"><option value="vendredi"' + (R.paques !== 'lundi' ? ' selected' : '') + '>${T("Vendredi saint")}</option>'
+      + '<option value="lundi"' + (R.paques === 'lundi' ? ' selected' : '') + '>${T("Lundi de Pâques")}</option></select></label>'
+      + '<label class="ch">${T("Retard signalé après")}<span class="unite"><input type="number" id="r-rt" min="1" max="120" step="1" value="' + esc(R.retardMin) + '" aria-label="${T("Retard signalé après")}"><i>min</i></span></label></div>'
+      + '<div class="ch large" style="margin-top:.2rem">${T("Modèles de quart")}<div class="mods" id="r-mods">' + mods.map(ligneMod).join('') + '</div>'
+      + '<button type="button" class="mini" id="r-madd" style="align-self:flex-start">${T("+ Ajouter un modèle")}</button></div>'
+      + '<div class="note">${T("Normes du travail du Québec : supplémentaires au-delà de 40 h par semaine à 150 % ; pause de 30 min non payée après 5 h ; vacances 4 %, 6 % dès 3 ans ; fériés et maladie payés à 1/20 du salaire des 4 semaines précédentes. Le salaire minimum change chaque 1er mai.")}</div>',
+      '${T("Enregistrer")}', true);
+    var lire = function(){ var out = []; b.el.querySelectorAll('#r-mods .m').forEach(function(r){ var g = function(k){ return r.querySelector('[data-mk="' + k + '"]').value; };
+      out.push({ id: 'm' + (out.length + 1), nom: g('nom'), debut: g('debut'), fin: g('fin') }); }); return out; };
+    b.el.addEventListener('click', function(ev){
+      var x = ev.target.closest && ev.target.closest('[data-mx]');
+      if (x) { mods = lire(); mods.splice(+x.getAttribute('data-mx'), 1); b.el.querySelector('#r-mods').innerHTML = mods.map(ligneMod).join(''); }
+      if (ev.target.id === 'r-madd') { mods = lire(); mods.push({ nom: '', debut: '09:00', fin: '17:00' }); b.el.querySelector('#r-mods').innerHTML = mods.map(ligneMod).join(''); }
+    });
+    b.ok.onclick = function(){
+      envoyer(b, 'employes:reglages', [{ periodeJours: +b.val('r-p'), debutRef: b.val('r-d'), salaireMin: +b.val('r-mi') || 0, seuilHS: +b.val('r-s'), tauxHS: Math.round(+b.val('r-t')) / 100,
+        vacancesMode: b.val('r-v'), pauseAuto: b.val('r-pa'), pauseApresH: +b.val('r-ph'), pauseMin: +b.val('r-pm'), paques: b.val('r-pq'), retardMin: +b.val('r-rt'), modeles: lire() }],
+        '${T("Réglages de la paie enregistrés.")}');
+      PERIODE = '';
+    };
+  }
+
+  /* Un clic sur une ligne de la ligne de temps : l'heure sous le pointeur (arrondie à la demi-heure). */
+  function heureSous(zone, ev){
+    var r = zone.getBoundingClientRect(), b0 = +zone.getAttribute('data-b0'), b1 = +zone.getAttribute('data-b1');
+    var m = b0 + (ev.clientX - r.left) / r.width * (b1 - b0);
+    m = Math.max(b0, Math.min(b1 - 60, Math.round(m / 30) * 30));
+    return deux(Math.floor(m / 60)) + ':' + deux(m % 60);
+  }
+  function poserModele(m, staffId){
+    appeler('employes:quart', [{ staffId: staffId, date: JOUR, debut: m.debut, fin: m.fin, note: m.nom }]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      dire('${T("Quart ajouté :")} ' + m.nom + ' · ' + nomDe(staffId), 'bon'); charger();
+    });
   }
 
   corps.addEventListener('click', function(ev){
     var t = ev.target; if (!t || !t.closest) return;
     var b;
-    if ((b = t.closest('[data-og]'))) { ONGLET = b.getAttribute('data-og'); FQ = null; FP = null; if (ONGLET === 'paie') { PAIE = null; dessiner(); chargerPaie(); } else dessiner(); return; }
-    if ((b = t.closest('[data-sem]'))) { var n = +b.getAttribute('data-sem'); SEMAINE = n ? plus(D.semaine[0], n) : D.aujourdhui; FQ = null; charger(); return; }
+    if ((b = t.closest('[data-og]'))) { ONGLET = b.getAttribute('data-og'); ARME = null; if (ONGLET === 'aujourdhui') SEMAINE = ''; if (ONGLET === 'paie') { PAIE = null; dessiner(); chargerPaie(); } else if (ONGLET === 'aujourdhui') charger(); else dessiner(); return; }
+    if ((b = t.closest('[data-sem]'))) { var n = +b.getAttribute('data-sem'); SEMAINE = n ? plus(D.semaine[0], n) : ''; JOUR = n ? plus(JOUR, n) : ''; charger(); return; }
+    if ((b = t.closest('[data-jour]'))) { JOUR = b.getAttribute('data-jour'); dessiner(); return; }
     if ((b = t.closest('[data-per]'))) {
       appeler('employes:periode', [D.periode.debut, +b.getAttribute('data-per')]).then(function(r){ if (r && r.ok) { PERIODE = r.debut; PAIE = null; charger(); } });
       return;
     }
-    if ((b = t.closest('[data-enrfiche]'))) {
-      var id = b.getAttribute('data-enrfiche'), tr = b.closest('tr');
-      var v = function(c){ var e = tr.querySelector('[data-c="' + c + '"]'); return e ? (e.type === 'checkbox' ? e.checked : e.value) : ''; };
-      b.disabled = true;
-      appeler('employes:fiche', [{ id: id, taux: v('taux'), commission: v('commission'), inclus: v('inclus'), embauche: v('embauche') }]).then(function(r){
-        b.disabled = false;
-        if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('${T("Fiche enregistrée : ")}' + nomDe(id), 'bon'); charger();
+    if ((b = t.closest('[data-allerper]'))) { PERIODE = b.getAttribute('data-allerper'); PAIE = null; charger(); return; }
+    if ((b = t.closest('[data-fiche]'))) { CHOISI = b.getAttribute('data-fiche'); dessiner(); return; }
+    if ((b = t.closest('[data-ligne]'))) { CHOISI = b.getAttribute('data-ligne'); dessiner(); return; }
+    if ((b = t.closest('[data-mod]'))) {
+      var id = b.getAttribute('data-mod');
+      var m = (D.reglages.modeles || []).filter(function(x){ return x.id === id; })[0];
+      ARME = (ARME && ARME.id === id) ? null : m; dessiner(); return;
+    }
+    if (!D.peutModifier) return;
+    if ((b = t.closest('[data-act]'))) {
+      var a = b.getAttribute('data-act'), sel = pers(CHOISI) || equipe()[0];
+      if (a === 'pointage') boitePointage({ staffId: (sel || {}).id || '', date: D.aujourdhui, entree: '09:00', sortie: '17:00' });
+      else if (a === 'conge') boiteConge(ONGLET === 'equipe' && sel ? sel.id : ((equipe()[0] || {}).id || ''), ONGLET === 'horaire' ? JOUR : D.aujourdhui);
+      else if (a === 'fiche' && sel) boiteFiche(sel);
+      else if (a === 'taux' && sel) boiteTaux(sel);
+      return;
+    }
+    if ((b = t.closest('[data-pmod]'))) { var p = pointageDe(b.getAttribute('data-pmod')); if (p) boitePointage(p); return; }
+    if ((b = t.closest('[data-qmod]'))) {
+      var q = (D.horaires || []).filter(function(x){ return x.id === b.getAttribute('data-qmod'); })[0];
+      if (q) boiteQuart({ id: q.id, staffId: q.staffId, date: q.date, debut: q.debut, fin: q.fin, note: q.note || '' });
+      return;
+    }
+    if ((b = t.closest('[data-cgx]'))) {
+      var cid = b.getAttribute('data-cgx');
+      szConfirmer({ titre: '${T("Retirer ce congé")}', texte: '${T("Le jour redevient libre à l’horaire. Les quarts retirés ne reviennent pas d’eux-mêmes.")}', oui: '${T("Retirer")}' }).then(function(okc){
+        if (!okc) return;
+        appeler('employes:congeSupprimer', [cid]).then(function(r){ if (!r.ok) { dire(expliquer(r), 'err'); return; } dire('${T("Congé retiré.")}', 'bon'); charger(); });
       });
       return;
     }
-    if ((b = t.closest('[data-qplus]'))) { var q = b.getAttribute('data-qplus').split('|'); FQ = { staffId: q[0], date: q[1], debut: '09:00', fin: '17:00' }; dessiner(); return; }
-    if (t.id === 'fq-x') { FQ = null; dessiner(); return; }
-    if (t.id === 'fq-ok') {
-      var s = { staffId: FQ.staffId, date: FQ.date, debut: document.getElementById('fq-d').value, fin: document.getElementById('fq-f').value, note: document.getElementById('fq-n').value };
-      t.disabled = true;
-      appeler('employes:quart', [s]).then(function(r){
-        t.disabled = false;
-        if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        FQ = null; dire('${T("Quart ajouté.")}', 'bon'); charger();
+    if ((b = t.closest('[data-absent]'))) {
+      var an = (D.anomalies || [])[+b.getAttribute('data-absent')]; if (!an) return;
+      var qq = (an.prevu || '').split('–');
+      szConfirmer({ titre: nomDe(an.staffId) + ' · ' + jourLong(an.date), texte: '${T("Ce quart n’a aucun pointage. Était-ce une absence (congé), ou un oubli de pointage ?")}', oui: '${T("Saisir le pointage")}', non: '${T("C’était un congé")}' }).then(function(okc){
+        if (okc) boitePointage({ staffId: an.staffId, date: an.date, entree: qq[0] || '09:00', sortie: qq[1] || '17:00', note: '${T("Oubli de pointage")}' });
+        else boiteConge(an.staffId, an.date);
       });
       return;
     }
-    if ((b = t.closest('[data-qx]'))) {
-      appeler('employes:quartSupprimer', [b.getAttribute('data-qx')]).then(function(r){ if (!r.ok) { dire(expliquer(r), 'err'); return; } dire('${T("Quart retiré.")}', 'bon'); charger(); });
+    if ((b = t.closest('[data-zone]'))) {
+      if (b.classList.contains('ferme')) return;
+      var sid = b.getAttribute('data-zone');
+      if (ARME) { poserModele(ARME, sid); return; }
+      var d0 = heureSous(b, ev), m0 = minDe(d0) + 8 * 60;
+      boiteQuart({ staffId: sid, date: JOUR, debut: d0, fin: deux(Math.min(23, Math.floor(m0 / 60))) + ':' + deux(m0 % 60) });
       return;
     }
+    if (t.id === 'em-mods' || t.id === 'em-reg') { boiteReglages(); return; }
     if (t.id === 'em-copier') {
       appeler('employes:copierSemaine', [D.semaine[0]]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -444,39 +871,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       });
       return;
     }
-    if ((b = t.closest('[data-pmod]'))) {
-      var pid = b.getAttribute('data-pmod'), p = (D.pointages || []).filter(function(x){ return x.id === pid; })[0];
-      if (p) { FP = { id: p.id, staffId: p.staffId, date: jourLocal(p.entree), entree: hm(p.entree), sortie: p.sortie ? hm(p.sortie) : '', note: p.note || '' }; dessiner(); }
-      return;
-    }
-    if (t.id === 'fp-x') { FP = null; dessiner(); return; }
-    if (t.id === 'fp-ok') {
-      var j = document.getElementById('fp-j').value, e = document.getElementById('fp-e').value, o = document.getElementById('fp-o').value;
-      if (!j || !e) { dire('${T("Indiquez la date et l’heure d’entrée.")}', 'att'); return; }
-      var sortie = o ? (o > e ? j : plus(j, 1)) + 'T' + o : '';   // une sortie avant l'entrée = le lendemain (quart de nuit)
-      var sp = { id: FP && FP.id ? FP.id : '', staffId: document.getElementById('fp-s').value, entree: j + 'T' + e, sortie: sortie, note: document.getElementById('fp-n').value };
-      t.disabled = true;
-      appeler('employes:pointage', [sp]).then(function(r){
-        t.disabled = false;
-        if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        FP = null; dire('${T("Pointage enregistré.")}', 'bon'); charger();
-      });
-      return;
-    }
-    if ((b = t.closest('[data-psup]'))) {
-      var idp = b.getAttribute('data-psup');
-      szConfirmer({ danger: true, titre: '${T("Supprimer ce pointage")}', texte: '${T("Ses heures sortiront du calcul de la paie.")}', oui: '${T("Supprimer")}' }).then(function(okc){
+    if (t.id === 'em-approuver') {
+      szConfirmer({ titre: '${T("Approuver la période")}', texte: '${T("La paie de cette période sera figée : aucun pointage, quart ou congé de ces dates ne pourra changer sans rouvrir la période.")}', oui: '${T("Approuver")}' }).then(function(okc){
         if (!okc) return;
-        appeler('employes:pointageSupprimer', [idp]).then(function(r){ if (!r.ok) { dire(expliquer(r), 'err'); return; } dire('${T("Pointage supprimé.")}', 'bon'); charger(); });
+        appeler('employes:approuver', [D.periode.debut]).then(function(r){ if (!r.ok) { dire(expliquer(r), 'err'); return; } dire('${T("Période approuvée.")}', 'bon'); PAIE = null; charger(); });
       });
       return;
     }
-    if (t.id === 'rg-ok') {
-      var rg = { periodeJours: +document.getElementById('rg-p').value, debutRef: document.getElementById('rg-d').value,
-        seuilHS: +document.getElementById('rg-s').value, tauxHS: Math.round(+document.getElementById('rg-t').value) / 100 };   // saisi en % (150), gardé en facteur (1,5)
-      appeler('employes:reglages', [rg]).then(function(r){ if (!r.ok) { dire(expliquer(r), 'err'); return; } dire('${T("Réglages de la paie enregistrés.")}', 'bon'); PERIODE = ''; PAIE = null; charger(); });
+    if (t.id === 'em-rouvrir') {
+      szConfirmer({ danger: true, titre: '${T("Rouvrir la période")}', texte: '${T("Les chiffres se recalculeront. Si la paie a déjà été versée, refaites l’export et corrigez-la dans le logiciel de paie. La réouverture est notée.")}', oui: '${T("Rouvrir")}' }).then(function(okc){
+        if (!okc) return;
+        appeler('employes:rouvrir', [D.periode.debut, '${T("rouverte depuis la fenêtre Employés")}']).then(function(r){ if (!r.ok) { dire(expliquer(r), 'err'); return; } dire('${T("Période rouverte.")}', 'bon'); PAIE = null; charger(); });
+      });
       return;
     }
+    if (t.id === 'em-imprimer') { try { window.print(); } catch (e) {} return; }
     if (t.id === 'em-csv') {
       appeler('employes:paieCsv', [D.periode.debut, D.periode.fin]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -488,9 +897,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       return;
     }
   });
+  // Glisser un modèle sur une ligne : le quart se pose.
+  corps.addEventListener('dragstart', function(ev){ var b = ev.target.closest && ev.target.closest('[data-mod]'); if (b) { try { ev.dataTransfer.setData('text/plain', b.getAttribute('data-mod')); } catch (e) {} } });
+  corps.addEventListener('dragover', function(ev){ var z = ev.target.closest && ev.target.closest('[data-zone]'); if (z && !z.classList.contains('ferme')) ev.preventDefault(); });
+  corps.addEventListener('drop', function(ev){
+    var z = ev.target.closest && ev.target.closest('[data-zone]'); if (!z || z.classList.contains('ferme')) return;
+    ev.preventDefault();
+    var id = ''; try { id = ev.dataTransfer.getData('text/plain'); } catch (e) {}
+    var m = (D.reglages.modeles || []).filter(function(x){ return x.id === id; })[0];
+    if (m && D.peutModifier) poserModele(m, z.getAttribute('data-zone'));
+  });
 
-  window.szActualiser = function(){ if (!FQ && !FP) charger(); };
-  window.szRevenir = function(){ if (!FQ && !FP) charger(); };
+  window.szActualiser = function(){ if (!BOITE) charger(); };
+  window.szRevenir = function(){ if (!BOITE) charger(); };
   window.szModeAncre = function(estAncree){
     var t = document.querySelector('.tete');
     if (!t) return;
