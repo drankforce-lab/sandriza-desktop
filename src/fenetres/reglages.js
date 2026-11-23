@@ -77,6 +77,19 @@ html.jour .rg-ic{background:#3d4456}
 .rg-ch span{flex:0 1 auto;min-width:0;white-space:normal;line-height:1.25}
 .rg-ch select{flex:1 1 0;width:0;min-width:6.5rem;height:30px;font:inherit;font-size:12.5px}
 .rg-vide{font-size:13px;color:var(--tx2)}
+/* (2026-11-22, sa capture : « ça se déforme encore » — Livraison coupée en bas, une colonne pleine, une autre à moitié vide)
+   Les colonnes CSS ne s'équilibraient pas (cartes insécables de tailles très inégales). ranger() les MESURE : chaque carte
+   va dans la colonne la plus courte ; si la page déborde encore, les entrées se resserrent (data-serre 1 puis 2). */
+.rg-grille.rg-mas{display:flex;columns:auto;gap:14px;align-items:flex-start}
+.rg-col{flex:1 1 0;min-width:0;display:flex;flex-direction:column;gap:14px}
+.rg-col>.rg-carte{margin:0}
+/* Une entrée qui ne tient pas même sur toute la largeur de la carte passe à la ligne — jamais coupée. */
+.rg-ent.une .rg-e span{white-space:normal}
+.rg-grille[data-serre="1"] .rg-carte{padding:11px 14px 9px;gap:5px}
+.rg-grille[data-serre="1"] .rg-e{padding:3px 8px}
+.rg-grille[data-serre="2"] .rg-carte{padding:9px 12px 7px;gap:4px}
+.rg-grille[data-serre="2"] .rg-e{padding:2px 6px;font-size:12.5px}
+.rg-grille[data-serre="2"] .rg-ic{width:24px;height:24px}
 .msg{position:fixed;left:32px;bottom:10px;font-size:.79rem;color:var(--tx2)}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-att)}
 `;
@@ -141,7 +154,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   /* Mesuré : une entrée qui ne tient pas dans sa demi-colonne prend la largeur de la carte (jamais de « … »).
      On repart de zéro à chaque mesure (police, taille de fenêtre). */
-  function larges(){
+  function larges(niv){
+    niv = niv || 0;
+    if (niv) grille.setAttribute('data-serre', String(niv)); else grille.removeAttribute('data-serre');
     var bs = grille.querySelectorAll('.rg-e');
     Array.prototype.forEach.call(bs, function(b){ b.classList.remove('large'); });
     Array.prototype.forEach.call(grille.querySelectorAll('.rg-ent'), function(z){ z.classList.remove('une'); });
@@ -152,6 +167,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        pour la demi-colonne passe TOUTE en une colonne : plus de « Transporteurs | Imprimantes » côte à côte sous des
        entrées pleine largeur. */
     Array.prototype.forEach.call(grille.querySelectorAll('.rg-ent'), function(z){ if (z.querySelector('.rg-e.large')) z.classList.add('une'); });
+    var haut = ranger();
+    var dispo = window.innerHeight - grille.getBoundingClientRect().top - 14;
+    if (haut > dispo && niv < 2) larges(niv + 1);
+  }
+  /* Chaque carte, dans l'ordre, va dans la colonne la plus COURTE (mesurée). Rend la hauteur de la plus haute. */
+  function ranger(){
+    var cartes = Array.prototype.slice.call(grille.querySelectorAll('.rg-carte'));
+    if (!cartes.length) return 0;
+    cartes.sort(function(a, b){ return (+a.getAttribute('data-g')) - (+b.getAttribute('data-g')); });
+    var rem = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+    var n = Math.max(1, Math.min(4, Math.floor((grille.clientWidth + 14) / (16.5 * rem + 14))));
+    Array.prototype.forEach.call(grille.querySelectorAll('.rg-col'), function(c){ c.remove(); });
+    grille.classList.add('rg-mas');
+    var cols = [];
+    for (var i = 0; i < n; i++) { var c = document.createElement('div'); c.className = 'rg-col'; grille.appendChild(c); cols.push(c); }
+    cartes.forEach(function(k){
+      var m = cols[0];
+      cols.forEach(function(c){ if (c.offsetHeight < m.offsetHeight) m = c; });
+      m.appendChild(k);
+    });
+    return Math.max.apply(null, cols.map(function(c){ return c.offsetHeight; }));
   }
   var minutR = null;
   window.addEventListener('resize', function(){ clearTimeout(minutR); minutR = setTimeout(larges, 120); });
@@ -164,6 +200,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       });
       c.hidden = !vus;
     });
+    ranger();
   }
   function agir(chemin){
     var p = null;
