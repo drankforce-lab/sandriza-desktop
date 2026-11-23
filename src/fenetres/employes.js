@@ -138,6 +138,7 @@ html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
 .em-barre.trop i{background:var(--ep-ambre-t)}
 .em-q{--emc:var(--vv-1,#5fd4a4);background:color-mix(in srgb,var(--emc,var(--vv-1,#5fd4a4)) 20%,var(--f-carte));color:var(--tx);border-left:3px solid var(--emc,var(--vv-1,#5fd4a4));
   border-radius:6px;padding:.15rem .35rem;font-size:.74rem;font-weight:600;justify-content:space-between}
+.em-q button{color:var(--tx)}   /* le ✕ sur la pastille teintée : --tx2 y tombait à 4,1:1 (contrastes, 2026-11-23) */
 .em-q.c2,.em-barre.c2 i{--emc:var(--vv-2,#7cb4f5)} .em-q.c3,.em-barre.c3 i{--emc:var(--vv-3,#b49cf7)} .em-q.c4,.em-barre.c4 i{--emc:var(--vv-4,#f08fb8)}
 .em-sem .plus{align-self:stretch;margin-top:auto;border-radius:6px;color:var(--tx2)}
 .em-sem .c:hover .plus{color:var(--tx);border-color:var(--v20,var(--v16))}
