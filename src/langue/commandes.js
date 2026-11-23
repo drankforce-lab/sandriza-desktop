@@ -551,4 +551,15 @@ module.exports = {
   'Kanban': 'Kanban',
   'Rechercher': 'Search',
   'Filtrer': 'Filter',
+  // (9.2.9) La fiche vivante : tuiles et bande.
+  'remboursée': 'refunded',
+  'paiement en attente': 'payment pending',
+  'payée': 'paid',
+  'depuis aujourd’hui': 'since today',
+  'depuis hier': 'since yesterday',
+  'depuis {0} jours': 'for {0} days',
+  'Au comptoir': 'In store',
+  'remise sur place': 'picked up in store',
+  'suivi': 'tracking',
+  'Détail de commande': 'Order details',
 };

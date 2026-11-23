@@ -378,6 +378,68 @@ html.jour .cm-chr .cm-et .cours i{background:#c25e00}
 .cm-cote .gestes button{flex:0 0 auto;height:34px;padding:0 12px;border:0;background:transparent;color:var(--tx2);font-weight:600}
 .cm-cote .gestes button:hover:not(:disabled){background:var(--v06);color:var(--tx)}
 .cm-cote .gestes button.sup{color:var(--ep-rouge-t)}
+/* ══ LA FICHE VIVANTE (2026-11-23, 9.2.9 — sa capture : « pas beau et non épuré » ; piste B choisie : « B est parfait »)
+   Maquette : https://claude.ai/artifact/FgEi6vpiz8qV7dB7j8bky2 (artboard Vivant). Quatre tuiles colorées (le cycle --vv du
+   look vivant, C + D du 2026-11-20 ; le statut garde les trois tons : neutre, ambre qui attend, rouge annulée), cartes en
+   relief, gestes en vrais boutons, taille et couleur en pastilles, chronologie verticale dans la colonne de droite. */
+.cm{gap:14px}
+.cm-c{background:var(--f-carte);border:1px solid var(--v08);border-radius:16px;box-shadow:0 14px 30px -18px rgba(0,0,0,.55),inset 0 1px 0 var(--v03)}
+html.jour .cm-c{box-shadow:0 10px 24px -16px rgba(20,30,50,.22)}
+.cm-tete{align-items:flex-end;gap:10px}
+.cm-tete h1{font-size:28px}
+.cm-tete button:not(.go):not(.tenu):not(.ret){height:38px;padding:0 13px;border:1px solid var(--v10);background:var(--f-carte);color:var(--tx);border-radius:10px}
+.cm-tete button:not(.go):not(.tenu):not(.ret):hover:not(:disabled){background:var(--f-carte2);color:var(--tx)}
+.cm-tete button.go{height:44px;padding:0 18px;font-size:14px;box-shadow:0 10px 22px -10px color-mix(in srgb,var(--sz-btn-prim,#c9a27a) 85%,transparent)}
+.cm-tete button.tenu{height:44px;font-size:14px}
+.cm-tuiles{flex:none;display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}
+.cm-tu{--cm-teinte:var(--vv-1,#5fd4a4);min-width:0;border-radius:14px;padding:12px 14px;display:flex;flex-direction:column;gap:4px;
+  background:color-mix(in srgb,var(--cm-teinte,var(--vv-1,#5fd4a4)) var(--vv-pct,20%),var(--f-carte));border:1px solid color-mix(in srgb,var(--cm-teinte,var(--vv-1,#5fd4a4)) 30%,var(--f-carte))}
+.cm-tu.t2{--cm-teinte:var(--vv-2,#7cb4f5)}
+.cm-tu.t4{--cm-teinte:var(--vv-3,#b49cf7)}
+.cm-tu .k{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--cm-teinte,var(--vv-1,#5fd4a4))}
+.cm-tu b{font-size:22px;font-weight:800;color:var(--tx);font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cm-tu b.p{font-size:16px;line-height:1.4}
+.cm-tu>span:not(.k){font-size:12px;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:16px}
+.cm-tu.st{background:var(--ep-neutre-f);border-color:var(--v10)}
+.cm-tu.st .k{color:var(--ep-neutre-t)}
+.cm-tu.st.a{background:var(--ep-ambre-f);border-color:color-mix(in srgb,var(--ep-ambre-t) 30%,var(--ep-ambre-f))}
+.cm-tu.st.a .k,.cm-tu.st.a b{color:var(--ep-ambre-t)}
+.cm-tu.st.r{background:var(--ep-rouge-f);border-color:color-mix(in srgb,var(--ep-rouge-t) 30%,var(--ep-rouge-f))}
+.cm-tu.st.r .k,.cm-tu.st.r b{color:var(--ep-rouge-t)}
+.cm-art .th{color:var(--tx-or,var(--tx2))}
+.cm-art .l{grid-template-columns:60px minmax(0,1fr) 44px 100px}
+.cm-art .r{height:83px}
+.cm-art .ph{width:60px;height:60px;border-radius:12px}
+.cm-art.dense .l{grid-template-columns:40px minmax(0,1fr) 44px 100px}
+.cm-art.dense .r{height:55px}
+.cm-art.dense .ph{width:40px;height:40px}
+.cm-art .nm>span{display:flex;align-items:center;gap:6px;overflow:hidden}
+.cm-pa{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:2px 8px;border-radius:6px;background:var(--ep-neutre-f);color:var(--ep-neutre-t);white-space:nowrap}
+.cm-pa i{width:8px;height:8px;border-radius:50%;flex:none;box-shadow:0 0 0 1px var(--v12)}
+.cm-tot b.v{color:var(--tx-or,var(--tx))}
+.cm-fiche{padding:14px 16px;gap:8px}
+.cm-fiche>div{padding:0;display:flex;flex-direction:column;gap:8px}
+.cm-fiche>div+div{border-top:0}
+.cm-fiche .co{font-size:12px;color:var(--ep-neutre-t,var(--tx2));line-height:1.45}
+.cm-fiche .cm-cli .cm-av{background:color-mix(in srgb,var(--vv-4,#f08fb8) 22%,var(--f-carte));color:var(--vv-4,#f08fb8)}
+.cm-c h2{font-size:14px}
+.cm-chv{flex:none;padding:14px 16px;gap:0}
+.cm-chv h2{margin-bottom:10px}
+.cm-note{background:var(--ep-ambre-f);border:1px solid color-mix(in srgb,var(--ep-ambre-t) 28%,var(--ep-ambre-f));border-radius:16px;padding:12px 16px}
+.cm-rb{padding:14px 16px}
+.cm-chv .e{display:grid;grid-template-columns:18px minmax(0,1fr);gap:0 10px;align-items:start;padding-bottom:10px}
+.cm-chv .e:last-child{padding-bottom:0}
+.cm-chv .e i{width:18px;height:18px;border-radius:50%;box-sizing:border-box;border:2px solid var(--v12);display:flex;align-items:center;justify-content:center}
+.cm-chv .e.fait i{background:var(--sz-btn-prim,#c9a27a);border-color:var(--sz-btn-prim,#c9a27a);color:var(--sz-btn-prim-txt,#1a1208)}
+.cm-chv .e.cours i{border-color:var(--ep-ambre-t);background:var(--ep-ambre-f)}
+.cm-chv .e b{font-size:13px;font-weight:700;color:var(--tx);line-height:18px}
+.cm-chv .e.cours b{color:var(--ep-ambre-t)}
+.cm-chv .e.avenir b{font-weight:600;color:var(--tx3,var(--tx2))}
+.cm-chv .e b span{display:block;font-size:11px;font-weight:500;color:var(--tx2);line-height:1.3}
+.cm-cote .gestes{gap:8px;margin-top:0;justify-content:stretch}
+.cm-cote .gestes button{flex:1 1 0;height:38px;justify-content:center;border:1px solid var(--v10);background:var(--f-carte);color:var(--tx);border-radius:10px}
+.cm-cote .gestes button:hover:not(:disabled){background:var(--f-carte2);color:var(--tx)}
+.cm-cote .gestes button.sup{border-color:color-mix(in srgb,var(--ep-rouge-t) 35%,var(--f-carte));color:var(--ep-rouge-t)}
 /* Le verrou, dans la bande du haut : un cadenas et un nom, plus une phrase. */
 .sz-verrou-puce{display:inline-flex;align-items:center;gap:6px;padding:3px 10px 3px 8px;border-radius:99px;background:var(--v06);color:var(--tx2);font-size:12px;font-weight:600;white-space:nowrap}
 .sz-verrou-puce svg{flex:none;opacity:.85}
@@ -1222,10 +1284,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       e('${T("Terminée")}', fin ? dateCourte(fin) : '—', (fin || st === 'completed') ? 'fait' : 'avenir')
     ];
   }
+  /* La pastille de couleur d'un article : un petit rond quand le nom est connu, rien sinon (jamais une teinte inventée). */
+  var CM_TEINTES = { noir: '#1d1d1f', blanc: '#f4f4f2', ivoire: '#efe8d8', creme: '#efe3c8', beige: '#d8c3a0',
+    gris: '#8b9099', marine: '#1f2f57', bleu: '#3b6fd8', 'bleu royal': '#3a63d6', 'bleu ciel': '#8cc2f0', vert: '#3f9a6b',
+    kaki: '#7d7a4f', olive: '#6b6b2e', rouge: '#c8333a', bordeaux: '#7a1f2e', rose: '#e58fb0', fuchsia: '#d63a8a', violet: '#7d55c7',
+    lilas: '#b79ee0', jaune: '#e8c440', moutarde: '#c99a2e', orange: '#e57f2e', corail: '#ee7d6b', brun: '#7a4e2d', caramel: '#b9814a',
+    camel: '#c19a6b', taupe: '#8b7d6f', 'or': '#c9a227', argent: '#b8bcc4' };
+  function cmTeinte(nom){ var k = String(nom || '').trim().toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g, ''); return CM_TEINTES[k] || ''; }
+  function cmChronoVerticale(et){
+    // Les étapes à venir en fin de parcours tiennent sur UNE ligne (« Étiquette créée, expédiée, livrée… »).
+    var n = et.length; while (n > 0 && et[n - 1].etat === 'avenir') n--;
+    var faites = et.slice(0, n), reste = et.slice(n);
+    var COCHE = '<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" aria-hidden="true"><path d="m5 12 5 5 9-10"></path></svg>';
+    var h = '<section class="cm-c cm-chv"><h2>${T("Chronologie")}</h2>' + faites.map(function(e){
+      return '<div class="e ' + e.etat + '"><i>' + (e.etat === 'fait' ? COCHE : '') + '</i><b>' + esc(e.l) + '<span>' + esc(e.q) + '</span></b></div>'; }).join('');
+    if (reste.length) h += '<div class="e avenir"><i></i><b>' + esc(reste.map(function(e, i){ return i ? e.l.charAt(0).toLowerCase() + e.l.slice(1) : e.l; }).join(', ')) + '</b></div>';
+    return h + '</section>';
+  }
   function dessinerDetailMaq(d, c, ro){
     var t = d.totaux, rb = d.remboursements;
     var resD = document.getElementById('c-resume'); if (resD) resD.textContent = '';
     actions.innerHTML = '';
+    // La bande dit ce qu'est la fenêtre : le numéro est écrit une fois, en grand, dans la page (9.2.9).
+    if (SEUL) { var tB = document.getElementById('titre'); if (tB) tB.textContent = '${T("Détail de commande")}'; }
     var h = '<div class="cm">';
     if (ro) {
       h += '<div class="cm-ban" role="status"><span class="cm-av">' + esc(initiales(VERROU_PAR)) + '<span class="cad">' + CADENAS + '</span></span>'
@@ -1235,16 +1316,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
     var src = c.manuelle ? '${T("au comptoir")}' : (c.tiktok ? 'TikTok' : '${T("boutique en ligne")}');
     var v = c.paiementVerifie;
-    var payP = (v && v.ok) || (c.paiementSquare && !c.attentePaiement && !(v && !v.ok))
-      ? '<span class="cm-p">${T("Payée")}</span>'
-      : ((c.attentePaiement || (v && !v.ok)) ? '<span class="cm-p a">${T("Paiement en attente")}</span>' : '');
     var tonS = c.statut === 'cancelled' ? ' r' : (['pending', 'confirmed', 'preparing', 'verification'].indexOf(c.statut) >= 0 ? ' a' : '');
     var peutPrep = CTX && CTX.peutEditer && ['confirmed', 'preparing', 'verification'].indexOf(c.statut) >= 0;
     h += '<header class="cm-tete">'
       + (SEUL ? '' : '<button type="button" class="ret" id="btn-retour">← ${T("Commandes")}</button>')
       + '<div class="g"><span class="meta">' + esc('${T("Passée le {0}")}'.split('{0}').join(dateCourte(c.creeLe))) + ' · ' + esc(src) + '</span>'
-      + '<span class="lgn"><h1>' + esc(c.numero) + '</h1>' + payP
-      + '<span class="cm-p' + tonS + '">' + esc(szTd(libelleStatut(c.statut))) + '</span>'
+      + '<span class="lgn"><h1>' + esc(c.numero) + '</h1>'
       + (c.prioritaire ? '<span class="cm-p">${T("Prioritaire")}</span>' : '')
       + (c.venteFinale ? '<span class="cm-p">${T("Vente finale")}</span>' : '')
       + (rb.complet ? '<span class="cm-p">${T("Remboursée")}</span>' : '') + '</span></div>'
@@ -1261,12 +1338,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
     /* Articles : toutes les lignes sont posées, cmAjuste n en montre qu une page. */
     var unites = d.articles.reduce(function(n, a){ return n + (Number(a.qte) || 0); }, 0);
+    /* ══ LES TUILES (9.2.9, piste B « Vivant ») : ce qu'on cherche d'un coup d'œil — combien, quoi, où en est-elle,
+       où va-t-elle. Payée et le statut y vivent : la ligne du numéro ne les répète plus. */
+    var verifie = v && v.ok;
+    var payTx = rb.complet ? '${T("remboursée")}'
+      : (c.attentePaiement || (v && !v.ok)) ? '${T("paiement en attente")}'
+      : (c.paiementSquare ? '${T("payée")} · Square' + (c.afterpay ? ' · Afterpay' : '') + (verifie ? ' ${T("vérifié")}' : '') : '${T("aucun paiement Square")}');
+    var enAttente = ['pending', 'confirmed', 'preparing', 'verification'].indexOf(c.statut) >= 0;
+    var jours = Math.floor((Date.now() - new Date(c.creeLe).getTime()) / 86400000);
+    var depuis = !enAttente ? '' : (!(jours >= 1) ? '${T("depuis aujourd’hui")}' : (jours === 1 ? '${T("depuis hier")}' : '${T("depuis {0} jours")}'.split('{0}').join(jours)));
+    var ad = c.adresse || {};
+    var livB = c.manuelle ? '${T("Au comptoir")}' : ([ad.ville, ad.province ? '(' + ad.province + ')' : ''].filter(Boolean).join(' ') || '—');
+    var livS = c.manuelle ? '${T("remise sur place")}' : (c.suivi ? (c.suiviStatut || '${T("suivi")} ' + c.suivi) : (ad.cp || ''));
+    h += '<div class="cm-tuiles">'
+      + '<div class="cm-tu t1"><span class="k">${T("Total")}</span><b>' + argent(t.total) + '</b><span>' + esc(payTx) + '</span></div>'
+      + '<div class="cm-tu t2"><span class="k">${T("Articles")}</span><b>' + d.articles.length + '</b><span>' + esc(unites + ' ' + szPl(unites, '${T("unité")}', '${T("unités")}')) + '</span></div>'
+      + '<div class="cm-tu st' + tonS + '"><span class="k">${T("Statut")}</span><b class="p">' + esc(szTd(libelleStatut(c.statut))) + '</b><span>' + esc(depuis) + '</span></div>'
+      + '<div class="cm-tu t4"><span class="k">${T("Livraison")}</span><b class="p">' + esc(livB) + '</b><span>' + esc(livS) + '</span></div>'
+      + '</div>';
     h += '<div class="cm-grille"><div class="cm-g"><section class="cm-c cm-art">'
       + '<div class="l th"><span></span><span>${T("Article")}</span><span style="text-align:center">${T("Qté")}</span><span style="text-align:right">${T("Montant")}</span></div>'
       + '<div class="cm-lignes">' + d.articles.map(function(a){
-          var det = [a.taille, a.couleur, a.sku].filter(function(x){ return x && x !== '—'; }).join(' · ');
+          var pas = (a.taille && a.taille !== '—' ? '<span class="cm-pa">' + esc(a.taille) + '</span>' : '')
+            + (a.couleur && a.couleur !== '—' ? '<span class="cm-pa">' + (cmTeinte(a.couleur) ? '<i style="background:' + cmTeinte(a.couleur) + '"></i>' : '') + esc(a.couleur) + '</span>' : '');
           return '<div class="l r"><span class="ph">' + (a.image ? '<img src="' + esc(a.image) + '" alt="">' : esc(String(a.nom || '?').trim().charAt(0).toUpperCase() || '?')) + '</span>'
-            + '<span class="nm"><b>' + esc(a.nom) + '</b><span>' + esc(det)
+            + '<span class="nm"' + (a.sku ? ' title="' + esc(a.sku) + '"' : '') + '><b>' + esc(a.nom) + '</b><span>' + pas
             + (a.rembourseQte > 0 ? '<span class="rb">' + a.rembourseQte + ' ' + szPl(a.rembourseQte, '${T("unité remboursée")}', '${T("unités remboursées")}') + '</span>' : '') + '</span></span>'
             + '<span class="q">' + a.qte + '</span>'
             + '<span class="m">' + argent(a.montant) + (a.qte > 1 ? '<small>' + argent(a.montant / a.qte) + ' ${T("/ unité")}</small>' : '') + '</span></div>';
@@ -1288,8 +1384,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (t.credit > 0) lt('${T("Crédit boutique")}', '−' + argent(t.credit));
     if (t.points > 0) lt('${T("Points de fidélité")}', '−' + argent(t.points));
     h += '<div class="cm-tot">' + tl.join('') + '<b>${T("Total")}</b><b class="v">' + argent(t.total) + '</b></div></section>';
-    h += '<section class="cm-c cm-chr"><h2>${T("Chronologie")}</h2><div class="cm-et">' + cmEtapes(c, ro).map(function(e){
-        return '<div class="' + e.etat + '"><i></i><b>' + esc(e.l) + '</b><span>' + esc(e.q) + '</span></div>'; }).join('') + '</div></section></div>';
+    h += '</div>';
 
     /* La colonne de droite : client, paiement et livraison, note, remboursements, gestes. */
     var a = c.adresse || {};
@@ -1298,13 +1393,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       + '<span class="n"><b>' + esc(c.client.nom || '—') + '</b><span>' + (c.membre ? '${T("membre")}' : '${T("invité")}')
       + (c.compte && c.compte.nom && c.compte.nom !== c.client.nom ? ' · ' + esc(c.compte.nom) : '') + (c.client.entreprise ? ' · ' + esc(c.client.entreprise) : '') + '</span></span>'
       + (d.droits.lier && !ro ? '<button type="button" id="det-lier">' + (c.compte ? '${T("Changer")}' : '${T("Lier")}') + '</button>' : '') + '</div>'
-      + '<span class="co">' + esc([c.client.courriel, c.client.tel].filter(Boolean).join(' · ')) + '</span></div>'
-      + '<div class="cm-pl"><h2>${T("Paiement et livraison")}</h2>'
-      + '<span>${T("Paiement")}</span><strong>' + (c.paiementSquare ? 'Square' + (c.afterpay ? ' · Afterpay' : '') + ((v && v.ok) ? ' · ${T("vérifié")}' : '') : '${T("aucun paiement Square")}') + '</strong>'
-      + (c.suivi ? '<span>${T("Suivi")}</span><strong>' + esc(c.suivi) + (c.suiviStatut ? ' · ' + esc(c.suiviStatut) : '') + '</strong>' : '')
-      + '<span>${T("Adresse")}</span><strong>' + esc(adr || '—') + '</strong>'
-      + (pvHtml(c) && !(v && v.ok) ? '<div style="grid-column:span 2">' + pvHtml(c) + '</div>' : '')
+      + '<span class="co">' + esc([c.client.courriel, c.client.tel].filter(Boolean).join(' · ')) + '</span>'
+      + (adr && !c.manuelle ? '<span class="co">' + esc(adr) + '</span>' : '')
+      + (c.suivi ? '<span class="co">${T("Suivi")} ' + esc(c.suivi) + (c.suiviStatut ? ' · ' + esc(c.suiviStatut) : '') + '</span>' : '')
+      + (pvHtml(c) && !(v && v.ok) ? '<div>' + pvHtml(c) + '</div>' : '')
       + '</div></section>'
+      + cmChronoVerticale(cmEtapes(c, ro))
       + (c.notes ? '<section class="cm-c cm-note"><b>${T("Notes")}</b><span>' + esc(c.notes) + '</span></section>' : '')
       + (rb.lignes.length ? '<section class="cm-c cm-rb"><h2>${T("Remboursements")}</h2>'
           + rb.lignes.slice(-3).map(function(r){ return '<div class="x"><span>' + esc(r.numero) + ' · ' + esc(dateCourte(r.date)) + '</span><b>−' + argent(r.montant) + '</b></div>'; }).join('')
@@ -1595,7 +1689,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       if (!r.ok) { dire(expliquer(r), 'err'); retourListe(); return; }
       DET = r;
       if (SEUL) {
-        document.getElementById('titre').textContent = '${T("Commande")} ' + (r.commande.numero || '');
+        // (9.2.9) La bande dit ce qu'est la fenêtre ; le numéro est écrit une fois, en grand, dans la page.
+        document.getElementById('titre').textContent = EPD() ? '${T("Détail de commande")}' : '${T("Commande")} ' + (r.commande.numero || '');
         document.title = '${T("Commande")} ' + (r.commande.numero || '') + ' ${T("— Administration Sandriza")}';
       }
       dessiner();
