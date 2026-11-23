@@ -3723,6 +3723,8 @@ const OPS_PONT = new Set([
   'vehicules:dpa',
   // Le calendrier (2026-11-18) : lecture seule, chaque source selon son droit (pont.js, calendrierMois).
   'calendrier:mois',
+  // La boîte de style (2026-11-23, lot 3) : la règle au serveur (lib-boite.php), le pont relaie.
+  'boite:saison', 'boite:proposer', 'boite:composer', 'boite:valider', 'boite:devalider', 'boite:prelever', 'boite:reglages', 'boite:reglagesEcrire', 'boite:produits',
   // La liste des marques et modeles d une annee, demandee a la NHTSA (vPIC).
   'vehicules:catalogue',
   // Atelier de creation (2026-10-16) : les modeles de vetements. ⚠ `atelier:donnees` est l op de
@@ -4503,6 +4505,7 @@ const LIMITES_PONT = {
   'vehicules:deplacement': 30000, 'vehicules:deplacementOter': 30000, 'vehicules:changement': 30000,
   'vehicules:dpa': 30000,
   'calendrier:mois': 15000,
+  'boite:saison': 20000, 'boite:proposer': 30000, 'boite:composer': 20000, 'boite:prelever': 600000, 'boite:reglagesEcrire': 20000,
   /* 37 demandes paralleles a la NHTSA (une par marque), puis l ecriture de la
      configuration partagee : 10 a 30 s d habitude, davantage sur un reseau lent. */
   'vehicules:catalogue': 90000,
@@ -5316,6 +5319,8 @@ const PAGES_ANCRABLES = () => ({
   'config-tresorerie': ['Réglages de la trésorerie', () => pageTresorerie('config-seul')],
   // Le calendrier (2026-11-18, relooking) : précommandes, ramassages, échéances fiscales et rappels sur un mois.
   calendrier: ['Calendrier', () => pageCalendrier()],
+  // La boîte de style (2026-11-23) : composer la saison, valider, prélever et expédier.
+  boite: ['Boîte de style', () => pageBoite()],
   // La page Réglages (2026-11-18, maquette) : le menu Configuration mis en page, ouvert par la barre Épuré.
   reglages: ['Réglages', () => pageReglages()],
   atelier: ['Atelier de création', () => pageAtelier('')],
@@ -7910,6 +7915,7 @@ const { pageComptabilite } = require('./fenetres/comptabilite');
 const { pageLivre } = require('./fenetres/livre');
 const { pageVehicules } = require('./fenetres/vehicules');
 const { pageCalendrier } = require('./fenetres/calendrier');
+const { pageBoite } = require('./fenetres/boite');
 const { pageReglages } = require('./fenetres/reglages');
 const { pageRappels } = require('./fenetres/rappels');
 const { pageObjectifs } = require('./fenetres/objectifs');
@@ -8217,6 +8223,7 @@ const actionApp = (nom, arg) => {
     case 'config-infolettre': case 'config-fidelite': case 'config-relance': case 'config-secondevie': case 'config-tresorerie':
     // Calendrier (2026-11-18) : meme cas, ne natif ; sa section hote cote site ne porte que la zone.
     case 'calendrier':
+    case 'boite':
     case 'reglages':
     // Atelier de creation (2026-10-16) : meme cas, nee native.
     case 'atelier':

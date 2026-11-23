@@ -284,6 +284,7 @@ const MENU_APP_EN = {
   'Densité': 'Density',
   'Mon entreprise': 'My business',
   'Calendrier': 'Calendar',
+  'Boîte de style': 'Style box',
   'Confortable': 'Comfortable',
   'Compacte': 'Compact',
   'Rechercher partout': 'Search everywhere',

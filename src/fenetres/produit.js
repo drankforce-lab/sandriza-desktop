@@ -246,14 +246,25 @@ html.photos-verrou #p-360-choisir,html.photos-verrou #p-360-retirer,html.photos-
   transform:translateX(-50%);padding:.22rem .6rem;border-radius:99px;background:#14532d;color:var(--tx-sur-accent);font-size:.72rem;
   font-weight:700;white-space:nowrap;pointer-events:none;box-shadow:0 2px 8px rgba(0,0,0,.35)}
 /* Les gestes au clavier : ‹ ⇤ › au pied de la case, visibles au survol et au foyer. */
-.vue .depl{position:absolute;left:0;right:0;bottom:calc(1.25rem + 8px);display:flex;justify-content:center;gap:4px;
+.vue .depl{position:absolute;left:0;right:0;bottom:6px;display:flex;justify-content:center;gap:4px;
   opacity:0;transition:opacity .12s}
+/* (2026-11-23, sa capture : « les options de déplacement des photos ne sont pas belles ») L'image et ses gestes vivent
+   dans .vue-img : la barre ‹ ⇤ › se pose AU BAS DE L'IMAGE, quelle que soit sa hauteur (3:4), jamais sur le libellé. */
+.vue-img{position:relative}
+#p-vues .vue .depl{left:50%;right:auto;transform:translateX(-50%);gap:0;padding:2px;border-radius:9px;
+  background:rgba(10,14,22,.78);box-shadow:0 4px 12px -4px rgba(0,0,0,.5)}
+#p-vues .vue .depl button{width:24px;height:22px;border:0;background:transparent;border-radius:7px;font-size:.8rem}
 .vue:hover .depl,.vue .depl:focus-within{opacity:1}
 .vue .depl button{width:26px;height:24px;padding:0;border-radius:7px;font-size:.85rem;line-height:1;font-weight:700;
   background:rgba(12,18,28,.86);border:1px solid var(--v28);color:var(--tx-blanc)}
 .vue .depl button:hover:not(:disabled){background:var(--or);border-color:var(--or);color:#1a1208}
 .vue .depl button:focus-visible{outline:2px solid var(--or);outline-offset:1px}
 .vue .depl button:disabled{opacity:.35;cursor:default}
+/* (2026-11-23) « Fibre » : envoie la photo dans la case Fibre agrandie — en haut à gauche, en face du ×, au survol. */
+.vue .afibre{position:absolute;top:6px;left:6px;height:22px;padding:0 .45rem;border-radius:7px;font-size:.68rem;font-weight:700;
+  background:rgba(12,18,28,.86);border:1px solid var(--v28);color:var(--tx-blanc);opacity:0;transition:opacity .12s}
+.vue:hover .afibre,.vue .afibre:focus-visible{opacity:1}
+.vue .afibre:hover{background:var(--or);border-color:var(--or);color:#1a1208}
 html.jour .cadre.survol[data-geste]::after,html.jour .vign.survol[data-geste]::after{background:#166534;color:var(--tx-sur-accent)}
 html.jour .vue .depl button{background:rgba(255,255,255,.92);color:#1d2433;border-color:rgba(29,36,51,.25)}
 .mini-decor{display:block;width:100%;margin-top:.3rem;font-size:.72rem;
@@ -584,6 +595,45 @@ html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
   padding-bottom:.3rem}
 .jrn .fin{font-size:.7rem;color:var(--tx2);text-align:center;line-height:1.45;margin-top:.5rem}
 .jrn .lien{color:var(--tx-or);text-decoration:none;font-weight:600;cursor:pointer}
+
+/* ══ L'ÉTAPE PHOTOS, PISTE A (2026-11-23) ══════════════════════════════════════════════════════════════════════ */
+.ligne-photos{display:grid!important;grid-template-columns:var(--pv-main-w,22rem) minmax(0,1fr)!important;grid-template-rows:none!important;column-gap:1.5rem;align-items:start}
+.ligne-photos>.pf-gauche{grid-column:1!important;grid-row:auto!important;display:flex;flex-direction:column;gap:.75rem;min-width:0}
+.ligne-photos>.pf-outils{grid-column:2!important;display:flex;flex-direction:column;gap:.65rem;min-width:0}
+.pf-gauche .vue-principale{width:auto!important}
+.pf-gauche .vue-principale .vign{width:100%!important;height:var(--pv-main-h,29rem)!important;border-radius:16px}
+.pf-gauche .lgd-principale{display:none}
+.pf-gestes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;margin-top:.6rem}
+.pf-gestes .mini-decor{margin:0!important;width:auto!important;min-height:2.5rem;border-radius:10px;font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pf-gestes .mini-decor.pf-ia-photo{margin:0!important;background:var(--sz-btn-prim,var(--or));border-color:transparent!important;color:var(--sz-btn-prim-txt,#1a1208)!important;font-weight:800}
+.pf-gestes .mini-decor.pf-ia-photo:disabled{background:var(--f-carte);color:var(--tx2)!important;border-color:var(--v08)!important}
+#p-vues .pv-t{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx-or,var(--tx2));margin:0 0 .45rem}
+#p-vues .pv-grille{grid-template-columns:repeat(var(--pv-n,6),minmax(0,1fr))!important;gap:8px!important}
+#p-vues .vue .cadre{border-radius:10px}
+#p-vues .vue .lgd{font-size:.7rem}
+.vue-img{position:relative}
+.vue .vmenu{position:absolute;right:5px;bottom:5px;width:26px;height:22px;padding:0;border:0;border-radius:7px;background:rgba(10,14,22,.8);color:var(--tx-blanc);font-size:.9rem;line-height:1;opacity:0;transition:opacity .12s}
+.vue:hover .vmenu,.vue .vmenu:focus-visible,.vue .vmenu-l:not([hidden])~.vmenu{opacity:1}
+.vue .vmenu-l{position:absolute;z-index:30;top:auto;bottom:calc(100% + 4px);left:0;min-width:13.5rem;padding:5px;border-radius:12px;background:var(--f-carte);border:1px solid var(--v12);
+  box-shadow:0 16px 36px -14px rgba(0,0,0,.6);display:flex;flex-direction:column;gap:1px}
+.vue .vmenu-l button{border:0;background:transparent;text-align:left;padding:.45rem .6rem;border-radius:8px;font-size:.8rem;font-weight:600;color:var(--tx);white-space:nowrap}
+.vue .vmenu-l button:hover:not(:disabled){background:var(--v06)}
+.vue .vmenu-l button:disabled{opacity:.4}
+.vue .depl,.vue .afibre,.pv-demarquer{display:none!important}
+.pf-outils-t{font-size:.95rem;font-weight:800;color:var(--tx)}
+.pf-outils .pf-3d,.pf-outils .pv-fibre{margin:0!important;padding:.85rem 1rem!important;border-radius:16px!important;background:var(--f-carte)!important;border:1px solid var(--v08)!important;box-shadow:0 14px 30px -22px rgba(0,0,0,.5)}
+.pf-outils .pv-fibre .pv-t{font-size:.85rem;font-weight:700;color:var(--tx)}
+.outil-t{display:flex;align-items:center;gap:.65rem;margin-bottom:.35rem}
+.outil-t b{font-size:.88rem;font-weight:700}
+.outil-ic{flex:none;width:34px;height:34px;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;
+  background:color-mix(in srgb,var(--oc,var(--vv-1,#5fd4a4)) 20%,var(--f-carte));color:color-mix(in srgb,var(--oc,var(--vv-1,#5fd4a4)) 45%,var(--tx))}
+.pf-outils .pf-med-l{margin-top:.45rem}
+.pf-outils .pf-med-l button{border-radius:9px}
+.pf-gestes{grid-template-columns:repeat(2,minmax(0,1fr))}
+.pf-gestes .mini-decor.pf-ia-photo{grid-column:1 / -1}
+.pf-outils .pv-fibre .cadre-fibre{width:58px!important;height:58px;flex:0 0 58px;border-radius:10px;font-size:.68rem}
+.pf-outils .pv-fibre .pv-fibre-l{gap:.85rem}
+.pf-outils .pv-fibre-g{flex-direction:row!important;align-items:center!important;flex-wrap:wrap}
 `;
 
 /** Page complète de l'assistant. `id` vide = création. */
@@ -789,9 +839,14 @@ function pageProduit(id, importId) {
          MAXIMUM, seul renseignement qui compte, vit dans le TITRE. */
       + '<div class="carte pf-photos"><div class="p-verrou-photos" role="status"></div><h2 id="p-vues-titre">Photos</h2>'
       + '<div class="ligne-photos">'
-      + '<div class="vue-principale">'
+      /* ══ PISTE A (2026-11-23, sa demande : « refais cette section, tout est trop pogné » — « A est parfait ») ══
+         Maquette https://claude.ai/artifact/2HetdANRv3ct24KgQfRR1a (artboard Main). À GAUCHE : la photo principale, ses trois
+         gestes sur une ligne, puis le dos et les photos sur UNE rangée. À DROITE : « Outils de la photo », une carte par outil
+         (cabine, aperçu 3D, vidéo, fibre agrandie). Chaque vignette ne garde que le × et un menu ⋯. */
+      + '<div class="pf-gauche"><div class="vue-principale">'
       + '<div class="vign" id="p-vign" >${T("choisir une photo")}</div>'
       + '<div class="lgd-principale">${T("Photo principale")}</div>'
+      + '<div class="pf-gestes">'
       + '<button type="button" id="p-detourer" class="mini-decor" disabled '
       + '><span class="ic">✂</span> ${T("Décor")}</button>'
       + '<button type="button" id="p-studio" class="mini-decor" disabled '
@@ -799,12 +854,15 @@ function pageProduit(id, importId) {
       /* (2026-11-22, sa question : « où est le bouton pour lancer la création automatique par IA une fois l'image placée ? »)
          Il vivait seulement à l'étape 2, sous la description. Le même geste est offert ICI, là où la photo vient d'être posée :
          la proposition (nom + description) s'ouvre dans la boîte de révision, puis on passe à l'étape 2 pour la voir. */
-      + '<button type="button" id="p-ia-photo" class="mini-decor pf-ia-photo" disabled><span class="ic">✨</span> ${T("Rédiger la fiche avec l’IA")}</button></div>'
+      + '<button type="button" id="p-ia-photo" class="mini-decor pf-ia-photo" disabled><span class="ic">✨</span> ${T("Rédiger avec l’IA")}</button></div></div>'
+      + '<div class="vues" id="p-vues"></div></div>'
+      + '<div class="pf-outils"><div class="pf-outils-t">${T("Outils de la photo")}</div>'
       + '<div class="aide p-studio-attente" id="p-studio-attente" style="display:none"></div>'
       /* LA CABINE D ESSAYAGE (2026-10-30, ses décisions) : obligatoire pour les vêtements et les accessoires de tête ;
          le coût affiché PENDANT la création est celui du serveur (cabine:etat). Dessinée par dessinerCabine. */
       + '<div class="pf-3d pf-cab" id="p-cab-carte" style="display:none" aria-live="polite"></div>'
       + '<div class="pf-3d" id="p-3d-carte">'
+      + '<div class="outil-t"><span class="outil-ic" style="--oc:var(--vv-2,#7cb4f5)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"></path><path d="M3 7.5 12 12l9-4.5M12 12v9"></path></svg></span><b>${T("Aperçu 3D")}</b></div>'
       + '<div class="pf-med-l" id="p-3dg-l">'
       + '<button type="button" id="p-3d-gen"><span class="ic">🧊</span> ${T("Générer l’aperçu 3D")}</button>'
       + '<span id="p-3d-vues"></span>'
@@ -822,16 +880,16 @@ function pageProduit(id, importId) {
          principale → 5 secondes animées (Kling, par fal.ai). Le prix est montré AVANT le clic ; la génération continue
          si la fiche se ferme (suivie par la page principale) ; la vidéo prête attend « Ajouter à la fiche ». */
       + '<div class="pf-3d" id="p-vidia-carte" aria-live="polite">'
+      + '<div class="outil-t"><span class="outil-ic" style="--oc:var(--vv-3,#b49cf7)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="6" width="13" height="12" rx="2"></rect><path d="m16 10 5-3v10l-5-3"></path></svg></span><b>${T("Vidéo")}</b></div>'
       + '<div class="pf-med-l"><button type="button" id="p-vidia-gen"><span class="ic">🎬</span> ${T("Générer une vidéo")}</button>'
       + '<span class="aide" id="p-vidia-etat"></span></div>'
       + '<div class="pf-med-l" id="p-vidia-l" style="display:none"></div>'
       + '</div>'
-      + '<div class="vues" id="p-vues"></div>'
       /* LA FIBRE AGRANDIE (2026-10-26, sa demande) : une case à part, FACULTATIVE, sous les photos ; un bouton qui
          génère TOUJOURS le rendu le plus précis (la macro professionnelle) — pas de choix à faire. La boutique
          l'affiche EN GRAND, dans sa propre section. Champ de la fiche : photoFibre. */
       + '<div class="pv-fibre" id="p-fibre-bloc"></div>'
-      + '</div></div>'
+      + '</div></div></div>'
       /* ⚠ LES MÉDIAS (2026-10-07, sa demande : « Sophie mesure 1,68 m et porte
          un S », « une courte vidéo de 5 secondes qui montre le tombé », « un 360
          degrés »). Tout est FACULTATIF : une fiche sans médias s affiche en
@@ -1277,7 +1335,7 @@ function pageProduit(id, importId) {
       [1, '${T("Poids unitaire")}', !!String(val('p-poids') || '').trim()],
       [1, '${T("Prix de vente")}', p > 0],
       [1, '${T("Coût d’achat")}', co > 0],
-      [2, '${T("Au moins une taille et une couleur")}', !!(t.length && c.length)]
+      [2, '${T("Tailles et couleurs")}', !!(t.length && c.length)]
     ];
     if (c.length > 1) exig.push([3, '${T("Une photo par couleur secondaire")}',
       c.slice(1).every(function(x){ return !!(PARCOUL[x] && (PARCOUL[x].main || PARCOUL[x].principale)); })]);
@@ -1670,6 +1728,14 @@ function pageProduit(id, importId) {
         IMAGE = ''; montrerImage(''); majIa(); dire('');
         return;
       }
+      var vmb = ev.target.closest('[data-vmenu]');
+      if (vmb) {
+        var lst = vmb.parentNode.querySelector('.vmenu-l'), ouvert = lst && !lst.hidden;
+        Array.prototype.forEach.call(document.querySelectorAll('#p-vues .vmenu-l'), function(x){ x.hidden = true; });
+        if (lst && !ouvert) { lst.hidden = false; var b0 = lst.querySelector('button:not([disabled])'); if (b0) b0.focus(); }
+        return;
+      }
+      if (!ev.target.closest('.vmenu-l')) Array.prototype.forEach.call(document.querySelectorAll('#p-vues .vmenu-l'), function(x){ x.hidden = true; });
       if (ev.target.closest('#p-detourer')) { ouvrirDetourage(); return; }
       if (ev.target.closest('#p-fibre-gen')) { genererFibre(); return; }
       if (ev.target.closest('#p-fibre-x')) { FIBRE = ''; dessinerFibre(); return; }
@@ -1722,6 +1788,19 @@ function pageProduit(id, importId) {
       if (x) { var kx = x.getAttribute('data-vuex'); if (DOS_SRC && VUES[kx] === DOS_SRC) DOS_SRC = ''; delete VUES[kx]; dessinerVues(); return; }
       var dp = ev.target.closest('[data-depl]');
       if (dp) { deplacerAuClavier(dp.getAttribute('data-cle'), dp.getAttribute('data-depl')); return; }
+      var af = ev.target.closest('[data-afibre]');
+      if (af) {
+        var kf = af.getAttribute('data-afibre'), sf = VUES[kf] || '';
+        if (!sf) return;
+        var ancienne = FIBRE;
+        FIBRE = sf; delete VUES[kf];
+        // (le dos envoyé en fibre perd sa marque : la ligne suivante s'en charge)
+        if (DOS_SRC === sf) DOS_SRC = '';
+        dessinerVues(); dessinerFibre();
+        dire(ancienne ? '${T("Photo placée dans « Fibre agrandie » (l’ancien gros plan est retiré). Elle sera enregistrée avec la fiche.")}'
+          : '${T("Photo placée dans « Fibre agrandie ». Elle sera enregistrée avec la fiche.")}', 'bon');
+        return;
+      }
       if (ev.target.closest('[data-dosnon]')) { DOS_SRC = ''; dessinerVues(); dire('${T("La photo redevient une photo supplémentaire.")}', 'bon'); return; }
       var xd = ev.target.closest('[data-vuedos]');
       if (xd) {
@@ -3122,18 +3201,28 @@ function pageProduit(id, importId) {
       var tuile = function(cle, i, n, nom, dos){
         var src = cle === '__dos__' ? '' : (VUES[cle] || '');
         var lib = esc(nom);
-        var depl = (src && !dos) ? '<div class="depl">'
-          + '<button type="button" data-depl="g" data-cle="' + esc(cle) + '"' + (i === 0 ? ' disabled' : '')
-          + ' aria-label="${T("Déplacer vers la case précédente")} — ' + lib + '">‹</button>'
-          + '<button type="button" data-depl="p" data-cle="' + esc(cle) + '"'
-          + ' aria-label="${T("Échanger avec la photo principale")} — ' + lib + '">⇤</button>'
-          + '<button type="button" data-depl="d" data-cle="' + esc(cle) + '"' + (i === n - 1 ? ' disabled' : '')
-          + ' aria-label="${T("Déplacer vers la case suivante")} — ' + lib + '">›</button>'
-          + '</div>' : '';
-        return '<div class="vue' + (dos ? ' vue-dos' : '') + '"><div class="cadre' + (src ? ' pleine" draggable="true' : '') + '" data-vue="' + esc(cle) + '">'
+        /* (2026-11-23, piste A) Un seul menu ⋯ : les gestes ont des mots, pas des flèches de 24 px. Ses entrées portent les
+           MÊMES attributs que les anciens boutons (data-depl, data-vuedos, data-dosnon, data-afibre) : mêmes traitements. */
+        var menu = '';
+        if (src) {
+          var it = function(attrs, txt, off){ return '<button type="button" role="menuitem" ' + attrs + (off ? ' disabled' : '') + '>' + txt + '</button>'; };
+          menu = '<button type="button" class="vmenu" data-vmenu="' + esc(cle) + '" aria-haspopup="menu" aria-label="${T("Options")} — ' + lib + '">⋯</button>'
+            + '<div class="vmenu-l" role="menu" hidden>'
+            + (dos
+                ? (std && cle !== '__dos__' ? it('data-dosnon="1"', '${T("Démarquer (redevient une photo)")}') : '')
+                : it('data-depl="g" data-cle="' + esc(cle) + '"', '${T("Déplacer avant")}', i === 0)
+                  + it('data-depl="d" data-cle="' + esc(cle) + '"', '${T("Déplacer après")}', i === n - 1)
+                  + it('data-depl="p" data-cle="' + esc(cle) + '"', '${T("Mettre en photo principale")}')
+                  + (std ? it('data-vuedos="' + esc(cle) + '"', '${T("Marquer comme dos")}') : ''))
+            + it('data-afibre="' + esc(cle) + '"', '${T("Utiliser comme fibre agrandie")}')
+            + '</div>';
+        }
+        var depl = '';
+        return '<div class="vue' + (dos ? ' vue-dos' : '') + '"><div class="vue-img"><div class="cadre' + (src ? ' pleine" draggable="true' : '') + '" data-vue="' + esc(cle) + '">'
           + (src ? '<img src="' + esc(src) + '" alt="" draggable="false">' : '${T("ajouter")}') + '</div>'
           + (src ? '<button type="button" class="x" data-vuex="' + esc(cle) + '" aria-label="${T("Retirer")} — ' + lib + '">×</button>' : '')
-          + depl + '<div class="lgd">' + lib + '</div></div>';
+          + menu
+          + depl + '</div><div class="lgd">' + lib + '</div></div>';
       };
       /* (2026-10-26, sa demande) Plus de « Devant / Côté gauche / Côté droit / Autre » : des PHOTOS ADDITIONNELLES
          numérotées. Les clés enregistrées (devant, coteG…) ne changent pas — seul le nom affiché change. */
@@ -3144,7 +3233,7 @@ function pageProduit(id, importId) {
       // Mode simple : la photo du dos peut redevenir une photo additionnelle (elle garde sa place).
       if (std && kDos !== '__dos__') {
         var vd = z.querySelector('.vue-dos');
-        if (vd) vd.insertAdjacentHTML('beforeend', '<button type="button" class="pv-demarquer" data-dosnon="1">${T("Démarquer")}</button>');
+        if (vd && false) vd.insertAdjacentHTML('beforeend', '');   // (2026-11-23) « Démarquer » vit dans le menu ⋯ du dos
       }
     }
     // Deux passes : tout de suite, puis une fois la page entièrement posée (3D, fibre, polices).
@@ -3643,56 +3732,42 @@ function pageProduit(id, importId) {
      resserrées, explications sur une ligne ; 2) les explications des cartes tombent (le bouton reste, le texte au survol).
      Chaque calcul repart du palier 0 : agrandir la fenêtre rend la mise en page aérée. */
   function ajusterPhotos(){ _ajusterPhotos(0); }
+  /* (2026-11-23, piste A) La colonne de gauche porte la photo principale, la rangée de ses gestes et UNE rangée de vignettes
+     (n cases de même largeur, 3:4) : la hauteur offerte H fixe tout d'un coup —
+       H = principale (mw × 4/3) + gestes + titre des vignettes + vignette ((mw − écarts) / n × 4/3) + légende.
+     La colonne de droite (les outils) garde sa hauteur naturelle ; si elle sort encore du bas, les deux paliers de
+     resserrement d'avant (pf-serre, pf-serre2) s'appliquent. */
   function _ajusterPhotos(niv){
     var lp = document.querySelector('.carte.pf-photos .ligne-photos');
     if (!lp || !lp.offsetParent) return;
-    var cp = lp.closest('.carte');
-    if (cp) { cp.classList.toggle('pf-serre', niv >= 1); cp.classList.toggle('pf-serre2', niv >= 2); }
-    // La hauteur OFFERTE : du haut de la rangée au bas de la CARTE (qui remplit l'étape) — pas la hauteur de la
-    // rangée elle-même, qui ne mesure que son contenu.
-    var carte = lp.closest('.carte') || lp, rc = carte.getBoundingClientRect(), rl = lp.getBoundingClientRect();
-    // La carte n'a pas toujours sa taille finale au premier calcul : on la SUIT (une fois) et l'on recalcule à chaque
-    // changement de taille réel — ouverture de l'étape, fenêtre redimensionnée, panneau voisin qui se dessine.
+    var carte = lp.closest('.carte') || lp;
+    carte.classList.toggle('pf-serre', niv >= 1); carte.classList.toggle('pf-serre2', niv >= 2);
     if (!carte.__pvSuivi && typeof ResizeObserver !== 'undefined') {
       carte.__pvSuivi = true;
       var dernier = 0;
       new ResizeObserver(function(){ var hh = carte.clientHeight + 'x' + carte.clientWidth; if (hh !== dernier) { dernier = hh; requestAnimationFrame(ajusterPhotos); } }).observe(carte);
     }
-    var H = Math.floor(rc.bottom - rl.top - (parseFloat(getComputedStyle(carte).paddingBottom) || 0) - 4), W = lp.clientWidth;
+    var rc = carte.getBoundingClientRect(), rl = lp.getBoundingClientRect();
+    var H = Math.floor(rc.bottom - rl.top - (parseFloat(getComputedStyle(carte).paddingBottom) || 0) - 6), W = lp.clientWidth;
     if (!(H > 150 && W > 300)) return;
-    var vp = lp.querySelector('.vue-principale'), gestes = 0;
-    if (vp) Array.prototype.forEach.call(vp.children, function(c){ if (!c.classList.contains('vign') && c.offsetParent) gestes += c.offsetHeight + 6; });
-    var mh = Math.max(180, H - gestes - 4), mw = Math.min(mh * 0.75, W * 0.42);
-    mh = mw / 0.75;
-    lp.style.setProperty('--pv-main-w', Math.floor(mw) + 'px');
-    lp.style.setProperty('--pv-main-h', Math.floor(mh) + 'px');
-    var rw = W - mw - 21, haut = 0;
-    // ⚠ (2026-11-19, sa capture : « Photo 4 » sortie sous la carte) La carte Cabine d'essayage n'était pas comptée : les cases
-    // se croyaient de la place qu'elles n'avaient pas.
-    // (2026-11-22, sa capture : « Fibre agrandie » coupée en bas) La carte de la vidéo par l'IA n'était pas comptée non plus.
-    ['p-studio-attente', 'p-3d-carte', 'p-cab-carte', 'p-vidia-carte'].forEach(function(id){ var e = document.getElementById(id); if (e && e.offsetParent) haut += e.offsetHeight + 13; });
     var n = Math.max(1, document.querySelectorAll('#p-vues .vue').length);
-    var demarquer = document.querySelector('.pv-demarquer') ? 32 : 0;
-    var fibre = document.getElementById('p-fibre-bloc'), fibreTete = fibre ? 64 : 0;
-    var meilleur = 88;
-    for (var w = 260; w >= 88; w -= 4) {
-      var cols = Math.max(1, Math.floor((rw + 10) / (w + 10))), rangs = Math.ceil(n / cols);
-      var besoin = haut + 24 + rangs * (w * 4 / 3 + 24) + (rangs - 1) * 10 + demarquer + (fibre ? fibreTete + w : 0);
-      if (besoin <= H) { meilleur = w; break; }
-      // Rien ne tient même à 88 px : toutes les cases sur UNE rangée, plus petites, plutôt qu'une rangée qui sort de la carte.
-      if (w <= 88) { meilleur = Math.max(56, Math.min(88, Math.floor((rw + 10) / n - 10))); }
-    }
-    lp.style.setProperty('--pv-w', meilleur + 'px');
-    /* ⚠ (2026-11-20, sa capture : « Fibre agrandie » sortie sous la carte Photos) Le calcul ci-dessus DEVINE des hauteurs
-       fixes (64 px d'en-tête de fibre, 24 px de légende) : avec une police plus grande, la vraie hauteur les dépasse. On
-       MESURE donc ce qui est réellement posé, et l'on rapetisse les cases tant que le bas de la colonne sort de la carte. */
+    lp.style.setProperty('--pv-n', n);
+    var g = lp.querySelector('.pf-gestes'), gh = (g ? g.offsetHeight : 40) + 10;
+    var t = lp.querySelector('#p-vues .pv-t'), th = (t ? t.offsetHeight : 18) + 8;
+    var lg = 20, ec = 8 * (n - 1);
+    // mw × 4/3 × (1 + 1/n) = H − gh − th − lg − 12 + ec × 4/(3n)
+    var mw = (H - gh - th - lg - 12 + ec * 4 / (3 * n)) / ((4 / 3) * (1 + 1 / n));
+    mw = Math.max(200, Math.min(mw, W * 0.46));
+    lp.style.setProperty('--pv-main-w', Math.floor(mw) + 'px');
+    lp.style.setProperty('--pv-main-h', Math.floor(mw * 4 / 3) + 'px');
+    // La gauche tient-elle ? Sinon on rapetisse la principale par pas de 8 px (les vignettes suivent sa largeur).
     var bas = rc.bottom - (parseFloat(getComputedStyle(carte).paddingBottom) || 0) - 2;
-    var basReel = function(){ var m = 0; ['p-vues', 'p-fibre-bloc'].forEach(function(id){ var e = document.getElementById(id); if (e && e.offsetParent) { var r = e.getBoundingClientRect(); var d = e.scrollHeight - e.clientHeight; m = Math.max(m, r.bottom + (d > 0 ? d : 0)); } }); return m; };
-    for (var essai = 0; essai < 60 && meilleur > 48 && basReel() > bas; essai++) {
-      meilleur -= 4;
-      lp.style.setProperty('--pv-w', meilleur + 'px');
+    var gauche = lp.querySelector('.pf-gauche');
+    for (var k = 0; k < 40 && gauche && gauche.getBoundingClientRect().bottom > bas && mw > 200; k++) {
+      mw -= 8; lp.style.setProperty('--pv-main-w', Math.floor(mw) + 'px'); lp.style.setProperty('--pv-main-h', Math.floor(mw * 4 / 3) + 'px');
     }
-    if (basReel() > bas && niv < 2) _ajusterPhotos(niv + 1);
+    var outils = lp.querySelector('.pf-outils');
+    if (outils && outils.getBoundingClientRect().bottom > bas && niv < 2) _ajusterPhotos(niv + 1);
   }
   window.addEventListener('resize', function(){ clearTimeout(window.__pvT); window.__pvT = setTimeout(ajusterPhotos, 80); });
   /* La case FIBRE (2026-10-26). FIBRE : l'image (data: neuve, ou adresse déjà en ligne) — vide, rien n'est envoyé. */

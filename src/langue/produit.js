@@ -1098,4 +1098,19 @@ module.exports = {
   "Approuver et appliquer": "Approve and apply",
   "Proposition rejetée — la fiche n’a pas changé.": "Proposal rejected — the product sheet is unchanged.",
   "Proposition approuvée et appliquée — elle sera enregistrée avec la fiche.": "Proposal approved and applied — it will be saved with the product sheet.",
+  // (2026-11-23) Une photo additionnelle envoyée dans « Fibre agrandie ».
+  'Utiliser comme fibre agrandie': 'Use as fibre close-up',
+  'Fibre': 'Fibre',
+  'Photo placée dans « Fibre agrandie » (l’ancien gros plan est retiré). Elle sera enregistrée avec la fiche.': 'Photo placed in “Fibre close-up” (the previous close-up is removed). It will be saved with the product.',
+  'Photo placée dans « Fibre agrandie ». Elle sera enregistrée avec la fiche.': 'Photo placed in “Fibre close-up”. It will be saved with the product.',
+  // (2026-11-23) L’étape Photos, piste A.
+  'Outils de la photo': 'Photo tools',
+  'Aperçu 3D': '3D preview',
+  'Vidéo': 'Video',
+  'Options': 'Options',
+  'Démarquer (redevient une photo)': 'Unmark (becomes a photo again)',
+  'Déplacer avant': 'Move earlier',
+  'Déplacer après': 'Move later',
+  'Mettre en photo principale': 'Make main photo',
+  'Marquer comme dos': 'Mark as back',
 };

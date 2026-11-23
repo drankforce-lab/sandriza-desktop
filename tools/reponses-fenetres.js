@@ -3485,6 +3485,28 @@ const JEU = {
       { t: 'Jeu de couleurs', choix: [{ t: 'Lin', c: '5.12.0|Lin', on: false }, { t: 'Doré (ancien défaut)', c: '5.12.2|Doré (ancien défaut)', on: false }, { t: 'Épuré (nouveau look)', c: '5.12.8|Épuré (nouveau look)', on: true }] },
       { t: 'Densité', choix: [{ t: 'Confortable', c: '5.13.0|Confortable', on: true }, { t: 'Compacte', c: '5.13.1|Compacte', on: false }] },
       { t: 'Outils de développement', c: '5.14|Outils de développement', coche: null } ] } ] } },
+  /* (2026-11-23) La boîte de style : une saison avec trois abonnées (à composer, proposée, validée en grâce). */
+  'boite.js': (function(){
+    var B = [
+      { aboId: 'bs_aaaaaaaaaaaaaaaaaaaa', userId: 'u1', envoi: '2027-03-15', statut: 'proposee', nom: 'Marie Tremblay', email: 'marie@exemple.ca', palier: 'classique', palierNom: 'Classique',
+        formule: 'saison', valeurVisee: 160, prixSaison: 99, valeur: 166.49, graceJusqu: '', orderNumber: '', erreur: '', surprise: { type: 'rabais', texte: '15 % — SURPRISE-7K2Q' },
+        articles: [ { productId: 'p1', nom: 'Chemise Walla', taille: 'M', couleur: 'vert', cle: 'M-vert', prix: 67.5, image: '' },
+                    { productId: 'p2', nom: 'Jupe plissée', taille: 'M', couleur: 'prune', cle: 'M-prune', prix: 59, image: '' },
+                    { productId: 'p3', nom: 'Foulard de soie', taille: 'U', couleur: 'caramel', cle: 'U-caramel', prix: 39.99, image: '' } ] },
+      { aboId: 'bs_bbbbbbbbbbbbbbbbbbbb', userId: 'u2', envoi: '2027-03-15', statut: 'a_composer', nom: 'Julie Gagnon', email: 'julie@exemple.ca', palier: 'prestige', palierNom: 'Prestige',
+        formule: 'annuel', valeurVisee: 260, prixSaison: 149, valeur: 0, graceJusqu: '', orderNumber: '', erreur: '', surprise: null, articles: [] },
+      { aboId: 'bs_cccccccccccccccccccc', userId: 'u3', envoi: '2027-03-15', statut: 'proposee', nom: 'Sophie Lavoie', email: 'sophie@exemple.ca', palier: 'decouverte', palierNom: 'Découverte',
+        formule: 'annuel', valeurVisee: 90, prixSaison: 59, valeur: 95, graceJusqu: '2027-03-10', orderNumber: '', erreur: '', surprise: null,
+        articles: [ { productId: 'p4', nom: 'Haut côtelé', taille: 'L', couleur: 'noir', cle: 'L-noir', prix: 55, image: '' }, { productId: 'p5', nom: 'Bandeau', taille: 'U', couleur: 'or', cle: 'U-or', prix: 40, image: '' } ] } ];
+    return { 'boite:saison': { ok: true, envoi: '2027-03-15', envois: ['2026-12-15', '2027-03-15', '2027-06-15', '2027-09-15'],
+        compteurs: { abonnees: 3, aValider: 3, validees: 0, prelevees: 0, aPrelever: 0, annuelles: 0 }, boites: B },
+      'boite:reglages': { ok: true, reglages: { actif: false, paliers: [ { id: 'decouverte', nom: 'Découverte', prixSaison: 59, prixAnnuel: 169, morceaux: '2 morceaux', valeurVisee: 90 },
+        { id: 'classique', nom: 'Classique', prixSaison: 99, prixAnnuel: 289, morceaux: '3 à 4 morceaux', valeurVisee: 160, vedette: true },
+        { id: 'prestige', nom: 'Prestige', prixSaison: 149, prixAnnuel: 429, morceaux: '5 morceaux', valeurVisee: 260 } ] } },
+      'boite:produits': { ok: true, produits: [] }, 'boite:proposer': { ok: true, boite: B[1] }, 'boite:composer': { ok: true, boite: B[0] },
+      'boite:valider': { ok: true, boite: B[0] }, 'boite:devalider': { ok: true, boite: B[0] }, 'boite:prelever': { ok: true, resultats: [] },
+      'boite:reglagesEcrire': { ok: true, reglages: {} } };
+  })(),
   'calendrier.js': { 'calendrier:mois': { ok: true, annee: 2026, mois: 11, aujourdhui: '2026-11-18', evenements: [
     { date: '2026-11-03', sorte: 'fiscal', titre: 'Acompte provisionnel TPS/TVQ', sous: '', ton: 'r', ouvrir: 'rappels' },
     { date: '2026-11-12', sorte: 'ramassage', titre: 'Postes Canada', colis: 3, ton: 'n', ouvrir: 'ramassages' },
