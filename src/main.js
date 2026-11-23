@@ -741,6 +741,26 @@ const _journalFenetre = (texte) => {
    plus petite SANS geste de la personne (Windows annonce chaque glisser de bord par « will-resize ») et SANS
    redimensionnement voulu par la coquille (_szPoseT) reprend sa taille. Chaque événement va dans fenetre.log, avec ce
    qui l'a précédé : au prochain signalement, le journal dira d'où il vient. */
+let _dernierOuvert = null;
+/* L'espion du premier plan (9.2.7) : toute remise au premier plan de la fenêtre PRINCIPALE dans les 15 s qui suivent
+   l'ouverture d'une fenêtre de travail est journalisée avec la pile d'appel — c'est elle qui dira quel code la ramène. */
+const _premierPlanEspion = (w) => {
+  if (!w || w._szEspion) return; w._szEspion = true;
+  ['focus', 'show', 'moveTop', 'restore'].forEach((m) => {
+    const orig = w[m];
+    if (typeof orig !== 'function') return;
+    w[m] = function () {
+      try {
+        if (_dernierOuvert && Date.now() - _dernierOuvert.t < 15000) {
+          const pile = String(new Error().stack || '').split('\n').slice(2, 6).map((s) => s.trim().replace(/^at /, '')).join(' < ');
+          _journalFenetre('principale.' + m + '() +' + (Date.now() - _dernierOuvert.t) + 'ms apres ' + _dernierOuvert.cle + ' : ' + pile);
+        }
+      } catch (e) {}
+      return orig.apply(this, arguments);
+    };
+  });
+  w.on('focus', () => { try { if (_dernierOuvert && Date.now() - _dernierOuvert.t < 15000) _journalFenetre('principale focus +' + (Date.now() - _dernierOuvert.t) + 'ms apres ' + _dernierOuvert.cle); } catch (e) {} });
+};
 const _gardeRapetissement = (w, cle) => {
   const t0 = Date.now();
   let geste = 0;
@@ -751,6 +771,28 @@ const _gardeRapetissement = (w, cle) => {
   w.on('resized', () => { if (Date.now() - geste < 1500) retenirVoulu(); });
   ['minimize', 'restore', 'maximize', 'unmaximize', 'enter-full-screen', 'leave-full-screen', 'hide'].forEach((ev) => {
     w.on(ev, () => { if (Date.now() - t0 < 60000) _journalFenetre(cle + ' ' + ev + ' +' + (Date.now() - t0) + 'ms bornes=' + JSON.stringify(w.getBounds())); });
+  });
+  /* ══ (2026-11-23, 9.2.7) « je clique une commande, le détail s'ouvre et 3 secondes plus tard se minimise » ══
+     Sa capture : la liste Commandes ANCRÉE, un clic sur une ligne (pas « Préparer »). fenetre.log de ce poste (9.2.4) ne
+     portait AUCUNE ligne pour cmd-detail-* : ni minimize, ni rapetissement → la fenêtre ne se réduit sans doute pas au sens
+     de Windows : elle passe DERRIÈRE la principale. Rien dans le code lu ne la ramène devant de façon évidente, donc :
+     1) le premier plan se journalise (focus / blur des fenêtres de travail, focus de la principale, avec ce qui l'a appelé :
+        _premierPlanEspion) — au prochain signalement, le journal NOMME le coupable ;
+     2) une RÉDUCTION sans le geste de la personne (le bouton _ passe par WM_SYSCOMMAND SC_MINIMIZE) dans les 15 s qui
+        suivent l'ouverture est défaite : la fenêtre revient, devant. */
+  ['focus', 'blur', 'show'].forEach((ev) => {
+    w.on(ev, () => { if (Date.now() - t0 < 60000) _journalFenetre(cle + ' ' + ev + ' +' + (Date.now() - t0) + 'ms'); });
+  });
+  w._szOuvertT = t0;
+  _dernierOuvert = { cle, t: t0 };
+  if (process.platform === 'win32' && typeof w.hookWindowMessage === 'function') {
+    try { w.hookWindowMessage(0x0112, (wp) => { try { if ((wp.readUInt32LE(0) & 0xFFF0) === 0xF020) w._szReduireT = Date.now(); } catch (e) {} }); w._szReduireSuivi = true; } catch (e) {}
+  }
+  w.on('minimize', () => {
+    const dt = Date.now() - t0;
+    if (dt > 15000 || !w._szReduireSuivi || Date.now() - (w._szReduireT || 0) < 2000) return;
+    _journalFenetre(cle + ' REDUITE SANS GESTE +' + dt + 'ms -> remise devant');
+    setTimeout(() => { try { if (!w.isDestroyed()) { w.restore(); w.show(); w.focus(); } } catch (e) {} }, 50);
   });
   w.on('resize', () => {
     try {
@@ -2369,6 +2411,7 @@ const createWindow = () => {
      « agrandie », elle prend la pleine zone. Voir `_pleineZoneArmer`. */
   _pleineZoneArmer(mainWindow);
   _verrouArmer();
+  _premierPlanEspion(mainWindow);
   /* ⚠ ET ON LA RETIRE AVEC LA FENÊTRE : une vue dont le parent meurt garde son
      processus de rendu et ses minuteries. */
   mainWindow.on('closed', () => { connexionRetirer(); mainWindow = null; });
@@ -5692,6 +5735,7 @@ let ancreeVisible = null;
 let vueVoilee = null;
 ipcMain.on('dock:voiler', (e, visible) => {
   if (!_deLaPrincipale(e)) return;
+  try { if (_dernierOuvert && Date.now() - _dernierOuvert.t < 15000) _journalFenetre('dock:voiler ' + !!visible + ' +' + (Date.now() - _dernierOuvert.t) + 'ms apres ' + _dernierOuvert.cle); } catch (er) {}
   if (visible) {
     const a = vueVoilee && ancrees.get(vueVoilee);
     vueVoilee = null;
