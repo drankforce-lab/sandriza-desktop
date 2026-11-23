@@ -3204,7 +3204,7 @@ const OPS_PONT = new Set([
   /* L editeur par blocs de la fenetre Campagnes (3.53.0). ⚠ La mise en page du
      courriel reste cote site : la fenetre envoie des BLOCS et recoit du HTML. */
   'nl:blocsCatalogue', 'nl:blocsHtml', 'nl:iaRediger', 'nl:iaEtat',
-  'nl:epingleDonnees', 'nl:iaEpingle', 'nl:epingleRendu', 'nl:publicationCourriel',
+  'nl:epingleDonnees', 'nl:iaEpingle', 'nl:epingleRendu', 'nl:publicationCourriel', 'nl:epingleNoter',
   // Segments d envoi composables : le menu << Segment >> d une campagne lisait
   // deux entrees ECRITES EN DUR. segments:apercu compte SANS enregistrer, pour
   // voir la portee d une recette pendant qu on l ecrit.

@@ -164,6 +164,38 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 .epg .cnt{font-size:.6875rem;color:var(--tx2)}
 .epg .cnt.trop{color:var(--tx-err)}
 .ep-note{font-size:.76rem;color:var(--tx2)}
+/* (2026-11-22, lot 1) Les mots-clics en pastilles modifiables, et ceux qu'on propose (saison, déjà employés). */
+.ep-mots{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center}
+.ep-mot{display:inline-flex;align-items:center;gap:.3rem;height:1.7rem;padding:0 .25rem 0 .6rem;border-radius:99px;
+  background:rgba(var(--or-rgb),.14);border:1px solid rgba(var(--or-rgb),.35);font-size:.76rem;color:var(--tx)}
+.ep-mot button{width:1.25rem;height:1.25rem;padding:0;border:0;background:transparent;border-radius:50%;font-size:.7rem;line-height:1;color:var(--tx2)}
+.ep-mot button:hover:not(:disabled){background:var(--v10);color:var(--tx)}
+.ep-mots input{flex:1 1 9rem;min-width:8rem;max-width:14rem;height:1.7rem!important;padding:0 .6rem!important;font-size:.76rem!important;border-radius:99px!important}
+.ep-prop{display:flex;flex-wrap:wrap;gap:.3rem;align-items:center;font-size:.72rem;color:var(--tx2)}
+.ep-prop button{height:1.5rem;padding:0 .55rem;border-radius:99px;font-size:.72rem;background:transparent;border:1px dashed var(--v16);color:var(--tx2)}
+.ep-prop button:hover:not(:disabled){border-style:solid;color:var(--tx);background:var(--v05)}
+/* Les 4 réseaux d'un geste : la case sous « Rédiger », et la pastille « prêt » sur chaque réseau rédigé. */
+.ep-tous{display:inline-flex;align-items:center;gap:.4rem;font-size:.76rem;color:var(--tx);cursor:pointer;margin:0!important}
+.ep-tous input{width:auto!important;height:auto!important;margin:0}
+.ep-res button.pret::after{content:"";display:inline-block;width:.4rem;height:.4rem;border-radius:50%;background:var(--tx-ok);margin-left:.4rem;vertical-align:middle}
+.ep-res button.on.pret::after{background:currentColor}
+/* (lot 1) Fenêtre basse : la Publication IA se resserre au lieu de passer sous le pied (aucune barre de défilement). */
+@media (max-height:820px){
+  .ep-etapes{padding:.8rem 1.1rem;gap:.5rem!important}
+  .ep-et{gap:.38rem}.ep-corps{gap:.38rem}
+  .ep-g3,.ep-g2{gap:.45rem}
+  .epg label{margin-bottom:.1rem}
+  .epg input,.epg select{height:2.05rem}
+  .ep-ligne input,.ep-ligne select,.ep-go{height:2.25rem}
+  .epg textarea{min-height:3.1rem}
+  .ep-res button{height:1.8rem}
+  .bqbar button.mini{height:1.7rem;min-width:1.7rem}
+}
+/* Variantes A/B de l'accroche, au-dessus de l'aperçu. */
+.ep-ab{display:flex;align-items:center;gap:.5rem;width:100%;font-size:.74rem;color:var(--tx2)}
+.ep-ab .ed-seg{margin-left:auto}
+.ep-ab button{height:1.75rem;padding:0 .8rem;font-size:.76rem}
+.ep-ab button.on{background:var(--or);color:#1a1208;font-weight:700}
 .ep-apercu{padding:.9rem;border-radius:18px;background:var(--f-carte);border:1px solid var(--sz-bord);display:flex;flex-direction:column;align-items:center;gap:.55rem}
 .epvue{border:1px solid var(--v16);border-radius:12px;overflow:hidden;background:#F8F6F3;
   aspect-ratio:2/3;display:flex;align-items:center;justify-content:center}
@@ -403,6 +435,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     if (EP.iDia >= EP.diapos.length || EP.iDia < 0) EP.iDia = 0;
     return EP.diapos[EP.iDia];
   }
+  function epProduitPar(id){
+    var l = (EPD && EPD.produits) || [];
+    for (var i = 0; i < l.length; i++) { if (l[i].id === id) return l[i]; }
+    return null;
+  }
+  // Les produits du carrousel d'une catégorie : les cinq plus récents (la liste du coeur est déjà triée).
+  function epProduitsCat(cat){
+    return ((EPD && EPD.produits) || []).filter(function(p){ return p.categorie === cat; }).slice(0, 5);
+  }
   function epProduit(){
     if (!EPD || !EP || !EP.produitId) return null;
     var l = EPD.produits || [];
@@ -416,6 +457,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     var p = epProduit();
     var n = (typeof i === 'number') ? i : EP.iDia;
     var d = (EP.diapos && EP.diapos[n]) || { sur: '', gros: '', sous: '' };
+    /* (2026-11-22, lot 1) CARROUSEL : chaque diapo porte SON produit, donc sa photo. */
+    if (d.produitId) { var pd = epProduitPar(d.produitId); if (pd) p = pd; }
     return { reseau: EPRES, photo: p ? p.photo : '', entreprise: (EPD && EPD.entreprise) || '',
              sur: d.sur, gros: d.gros, sous: d.sous,
              no: n + 1, total: (EP.diapos || []).length };
@@ -526,13 +569,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
      branches plus bas les retrouvent tels quels.
      ⚠ L IDEE ET LES OPTIONS SURVIVENT AU REDESSIN (EPSAISIE) : deplier les options, ou changer de
      reseau, redessine la page — l idee tapee disparaissait. */
-  var EPSAISIE = { but: '', ton: 'elegant', langue: 'fr', plus: '' };
+  var EPSAISIE = { but: '', ton: 'elegant', langue: 'fr', plus: '', tous: false };
+  /* (2026-11-22, lot 1) UNE PUBLICATION PAR RÉSEAU quand on rédige pour les quatre d'un geste : EPMAP[reseau] = le
+     modèle de ce réseau. Sans rédaction multiple, EPMAP reste vide et le comportement d'avant tient (un seul modèle,
+     qui suit le réseau choisi). */
+  var EPMAP = {};
+  var EPMOT = '';   // le mot-clic en cours de frappe (survit au redessin)
   function vueEpingle(){
     if (!EPD) return '<div class="carte"><div class="vide charge">${T("Lecture du catalogue…")}</div></div>';
     if (!EP) EP = epVide();
     var pret = !!(EPETAT && EPETAT.clePosee);
     var F = epFiche();
-    var multi = (F.diapos && F.diapos[1] > 1);
+    var multi = (F.diapos && F.diapos[1] > 1) || (EP && EP.diapos && EP.diapos.length > 1);
     var num = function(n, titre, aide){
       return '<div class="ep-et-t"><span class="ep-n" aria-hidden="true">' + n + '</span><b>' + titre + '</b>'
         + (aide ? '<span class="aide">' + aide + '</span>' : '') + '</div>';
@@ -543,10 +591,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     var champsDuReseau = (F.titre ? '${T("titre, ")}' : '') + '${T("description")}' + (F.lienCliquable ? '${T(" et lien")}' : '');
     h += '<div class="ep-et ep-et-ligne">' + num(1, '${T("Pour quel réseau ?")}', '')
       + '<div class="ed-seg ep-res">' + (EPD.reseaux || []).map(function(r){
-          return '<button type="button" class="' + (r.cle === EPRES ? 'on' : '') + '" data-epres="' + esc(r.cle) + '">' + esc(r.nom) + '</button>';
+          return '<button type="button" class="' + (r.cle === EPRES ? 'on' : '') + (EPMAP[r.cle] ? ' pret' : '') + '" data-epres="' + esc(r.cle) + '"'
+            + (EPMAP[r.cle] ? ' title="${T("Publication rédigée pour ce réseau")}"' : '') + '>' + esc(r.nom) + '</button>';
         }).join('') + '</div>'
       + '<span class="aide">' + F.largeur + ' &times; ' + F.hauteur + ' · ' + champsDuReseau
-      + (multi ? ' · ' + F.diapos[0] + '${T(" à ")}' + F.diapos[1] + ' ${T("diapos")}' : '') + '</span></div>';
+      + ((F.diapos && F.diapos[1] > 1) ? ' · ' + F.diapos[0] + '${T(" à ")}' + F.diapos[1] + ' ${T("diapos")}' : '') + '</span></div>';
     h += '<div class="ep-sep"></div>';
 
     // ── ② L idee ─────────────────────────────────────────────────────────
@@ -554,16 +603,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     if (EPETAT && !pret) {
       h += '<div class="ep-corps"><div class="vide">${T("Aucune clé d’écriture IA n’est enregistrée. Elle se pose dans Configuration ▸ Clés API.")}</div></div>';
     } else {
-      var opts = [['', '${T("— aucun produit —")}']].concat((EPD.produits || []).map(function(p){
-        return [p.id, p.nom + (p.categorie ? ' · ' + p.categorie : '')];
-      }));
-      h += '<div class="ep-corps"><div class="ep-ligne">' + epChoix('ep-prod', '${T("Produit")}', opts, EP.produitId)
+      var valProd = EP.carrousel ? ('cat:' + EP.carrousel) : EP.produitId;
+      var selProd = '<div><label for="ep-prod">${T("Produit ou carrousel")}</label><select id="ep-prod">'
+        + '<option value="">${T("— aucun produit —")}</option>'
+        + ((EPD.categories || []).length
+            ? '<optgroup label="${T("Carrousel d’une collection (5 produits)")}">' + EPD.categories.map(function(c){
+                var n = epProduitsCat(c).length;
+                return n >= 2 ? '<option value="cat:' + esc(c) + '"' + (valProd === 'cat:' + c ? ' selected' : '') + '>'
+                  + '${T("Carrousel · ")}' + esc(c) + ' (' + n + ')</option>' : '';
+              }).join('') + '</optgroup>'
+            : '')
+        + '<optgroup label="${T("Un produit")}">' + (EPD.produits || []).map(function(p){
+            return '<option value="' + esc(p.id) + '"' + (valProd === p.id ? ' selected' : '') + '>' + esc(p.nom + (p.categorie ? ' · ' + p.categorie : '')) + '</option>';
+          }).join('') + '</optgroup></select></div>';
+      h += '<div class="ep-corps"><div class="ep-ligne">' + selProd
         + '<div><label for="ep-but">${T("L’idée, en une phrase")}</label>'
         + '<input id="ep-but" value="' + esc(EPSAISIE.but) + '" placeholder="${T("ex. la coupe et la matière de ce manteau, pour l’automne")}"></div>'
         + '<button type="button" class="prim ep-go" id="ep-go"' + (EPOCC ? ' disabled' : '') + '>'
         + '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 3v4M12 17v4M3 12h4M17 12h4M6 6l2.5 2.5M15.5 15.5L18 18M6 18l2.5-2.5M15.5 8.5L18 6"/></svg>'
         + (EPOCC ? '${T("Rédaction…")}' : '${T("Rédiger")}') + '</button></div>'
-        + '<div class="ep-sous"><span>' + esc(epSousBudget()) + '</span>'
+        + '<div class="ep-sous"><label class="ep-tous"><input type="checkbox" id="ep-tous"' + (EPSAISIE.tous ? ' checked' : '') + '> ${T("Rédiger pour les 4 réseaux d’un geste")}</label>'
+        + '<span>' + esc(epSousBudget()) + '</span>'
         + (EPMODE === 'avance'
             ? '<button type="button" class="ep-lien" id="ep-simple">${T("Masquer les options ▴")}</button>'
             : '<button type="button" class="ep-lien" id="ep-avance">${T("Ton, langue et consignes ▾")}</button>')
@@ -609,16 +669,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + epChamp('alt', '${T("Texte de remplacement de l’image")}', 0, true)
       + '</div>';
     if (!F.lienCliquable) h += '<div class="ep-note">${T("Ce réseau ne rend pas les liens cliquables : mettez l’adresse dans la bio du compte.")}</div>';
-    if ((EP.motsCles || []).length) {
-      h += '<div class="ep-note">' + (F.cle === 'pinterest' ? '${T("Mots de recherche : ")}' : '${T("Mots-clics : ")}')
-        + esc(EP.motsCles.map(function(m){ return F.cle === 'pinterest' ? m : ('#' + m); }).join(' · ')) + '</div>';
-    }
+    h += epVueMots(F);
     h += '</div></div></div>';
 
     // ── L apercu, au format que CE reseau-la montre, et UN geste principal ──
-    h += '<div class="cd"><div class="ep-apercu"><div class="epvue" id="ep-vue" style="aspect-ratio:' + F.largeur + '/' + F.hauteur + '"></div>'
+    var ab = (EP.variantes || []).length === 2
+      ? '<div class="ep-ab"><span>${T("Accroche à tester")}</span><div class="ed-seg">'
+        + '<button type="button" class="' + (EP.ab ? '' : 'on') + '" data-epab="0" title="' + esc(EP.variantes[0]) + '">A</button>'
+        + '<button type="button" class="' + (EP.ab ? 'on' : '') + '" data-epab="1" title="' + esc(EP.variantes[1]) + '">B</button></div></div>'
+      : '';
+    h += '<div class="cd"><div class="ep-apercu">' + ab + '<div class="epvue" id="ep-vue" style="aspect-ratio:' + F.largeur + '/' + F.hauteur + '"></div>'
       + '<div class="epinfo">' + F.largeur + ' &times; ' + F.hauteur + ' px</div></div>'
-      + '<button type="button" class="prim ep-enr" id="ep-enr"' + (EPIMG ? '' : ' disabled') + '>${T("Enregistrer la publication")}</button>'
+      + '<button type="button" class="prim ep-enr" id="ep-enr"' + (EPIMG ? '' : ' disabled') + '>'
+      + (Object.keys(EPMAP).length > 1 ? ('${T("Enregistrer les ")}' + Object.keys(EPMAP).length + '${T(" publications")}') : '${T("Enregistrer la publication")}')
+      + ((EP.variantes || []).length === 2 ? '${T(" (A et B)")}' : '') + '</button>'
       + '<div class="ep-2"><button type="button" id="ep-copier">${T("Copier le texte")}</button>'
       + '<button type="button" id="ep-dossier">${T("Dossier des exports")}</button></div>'
       /* ⚠⚠ L ENVOI PAR COURRIEL N EST PAS UN CONFORT, C EST LE SEUL PONT VERS LE TELEPHONE :
@@ -634,6 +698,39 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + '<textarea id="ep-presse" aria-hidden="true" tabindex="-1" style="position:absolute;left:-9999px;top:0;width:1px;height:1px"></textarea>'
       + '</div></div>';
     return h;
+  }
+
+  /* (2026-11-22, lot 1) LES MOTS-CLICS : des pastilles qu'on retire d'un clic, un champ pour en ajouter, et une rangée de
+     propositions — la saison, puis ceux qu'on a déjà employés. Pinterest n'en affiche pas le croisillon : ce sont des
+     mots de recherche. */
+  function epVueMots(F){
+    var pin = F.cle === 'pinterest';
+    var l = EP.motsCles || [];
+    var h = '<span class="ep-grp">' + (pin ? '${T("Mots de recherche")}' : '${T("Mots-clics")}') + '</span><div class="ep-mots">'
+      + l.map(function(m, i){
+          return '<span class="ep-mot">' + esc(pin ? m : ('#' + m)) + '<button type="button" data-epmotx="' + i + '" aria-label="${T("Retirer")}" title="${T("Retirer")}">✕</button></span>';
+        }).join('')
+      + '<input id="ep-mot-plus" value="' + esc(EPMOT) + '" placeholder="${T("+ ajouter (Entrée)")}" aria-label="${T("Ajouter un mot-clic")}"></div>';
+    var deja = {}; l.forEach(function(m){ deja[String(m).toLowerCase()] = 1; });
+    var prop = [];
+    ((EPD && EPD.motsClesHist) || []).concat((EPD && EPD.motsClesSaison) || []).forEach(function(m){
+      if (!deja[m] && prop.indexOf(m) < 0) prop.push(m);
+    });
+    prop = prop.slice(0, 9);
+    if (prop.length) {
+      h += '<div class="ep-prop"><span>${T("Proposés :")}</span>' + prop.map(function(m){
+        return '<button type="button" data-epmotadd="' + esc(m) + '">' + esc(pin ? m : ('#' + m)) + '</button>';
+      }).join('') + '</div>';
+    }
+    return h;
+  }
+  function epMotAjouter(v){
+    var m = String(v || '').replace(/^#+/, '').trim().toLowerCase().replace(/\\s+/g, '');
+    if (!m) return false;
+    EP.motsCles = EP.motsCles || [];
+    if (EP.motsCles.indexOf(m) >= 0) return false;
+    EP.motsCles.push(m);
+    return true;
   }
 
   function epSousBudget(){
@@ -670,32 +767,99 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     var but = v('ep-but').trim();
     if (!but) { dire('${T("Dites d’abord ce qu’il faut annoncer.")}', 'att'); return; }
     var p = epProduit();
-    var d = { reseau: EPRES, but: but, ton: v('ep-ton') || 'elegant', langue: v('ep-langue') || 'fr',
+    var carr = EP.carrousel ? epProduitsCat(EP.carrousel) : [];
+    var base = { but: but, ton: v('ep-ton') || 'elegant', langue: v('ep-langue') || 'fr',
       consignesLibres: v('ep-plus') || '',
-      produit: p ? { nom: p.nom, categorie: p.categorie, prix: p.prix } : null };
-    EPOCC = true; dessiner();
-    dire('${T("Rédaction en cours — cela prend une dizaine de secondes.")}');
-    appeler('nl:iaEpingle', [d]).then(function(r){
-      EPOCC = false;
-      if (!r || !r.ok) { dessiner(); dire(epExpliquer(r), 'err'); return; }
-      if (r.budget) { EPETAT = EPETAT || {}; EPETAT.budget = r.budget; EPETAT.clePosee = true; }
-      EP.diapos = (r.diapos && r.diapos.length) ? r.diapos : [{ sur: '', gros: '', sous: '' }];
-      EP.iDia = 0;
-      EP.titre = r.titre || ''; EP.description = r.description || '';
-      EP.alt = r.altTexte || ''; EP.motsCles = r.motsCles || [];
+      motsClesVoulus: (EP.motsCles || []).slice(0, 12),
+      produit: p ? { nom: p.nom, categorie: p.categorie, prix: p.prix } : null,
+      produits: carr.map(function(x){ return { nom: x.nom, categorie: x.categorie, prix: x.prix }; }) };
+    /* (2026-11-22, lot 1) LES QUATRE RÉSEAUX D'UN GESTE : la même demande part quatre fois, en parallèle — chaque réseau
+       reçoit SON format et SON ton (le coeur écrit la consigne depuis la fiche du réseau). Le coût est celui de quatre
+       rédactions ; il s'affiche à la fin. */
+    var cles = EPSAISIE.tous ? (EPD.reseaux || []).map(function(r){ return r.cle; }) : [EPRES];
+    var modeleDe = function(r){
+      var m = (cles.length > 1 || !EP) ? epVide() : EP;
+      m.produitId = EP.produitId; m.carrousel = EP.carrousel;
+      m.diapos = (r.diapos && r.diapos.length) ? r.diapos : [{ sur: '', gros: '', sous: '' }];
+      if (carr.length >= 2) m.diapos.forEach(function(dd, i){ if (carr[i]) dd.produitId = carr[i].id; });
+      m.iDia = 0;
+      m.titre = r.titre || ''; m.description = r.description || '';
+      m.alt = r.altTexte || ''; m.motsCles = r.motsCles || [];
+      m.variantes = r.variantes || []; m.ab = 0;
       /* ⚠ LE LIEN N EST PAS ECRIT PAR L IA. Une adresse inventee par un modele
          menerait quelque part — et sur Pinterest, ou l epingle vit des annees,
          personne ne verifierait jamais. Il vient du catalogue, ou du site. */
-      if (p && p.lien) EP.lien = p.lien;
-      else if (!EP.lien) EP.lien = EPD.siteUrl || '';
-      dessiner();
-      epDemanderRendu();
-      dire('${T("Publication rédigée : ")}' + (r.cout ? szArgent(r.cout) : '${T("prête")}'), 'bon');
+      if (p && p.lien) m.lien = p.lien;
+      else if (!m.lien) m.lien = EPD.siteUrl || '';
+      return m;
+    };
+    EPOCC = true; dessiner();
+    dire(cles.length > 1 ? '${T("Rédaction pour les 4 réseaux — une vingtaine de secondes…")}' : '${T("Rédaction en cours — cela prend une dizaine de secondes.")}');
+    var cout = 0, faits = 0, rates = [], restant = cles.length, dernier = null;
+    if (cles.length > 1) EPMAP = {};
+    cles.forEach(function(cle){
+      var d = {}; for (var k in base) d[k] = base[k];
+      d.reseau = cle;
+      appeler('nl:iaEpingle', [d]).then(function(r){
+        if (r && r.ok) {
+          faits++; cout += Number(r.cout || 0); dernier = r;
+          if (r.budget) { EPETAT = EPETAT || {}; EPETAT.budget = r.budget; EPETAT.clePosee = true; }
+          var m = modeleDe(r);
+          if (cles.length > 1) EPMAP[cle] = m; else { EP = m; if (Object.keys(EPMAP).length) EPMAP[cle] = m; }
+        } else rates.push({ cle: cle, r: r });
+        if (--restant > 0) return;
+        EPOCC = false;
+        if (cles.length > 1 && EPMAP[EPRES]) EP = EPMAP[EPRES];
+        else if (cles.length > 1 && faits) { EPRES = Object.keys(EPMAP)[0]; EP = EPMAP[EPRES]; }
+        EPIMG = '';
+        dessiner();
+        if (faits) epDemanderRendu();
+        if (!faits) { dire(epExpliquer(rates[0] && rates[0].r), 'err'); return; }
+        dire((cles.length > 1 ? (faits + '${T(" publications rédigées sur ")}' + cles.length) : '${T("Publication rédigée")}')
+          + (cout ? ' · ' + szArgent(cout) : '')
+          + (rates.length ? ('${T(" — en échec : ")}' + rates.map(function(x){ return x.cle; }).join(', ')) : ''),
+          rates.length ? 'att' : 'bon');
+      });
     });
   }
 
+  /* (2026-11-22, lot 1) ENREGISTRER enregistre TOUT ce qui est rédigé : chaque réseau de EPMAP (ou le seul en cours),
+     et pour chacun les deux accroches A et B quand il y en a deux. Un réseau à la fois, une variante à la fois : le
+     rendu lit EPRES et EP, qu'on pose puis qu'on rétablit. */
   function epEnregistrer(){
     if (!EPIMG) { dire('${T("Aucune image à enregistrer.")}', 'att'); return; }
+    var garderRes = EPRES, garderEP = EP;
+    var cles = Object.keys(EPMAP).length > 1 ? Object.keys(EPMAP) : [EPRES];
+    var taches = [];
+    cles.forEach(function(cle){
+      var m = (cles.length > 1) ? EPMAP[cle] : EP;
+      var vars = (m.variantes || []).length === 2 ? [0, 1] : [-1];
+      vars.forEach(function(vi){ taches.push({ cle: cle, m: m, vi: vi }); });
+    });
+    var tot = 0, bons = 0;
+    var suivante = function(){
+      var t = taches.shift();
+      if (!t) {
+        EPRES = garderRes; EP = garderEP;
+        if (EP.variantes && EP.variantes.length === 2) epDia0Gros(EP, EP.ab || 0);
+        dire(bons === tot ? ('${T("Enregistré : ")}' + tot + ' ' + szPl(tot, '${T("publication")}', '${T("publications")}') + '${T(" (images et texte)")}')
+                          : ('${T("Enregistré partiellement : ")}' + bons + '${T(" sur ")}' + tot), bons === tot ? 'bon' : 'att');
+        appeler('nl:epingleNoter', [{ motsCles: EP.motsCles || [], reseau: EPRES }]);
+        return;
+      }
+      EPRES = t.cle; EP = t.m;
+      if (t.vi >= 0) epDia0Gros(EP, t.vi);
+      tot++;
+      epEnregistrerUn(t.vi >= 0 ? (t.vi ? '-B' : '-A') : '', function(ok){ if (ok) bons++; suivante(); });
+    };
+    suivante();
+  }
+  // Pose l'accroche A (0) ou B (1) sur la première diapo.
+  function epDia0Gros(m, vi){
+    if (!m || !m.diapos || !m.diapos.length || !(m.variantes || [])[vi]) return;
+    m.diapos[0].gros = m.variantes[vi];
+  }
+  function epEnregistrerUn(suffixe, fini){
     /* ⚠⚠ L IMAGE ET SON TEXTE PARTENT ENSEMBLE, EN DEUX FICHIERS D UN SEUL
        GESTE. Une publication sans son texte est a moitie faite : il faudrait
        revenir le recopier a la main au moment de la deposer sur le reseau, et
@@ -704,7 +868,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
        meme dossier, et l on ne sait plus laquelle va ou. */
     var F = epFiche();
     var base = F.cle + '-' + new Date().toISOString().slice(0, 10) + '-'
-      + String(Date.now()).slice(-5);
+      + String(Date.now()).slice(-5) + (suffixe || '');
     /* ⚠ LE TEXTE EXPORTE EST CELUI QU ON COLLE, PAS UNE FICHE. Les mots-clics
        sont donc DANS le texte, a la fin — comme ils doivent l etre sur le
        reseau — et non sur une ligne intitulee. Le reste (lien, texte de
@@ -722,7 +886,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     ].filter(function(x){ return x !== '' && x !== null; }).join('\\n');
     dire('${T("Enregistrement…")}');
     epPeindreTout(base, function(images, rates){
-      if (!images.length) { dire('${T("L’image n’a pas pu être enregistrée.")}', 'err'); return; }
+      if (!images.length) { fini(false); return; }
       var faites = 0, restant = images.length;
       images.forEach(function(im){
         P.enregistrerExport(im.nom, im.dataUrl).then(function(rr){
@@ -730,11 +894,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
           if (--restant > 0) return;
           P.enregistrerExport(base + '.txt', texte).then(function(r2){
             var n = (EP.diapos || []).length;
-            var bon = faites === n && !rates && r2 && r2.ok;
-            dire(bon
-              ? ('${T("Enregistré : ")}' + faites + ' ' + szPl(faites, '${T("image et le texte")}', '${T("images et le texte")}'))
-              : ('${T("Enregistré partiellement : ")}' + faites + ' ' + szPl(faites, '${T("image sur")}', '${T("images sur")}') + ' ' + n),
-              bon ? 'bon' : 'att');
+            fini(faites === n && !rates && r2 && r2.ok);
           });
         });
       });
@@ -793,6 +953,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
         note: EP.alt || '', images: images }]).then(function(r){
         EPENVOI = false; epMajBoutons();
         if (r && r.ok) {
+          appeler('nl:epingleNoter', [{ motsCles: EP.motsCles || [], reseau: F.cle }]);
           // dire() ecrit en texte brut : l adresse s y pose telle quelle (2026-10-25, audit — esc y affichait « &amp; »).
           dire('${T("Envoyé à ")}' + a + ' ${T("· ")}' + r.images + ' ' + szPl(r.images, '${T("image")}', '${T("images")}')
             + (rates ? (' ${T(" — ")}' + rates + ' ' + szPl(rates, '${T("non rendue")}', '${T("non rendues")}')) : ''),
@@ -838,6 +999,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
         var cle = el.getAttribute('data-epres');
         if (cle === EPRES) return;
         EPRES = cle; EPIMG = '';
+        // (lot 1) Un réseau rédigé à part garde SA publication.
+        if (EPMAP[cle]) EP = EPMAP[cle];
         dessiner();
         epDemanderRendu();
       };
@@ -873,6 +1036,36 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     if (b) b.onclick = function(){ EPMODE = 'avance'; dessiner(); };
     b = document.getElementById('ep-go');
     if (b) b.onclick = epRediger;
+    b = document.getElementById('ep-tous');
+    if (b) b.onchange = function(){ EPSAISIE.tous = !!this.checked; };
+    // (lot 1) Les mots-clics : retirer, ajouter (Entrée ou virgule), reprendre une proposition.
+    var zm = document.getElementById('corps');
+    (zm ? zm.querySelectorAll('[data-epmotx]') : []).forEach(function(el){
+      el.onclick = function(){ EP.motsCles.splice(Number(el.getAttribute('data-epmotx')), 1); dessiner(); };
+    });
+    (zm ? zm.querySelectorAll('[data-epmotadd]') : []).forEach(function(el){
+      el.onclick = function(){ if (epMotAjouter(el.getAttribute('data-epmotadd'))) dessiner(); };
+    });
+    var mi = document.getElementById('ep-mot-plus');
+    if (mi) {
+      mi.oninput = function(){ EPMOT = mi.value; };
+      mi.onkeydown = function(ev){
+        if (ev.key === 'Enter' || ev.key === ',') {
+          ev.preventDefault();
+          if (epMotAjouter(mi.value)) { EPMOT = ''; dessiner(); var n2 = document.getElementById('ep-mot-plus'); if (n2) n2.focus(); }
+        }
+      };
+    }
+    // (lot 1) A/B : l'accroche essayée sur la première diapo.
+    (zm ? zm.querySelectorAll('[data-epab]') : []).forEach(function(el){
+      el.onclick = function(){
+        var vi = Number(el.getAttribute('data-epab'));
+        if ((EP.ab || 0) === vi) return;
+        EP.ab = vi; epDia0Gros(EP, vi);
+        if (EP.iDia !== 0) EP.iDia = 0;
+        EPIMG = ''; dessiner(); epDemanderRendu();
+      };
+    });
     [['ep-but', 'but'], ['ep-ton', 'ton'], ['ep-langue', 'langue'], ['ep-plus', 'plus']].forEach(function(x){
       var e = document.getElementById(x[0]);
       if (e) e.addEventListener(e.tagName === 'SELECT' ? 'change' : 'input', function(){ EPSAISIE[x[1]] = e.value; });
@@ -887,6 +1080,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     if (b) b.onclick = epEnvoyer;
     var sel = document.getElementById('ep-prod');
     if (sel) sel.onchange = function(){
+      /* (lot 1) « cat:… » = le CARROUSEL d'une collection : une diapo par produit, chacune avec sa photo. */
+      if (sel.value.indexOf('cat:') === 0) {
+        EP.carrousel = sel.value.slice(4); EP.produitId = '';
+        var lc = epProduitsCat(EP.carrousel);
+        EP.diapos = lc.map(function(x, i){ var o = (EP.diapos && EP.diapos[i]) || {}; return { sur: o.sur || '', gros: o.gros || '', sous: o.sous || '', produitId: x.id }; });
+        EP.iDia = 0; EPIMG = '';
+        if (lc[0] && lc[0].lien) EP.lien = lc[0].lien.replace(/#product\\?id=.*$/, '#shop?cat=' + encodeURIComponent(EP.carrousel));
+        dessiner(); epDemanderRendu();
+        return;
+      }
+      if (EP.carrousel) { EP.carrousel = ''; EP.diapos = [EP.diapos && EP.diapos[0] ? { sur: EP.diapos[0].sur, gros: EP.diapos[0].gros, sous: EP.diapos[0].sous } : { sur: '', gros: '', sous: '' }]; EP.iDia = 0; }
       EP.produitId = sel.value;
       var p = epProduit();
       if (p && p.lien) { EP.lien = p.lien; var li = document.getElementById('ep-lien'); if (li) li.value = EP.lien; }
