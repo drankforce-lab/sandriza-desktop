@@ -300,6 +300,8 @@ function pageCaisse(mode) {
     title="${T("Plein écran, texte et boutons agrandis — pour la tablette ou l’écran de caisse. Échap pour sortir.")}">${T("Mode comptoir")}</button>
   <button id="btn-afficheur" class="mini"
     title="${T("Ouvrir l’écran tourné vers le client, à poser sur un second moniteur")}">${T("Affichage client")}</button>
+  <!-- (2026-11-22, module Employés) Le pointage de la personne connectée : entrée, puis sortie. Caché si le module manque. -->
+  <button id="btn-pointer" class="mini" style="display:none"></button>
   <!-- Le NIP des prix modifies (2026-10-14) : montre au super-administrateur seulement ; le serveur
        refuse de toute facon tout autre role. -->
   <button id="btn-nip" class="mini" style="display:none"
@@ -1500,6 +1502,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       }).observe(H, { attributes: true, attributeFilter: ['class'] });
     } catch (e) {}
   })();
+  /* ══ LE POINTAGE (2026-11-22, module Employés) ══════════════════════════════════════════════
+     La personne connectée pointe SON entrée, puis SA sortie. Le serveur ne laisse poser que l'heure réelle ;
+     un oubli de plus de 16 heures ne se ferme pas seul : la gestion le corrige dans Employés et paie. */
+  var bPointer = document.getElementById('btn-pointer');
+  function hmPt(iso){ var d = new Date(iso); return isNaN(d) ? '' : (d.getHours() + ' h ' + (d.getMinutes() < 10 ? '0' : '') + d.getMinutes()); }
+  function pointageEtat(){
+    appeler('employes:monEtat', []).then(function(r){
+      if (!r || !r.ok) { bPointer.style.display = 'none'; return; }
+      bPointer.style.display = '';
+      bPointer.textContent = r.enPoste ? '${T("Pointer la sortie")}' : '${T("Pointer l’entrée")}';
+      bPointer.title = r.enPoste ? ('${T("En poste depuis ")}' + hmPt(r.depuis)) : '${T("Commencer votre quart : l’heure est notée pour la paie.")}';
+      bPointer.classList.toggle('prim', !r.enPoste);
+    });
+  }
+  bPointer.onclick = function(){
+    bPointer.disabled = true;
+    appeler('employes:pointer', []).then(function(r){
+      bPointer.disabled = false;
+      if (r && r.ok) {
+        dire(r.enPoste ? ('${T("Entrée pointée à ")}' + hmPt(r.depuis) + '${T(". Bon quart !")}')
+          : ('${T("Sortie pointée : ")}' + szNombre(r.heures || 0, 2) + '${T(" h aujourd’hui.")}'), 'bon');
+      } else if (r && r.motif === 'oubli') {
+        dire('${T("Votre dernière entrée date de plus de 16 heures : demandez à la gestion de corriger le pointage dans Employés et paie.")}', 'err');
+      } else dire('${T("Le pointage n’a pas pu être enregistré.")}', 'err');
+      pointageEtat();
+    });
+  };
+  pointageEtat();
+
   document.getElementById('btn-afficheur').onclick = function(){
     var b = this;
     b.disabled = true;

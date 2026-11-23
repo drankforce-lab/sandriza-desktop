@@ -307,4 +307,15 @@ module.exports = {
   'Adresse de facturation — rue': 'Billing address — street',
   'Province': 'Province',
   'Code postal': 'Postal code',
+  // (2026-11-22) Le pointage du module Employés.
+  "Pointer la sortie": "Clock out",
+  "Pointer l’entrée": "Clock in",
+  "En poste depuis ": "On shift since ",
+  "Commencer votre quart : l’heure est notée pour la paie.": "Start your shift: the time is recorded for payroll.",
+  "Entrée pointée à ": "Clocked in at ",
+  ". Bon quart !": ". Have a good shift!",
+  "Sortie pointée : ": "Clocked out: ",
+  " h aujourd’hui.": " h today.",
+  "Votre dernière entrée date de plus de 16 heures : demandez à la gestion de corriger le pointage dans Employés et paie.": "Your last clock-in is more than 16 hours old: ask management to correct the entry in Staff and payroll.",
+  "Le pointage n’a pas pu être enregistré.": "The time entry could not be saved.",
 };

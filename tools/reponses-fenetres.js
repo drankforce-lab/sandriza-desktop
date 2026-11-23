@@ -4256,6 +4256,43 @@ const JEU = {
       { nom: 'module des objectifs absent', id: '', reponses: { 'objectifs:donnees': { ok: false, motif: 'indisponible' }, identite: IDENTITE } },
     ];
   })(),
+  /* (2026-11-22) Employés et paie : formes copiées de assets/js/employes.js (donnees, paie). */
+  'employes.js': (function(){
+    var PERS = [
+      { id: 'st1', nom: 'Brigitte Brousseau', role: 'Super-administrateur', actif: true, fiche: { id: 'st1', taux: 0, commission: 0, inclus: false } },
+      { id: 'st2', nom: 'Camille Tremblay', role: 'Administrateur', actif: true, fiche: { id: 'st2', taux: 18.5, commission: 3, inclus: true, embauche: '2026-09-02' } },
+      { id: 'st3', nom: 'Léa Gagnon', role: 'Administrateur', actif: true, fiche: { id: 'st3', taux: 17.75, commission: 2.5, inclus: true, embauche: '2026-10-14' } } ];
+    var SEM = ['2026-11-22', '2026-11-23', '2026-11-24', '2026-11-25', '2026-11-26', '2026-11-27', '2026-11-28'];
+    var HOR = [
+      { id: 'qt1', staffId: 'st2', date: '2026-11-23', debut: '10:00', fin: '17:00', note: '' },
+      { id: 'qt2', staffId: 'st2', date: '2026-11-25', debut: '12:00', fin: '20:00', note: 'Fermeture' },
+      { id: 'qt3', staffId: 'st3', date: '2026-11-27', debut: '09:00', fin: '17:00', note: '' },
+      { id: 'qt4', staffId: 'st3', date: '2026-11-28', debut: '10:00', fin: '18:00', note: '' } ];
+    var PTS = [
+      { id: 'pt1', staffId: 'st3', entree: '2026-11-22T14:02:00.000Z', sortie: null, source: 'caisse', note: '', heures: 0 },
+      { id: 'pt2', staffId: 'st2', entree: '2026-11-21T15:00:00.000Z', sortie: '2026-11-21T22:05:00.000Z', source: 'caisse', note: '', heures: 7.08 },
+      { id: 'pt3', staffId: 'st2', entree: '2026-11-19T14:00:00.000Z', sortie: '2026-11-19T22:00:00.000Z', source: 'saisie', note: 'Oubli de pointage', corrigePar: 'Brigitte Brousseau', heures: 8 } ];
+    var D = { ok: true, peutModifier: true, moi: 'st1', reglages: { periodeJours: 14, debutRef: '2026-01-04', seuilHS: 40, tauxHS: 1.5 },
+      personnel: PERS, semaine: SEM, horaires: HOR, periode: { debut: '2026-11-15', fin: '2026-11-28', jours: 14 }, pointages: PTS, enPoste: ['st3'], aujourdhui: '2026-11-22' };
+    var PAIE = { ok: true, debut: '2026-11-15', fin: '2026-11-28', reglages: D.reglages,
+      totaux: { heures: 72.5, heuresSup: 2, commissions: 61.86, brut: 1452.73 },
+      lignes: [
+        { staffId: 'st2', nom: 'Camille Tremblay', taux: 18.5, pct: 3, heures: 40, heuresSup: 2, salaire: 795.5, nbVentes: 14, ventes: 1420.4, commissions: 42.61, brut: 838.11, pointages: 6, ouverts: 0 },
+        { staffId: 'st3', nom: 'Léa Gagnon', taux: 17.75, pct: 2.5, heures: 32.5, heuresSup: 0, salaire: 576.88, nbVentes: 7, ventes: 770.1, commissions: 19.25, brut: 596.13, pointages: 4, ouverts: 1 } ] };
+    var rep = function(d){ return { identite: IDENTITE, 'employes:donnees': d, 'employes:paie': PAIE,
+      'employes:paieCsv': { ok: true, csv: 'Employé;Taux' }, 'employes:periode': { ok: true, debut: '2026-11-01', fin: '2026-11-14', jours: 14 },
+      'employes:fiche': { ok: true, id: 'st2' }, 'employes:quart': { ok: true, id: 'qt9' }, 'employes:quartSupprimer': { ok: true },
+      'employes:copierSemaine': { ok: true, copies: 3 }, 'employes:pointage': { ok: true, id: 'pt9' }, 'employes:pointageSupprimer': { ok: true },
+      'employes:reglages': { ok: true } }; };
+    return [
+      { nom: 'équipe', id: 'equipe', reponses: rep(D), exige: ['data-enrfiche="st2"', 'data-c="taux"'] },
+      { nom: 'horaires de la semaine', id: 'horaires', reponses: rep(D), exige: ['data-qplus="st2|2026-11-23"', 'id="em-copier"'] },
+      { nom: 'pointages de la période', id: 'pointages', reponses: rep(D), exige: ['id="fp-ok"', 'data-pmod="pt2"'] },
+      { nom: 'rapport de paie', id: 'paie', reponses: rep(D), exige: ['id="em-csv"', 'id="rg-ok"'] },
+      { nom: 'aucun personnel', id: 'equipe', reponses: rep(Object.assign({}, D, { personnel: [], horaires: [], pointages: [], enPoste: [] })) },
+      { nom: 'droit absent', id: '', reponses: { identite: IDENTITE, 'employes:donnees': { ok: false, motif: 'droit' } } },
+    ];
+  })(),
   /* (2026-11-20) Relance des clients endormis : formes copiées de assets/js/relance.js (candidats, bilan, réglages). */
   'relance.js': (function(){
     var REG = { seuil: 90, plafond: 540, delai: 60, sujet: '{prenom}, de nouvelles pièces vous attendent',

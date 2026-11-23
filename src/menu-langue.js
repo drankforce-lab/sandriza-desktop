@@ -205,6 +205,8 @@ const MENU_APP_EN = {
   'Rappels': 'Reminders',
   // Objectifs et défis (2026-11-20).
   'Objectifs et défis': 'Goals and challenges',
+  // Employés et paie (2026-11-22).
+  'Employés et paie': 'Staff and payroll',
   'Relance des clients endormis': 'Win back sleeping customers',
   'Fermeture de caisse': 'Cash register closing',
   'Trésorerie des 90 jours': '90-day cash flow',

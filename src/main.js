@@ -3610,6 +3610,8 @@ const OPS_PONT = new Set([
   'rappels:fait', 'rappels:reporter', 'rappels:supprimer',
   // Objectifs et défis de vente (fenetre Objectifs, 2026-11-20). `objectifs:etat` sert aussi au tableau de bord.
   'objectifs:donnees', 'objectifs:etat', 'objectifs:ecrire', 'objectifs:supprimer',
+  // Employés et paie (fenetre Employes, 2026-11-22) ; `employes:pointer` et `monEtat` servent aussi a la caisse.
+  'employes:donnees', 'employes:paie', 'employes:paieCsv', 'employes:periode', 'employes:fiche', 'employes:reglages', 'employes:quart', 'employes:quartSupprimer', 'employes:copierSemaine', 'employes:pointage', 'employes:pointageSupprimer', 'employes:monEtat', 'employes:pointer',
   // Relance des clients endormis (fenetre Relance, 2026-11-20). `relance:envoyer` passe par Resend (infolettre).
   'relance:donnees', 'relance:apercu', 'relance:envoyer', 'relance:reglages',
   // Fermeture de caisse (fenetre Fermeture, 2026-11-21) : journee de comptoir, tiroir, rapport Z.
@@ -4403,6 +4405,7 @@ const LIMITES_PONT = {
   'rappels:reporter': 30000, 'rappels:supprimer': 30000,
   /* Les objectifs recalculent la progression depuis les commandes : lecture locale ; les ecritures passent par le nuage. */
   'objectifs:donnees': 15000, 'objectifs:etat': 15000, 'objectifs:ecrire': 30000, 'objectifs:supprimer': 30000,
+  'employes:donnees': 15000, 'employes:paie': 20000, 'employes:paieCsv': 20000, 'employes:copierSemaine': 60000, 'employes:pointer': 30000,
   /* La relance croise clients, commandes et abonnes (lecture locale) ; l envoi attend Resend, un courriel apres l autre. */
   'relance:donnees': 20000, 'relance:apercu': 15000, 'relance:envoyer': 180000, 'relance:reglages': 30000,
   'fermeture:donnees': 15000, 'fermeture:fermer': 30000, 'fermeture:imprimer': 20000,
@@ -4627,6 +4630,8 @@ const OPS_QUI_CHANGENT_LE_TABLEAU = new Set([
   'archives:reactiver', 'factures:payer', 'factures:supprimer',
   // (2026-11-20) L objectif epingle s affiche au tableau de bord.
   'objectifs:ecrire', 'objectifs:supprimer',
+  // (2026-11-22) Un pointage fait a la caisse se voit dans la fenetre Employes ouverte.
+  'employes:pointer', 'employes:pointage', 'employes:fiche', 'employes:quart',
 ]);
 
 /* ══ LES LIBELLÉS TRADUITS SUR LE TRAJET ════════════════════════════════════
@@ -5163,6 +5168,7 @@ const PAGES_ANCRABLES = () => ({
   vehicules: ['Véhicules et déplacements', () => pageVehicules()],
   rappels: ['Rappels', () => pageRappels()],
   objectifs: ['Objectifs et défis', () => pageObjectifs()],
+  employes: ['Employés et paie', () => pageEmployes()],
   relance: ['Relance des clients endormis', () => pageRelance()],
   fermeture: ['Fermeture de caisse', () => pageFermeture()],
   tresorerie: ['Trésorerie des 90 jours', () => pageTresorerie()],
@@ -7758,6 +7764,7 @@ const { pageCalendrier } = require('./fenetres/calendrier');
 const { pageReglages } = require('./fenetres/reglages');
 const { pageRappels } = require('./fenetres/rappels');
 const { pageObjectifs } = require('./fenetres/objectifs');
+const { pageEmployes } = require('./fenetres/employes');
 const { pageRelance } = require('./fenetres/relance');
 const { pageFermeture } = require('./fenetres/fermeture');
 const { pageTresorerie } = require('./fenetres/tresorerie');
@@ -8049,6 +8056,8 @@ const actionApp = (nom, arg) => {
     case 'rappels':
     // Objectifs et défis (2026-11-20) : meme cas, section hote cote site sans autre corps que la zone.
     case 'objectifs':
+    // Employés et paie (2026-11-22) : meme cas.
+    case 'employes':
     case 'relance':
     case 'fermeture':
     case 'tresorerie':
