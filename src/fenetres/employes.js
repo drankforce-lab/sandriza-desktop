@@ -282,7 +282,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     trop_long:          '${T("Un pointage ne peut pas dépasser 16 heures.")}',
     periode_approuvee:  '${T("Cette date est dans une période de paie approuvée. Rouvrez la période dans l’onglet Paie pour la modifier.")}',
     pas_finie:          '${T("La période n’est pas terminée : elle s’approuve à partir du lendemain de son dernier jour.")}',
-    deja:               '${T("Cette période est déjà approuvée.")}',
+    deja:               '${T("C’est déjà fait : la liste a été relue.")}',
     limite:             '${T("Trop d’envois en peu de temps. Réessayez dans une heure.")}',
     pointage_ouvert:    '${T("Un pointage de la période est encore ouvert. Fermez-le (oubli de sortie) avant d’approuver.")}',
     nuage:              '${T("Le nuage a refusé l’écriture : elle n’existe que sur ce poste. Vérifiez la connexion, puis refaites le geste.")}',
@@ -350,7 +350,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
 
   /* ── La tête : onglets, puis les gestes de l'onglet ── */
   function tete(){
-    var nA = (D.anomalies || []).length;
+    var nA = (D.anomalies || []).length + (D.demandes || []).length;
     var og = function(v, l, nb){ return '<button type="button" class="' + (ONGLET === v ? 'on' : '') + '" data-og="' + v + '">' + l + (nb ? '<span class="nb">' + nb + '</span>' : '') + '</button>'; };
     var h = '<div class="em-tete"><div class="ed-seg">' + og('aujourdhui', '${T("Aujourd’hui")}', nA) + og('horaire', '${T("Horaire")}')
       + og('equipe', '${T("Équipe")}') + og('paie', '${T("Paie")}') + '</div><div class="droite">';
@@ -452,8 +452,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     if (c && !c.connue) j += '<div class="note" style="margin-top:.5rem">${T("Les heures d’ouverture ne sont pas réglées (Configuration → Heures d’ouverture) : les trous de couverture ne se calculent pas.")}</div>';
     j += '</div></div>';
     // À régler
-    var r = '<div class="carte"><h3>${T("À régler")}' + (nA ? '<span class="dr pill a">' + nA + '</span>' : '') + '</h3><div class="liste">';
-    if (!nA) r += '<div class="vide">${T("Rien à corriger dans la période.")}</div>';
+    var dem = D.demandes || [];
+    var r = '<div class="carte"><h3>${T("À régler")}' + (nA + dem.length ? '<span class="dr pill a">' + (nA + dem.length) + '</span>' : '') + '</h3><div class="liste">';
+    dem.forEach(function(d){
+      r += '<div class="al"><i class="b"></i><span class="tx"><b>' + esc(String(d.nom || nomDe(d.staffId)).split(' ')[0]) + ' ${T("demande :")} ' + esc(MOTIF_NOM[d.motif] || '') + '</b><small>'
+        + esc(jourLong(d.debut) + (d.fin !== d.debut ? ' – ' + jourLong(d.fin) : '')) + (d.note ? ' · « ' + esc(d.note) + ' »' : '') + '</small></span>'
+        + (D.peutModifier ? '<button class="mini" data-dref="' + esc(d.id) + '">${T("Refuser")}</button><button class="mini prim" data-dok="' + esc(d.id) + '">${T("Accepter")}</button>' : '') + '</div>';
+    });
+    if (!nA && !dem.length) r += '<div class="vide">${T("Rien à corriger dans la période.")}</div>';
     (D.anomalies || []).slice(0, 8).forEach(function(a, i){
       var p = phraseAnomalie(a);
       r += '<div class="al"><i></i><span class="tx"><b>' + esc(nomDe(a.staffId).split(' ')[0]) + ' : ' + esc(p[0]) + '</b><small>' + p[1] + '</small></span>'
@@ -892,6 +898,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     }
     if (t.id === 'em-mods' || t.id === 'em-reg') { boiteReglages(); return; }
     if (t.id === 'em-publier') { publier(); return; }
+    if ((b = t.closest('[data-dok]'))) {
+      var did = b.getAttribute('data-dok'); b.disabled = true;
+      appeler('employes:demandeTraiter', [did, true, '']).then(function(r){ b.disabled = false; if (!r.ok) { dire(expliquer(r), 'err'); return; } dire('${T("Demande acceptée : le congé est posé à l’horaire.")}', 'bon'); charger(); });
+      return;
+    }
+    if ((b = t.closest('[data-dref]'))) {
+      var dr = b.getAttribute('data-dref');
+      var bx = boite('${T("Refuser la demande")}', '${T("La personne verra la raison à la caisse.")}',
+        '<div class="champs"><label class="ch large">${T("Raison")}<input id="dr-r" maxlength="200" placeholder="${T("Ex. : inventaire ce jour-là")}"></label></div>', '${T("Refuser")}');
+      bx.ok.onclick = function(){ envoyer(bx, 'employes:demandeTraiter', [dr, false, bx.val('dr-r')], '${T("Demande refusée.")}'); };
+      return;
+    }
     if (t.id === 'em-copier') {
       appeler('employes:copierSemaine', [D.semaine[0]]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }

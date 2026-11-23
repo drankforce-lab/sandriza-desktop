@@ -268,6 +268,18 @@ html.jour .liste-cli{box-shadow:0 14px 36px rgba(15,23,42,.18)}
 .voile .fin{display:flex;gap:.45rem;justify-content:flex-end;margin-top:.9rem}
 .voile .lien{display:flex;gap:.4rem;margin-top:.55rem}
 .voile .lien input{font-family:ui-monospace,monospace;font-size:.78rem}
+/* La demande de congé (2026-11-23) */
+.dc-ch{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.6rem .7rem;margin:.2rem 0 .4rem}
+.dc-ch label{display:flex;flex-direction:column;gap:.25rem;font-size:.74rem;font-weight:600;color:var(--tx2)}
+.dc-ch label.large{grid-column:1 / -1}
+.dc-ch input,.dc-ch select{height:2.2rem;color:var(--tx)}
+.dc-l{display:flex;align-items:center;gap:.6rem;padding:.4rem 0;border-top:1px solid var(--v06);font-size:.82rem}
+.dc-l .tx{margin-right:auto;display:flex;flex-direction:column;line-height:1.35}
+.dc-l small{color:var(--tx2);font-size:.74rem}
+.dc-p{font-size:.7rem;font-weight:700;padding:.1rem .5rem;border-radius:99px;white-space:nowrap;background:var(--ep-neutre-f,var(--v08));color:var(--ep-neutre-t,var(--tx2))}
+.dc-p.v{background:var(--ep-vert-f,rgba(74,222,128,.14));color:var(--ep-vert-t,var(--tx-ok))}
+.dc-p.r{background:var(--ep-rouge-f);color:var(--ep-rouge-t)}
+.dc-p.a{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
 
 html.jour .tete{background:#faf8f3}
 html.jour .rab-pill{background:rgba(var(--or-jour-rgb),.12);color:#6f5530}
@@ -302,6 +314,8 @@ function pageCaisse(mode) {
     title="${T("Ouvrir l’écran tourné vers le client, à poser sur un second moniteur")}">${T("Affichage client")}</button>
   <!-- (2026-11-22, module Employés) Le pointage de la personne connectée : entrée, puis sortie. Caché si le module manque. -->
   <button id="btn-pointer" class="mini" style="display:none"></button>
+  <!-- (2026-11-23) Demander un congé : la gestion l'accepte ou le refuse dans Employés et paie. -->
+  <button id="btn-conge" class="mini" style="display:none" title="${T("Demander un congé : la gestion l’accepte ou le refuse dans Employés et paie.")}">${T("Demander un congé")}</button>
   <!-- Le NIP des prix modifies (2026-10-14) : montre au super-administrateur seulement ; le serveur
        refuse de toute facon tout autre role. -->
   <button id="btn-nip" class="mini" style="display:none"
@@ -1530,6 +1544,60 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
   };
   pointageEtat();
+
+  /* ══ LA DEMANDE DE CONGÉ (2026-11-23) ══════════════════════════════════════════════════════
+     Chacun demande pour soi ; la gestion accepte (le congé se pose à l'horaire) ou refuse avec une raison, dans
+     Employés et paie › Aujourd'hui. Ici : la demande, et l'état des siennes. */
+  var bConge = document.getElementById('btn-conge');
+  var DC_MOTIF = { vacances: '${T("Vacances")}', maladie: '${T("Maladie")}', sans_solde: '${T("Sans solde")}', autre: '${T("Autre absence")}' };
+  var DC_MOIS = ['${T("janv.")}', '${T("févr.")}', '${T("mars")}', '${T("avr.")}', '${T("mai")}', '${T("juin")}', '${T("juill.")}', '${T("août")}', '${T("sept.")}', '${T("oct.")}', '${T("nov.")}', '${T("déc.")}'];
+  function dcJour(iso){ var p = String(iso).split('-'); return (+p[2]) + ' ' + DC_MOIS[(+p[1]) - 1]; }
+  function dcEsc(x){ return String(x == null ? '' : x).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
+  appeler('employes:mesDemandes', []).then(function(r){ if (r && r.ok) bConge.style.display = ''; });
+  bConge.onclick = function(){
+    appeler('employes:mesDemandes', []).then(function(r){
+      var l = (r && r.ok && r.demandes) || [];
+      var d = new Date(); d.setDate(d.getDate() + 7);
+      var dj = d.getFullYear() + '-' + (d.getMonth() < 9 ? '0' : '') + (d.getMonth() + 1) + '-' + (d.getDate() < 10 ? '0' : '') + d.getDate();
+      var v = document.createElement('div');
+      v.className = 'voile';
+      v.innerHTML = '<div class="boite" role="dialog" aria-modal="true" aria-labelledby="dc-t"><h3 id="dc-t">${T("Demander un congé")}</h3>'
+        + '<div class="dc-ch"><label>${T("Du")}<input type="date" id="dc-d" value="' + dj + '"></label><label>${T("Au")}<input type="date" id="dc-f" value="' + dj + '"></label>'
+        + '<label class="large">${T("Type")}<select id="dc-m"><option value="vacances">${T("Vacances")}</option><option value="maladie">${T("Maladie")}</option>'
+        + '<option value="sans_solde">${T("Sans solde")}</option><option value="autre">${T("Autre absence")}</option></select></label>'
+        + '<label class="large">${T("Note pour la gestion (facultatif)")}<input id="dc-n" maxlength="200"></label></div>'
+        + (l.length ? '<div style="margin-top:.6rem;font-size:.74rem;font-weight:700;color:var(--tx2);text-transform:uppercase;letter-spacing:.05em">${T("Vos demandes")}</div>' + l.map(function(x){
+            var st = x.statut === 'acceptee' ? '<span class="dc-p v">${T("acceptée")}</span>' : (x.statut === 'refusee' ? '<span class="dc-p r">${T("refusée")}</span>' : '<span class="dc-p a">${T("en attente")}</span>');
+            return '<div class="dc-l"><span class="tx"><b>' + dcEsc((DC_MOTIF[x.motif] || '') + ' · ' + dcJour(x.debut) + (x.fin !== x.debut ? ' – ' + dcJour(x.fin) : '')) + '</b>'
+              + (x.raison ? '<small>' + dcEsc(x.raison) + '</small>' : '') + '</span>' + st
+              + (x.statut === 'attente' ? '<button class="mini" data-dcx="' + dcEsc(x.id) + '">${T("Annuler")}</button>' : '') + '</div>';
+          }).join('') : '')
+        + '<div class="fin"><button class="mini" id="dc-x">${T("Fermer")}</button><button class="mini prim" id="dc-ok">${T("Envoyer la demande")}</button></div></div>';
+      document.body.appendChild(v);
+      var fermer = function(){ document.removeEventListener('keydown', clav, true); v.remove(); };
+      var clav = function(ev){ if (ev.key === 'Escape') { ev.preventDefault(); fermer(); } };
+      document.addEventListener('keydown', clav, true);
+      v.addEventListener('mousedown', function(ev){ if (ev.target === v) fermer(); });
+      v.querySelector('#dc-x').onclick = fermer;
+      v.addEventListener('click', function(ev){
+        var b = ev.target.closest && ev.target.closest('[data-dcx]'); if (!b) return;
+        appeler('employes:demandeAnnuler', [b.getAttribute('data-dcx')]).then(function(r2){
+          fermer(); dire(r2 && r2.ok ? '${T("Demande annulée.")}' : '${T("La demande n’a pas pu être annulée.")}', r2 && r2.ok ? 'bon' : 'err');
+        });
+      });
+      v.querySelector('#dc-ok').onclick = function(){
+        var g = function(id){ return v.querySelector('#' + id).value; };
+        var ok = this; ok.disabled = true;
+        appeler('employes:demander', [{ debut: g('dc-d'), fin: g('dc-f') || g('dc-d'), motif: g('dc-m'), note: g('dc-n') }]).then(function(r2){
+          ok.disabled = false;
+          if (r2 && r2.ok) { fermer(); dire('${T("Demande envoyée : la gestion la verra dans Employés et paie.")}', 'bon'); return; }
+          var m = r2 && r2.motif;
+          dire(m === 'passe' ? '${T("Un congé se demande pour aujourd’hui ou plus tard.")}' : (m === 'duree' || m === 'date' ? '${T("Vérifiez les dates : la fin suit le début, 60 jours au plus.")}' : '${T("La demande n’a pas pu être envoyée.")}'), 'err');
+        });
+      };
+      try { v.querySelector('#dc-d').focus(); } catch (e) {}
+    });
+  };
 
   document.getElementById('btn-afficheur').onclick = function(){
     var b = this;

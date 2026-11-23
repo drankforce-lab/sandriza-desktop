@@ -4316,6 +4316,7 @@ const JEU = {
     var D = { ok: true, peutModifier: true, moi: 'st1', reglages: RG, personnel: PERS, semaine: SEM, horaires: HOR, conges: CG, pointagesSemaine: PTSEM,
       couvertures: COUV, feriesSemaine: [], publication: { publiee: true, le: '2026-11-21T20:00:00Z', par: 'Brigitte Brousseau', changes: ['st2'] }, periode: { debut: '2026-11-22', fin: '2026-12-05', jours: 14, approuvee: null }, pointages: PTS,
       enPoste: [{ staffId: 'st3', depuis: '2026-11-23T14:02:00.000Z', id: 'pt1' }], anomalies: ANOM, brutPeriode: 1453.13,
+      demandes: [{ id: 'dm1', type: 'demande', staffId: 'st2', nom: 'Camille Tremblay', debut: '2026-12-21', fin: '2026-12-24', motif: 'vacances', note: 'Noël en famille', statut: 'attente', le: '2026-11-22T18:00:00Z' }],
       prochainsFeries: [{ date: '2026-12-25', nom: 'Noël' }],
       historique: [{ debut: '2026-11-08', fin: '2026-11-21', le: '2026-11-22T15:00:00Z', par: 'Brigitte Brousseau', brut: 1388.4, personnes: 3 }], aujourdhui: '2026-11-23' };
     var LIG = [
@@ -4333,10 +4334,10 @@ const JEU = {
       'employes:fiche': { ok: true, id: 'st2' }, 'employes:quart': { ok: true, id: 'qt9' }, 'employes:quartSupprimer': { ok: true },
       'employes:copierSemaine': { ok: true, copies: 3 }, 'employes:pointage': { ok: true, id: 'pt9' }, 'employes:pointageSupprimer': { ok: true },
       'employes:reglages': { ok: true }, 'employes:taux': { ok: true }, 'employes:conge': { ok: true, jours: 1 }, 'employes:congeSupprimer': { ok: true },
-      'employes:approuver': { ok: true }, 'employes:rouvrir': { ok: true }, 'employes:publier': { ok: true, envois: [] } }; };
+      'employes:approuver': { ok: true }, 'employes:rouvrir': { ok: true }, 'employes:publier': { ok: true, envois: [] }, 'employes:demandeTraiter': { ok: true } }; };
     var FINIE = Object.assign({}, D, { aujourdhui: '2026-12-08' });
     return [
-      { nom: 'aujourd’hui', id: 'aujourdhui', reponses: rep(D), exige: ['data-pmod="pt2"', 'data-absent="2"'] },
+      { nom: 'aujourd’hui', id: 'aujourdhui', reponses: rep(D), exige: ['data-pmod="pt2"', 'data-absent="2"', 'data-dok="dm1"'] },
       { nom: 'horaire du jour', id: 'horaire', reponses: rep(D), exige: ['data-zone="st2"', 'data-qmod="qt2"', 'data-cgx="cg1"', 'data-mod="m1"', 'id="em-copier"', 'id="em-publier"'] },
       { nom: 'équipe et fiche', id: 'equipe', reponses: rep(D), exige: ['data-fiche="st2"', 'data-act="taux"'] },
       { nom: 'paie en cours', id: 'paie', reponses: rep(D), exige: ['id="em-csv"', 'id="bulletin"', 'data-ligne="st4"'] },

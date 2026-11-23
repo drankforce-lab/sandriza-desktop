@@ -3746,6 +3746,7 @@ const OPS_PONT = new Set([
   'employes:donnees', 'employes:paie', 'employes:paieCsv', 'employes:periode', 'employes:fiche', 'employes:reglages', 'employes:quart', 'employes:quartSupprimer', 'employes:copierSemaine', 'employes:pointage', 'employes:pointageSupprimer', 'employes:monEtat', 'employes:pointer',
   // (2026-11-23, refonte piste A) taux daté, congés, approbation d'une période.
   'employes:taux', 'employes:conge', 'employes:congeSupprimer', 'employes:approuver', 'employes:rouvrir', 'employes:publier',
+  'employes:demander', 'employes:demandeAnnuler', 'employes:mesDemandes', 'employes:demandeTraiter',
   // Relance des clients endormis (fenetre Relance, 2026-11-20). `relance:envoyer` passe par Resend (infolettre).
   'relance:donnees', 'relance:apercu', 'relance:envoyer', 'relance:reglages',
   // Fermeture de caisse (fenetre Fermeture, 2026-11-21) : journee de comptoir, tiroir, rapport Z.
