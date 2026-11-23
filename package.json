@@ -1,7 +1,7 @@
 {
   "name": "sandriza-admin-desktop",
   "productName": "Administration Sandriza",
-  "version": "9.2.11",
+  "version": "9.2.12",
   "description": "Coquille de bureau (prototype) pour l'administration SANDRIZA — ouvre le site en ligne, impression silencieuse directe (sans agent).",
   "author": "SANDRIZA",
   "license": "UNLICENSED",
