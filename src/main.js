@@ -3283,7 +3283,7 @@ const OPS_PONT = new Set([
   'profil:donnees', 'profil:motdepasse', 'profil:questions',
   // Ses clés d'identification, une par poste (2026-10-19).
   'profil:cleAjouter', 'profil:cleRetirer', 'profil:cleRenommer',
-  'sociaux:liste', 'sociaux:publier', 'sociaux:publierTout', 'sociaux:ignorer',
+  'sociaux:liste', 'sociaux:publier', 'sociaux:publierTout', 'sociaux:ignorer', 'sociaux:planifier', 'sociaux:replanifier', 'sociaux:retenir', 'sociaux:liens', 'sociaux:stats', 'sociaux:recyclage', 'sociaux:moments',
   'sociaux:viderHistorique',
   // Fidelisation (fenetre Fidelisation, 1.71.0). La LISTE attend la
   // resynchronisation : un taux de reponse perime est un chiffre FAUX.
@@ -4303,7 +4303,7 @@ const LIMITES_PONT = {
   'stats:ga': 60000,
   'stats:telephonie': 45000,
   // Un appel par reseau, et la file peut en compter plusieurs.
-  'sociaux:publier': 60000,
+  'sociaux:publier': 60000, 'sociaux:planifier': 120000, 'sociaux:stats': 30000, 'sociaux:recyclage': 30000, 'sociaux:liens': 30000,
   // Le test interroge Facebook/Instagram : un aller-retour hors de chez nous.
   'sociaux:config:donnees': 20000, 'sociaux:config:ecrire': 30000, 'sociaux:config:tester': 45000,
   /* La photo part en clair vers la PAGE, qui la range dans R2 : un televersement

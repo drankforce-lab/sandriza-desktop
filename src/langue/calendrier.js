@@ -57,4 +57,10 @@ module.exports = {
   'autres': 'more',
   'autre': 'more',
   'Passez à la vue Jour pour tout voir.': 'Switch to Day view to see everything.',
+  // (2026-11-22) Lot 2 : les publications sociales du calendrier.
+  "Publication": "Post",
+  "Publiée": "Published",
+  "Retenue : produit en rupture": "On hold: out of stock",
+  "Glissez sur un autre jour pour la replanifier": "Drag to another day to reschedule",
+  "Replanification…": "Rescheduling…",
 };

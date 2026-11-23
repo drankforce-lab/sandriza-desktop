@@ -179,8 +179,40 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 .ep-tous input{width:auto!important;height:auto!important;margin:0}
 .ep-res button.pret::after{content:"";display:inline-block;width:.4rem;height:.4rem;border-radius:50%;background:var(--tx-ok);margin-left:.4rem;vertical-align:middle}
 .ep-res button.on.pret::after{background:currentColor}
+/* (2026-11-22, lot 2) Planifier, recyclage, performances. */
+.epenv.eppub{display:flex;flex-direction:column;gap:.45rem}
+.ep-grpl{display:flex;align-items:center;gap:1rem;justify-content:space-between}
+.eppub .ep-pubt b{margin-right:auto}
+.epenv.eppub .ep-mom button{height:1.45rem;border-radius:99px;padding:0 .5rem}
+.eppub .ep-pubt{display:flex;align-items:center;gap:.5rem}
+.eppub .ep-pubt b{font-size:.8rem}
+.eppub .ed-seg{margin-left:auto}
+.eppub .ed-seg button{height:1.7rem;padding:0 .7rem;font-size:.74rem}
+.eppub .ed-seg button.on{background:var(--or);color:#1a1208;font-weight:700}
+.ep-quand{display:grid;grid-template-columns:minmax(0,1fr) 6.2rem auto;gap:.4rem;align-items:center}
+.ep-quand input{height:2.1rem!important}
+.ep-quand button{height:2.1rem;border-radius:9px;white-space:nowrap}
+.ep-mom{display:flex;flex-wrap:wrap;gap:.3rem;font-size:.7rem;color:var(--tx2);align-items:center}
+.ep-mom button{height:1.45rem;padding:0 .5rem;border-radius:99px;font-size:.7rem;background:transparent;border:1px dashed var(--v16);color:var(--tx2)}
+.ep-mom button:hover:not(:disabled){border-style:solid;color:var(--tx)}
+.ep-recy{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;font-size:.74rem;color:var(--tx2);padding:.4rem .6rem;border:1px dashed var(--v14);border-radius:10px}
+.ep-recy .it{display:inline-flex;align-items:center;gap:.25rem;padding:.1rem .15rem .1rem .55rem;border-radius:99px;background:var(--v05);color:var(--tx)}
+.ep-recy .it button{height:1.4rem;padding:0 .5rem;border-radius:99px;font-size:.7rem}
+.ep-suivi{display:flex;align-items:center;gap:.4rem;font-size:.74rem;color:var(--tx2);margin:0!important}
+.ep-suivi input{width:auto!important;height:auto!important;margin:0}
+.so-perf{display:flex;flex-direction:column;gap:.7rem;min-height:0;flex:1 1 auto}
+.so-perf .pf-tot{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem}
+.so-perf table{width:100%;border-collapse:separate;border-spacing:0 4px;font-size:.8rem}
+.so-perf th{text-align:left;font-size:.68rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2);font-weight:700;padding:0 .6rem}
+.so-perf td{background:var(--f-carte);padding:.45rem .6rem;border-top:1px solid var(--v07);border-bottom:1px solid var(--v07)}
+.so-perf td:first-child{border-left:1px solid var(--v07);border-radius:9px 0 0 9px}
+.so-perf td:last-child{border-right:1px solid var(--v07);border-radius:0 9px 9px 0}
+.so-perf td.n{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}
+.so-perf th.n{text-align:right}
+.so-perf .tit{max-width:22rem;white-space:normal}
+.so-perf .mots{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;font-size:.76rem;color:var(--tx2)}
 /* (lot 1) Fenêtre basse : la Publication IA se resserre au lieu de passer sous le pied (aucune barre de défilement). */
-@media (max-height:820px){
+@media (max-height:940px){
   .ep-etapes{padding:.8rem 1.1rem;gap:.5rem!important}
   .ep-et{gap:.38rem}.ep-corps{gap:.38rem}
   .ep-g3,.ep-g2{gap:.45rem}
@@ -190,6 +222,17 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
   .epg textarea{min-height:3.1rem}
   .ep-res button{height:1.8rem}
   .bqbar button.mini{height:1.7rem;min-width:1.7rem}
+  .ep-sep{margin:0}
+  .ep-recy{padding:.25rem .5rem}
+  .ep-et-t{gap:.5rem}
+}
+/* (lot 2) Deuxième cran, fenêtre vraiment basse : zones de texte plus courtes, étapes plus serrées. */
+@media (max-height:800px){
+  .ep-etapes{padding:.65rem 1rem;gap:.4rem!important}
+  .epg textarea{min-height:2.55rem}
+  .epg input,.epg select{height:1.95rem}
+  .ep-grp{margin-top:0}
+  .epg label{font-size:.68rem}
 }
 /* Variantes A/B de l'accroche, au-dessus de l'aperçu. */
 .ep-ab{display:flex;align-items:center;gap:.5rem;width:100%;font-size:.74rem;color:var(--tx2)}
@@ -202,7 +245,7 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 .epvue img{display:block;width:100%;height:100%;object-fit:contain}
 /* ⚠ LA HAUTEUR SUIT LA FENETRE, LA LARGEUR SUIT LE FORMAT (2026-09-26, sa demande : aucune barre de
    defilement) : on fixe la HAUTEUR a ce qui reste, aspect-ratio en deduit la largeur. */
-.epvue{height:max(12rem, min(calc(100vh - 31rem), 24rem));width:auto;max-width:100%;align-self:center}
+.epvue{height:max(10rem, min(calc(100vh - 36rem), 24rem));width:auto;max-width:100%;align-self:center}
 .epvue .rien{font-size:.76rem;color:#4A4A4A;padding:1rem;text-align:center}
 .epinfo{font-size:.72rem;color:var(--tx2);text-align:center}
 .ep-enr{height:2.75rem;border-radius:12px;font-size:.88rem;font-weight:700}
@@ -258,7 +301,7 @@ function pageSociaux(onglet) {
      l'entrée « Réseaux sociaux » de Marketing mènent à la MÊME fenêtre, et il
      n'y en a qu'une. Lui donner deux onglets de départ selon l'entrée
      emprunterait deux vérités pour un seul écran ; la file reste à un clic. */
-  const depart = (['historique', 'patrons', 'file', 'epingle'].indexOf(String(onglet || '')) >= 0)
+  const depart = (['historique', 'patrons', 'file', 'epingle', 'perf'].indexOf(String(onglet || '')) >= 0)
     ? String(onglet) : 'epingle';
   return `${TETE()}
 <title>${T("Réseaux sociaux — Administration Sandriza")}</title>
@@ -322,9 +365,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
   }
 
   var LIB = { published: '${T("Publiée")}', partial: '${T("Partielle")}', failed: '${T("Échouée")}',
-              skipped: '${T("Ignorée")}', pending: '${T("En attente")}' };
+              skipped: '${T("Ignorée")}', pending: '${T("En attente")}', held: '${T("Retenue")}' };
   var TONS = { published: 'bon', partial: 'att', failed: 'err',
-               skipped: 'neutre', pending: 'att' };
+               skipped: 'neutre', pending: 'att', held: 'err' };
 
   function reseaux(list){
     if (!list.length) return '<span class="dt">${T("aucun réseau")}</span>';
@@ -350,8 +393,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + '<span class="pill ' + (TONS[e.statut] || 'neutre') + '">' + esc(LIB[e.statut] || e.statut) + '</span>'
       + reseaux(e.reseaux || [])
       + (e.image ? '<span class="pill neutre">${T("image")}</span>' : '')
+      + (e.retenue ? '<span class="pill err" title="' + esc(e.motifRetenue === 'rupture' ? '${T("Le produit est en rupture : elle ne partira pas avant son retour en stock.")}' : (e.motifRetenue || '')) + '">${T("Produit en rupture")}</span>' : '')
+      + (e.prevue ? '<span class="pill neutre">${T("Prévue le ")}' + esc(szQuand(e.prevue)) + '</span>' : '')
+      + (e.lienCode ? '<span class="pill neutre" title="${T("Lien suivi : clics et ventes mesurés")}">${T("lien suivi")}</span>' : '')
       + '<span class="droite">';
-    if (avecGestes && D.peutModifier) {
+    if (avecGestes && D.peutModifier && e.retenue) {
+      h += '<button class="mini geste" data-relacher="' + esc(e.id) + '">${T("Relâcher")}</button>';
+    } else if (avecGestes && D.peutModifier) {
       h += '<button class="mini geste prim" data-publier="' + esc(e.id) + '">'
         + '${T("Publier")}' + '</button>'
         + '<button class="mini geste" data-ignorer="' + esc(e.id) + '">${T("Ignorer")}</button>';
@@ -515,6 +563,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     if (be) be.disabled = !EPIMG;
     var bv = document.getElementById('ep-envoi');
     if (bv) bv.disabled = !EPIMG || EPENVOI || !!(EPD && EPD.resendPret === false);
+    var bpl = document.getElementById('ep-plan');
+    if (bpl) bpl.disabled = !EPIMG || EPENVOI;
   }
 
   function epChoix(id, lib, opts, val){
@@ -575,6 +625,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
      qui suit le réseau choisi). */
   var EPMAP = {};
   var EPMOT = '';   // le mot-clic en cours de frappe (survit au redessin)
+  /* (2026-11-22, lot 2) La sortie : PLANIFIER (dans la file, à une date) ou PAR COURRIEL (vers le téléphone). Le lien
+     suivi est posé par défaut là où le réseau rend le lien cliquable. RECY : les publications à recycler. */
+  var EPPUB = 'planifier', EPQD = '', EPQH = '', RECY = null;
+  if (EPSAISIE.suivi === undefined) EPSAISIE.suivi = true;
+  var PERF = null;
   function vueEpingle(){
     if (!EPD) return '<div class="carte"><div class="vide charge">${T("Lecture du catalogue…")}</div></div>';
     if (!EP) EP = epVide();
@@ -616,7 +671,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
         + '<optgroup label="${T("Un produit")}">' + (EPD.produits || []).map(function(p){
             return '<option value="' + esc(p.id) + '"' + (valProd === p.id ? ' selected' : '') + '>' + esc(p.nom + (p.categorie ? ' · ' + p.categorie : '')) + '</option>';
           }).join('') + '</optgroup></select></div>';
-      h += '<div class="ep-corps"><div class="ep-ligne">' + selProd
+      h += '<div class="ep-corps">' + epVueRecy() + '<div class="ep-ligne">' + selProd
         + '<div><label for="ep-but">${T("L’idée, en une phrase")}</label>'
         + '<input id="ep-but" value="' + esc(EPSAISIE.but) + '" placeholder="${T("ex. la coupe et la matière de ce manteau, pour l’automne")}"></div>'
         + '<button type="button" class="prim ep-go" id="ep-go"' + (EPOCC ? ' disabled' : '') + '>'
@@ -662,13 +717,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + '</div>';
     /* ⚠ LE TITRE N EXISTE QUE CHEZ PINTEREST, ET LE LIEN DISPARAIT LA OU IL NE CLIQUE PAS
        (Instagram ne rend aucune adresse cliquable dans une legende). La fiche du reseau le dit. */
-    h += '<span class="ep-grp">${T("La publication")}</span><div class="ep-g2">'
+    /* (lot 2) Le lien suivi se coche sur la ligne du groupe : pas de rangée de plus. */
+    h += '<div class="ep-grpl"><span class="ep-grp">${T("La publication")}</span>'
+      + (F.lienCliquable ? '<label class="ep-suivi" title="${T("Clics et ventes de cette publication mesurés dans Performances")}"><input type="checkbox" id="ep-suivi"' + (EPSAISIE.suivi ? ' checked' : '') + '> ${T("Lien suivi (clics et ventes)")}</label>' : '')
+      + '</div><div class="ep-g2">'
       + (F.titre ? epChamp('titre', '${T("Titre de l’épingle")}', F.titre, false) : '')
       + (F.lienCliquable ? epChamp('lien', '${T("Lien de destination")}', 0, false) : '')
       + epChamp('description', F.cle === 'pinterest' ? '${T("Description (elle sert à être trouvée)")}' : '${T("Texte de la publication")}', F.description, true)
       + epChamp('alt', '${T("Texte de remplacement de l’image")}', 0, true)
       + '</div>';
     if (!F.lienCliquable) h += '<div class="ep-note">${T("Ce réseau ne rend pas les liens cliquables : mettez l’adresse dans la bio du compte.")}</div>';
+
     h += epVueMots(F);
     h += '</div></div></div>';
 
@@ -687,13 +746,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + '<button type="button" id="ep-dossier">${T("Dossier des exports")}</button></div>'
       /* ⚠⚠ L ENVOI PAR COURRIEL N EST PAS UN CONFORT, C EST LE SEUL PONT VERS LE TELEPHONE :
          Instagram et TikTok ne se publient pas depuis un bureau. */
-      + '<div class="epenv"><label for="ep-a">${T("Vers le téléphone")}</label>'
-      + '<input id="ep-a" type="email" value="' + esc((EPD && EPD.courrielDefaut) || '') + '" placeholder="${T("votre@courriel.com")}"'
-      + ((EPD && EPD.resendPret === false) ? ' disabled' : '') + '>'
-      + '<button type="button" id="ep-envoi"' + ((EPIMG && !EPENVOI && !(EPD && EPD.resendPret === false)) ? '' : ' disabled') + '>${T("Envoyer")}</button>'
-      + ((EPD && EPD.resendPret === false)
-          ? '<div class="epinfo">${T("Aucune clé Resend : l’envoi de courriel n’est pas configuré.")}</div>'
-          : '')
+      + '<div class="epenv eppub"><div class="ep-pubt"><b>${T("Publier")}</b>'
+      + '<div class="ed-seg"><button type="button" class="' + (EPPUB === 'planifier' ? 'on' : '') + '" data-eppub="planifier">${T("Planifier")}</button>'
+      + '<button type="button" class="' + (EPPUB === 'courriel' ? 'on' : '') + '" data-eppub="courriel">${T("Par courriel")}</button></div></div>'
+      + (EPPUB === 'planifier' ? epVuePlanifier()
+        : ('<div class="ep-quand" style="grid-template-columns:minmax(0,1fr) auto"><input id="ep-a" type="email" aria-label="${T("Vers le téléphone")}" value="' + esc((EPD && EPD.courrielDefaut) || '') + '" placeholder="${T("votre@courriel.com")}"'
+          + ((EPD && EPD.resendPret === false) ? ' disabled' : '') + '>'
+          + '<button type="button" id="ep-envoi"' + ((EPIMG && !EPENVOI && !(EPD && EPD.resendPret === false)) ? '' : ' disabled') + '>${T("Envoyer")}</button></div>'
+          + ((EPD && EPD.resendPret === false)
+              ? '<div class="epinfo">${T("Aucune clé Resend : l’envoi de courriel n’est pas configuré.")}</div>'
+              : '')))
       + '</div>'
       + '<textarea id="ep-presse" aria-hidden="true" tabindex="-1" style="position:absolute;left:-9999px;top:0;width:1px;height:1px"></textarea>'
       + '</div></div>';
@@ -724,6 +786,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     }
     return h;
   }
+  /* (lot 2) LE RECYCLAGE : de retour en stock (une publication retenue pour rupture), ou ancien succès. « Réécrire »
+     prépare une rédaction neuve sur le même produit, avec ses mots-clics ; « Republier » relâche la retenue telle quelle. */
+  function epVueRecy(){
+    if (!RECY || !RECY.length) return '';
+    return '<div class="ep-recy"><span>${T("À recycler :")}</span>' + RECY.map(function(x, i){
+      return '<span class="it" title="' + esc(x.texte || '') + '">' + (x.sorte === 'retour' ? '${T("De retour · ")}' : '${T("Succès · ")}') + esc(x.produit)
+        + (x.sorte === 'succes' ? ' (' + (x.ventes ? x.ventes + ' ${T("ventes")}' : x.clics + ' ${T("clics")}') + ')' : '')
+        + '<button type="button" data-recy="' + i + '">${T("Réécrire")}</button>'
+        + (x.sorte === 'retour' ? '<button type="button" data-recyrel="' + i + '">${T("Republier")}</button>' : '') + '</span>';
+    }).join('') + '</div>';
+  }
   function epMotAjouter(v){
     var m = String(v || '').replace(/^#+/, '').trim().toLowerCase().replace(/\\s+/g, '');
     if (!m) return false;
@@ -731,6 +804,95 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     if (EP.motsCles.indexOf(m) >= 0) return false;
     EP.motsCles.push(m);
     return true;
+  }
+
+  /* (lot 2) LE CALENDRIER DE PUBLICATION : la date et l'heure (par défaut, le prochain « meilleur moment »), les moments
+     proposés d'après les ventes, et « Planifier ». Les réseaux par l'API (Facebook, Instagram, Pinterest) partent seuls à
+     l'heure ; TikTok reste un rappel dans le calendrier. */
+  function epVuePlanifier(){
+    var M = (EPD && EPD.moments && EPD.moments.moments) || [];
+    if (!EPQD && M[0]) { EPQD = M[0].quand.slice(0, 10); EPQH = M[0].quand.slice(11, 16); }
+    var JS = ['${T("dim.")}', '${T("lun.")}', '${T("mar.")}', '${T("mer.")}', '${T("jeu.")}', '${T("ven.")}', '${T("sam.")}'];
+    var nb = Object.keys(EPMAP).length > 1 ? Object.keys(EPMAP).length : 1;
+    var h = '<div class="ep-quand"><input type="date" id="ep-qd" value="' + esc(EPQD) + '" aria-label="${T("Date")}">'
+      + '<input type="time" id="ep-qh" value="' + esc(EPQH) + '" aria-label="${T("Heure")}">'
+      + '<button type="button" class="prim" id="ep-plan"' + (EPIMG && !EPENVOI ? '' : ' disabled') + '>${T("Planifier")}' + (nb > 1 ? ' (' + nb + ')' : '') + '</button></div>';
+    if (M.length) {
+      h += '<div class="ep-mom"><span>' + (EPD.moments.d_apres_ventes ? '${T("Meilleurs moments (vos ventes) :")}' : '${T("Moments conseillés :")}') + '</span>'
+        + M.map(function(m){
+            return '<button type="button" data-epmom="' + esc(m.quand) + '">' + JS[m.jour] + ' ' + m.heure + ' h</button>';
+          }).join('') + '</div>';
+    }
+    return h;
+  }
+  // Le texte qu'on colle — le même que « Copier le texte », avec le lien donné.
+  function epTexteCollable(F, lien){
+    var clics = (F.cle === 'pinterest') ? '' : (EP.motsCles || []).map(function(m){ return '#' + m; }).join(' ');
+    return [EP.titre, EP.titre ? '' : null, EP.description, clics ? '' : null, clics,
+      F.lienCliquable ? '' : null, F.lienCliquable ? lien : null]
+      .filter(function(x){ return x !== null; }).join('\\n');
+  }
+  function epPlusJours(qd, qh, n){
+    var d = new Date(qd + 'T' + qh); d.setDate(d.getDate() + n);
+    var z = function(x){ return (x < 10 ? '0' : '') + x; };
+    return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + 'T' + z(d.getHours()) + ':' + z(d.getMinutes());
+  }
+  /* PLANIFIER : chaque réseau rédigé, et pour chacun A puis B (B deux jours plus tard, même heure — publier les deux
+     le même jour ferait doublon dans le fil). Chaque publication reçoit son lien suivi, son image et sa date. */
+  function epPlanifier(){
+    var qd = (document.getElementById('ep-qd') || {}).value || '', qh = (document.getElementById('ep-qh') || {}).value || '';
+    if (!qd || !qh) { dire('${T("Choisissez une date et une heure.")}', 'att'); return; }
+    if (Date.parse(qd + 'T' + qh) < Date.now() - 60000) { dire('${T("Cette heure est déjà passée.")}', 'att'); return; }
+    if (EPENVOI) return;
+    var garderRes = EPRES, garderEP = EP;
+    var cles = Object.keys(EPMAP).length > 1 ? Object.keys(EPMAP) : [EPRES];
+    var pubId = 'p' + Date.now().toString(36);
+    var taches = [];
+    cles.forEach(function(cle){
+      var m = (cles.length > 1) ? EPMAP[cle] : EP;
+      ((m.variantes || []).length === 2 ? [0, 1] : [-1]).forEach(function(vi){ taches.push({ cle: cle, m: m, vi: vi }); });
+    });
+    var faits = 0, retenues = 0, rates = [];
+    EPENVOI = true; epMajBoutons(); dire('${T("Planification…")}');
+    var fin = function(){
+      EPENVOI = false; EPRES = garderRes; EP = garderEP;
+      if (EP.variantes && EP.variantes.length === 2) epDia0Gros(EP, EP.ab || 0);
+      appeler('nl:epingleNoter', [{ motsCles: EP.motsCles || [], reseau: EPRES }]);
+      dessiner();
+      dire(faits ? (faits + ' ' + szPl(faits, '${T("publication planifiée")}', '${T("publications planifiées")}')
+          + (retenues ? ('${T(" — ")}' + retenues + ' ' + szPl(retenues, '${T("retenue (produit en rupture)")}', '${T("retenues (produit en rupture)")}')) : '')
+          + (rates.length ? ('${T(" — en échec : ")}' + rates.join(', ')) : ''))
+        : ('${T("Rien n’a été planifié : ")}' + (rates.join(', ') || '?')), (faits && !rates.length) ? 'bon' : 'att');
+    };
+    var suivante = function(){
+      var t = taches.shift();
+      if (!t) { fin(); return; }
+      EPRES = t.cle; EP = t.m;
+      if (t.vi >= 0) epDia0Gros(EP, t.vi);
+      var F = epFiche();
+      var quand = t.vi === 1 ? epPlusJours(qd, qh, 2) : (qd + 'T' + qh);
+      var gros = (EP.diapos && EP.diapos[0] && EP.diapos[0].gros) || '';
+      var titre = EP.titre || gros || '${T("Publication IA")}';
+      var var_ = t.vi >= 0 ? (t.vi ? 'B' : 'A') : '';
+      var prod = EP.produitId || (EP.diapos && EP.diapos[0] && EP.diapos[0].produitId) || '';
+      var lienP = (EPSAISIE.suivi && F.lienCliquable && EP.lien)
+        ? appeler('sociaux:liens', [[{ url: EP.lien, reseau: F.cle, variante: var_, pub: pubId, produit: prod || EP.carrousel || '', titre: titre + (var_ ? ' (' + var_ + ')' : '') }]])
+        : Promise.resolve(null);
+      lienP.then(function(rl){
+        var L = (rl && rl.ok && rl.liens && rl.liens[0]) ? rl.liens[0] : null;
+        var lien = L ? L.court : EP.lien;
+        epPeindreTout(F.cle, function(images){
+          appeler('sociaux:planifier', [{ reseaux: [F.cle], contenu: epTexteCollable(F, lien),
+            image: images[0] ? images[0].dataUrl : '', quand: quand, produitId: prod, lien: lien, lienCode: L ? L.code : '',
+            motsCles: EP.motsCles || [], variante: var_, pub: pubId, titre: titre }]).then(function(r){
+            if (r && r.ok) { faits++; if (r.retenue) retenues++; }
+            else rates.push(F.nom + (var_ ? ' ' + var_ : '') + ' (' + expliquer(r) + ')');
+            suivante();
+          });
+        });
+      });
+    };
+    suivante();
   }
 
   function epSousBudget(){
@@ -1038,6 +1200,41 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     if (b) b.onclick = epRediger;
     b = document.getElementById('ep-tous');
     if (b) b.onchange = function(){ EPSAISIE.tous = !!this.checked; };
+    // (lot 2) Lien suivi, planification, recyclage.
+    b = document.getElementById('ep-suivi');
+    if (b) b.onchange = function(){ EPSAISIE.suivi = !!this.checked; };
+    b = document.getElementById('ep-plan');
+    if (b) b.onclick = epPlanifier;
+    ['ep-qd', 'ep-qh'].forEach(function(k){ var e = document.getElementById(k); if (e) e.onchange = function(){ if (k === 'ep-qd') EPQD = e.value; else EPQH = e.value; }; });
+    var zp = document.getElementById('corps');
+    (zp ? zp.querySelectorAll('[data-eppub]') : []).forEach(function(el){
+      el.onclick = function(){ EPPUB = el.getAttribute('data-eppub'); dessiner(); };
+    });
+    (zp ? zp.querySelectorAll('[data-epmom]') : []).forEach(function(el){
+      el.onclick = function(){ var q = el.getAttribute('data-epmom'); EPQD = q.slice(0, 10); EPQH = q.slice(11, 16); dessiner(); };
+    });
+    (zp ? zp.querySelectorAll('[data-recy]') : []).forEach(function(el){
+      el.onclick = function(){
+        var x = RECY[Number(el.getAttribute('data-recy'))]; if (!x) return;
+        EP = epVide(); EPMAP = {}; EP.produitId = x.produitId;
+        EP.motsCles = (x.motsCles || []).slice(0, 15);
+        var p = epProduit(); if (p && p.lien) EP.lien = p.lien;
+        EPSAISIE.but = (x.sorte === 'retour' ? '${T("De retour en stock : ")}' : '${T("On le remet de l’avant : ")}') + x.produit;
+        EPIMG = ''; dessiner(); epDemanderRendu();
+        dire('${T("Prêt à réécrire : vérifiez l’idée, puis « Rédiger ».")}', 'bon');
+      };
+    });
+    (zp ? zp.querySelectorAll('[data-recyrel]') : []).forEach(function(el){
+      el.onclick = function(){
+        var x = RECY[Number(el.getAttribute('data-recyrel'))]; if (!x) return;
+        el.disabled = true;
+        appeler('sociaux:retenir', [x.id, false, '']).then(function(r){
+          if (!r || !r.ok) { el.disabled = false; dire(expliquer(r), 'err'); return; }
+          RECY.splice(RECY.indexOf(x), 1); dessiner();
+          dire('${T("Republiée : elle reprend sa place dans la file.")}', 'bon');
+        });
+      };
+    });
     // (lot 1) Les mots-clics : retirer, ajouter (Entrée ou virgule), reprendre une proposition.
     var zm = document.getElementById('corps');
     (zm ? zm.querySelectorAll('[data-epmotx]') : []).forEach(function(el){
@@ -1129,12 +1326,53 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       if (!EP) EP = epVide();
       if (ONGLET === 'epingle') dessiner();
     });
+    // (lot 2) Les publications à recycler (de retour en stock, anciens succès).
+    appeler('sociaux:recyclage', []).then(function(r){
+      RECY = (r && r.ok) ? (r.items || []) : [];
+      if (ONGLET === 'epingle' && RECY.length) dessiner();
+    });
     if (!EPETAT) {
       appeler('nl:iaEtat', []).then(function(r){
         EPETAT = (r && r.ok) ? r : { clePosee: false, budget: {} };
         if (ONGLET === 'epingle') dessiner();
       });
     }
+  }
+
+  /* ══ PERFORMANCES (2026-11-22, lot 2) : les liens suivis — clics (s.php), ventes (commandes portant le code),
+     la gagnante d'un A/B, et les mots-clics qui rapportent. ══ */
+  function chargerPerf(){
+    PERF = PERF || { charge: true };
+    appeler('sociaux:stats', []).then(function(r){
+      PERF = (r && r.ok) ? r : { erreur: r };
+      if (ONGLET === 'perf') dessiner();
+    });
+  }
+  function vuePerf(){
+    if (!PERF || PERF.charge) return '<div class="carte"><div class="vide charge">${T("Lecture des liens suivis…")}</div></div>';
+    if (PERF.erreur) return '<div class="carte"><div class="vide">' + esc(expliquer(PERF.erreur)) + '</div></div>';
+    var l = PERF.liens || [], t = PERF.totaux || {};
+    var h = '<div class="so-perf"><div class="pf-tot">'
+      + '<div class="tuile"><div class="lbl">${T("Clics")}</div><div class="val">' + szNombre(t.clics || 0, 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Ventes")}</div><div class="val' + ((t.ventes || 0) > 0 ? ' bon' : '') + '">' + szNombre(t.ventes || 0, 0) + '</div></div>'
+      + '<div class="tuile"><div class="lbl">${T("Revenu")}</div><div class="val">' + szArgent(t.revenu || 0) + '</div></div></div>';
+    if ((PERF.motsCles || []).length) {
+      h += '<div class="mots"><span>${T("Mots-clics qui rapportent :")}</span>' + PERF.motsCles.slice(0, 10).map(function(m){
+        return '<span class="pill neutre">#' + esc(m.mot) + ' · ' + m.clics + ' ${T("clics")}' + (m.ventes ? ' · ' + m.ventes + ' ${T("ventes")}' : '') + '</span>';
+      }).join('') + '</div>';
+    }
+    if (!l.length) return h + '<div class="ls-vide">${T("Aucun lien suivi pour l’instant : planifiez une publication depuis la Publication IA, le lien se pose tout seul.")}</div></div>';
+    var AB = { gagne: '<span class="pill bon">${T("gagnante")}</span>', perd: '<span class="pill neutre">${T("moins bonne")}</span>',
+               tot: '<span class="pill neutre" title="${T("Moins de 10 clics en tout : trop tôt pour départager.")}">${T("trop tôt")}</span>' };
+    h += '<div data-pages="sociaux-perf"><table><thead><tr><th>${T("Publication")}</th><th>${T("Réseau")}</th><th>${T("A/B")}</th>'
+      + '<th class="n">${T("Clics")}</th><th class="n">${T("Ventes")}</th><th class="n">${T("Revenu")}</th><th>${T("Créé")}</th></tr></thead><tbody>'
+      + l.map(function(x){
+          return '<tr><td class="tit">' + esc(x.titre || x.code) + '</td><td>' + esc(x.reseau || '') + '</td>'
+            + '<td>' + (x.variante ? esc(x.variante) + ' ' : '') + (AB[x.ab] || '') + '</td>'
+            + '<td class="n">' + szNombre(x.clics || 0, 0) + '</td><td class="n">' + szNombre(x.ventes || 0, 0) + '</td>'
+            + '<td class="n">' + szArgent(x.revenu || 0) + '</td><td>' + esc(szQuand(x.cree)) + '</td></tr>';
+        }).join('') + '</tbody></table></div></div>';
+    return h;
   }
 
   function vuePatrons(){
@@ -1331,7 +1569,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     };
     h += '<div class="ls-tete so-tete"><div class="ed-seg ls-onglets">'
       + og('file', '${T("File d’attente")}' + ((D.file || []).length ? ' <span class="n hi">' + D.file.length + '</span>' : ''))
-      + og('historique', '${T("Historique")}') + og('patrons', '${T("Patrons")}') + og('epingle', '${T("Publication IA")}')
+      + og('historique', '${T("Historique")}') + og('patrons', '${T("Patrons")}') + og('perf', '${T("Performances")}') + og('epingle', '${T("Publication IA")}')
       + '</div><div class="droite"><span class="so-renvoi">${T("Comptes et jetons des réseaux : ")}'
       + '${T("Configuration → Communications → Réseaux sociaux")}</span>';
     if (ONGLET === 'file' && D.peutModifier && (D.file || []).length) {
@@ -1349,6 +1587,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
 
     if (ONGLET === 'patrons') {
       h += vuePatrons();
+    } else if (ONGLET === 'perf') {
+      h += vuePerf();
     } else if (ONGLET === 'epingle') {
       h += vueEpingle();
     } else {
@@ -1421,6 +1661,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       dessiner();
       if (ONGLET === 'patrons') chargerPatrons();
       if (ONGLET === 'epingle') chargerEpingle();
+      if (ONGLET === 'perf') chargerPerf();
       return; }
 
     var pm = t.closest('[data-modifier]');
@@ -1515,6 +1756,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       return;
     }
 
+    var brl = t.closest('[data-relacher]');
+    if (brl) {
+      brl.disabled = true;
+      appeler('sociaux:retenir', [brl.getAttribute('data-relacher'), false, '']).then(function(r){
+        if (!r.ok) { brl.disabled = false; dire(expliquer(r), 'err'); return; }
+        dire('${T("Publication relâchée : elle partira à son heure.")}', 'bon');
+        charger();
+      });
+      return;
+    }
     var bi = t.closest('[data-ignorer]');
     if (bi) {
       ARME = '';
@@ -1544,6 +1795,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       dessiner();
       if (ONGLET === 'patrons') chargerPatrons();
       if (ONGLET === 'epingle') chargerEpingle();
+      if (ONGLET === 'perf') chargerPerf();
     });
   }
 

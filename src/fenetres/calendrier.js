@@ -51,6 +51,9 @@ body{background:var(--f-page);color:var(--tx);
 .cal-case.hors{opacity:.45}
 .cal-case.auj{border-color:var(--or);box-shadow:inset 0 0 0 1px var(--or)}
 .cal-case.choisi{background:var(--f-carte2);border-color:var(--v20)}
+/* (lot 2) Une publication prévue se glisse ; la case visée se marque. */
+[data-glisse]{cursor:grab}
+.cal-depot{outline:2px dashed var(--or);outline-offset:-2px}
 .cal-case .n{flex:none;font-size:.74rem;font-weight:700;color:var(--tx2)}
 .cal-case.auj .n{color:var(--tx)}
 .rf-pill.cal-ev{flex:none;display:block;max-width:100%;font-size:.66rem;font-weight:600;padding:.08rem .45rem;border-radius:6px;
@@ -130,7 +133,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var MOIS = ['${T("janvier")}', '${T("février")}', '${T("mars")}', '${T("avril")}', '${T("mai")}', '${T("juin")}',
     '${T("juillet")}', '${T("août")}', '${T("septembre")}', '${T("octobre")}', '${T("novembre")}', '${T("décembre")}'];
   var JSEM = ['${T("lun.")}', '${T("mar.")}', '${T("mer.")}', '${T("jeu.")}', '${T("ven.")}', '${T("sam.")}', '${T("dim.")}'];
-  var SORTES = { rappel: '${T("Rappel")}', fiscal: '${T("Échéance fiscale")}', ramassage: '${T("Ramassage")}', precommande: '${T("Précommande")}' };
+  var SORTES = { rappel: '${T("Rappel")}', fiscal: '${T("Échéance fiscale")}', ramassage: '${T("Ramassage")}', precommande: '${T("Précommande")}', social: '${T("Publication")}' };
   var TON = { n: 'bleu', a: 'ambre', r: 'rouge' };
   var MOTIFS = {
   maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
@@ -160,6 +163,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function sousDe(e){
     if (e.sorte === 'ramassage') return '${T("Colis :")} ' + e.colis;
     if (e.sorte === 'precommande') return '${T("Livraison promise des précommandes")}';
+    if (e.sorte === 'social') return (e.heure ? e.heure + ' · ' : '') + (e.publiee ? '${T("Publiée")}'
+      : (e.retenue ? '${T("Retenue : produit en rupture")}' : (e.sous || '')));
     return e.sous || '';
   }
   function duJour(d){ var m = MC[String(d).slice(0, 7)]; return ((m && m.evenements) || []).filter(function(e){ return e.date === d; }); }
@@ -172,8 +177,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (MC[k]) return Promise.resolve(MC[k]);
     return appeler('calendrier:mois', [a, m]).then(function(r){ if (r && r.ok) { MC[k] = r; if (r.aujourdhui) AUJ = r.aujourdhui; } return r; });
   }
+  /* (2026-11-22, lot 2) UNE PUBLICATION PRÉVUE SE GLISSE sur un autre jour : l'heure reste, la date change. */
+  function glisse(e){ return (e.sorte === 'social' && e.deplacable && e.id) ? ' draggable="true" data-glisse="' + esc(e.id) + '|' + esc(e.heure || '10:00') + '"' : ''; }
   function itemHtml(e, i){
-    return '<button type="button" class="cal-item" data-ev="' + esc(e.date) + '|' + i + '" title="${T("Ouvrir dans son module")}">'
+    return '<button type="button" class="cal-item" data-ev="' + esc(e.date) + '|' + i + '"' + glisse(e)
+      + ' title="' + (glisse(e) ? '${T("Glissez sur un autre jour pour la replanifier")}' : '${T("Ouvrir dans son module")}') + '">'
       + '<span class="l1"><span class="rf-pill ' + (TON[e.ton] || 'bleu') + '">' + esc(SORTES[e.sorte] || '') + '</span><b>' + esc(e.titre) + '</b></span>'
       + (sousDe(e) ? '<span class="l2">' + esc(sousDe(e)) + '</span>' : '') + '</button>';
   }
@@ -234,7 +242,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var cols = '';
     for (var k = 0; k < 5; k++) {
       var d = plusJours(lun, k), l = duJour(d); n += l.length;
-      cols += '<div class="cal-col' + (d === AUJ ? ' auj' : '') + '"><div class="cal-ct" data-voirjour="' + d + '" title="${T("Voir ce jour")}"><span class="cal-ctj">' + esc(JSEM[k]) + '</span><b class="cal-ctn">' + versDate(d).getDate() + '</b></div>'
+      cols += '<div class="cal-col' + (d === AUJ ? ' auj' : '') + '" data-depot="' + d + '"><div class="cal-ct" data-voirjour="' + d + '" title="${T("Voir ce jour")}"><span class="cal-ctj">' + esc(JSEM[k]) + '</span><b class="cal-ctn">' + versDate(d).getDate() + '</b></div>'
         + (l.length ? '<div class="cal-items">' + l.map(itemHtml).join('') + '</div><div class="cal-reste" hidden></div>' : '<div class="cal-vide">—</div>')
         + '</div>';
     }
@@ -255,9 +263,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var j = c - decal + 1;
       if (j < 1 || j > nbJours) { h += '<div class="cal-case hors" aria-hidden="true"></div>'; continue; }
       var d = iso(AN, MO, j), l = duJour(d);
-      h += '<div class="cal-case' + (d === AUJ ? ' auj' : '') + (d === JOUR ? ' choisi' : '') + '" data-jour="' + d + '">'
+      h += '<div class="cal-case' + (d === AUJ ? ' auj' : '') + (d === JOUR ? ' choisi' : '') + '" data-jour="' + d + '" data-depot="' + d + '">'
         + '<span class="n">' + j + '</span>'
-        + l.map(function(e){ return '<span class="rf-pill cal-ev ' + (TON[e.ton] || 'bleu') + '" title="' + esc(SORTES[e.sorte] || '') + ' — ' + esc(e.titre) + '">' + esc(e.titre) + '</span>'; }).join('')
+        + l.map(function(e){ return '<span class="rf-pill cal-ev ' + (TON[e.ton] || 'bleu') + '"' + glisse(e) + ' title="' + esc(SORTES[e.sorte] || '') + ' — ' + esc(e.titre) + '">' + esc(e.titre) + '</span>'; }).join('')
         + '<span class="cal-plus" hidden></span></div>';
     }
     h += '</div><div class="carte cal-jour" id="cal-jour"></div></div>';
@@ -311,6 +319,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     r.hidden = !k; r.textContent = '${T("+ {0} autres ce jour-là — ouvrez leur module.")}'.split('{0}').join(k);
   }
 
+  var GLISSE = '';
+  corps.addEventListener('dragstart', function(ev){
+    var g = ev.target && ev.target.closest ? ev.target.closest('[data-glisse]') : null;
+    if (!g) return;
+    GLISSE = g.getAttribute('data-glisse');
+    try { ev.dataTransfer.setData('text/plain', GLISSE); ev.dataTransfer.effectAllowed = 'move'; } catch (e) {}
+  });
+  corps.addEventListener('dragover', function(ev){
+    if (!GLISSE) return;
+    var z = ev.target && ev.target.closest ? ev.target.closest('[data-depot]') : null;
+    if (!z) return;
+    ev.preventDefault();
+    Array.prototype.forEach.call(corps.querySelectorAll('.cal-depot'), function(x){ if (x !== z) x.classList.remove('cal-depot'); });
+    z.classList.add('cal-depot');
+  });
+  corps.addEventListener('dragend', function(){ GLISSE = ''; Array.prototype.forEach.call(corps.querySelectorAll('.cal-depot'), function(x){ x.classList.remove('cal-depot'); }); });
+  corps.addEventListener('drop', function(ev){
+    var z = ev.target && ev.target.closest ? ev.target.closest('[data-depot]') : null;
+    if (!z || !GLISSE) return;
+    ev.preventDefault();
+    var p = GLISSE.split('|'); GLISSE = '';
+    var jour = z.getAttribute('data-depot');
+    elSous.textContent = '${T("Replanification…")}';
+    appeler('sociaux:replanifier', [p[0], jour + 'T' + (p[1] || '10:00')]).then(function(r){
+      if (!r || !r.ok) { elSous.textContent = expliquer(r); return; }
+      MC = {}; JOUR = jour; charger();
+    });
+  });
   corps.onclick = function(ev){
     var t = ev.target; if (!t || !t.closest) return;
     var vb = t.closest('[data-vue]');

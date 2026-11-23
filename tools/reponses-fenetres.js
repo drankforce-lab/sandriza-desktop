@@ -3496,7 +3496,10 @@ const JEU = {
     { date: '2026-11-18', sorte: 'rappel', titre: 'Vérifier le stock des foulards', sous: '', ton: 'a', ouvrir: 'rappels' },
     { date: '2026-11-21', sorte: 'precommande', titre: 'Jupe plissée Camélia', ton: 'a', ouvrir: 'produits' },
     { date: '2026-11-30', sorte: 'fiscal', titre: 'Déclaration TPS/TVQ', sous: 'Trimestre 3', ton: 'n', ouvrir: 'rappels' },
-  ] } },
+    // (2026-11-22, lot 2) Les publications sociales : prévue (glissable) et retenue pour rupture.
+    { date: '2026-11-19', heure: '19:00', sorte: 'social', id: 'sq-a1', titre: 'Manteau Aurore · facebook', sous: 'La laine qui tient l’automne', deplacable: true, ton: 'a', ouvrir: 'sociaux' },
+    { date: '2026-11-24', heure: '10:00', sorte: 'social', id: 'sq-a2', titre: 'Robe Solstice · pinterest', sous: '', retenue: true, deplacable: true, ton: 'r', ouvrir: 'sociaux' },
+  ] }, 'sociaux:replanifier': { ok: true, quand: '2026-11-20T19:00:00.000Z' } },
   'vehicules.js': (function(){
     var TYPES = [
       { cle: 'essence', nom: 'Essence / recharge', entiere: false },
@@ -6495,6 +6498,10 @@ const JEU = {
         categories: ['manteaux', 'robes'],
         motsClesSaison: ['automne', 'modeautomne', 'layering', 'vendredifou', 'modefeminine', 'achatlocal'],
         motsClesHist: ['manteaudelaine', 'modequebecoise'],
+        moments: { d_apres_ventes: true, commandes: 84, moments: [
+          { quand: '2026-11-24T19:00', jour: 2, heure: 19, poids: 9 },
+          { quand: '2026-11-26T20:00', jour: 4, heure: 20, poids: 7 },
+          { quand: '2026-11-29T10:00', jour: 0, heure: 10, poids: 6 }] },
         produits: [{ id: 'p1', nom: 'Manteau Aurore', categorie: 'manteaux', prix: 249,
           photo: 'https://r2.example/p1.webp', lien: 'https://www.sandriza.com/#product?id=p1' },
           { id: 'p3', nom: 'Manteau Boréal', categorie: 'manteaux', prix: 289,
@@ -6505,6 +6512,11 @@ const JEU = {
             photo: '', lien: 'https://www.sandriza.com/#product?id=p2' }] },
       'nl:publicationCourriel': { ok: true, id: 'em_1', destinataires: 1, images: 4 },
       'nl:epingleNoter': { ok: true, notes: 3 },
+      'sociaux:recyclage': { ok: true, items: [
+        { sorte: 'retour', id: 'sq-r1', produitId: 'p2', produit: 'Robe Solstice', texte: 'La robe de toutes les fêtes.', motsCles: ['robe', 'fetes'], reseaux: ['facebook'] },
+        { sorte: 'succes', id: 'sq-r2', produitId: 'p3', produit: 'Manteau Boréal', texte: 'Le manteau qui affronte janvier.', motsCles: ['manteau'], reseaux: ['pinterest'], clics: 42, ventes: 3 }] },
+      'sociaux:liens': { ok: true, liens: [{ code: 'Ab3kZ9q', court: 'https://www.sandriza.com/s.php?c=Ab3kZ9q', url: 'https://www.sandriza.com/#product?id=p1', reseau: 'pinterest', variante: 'A' }] },
+      'sociaux:planifier': { ok: true, id: 'sq-x1', quand: '2026-11-25T00:00:00.000Z', retenue: false },
       'nl:iaEpingle': { ok: true, titre: 'Le manteau de laine qui traverse l automne',
         description: 'Un manteau de laine coupe droite, col montant, pense pour les matins frais '
           + 'de septembre a novembre. Se porte sur une robe comme sur un jean.',
@@ -6523,6 +6535,16 @@ const JEU = {
         cout: 0.014, budget: { plafond: 25, depense: 3.414 }, modele: 'claude-sonnet-5', ms: 4200 },
       'nl:epingleRendu': { ok: true, largeur: 1000, hauteur: 1500, photoPosee: true,
         image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' } } },
+    /* (2026-11-22, lot 2) L'onglet PERFORMANCES : les liens suivis, un A/B départagé, les mots-clics qui rapportent. */
+    { nom: 'performances', id: 'perf', reponses: { identite: IDENTITE,
+      'sociaux:liste': { ok: true, peutModifier: true, tuiles: { enAttente: 0, publiees: 3, echouees: 0, ignorees: 0 },
+        reseauxActifs: [], file: [], historique: [] },
+      'sociaux:stats': { ok: true, totaux: { clics: 214, ventes: 6, revenu: 1189.4 },
+        motsCles: [{ mot: 'manteaudelaine', clics: 120, ventes: 4, n: 2 }, { mot: 'modeautomne', clics: 64, ventes: 1, n: 2 }],
+        liens: [
+          { code: 'Ab3kZ9q', reseau: 'pinterest', variante: 'A', pub: 'p1', titre: 'Le manteau de laine qui traverse l automne (A)', clics: 120, ventes: 4, revenu: 996, cree: '2026-11-02T14:00:00Z', ab: 'gagne' },
+          { code: 'Ab3kZ9r', reseau: 'pinterest', variante: 'B', pub: 'p1', titre: 'Le manteau de laine qui traverse l automne (B)', clics: 58, ventes: 1, revenu: 189, cree: '2026-11-04T14:00:00Z', ab: 'perd' },
+          { code: 'Cd7mP2x', reseau: 'facebook', variante: '', pub: 'p2', titre: 'La robe de toutes les fêtes', clics: 36, ventes: 1, revenu: 4.4, cree: '2026-11-10T19:00:00Z' }] } } },
     {
       // ⚠ FORME REELLE de sociaux:liste (coeur Social._sociauxDonnees).
       /* ⚠⚠ L ONGLET EST NOMME DEPUIS LE 2026-09-14, ET C EST UNE COUVERTURE
@@ -6544,6 +6566,14 @@ const JEU = {
             { id: 'q1', patron: 'Nouvelle promotion', contenu: 'Jusqu’à 20 % sur les robes !',
               image: true, reseaux: [{ cle: 'facebook', nom: 'Facebook', icone: '📘' }],
               statut: 'pending', creee: '2026-08-08 10:00', partie: '', resultats: [] },
+            { id: 'q4', patron: 'Le manteau des matins frais', contenu: 'Un manteau de laine coupe droite, pensé pour les matins frais.',
+              image: true, reseaux: [{ cle: 'pinterest', nom: 'Pinterest', icone: '📌' }],
+              statut: 'pending', creee: '2026-11-22 10:00', partie: '', resultats: [],
+              prevue: '2026-11-25T00:00:00.000Z', lienCode: 'Ab3kZ9q' },
+            { id: 'q5', patron: 'Robe Solstice', contenu: 'La robe de toutes les fêtes.',
+              image: true, reseaux: [{ cle: 'facebook', nom: 'Facebook', icone: '📘' }],
+              statut: 'held', creee: '2026-11-20 10:00', partie: '', resultats: [],
+              prevue: '2026-11-24T15:00:00.000Z', retenue: true, motifRetenue: 'rupture' },
           ],
           historique: [
             { id: 'q2', patron: 'Nouveau produit', contenu: 'Découvrez la blouse en soie.',
@@ -6565,6 +6595,7 @@ const JEU = {
         'sociaux:publierTout': { ok: true, tentees: 1, completes: 0, partielles: 1, echecs: 0 },
         'sociaux:ignorer': { ok: true, patron: 'Nouvelle promotion' },
         'sociaux:viderHistorique': { ok: true, efface: 2 },
+        'sociaux:retenir': { ok: true },
         identite: IDENTITE,
       },
     },
