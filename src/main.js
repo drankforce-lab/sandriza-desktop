@@ -5575,6 +5575,23 @@ ipcMain.handle('dock:ouvrir', async (e, cle, etat) => {
 /* ⚠ LE CORPS DE `dock:ouvrir`, APPELABLE D'ICI (2026-10-18). La fenêtre « Générations » s'ouvre depuis la pastille
    de N'IMPORTE QUELLE fenêtre (module:ouvrir), et non depuis la seule page principale : elle a besoin du même chemin
    — une seule instance, ancrée ou détachée selon ce qui a été retenu — sans passer par le contrôle d'origine. */
+/* ══ LE CLAVIER À LA VUE ANCRÉE — SEULEMENT SI LA PRINCIPALE EST DÉJÀ DEVANT (2026-11-23, 9.2.8) ══
+   Son signalement, capture et espion à l'appui : « je clique une commande, le détail s'ouvre et 3 secondes plus tard se
+   minimise ». MESURÉ sur son poste : 11:47:04.476 le détail prend le premier plan ; 11:47:08.037 la PRINCIPALE le reprend
+   — sans clic. Le détail prend son verrou, le sondage des verrous du site voit la liste changer, redessine la section
+   Commandes, qui redemande sa vue ancrée (dockOuvrir) — et `webContents.focus()` d'une vue sous Windows ACTIVE la fenêtre
+   qui la porte, par-dessus la fenêtre de travail qu'on venait d'ouvrir.
+   ➡ Donner le clavier au module reste voulu (le lecteur de la caisse doit taper dans le champ de scan, 2026-10-17) —
+   mais seulement quand la principale A DÉJÀ le premier plan. Un geste de la personne vers la principale (menu, clic)
+   la met devant d'abord ; un redessin venu d'un sondage, jamais. */
+const _clavierVue = (view) => {
+  try {
+    if (!view || view.webContents.isDestroyed()) return;
+    const devant = BrowserWindow.getFocusedWindow();
+    if (devant !== mainWindow) { _journalFenetre('clavier de la vue ancree retenu (devant : ' + ((devant && devant._szCle) || (devant ? 'autre' : 'aucune')) + ')'); return; }
+    view.webContents.focus();
+  } catch (e) {}
+};
 const _dockOuvrir = async (cle, etat) => {
   const defs = PAGES_ANCRABLES();
   const c = String(cle || '');
@@ -5695,7 +5712,7 @@ const _dockOuvrir = async (cle, etat) => {
   /* ⚠ LE CLAVIER VA AU MODULE OUVERT (2026-10-17, son signalement : « dans la vente au comptoir, on doit toujours
      cliquer dans la zone de recherche pour scanner »). La vue était montrée sans recevoir le clavier : le curseur
      clignotait dans la zone de scan, mais les frappes du lecteur (un clavier) partaient dans la page du menu. */
-  try { a.view.webContents.focus(); } catch {}
+  _clavierVue(a.view);
   ancreeVisible = c; vueVoilee = null;
   a.retourCfg = versCfg; _retourCfgPoser(a.view.webContents, versCfg);
   /* ⚠ « VISIBLE » N'EST PAS « PEINTE » (2026-09-26, filmé chez lui) : après
@@ -5743,7 +5760,7 @@ ipcMain.on('dock:voiler', (e, visible) => {
       try { a.view.setVisible(true); } catch {}
       const b = boundsAncrage();
       if (b) { try { a.view.setBounds(b); } catch {} }
-      try { a.view.webContents.focus(); } catch {}   // le menu refermé, le clavier revient au module
+      _clavierVue(a.view);   // le menu refermé, le clavier revient au module
     }
     return;
   }
