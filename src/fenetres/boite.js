@@ -66,7 +66,7 @@ button.dang{color:var(--tx-err2,var(--ep-rouge-t))}
 .pill.r{background:var(--ep-rouge-f);color:var(--ep-rouge-t)}
 .bx-pied-l{margin-top:auto;padding:.4rem .4rem 0;font-size:.72rem;color:var(--tx2);display:flex;align-items:center;gap:.4rem}
 .bx-pied-l button{padding:.1rem .45rem}
-.bx-d{display:flex;flex-direction:column;gap:.75rem;padding:.9rem 1rem;overflow:hidden}
+.bx-d{display:flex;flex-direction:column;gap:.6rem;padding:.8rem 1rem;overflow:auto}   /* (2026-11-23) défile : l’encadré de l’IA peut pousser les gestes */
 .bx-d .tt{display:flex;align-items:center;gap:.6rem}
 .bx-d .tt .g{display:flex;flex-direction:column;margin-right:auto}
 .bx-d .tt b{font-size:1rem}
@@ -74,7 +74,7 @@ button.dang{color:var(--tx-err2,var(--ep-rouge-t))}
 .bx-d .tt .g span{font-size:.76rem;color:var(--tx2)}
 .bx-arts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem}
 .bx-a{display:flex;flex-direction:column;gap:.3rem;min-width:0}
-.bx-a .ph{height:clamp(6rem,26vh,13rem);border-radius:12px;background:var(--v06);overflow:hidden}
+.bx-a .ph{height:clamp(4.5rem,13vh,13rem);border-radius:12px;background:var(--v06);overflow:hidden}
 .bx-a .ph img{width:100%;height:100%;object-fit:cover}
 .bx-a b{font-size:.8rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bx-a span{font-size:.7rem;color:var(--tx2)}
@@ -85,10 +85,10 @@ button.dang{color:var(--tx-err2,var(--ep-rouge-t))}
 .bx-res{display:flex;flex-direction:column;gap:2px;max-height:11rem;overflow:hidden}
 .bx-res button{display:flex;justify-content:space-between;gap:.6rem;border:0;background:transparent;text-align:left;border-radius:8px;font-size:.78rem}
 .bx-res button:hover{background:var(--v06)}
-.bx-ia{display:flex;flex-direction:column;gap:.15rem;padding:.55rem .75rem;border-radius:11px;font-size:.8rem;line-height:1.45;
+.bx-ia{display:flex;flex-direction:column;gap:.1rem;padding:.4rem .7rem;border-radius:11px;font-size:.8rem;line-height:1.45;
   background:color-mix(in srgb,var(--vv-3,#b49cf7) 14%,var(--f-carte));border:1px solid color-mix(in srgb,var(--vv-3,#b49cf7) 30%,var(--f-carte))}
 .bx-ia b{font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:color-mix(in srgb,var(--vv-3,#b49cf7) 40%,var(--tx))}
-.bx-ia span{color:var(--tx)}
+.bx-ia span{color:var(--tx);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
 .bx-ia.regle{background:var(--v04,var(--v05));border-color:var(--v08)}
 .bx-ia.regle b{color:var(--tx2)}
 .bx-sur{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.55rem .8rem;border-radius:12px;
@@ -213,7 +213,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (b.orderNumber ? '<span class="pill">' + esc('${T("Commande")} ' + b.orderNumber) + '</span>' : '<span class="pill ' + ((ST[b.statut] || [])[1] || '') + '">' + esc((ST[b.statut] || [b.statut])[0]) + '</span>') + '</div>';
     if (b.erreur) h += '<div class="pill r" style="align-self:flex-start">' + esc(b.erreur) + '</div>';
     // (2026-11-23) La proposition de l'IA dit POURQUOI ; la proposition par règles le dit aussi (l'IA n'a pas répondu, ou pas de clé).
-    if (arts.length && b.source === 'ia') h += '<div class="bx-ia"><b>${T("Proposée par l’IA")}</b>' + (b.raison ? '<span>' + esc(b.raison) + '</span>' : '') + '</div>';
+    if (arts.length && b.source === 'ia') h += '<div class="bx-ia"><b>${T("Proposée par l’IA")}</b>' + (b.raison ? '<span title="' + esc(b.raison) + '">' + esc(b.raison) + '</span>' : '') + '</div>';
     else if (arts.length && b.source === 'automatique') h += '<div class="bx-ia regle"><b>${T("Proposée par les règles")}</b><span>${T("En stock dans sa taille, jamais reçu, catégories variées.")}</span></div>';
     h += '<div class="bx-arts">' + arts.map(function(a, i){
       return '<div class="bx-a"><span class="ph">' + (a.image ? '<img src="' + esc(a.image) + '" alt="">' : '') + '</span><b title="' + esc(a.nom) + '">' + esc(a.nom) + '</b>'
