@@ -6517,6 +6517,11 @@ const JEU = {
         { sorte: 'succes', id: 'sq-r2', produitId: 'p3', produit: 'Manteau Boréal', texte: 'Le manteau qui affronte janvier.', motsCles: ['manteau'], reseaux: ['pinterest'], clics: 42, ventes: 3 }] },
       'sociaux:liens': { ok: true, liens: [{ code: 'Ab3kZ9q', court: 'https://www.sandriza.com/s.php?c=Ab3kZ9q', url: 'https://www.sandriza.com/#product?id=p1', reseau: 'pinterest', variante: 'A' }] },
       'sociaux:planifier': { ok: true, id: 'sq-x1', quand: '2026-11-25T00:00:00.000Z', retenue: false },
+      // (lot 3) Mise en scène IA et vidéo courte.
+      'sociaux:miseEnScene': { ok: true, cout: 0.04, image: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8z8BQDwAEhQGAhKmMIQAAAABJRU5ErkJggg==' },
+      'sociaux:videoEtat': { ok: true, etat: 'prete', url: 'https://r2.example/videos/p1/v.mp4', erreur: '', rapatriable: false, position: null, depuis: 0, prix: 0.42 },
+      'sociaux:videoLancer': { ok: true, etat: 'en_cours' },
+      'sociaux:videoDonnees': { ok: true, donnees: 'data:video/mp4;base64,AAAA' },
       'nl:iaEpingle': { ok: true, titre: 'Le manteau de laine qui traverse l automne',
         description: 'Un manteau de laine coupe droite, col montant, pense pour les matins frais '
           + 'de septembre a novembre. Se porte sur une robe comme sur un jean.',

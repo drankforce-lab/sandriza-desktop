@@ -181,6 +181,14 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 .ep-res button.on.pret::after{background:currentColor}
 /* (2026-11-22, lot 2) Planifier, recyclage, performances. */
 .epenv.eppub{display:flex;flex-direction:column;gap:.45rem}
+/* (2026-11-22, lot 3) Mise en scène IA sous l'aperçu ; la vidéo courte dans « Publier ». */
+.ep-scene{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:.35rem;width:100%;align-items:center}
+.ep-scene select{height:1.95rem!important;font-size:.76rem!important;padding:0 .5rem!important}
+.ep-scene button{height:1.95rem;padding:0 .7rem;border-radius:9px;font-size:.76rem;white-space:nowrap}
+.ep-scene .ep-lien{grid-column:1/-1;justify-self:start;font-size:.72rem}
+.ep-vid{display:flex;flex-direction:column;gap:.4rem;font-size:.76rem;color:var(--tx2)}
+.ep-vid .ligne{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.ep-vid button{height:2.1rem;border-radius:9px;padding:0 .8rem}
 .ep-grpl{display:flex;align-items:center;gap:1rem;justify-content:space-between}
 .eppub .ep-pubt b{margin-right:auto}
 .epenv.eppub .ep-mom button{height:1.45rem;border-radius:99px;padding:0 .5rem}
@@ -245,7 +253,7 @@ label.case input{width:15px;height:15px;accent-color:var(--or)}
 .epvue img{display:block;width:100%;height:100%;object-fit:contain}
 /* ⚠ LA HAUTEUR SUIT LA FENETRE, LA LARGEUR SUIT LE FORMAT (2026-09-26, sa demande : aucune barre de
    defilement) : on fixe la HAUTEUR a ce qui reste, aspect-ratio en deduit la largeur. */
-.epvue{height:max(10rem, min(calc(100vh - 36rem), 24rem));width:auto;max-width:100%;align-self:center}
+.epvue{height:max(9rem, min(calc(100vh - 38.5rem), 24rem));width:auto;max-width:100%;align-self:center}
 .epvue .rien{font-size:.76rem;color:#4A4A4A;padding:1rem;text-align:center}
 .epinfo{font-size:.72rem;color:var(--tx2);text-align:center}
 .ep-enr{height:2.75rem;border-radius:12px;font-size:.88rem;font-weight:700}
@@ -507,7 +515,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     var d = (EP.diapos && EP.diapos[n]) || { sur: '', gros: '', sous: '' };
     /* (2026-11-22, lot 1) CARROUSEL : chaque diapo porte SON produit, donc sa photo. */
     if (d.produitId) { var pd = epProduitPar(d.produitId); if (pd) p = pd; }
-    return { reseau: EPRES, photo: p ? p.photo : '', entreprise: (EPD && EPD.entreprise) || '',
+    // (lot 3) Une mise en scène IA remplace la photo de la PREMIÈRE diapo (celle qu'on voit dans le fil).
+    var ph = (n === 0 && EP.scene) ? EP.scene : (p ? p.photo : '');
+    return { reseau: EPRES, photo: ph, entreprise: (EPD && EPD.entreprise) || '',
              sur: d.sur, gros: d.gros, sous: d.sous,
              no: n + 1, total: (EP.diapos || []).length };
   }
@@ -630,6 +640,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
   var EPPUB = 'planifier', EPQD = '', EPQH = '', RECY = null;
   if (EPSAISIE.suivi === undefined) EPSAISIE.suivi = true;
   var PERF = null;
+  /* (lot 3) L'ambiance de la mise en scène ; l'état de la vidéo courte du produit choisi (sondé toutes les 8 s tant
+     qu'elle se fabrique et que l'onglet « Vidéo » est ouvert). */
+  var EPAMB = 'studio', EPSCOCC = false, EPVID = null, EPVIDT = null;
   function vueEpingle(){
     if (!EPD) return '<div class="carte"><div class="vide charge">${T("Lecture du catalogue…")}</div></div>';
     if (!EP) EP = epVide();
@@ -738,7 +751,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
         + '<button type="button" class="' + (EP.ab ? 'on' : '') + '" data-epab="1" title="' + esc(EP.variantes[1]) + '">B</button></div></div>'
       : '';
     h += '<div class="cd"><div class="ep-apercu">' + ab + '<div class="epvue" id="ep-vue" style="aspect-ratio:' + F.largeur + '/' + F.hauteur + '"></div>'
-      + '<div class="epinfo">' + F.largeur + ' &times; ' + F.hauteur + ' px</div></div>'
+      + '<div class="epinfo">' + F.largeur + ' &times; ' + F.hauteur + ' px' + (EP.scene ? ' · ${T("photo mise en scène par l’IA")}' : '') + '</div>'
+      + epVueScene() + '</div>'
       + '<button type="button" class="prim ep-enr" id="ep-enr"' + (EPIMG ? '' : ' disabled') + '>'
       + (Object.keys(EPMAP).length > 1 ? ('${T("Enregistrer les ")}' + Object.keys(EPMAP).length + '${T(" publications")}') : '${T("Enregistrer la publication")}')
       + ((EP.variantes || []).length === 2 ? '${T(" (A et B)")}' : '') + '</button>'
@@ -748,8 +762,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
          Instagram et TikTok ne se publient pas depuis un bureau. */
       + '<div class="epenv eppub"><div class="ep-pubt"><b>${T("Publier")}</b>'
       + '<div class="ed-seg"><button type="button" class="' + (EPPUB === 'planifier' ? 'on' : '') + '" data-eppub="planifier">${T("Planifier")}</button>'
-      + '<button type="button" class="' + (EPPUB === 'courriel' ? 'on' : '') + '" data-eppub="courriel">${T("Par courriel")}</button></div></div>'
-      + (EPPUB === 'planifier' ? epVuePlanifier()
+      + '<button type="button" class="' + (EPPUB === 'courriel' ? 'on' : '') + '" data-eppub="courriel">${T("Courriel")}</button>'
+      + '<button type="button" class="' + (EPPUB === 'video' ? 'on' : '') + '" data-eppub="video">${T("Vidéo")}</button></div></div>'
+      + (EPPUB === 'video' ? epVueVideo() : EPPUB === 'planifier' ? epVuePlanifier()
         : ('<div class="ep-quand" style="grid-template-columns:minmax(0,1fr) auto"><input id="ep-a" type="email" aria-label="${T("Vers le téléphone")}" value="' + esc((EPD && EPD.courrielDefaut) || '') + '" placeholder="${T("votre@courriel.com")}"'
           + ((EPD && EPD.resendPret === false) ? ' disabled' : '') + '>'
           + '<button type="button" id="ep-envoi"' + ((EPIMG && !EPENVOI && !(EPD && EPD.resendPret === false)) ? '' : ' disabled') + '>${T("Envoyer")}</button></div>'
@@ -893,6 +908,68 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       });
     };
     suivante();
+  }
+
+  /* (lot 3) LA MISE EN SCÈNE IA : le vêtement de la photo du produit, posé dans un décor (studio, saison, fêtes, ville),
+     au format du réseau. Le prix est sur le bouton ; rien n'est attaché au produit. */
+  function epVueScene(){
+    var p = epProduit() || (EP.diapos && EP.diapos[0] && EP.diapos[0].produitId ? epProduitPar(EP.diapos[0].produitId) : null);
+    var amb = [['studio', '${T("Studio ivoire")}'], ['automne', '${T("Automne")}'], ['hiver', '${T("Hiver")}'], ['printemps', '${T("Printemps")}'],
+      ['ete', '${T("Été")}'], ['fetes', '${T("Fêtes")}'], ['urbain', '${T("Vieux-Montréal")}']];
+    return '<div class="ep-scene"><select id="ep-amb" aria-label="${T("Ambiance de la mise en scène")}">' + amb.map(function(a){
+        return '<option value="' + a[0] + '"' + (a[0] === EPAMB ? ' selected' : '') + '>' + a[1] + '</option>'; }).join('') + '</select>'
+      + '<button type="button" id="ep-scene"' + ((!p || !p.photo || EPSCOCC) ? ' disabled' : '')
+      + ' title="' + (p && p.photo ? '${T("Le vêtement reste identique ; seul le décor change. Environ 0,04 $ l’image.")}' : '${T("Choisissez d’abord un produit avec une photo.")}') + '">'
+      + (EPSCOCC ? '${T("Mise en scène…")}' : '${T("Mise en scène IA · 0,04 $")}') + '</button>'
+      + (EP.scene ? '<button type="button" class="ep-lien" id="ep-scene-x">${T("Revenir à la photo d’origine")}</button>' : '')
+      + '</div>';
+  }
+  /* (lot 3) LA VIDÉO COURTE (5 s, pour TikTok et les Reels) : le moteur vidéo de la fiche produit, lancé sur la mise en
+     scène si elle existe, sinon sur la photo du produit. */
+  function epVueVideo(){
+    var p = epProduit() || (EP.diapos && EP.diapos[0] && EP.diapos[0].produitId ? epProduitPar(EP.diapos[0].produitId) : null);
+    if (!p) return '<div class="ep-vid">${T("Choisissez un produit : la vidéo part de sa photo (ou de la mise en scène).")}</div>';
+    var v = EPVID || {};
+    var h = '<div class="ep-vid">';
+    if (v.etat === 'en_cours') {
+      h += '<div>' + '${T("Fabrication en cours")}' + (v.position != null ? ' · ${T("place en file : ")}' + v.position : '') + '${T(" — 1 à 3 minutes. Vous pouvez continuer ailleurs.")}</div>';
+    } else if (v.etat === 'prete') {
+      h += '<div>${T("La vidéo de 5 s est prête (sans son). Elle est aussi proposée dans la fiche du produit.")}</div>'
+        + '<div class="ligne"><button type="button" class="prim" id="ep-vid-enr">${T("Enregistrer la vidéo (.mp4)")}</button></div>';
+    } else {
+      if (v.etat === 'echec') h += '<div>${T("La dernière vidéo a échoué : ")}' + esc(v.erreur || '') + '</div>';
+      h += '<div class="ligne"><button type="button" class="prim" id="ep-vid-go">${T("Créer la vidéo 5 s · 0,42 $")}</button>'
+        + '<span>' + (EP.scene ? '${T("à partir de la mise en scène")}' : '${T("à partir de la photo du produit")}') + '</span></div>';
+    }
+    return h + '</div>';
+  }
+  function epVideoSonder(){
+    clearTimeout(EPVIDT); EPVIDT = null;
+    var p = epProduit() || (EP && EP.diapos && EP.diapos[0] && EP.diapos[0].produitId ? epProduitPar(EP.diapos[0].produitId) : null);
+    if (!p || EPPUB !== 'video' || ONGLET !== 'epingle') return;
+    appeler('sociaux:videoEtat', [p.id]).then(function(r){
+      var avant = EPVID && EPVID.etat;
+      EPVID = (r && r.ok) ? r : null;
+      if (EPPUB === 'video' && ONGLET === 'epingle' && (!avant || avant !== (EPVID && EPVID.etat) || (EPVID && EPVID.etat === 'en_cours'))) dessiner();
+      if (EPVID && EPVID.etat === 'en_cours') EPVIDT = setTimeout(epVideoSonder, 8000);
+    });
+  }
+  function epVideoLancer(forcer){
+    var p = epProduit() || (EP.diapos && EP.diapos[0] && EP.diapos[0].produitId ? epProduitPar(EP.diapos[0].produitId) : null);
+    if (!p) return;
+    dire('${T("Lancement de la vidéo…")}');
+    appeler('sociaux:videoLancer', [p.id, EP.scene || '', 0.42, !!forcer]).then(function(r){
+      if (r && r.ok) { dire('${T("Vidéo lancée : 1 à 3 minutes.")}', 'bon'); EPVID = { etat: 'en_cours' }; dessiner(); EPVIDT = setTimeout(epVideoSonder, 8000); return; }
+      if (r && r.motif === 'avertir') {
+        szConfirmer({ prudent: true, titre: '${T("Une autre vidéo pour ce produit ?")}',
+          texte: '${T("Ce produit a déjà des vidéos générées. Chacune est facturée.")}',
+          details: [['${T("Déjà faites")}', String(r.deja || 0)], ['${T("Coût")}', szArgent(0.42)]],
+          oui: '${T("Créer quand même")}' }).then(function(ok){ if (ok) epVideoLancer(true); });
+        return;
+      }
+      dire(r && r.motif === 'limite' ? '${T("Limite atteinte : 3 vidéos en 24 heures pour ce produit.")}'
+        : (r && r.motif === 'deja_en_cours' ? '${T("Une vidéo de ce produit est déjà en cours.")}' : expliquer(r)), 'err');
+    });
   }
 
   function epSousBudget(){
@@ -1208,8 +1285,41 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
     ['ep-qd', 'ep-qh'].forEach(function(k){ var e = document.getElementById(k); if (e) e.onchange = function(){ if (k === 'ep-qd') EPQD = e.value; else EPQH = e.value; }; });
     var zp = document.getElementById('corps');
     (zp ? zp.querySelectorAll('[data-eppub]') : []).forEach(function(el){
-      el.onclick = function(){ EPPUB = el.getAttribute('data-eppub'); dessiner(); };
+      el.onclick = function(){ EPPUB = el.getAttribute('data-eppub'); dessiner(); if (EPPUB === 'video') epVideoSonder(); };
     });
+    // (lot 3) Mise en scène IA, vidéo courte.
+    b = document.getElementById('ep-amb');
+    if (b) b.onchange = function(){ EPAMB = this.value; };
+    b = document.getElementById('ep-scene');
+    if (b) b.onclick = function(){
+      var p = epProduit() || (EP.diapos && EP.diapos[0] && EP.diapos[0].produitId ? epProduitPar(EP.diapos[0].produitId) : null);
+      if (!p || EPSCOCC) return;
+      EPSCOCC = true; dessiner(); dire('${T("Mise en scène en cours — une quinzaine de secondes…")}');
+      appeler('sociaux:miseEnScene', [p.id, EPAMB, EPRES]).then(function(r){
+        EPSCOCC = false;
+        if (r && r.ok && r.image) { EP.scene = r.image; EPIMG = ''; dessiner(); epDemanderRendu(); dire('${T("Mise en scène prête : ")}' + szArgent(r.cout || 0.04), 'bon'); return; }
+        dessiner();
+        dire(r && r.motif === 'photo_absente' ? '${T("Ce produit n’a pas de photo à mettre en scène.")}'
+          : (r && r.motif === 'droit' ? '${T("Votre rôle ne permet pas de traiter les photos.")}' : expliquer(r)), 'err');
+      });
+    };
+    b = document.getElementById('ep-scene-x');
+    if (b) b.onclick = function(){ EP.scene = ''; EPIMG = ''; dessiner(); epDemanderRendu(); };
+    b = document.getElementById('ep-vid-go');
+    if (b) b.onclick = function(){ epVideoLancer(false); };
+    b = document.getElementById('ep-vid-enr');
+    if (b) b.onclick = function(){
+      if (!EPVID || !EPVID.url) return;
+      var bb = this; bb.disabled = true; dire('${T("Téléchargement de la vidéo…")}');
+      appeler('sociaux:videoDonnees', [EPVID.url]).then(function(r){
+        if (!r || !r.ok) { bb.disabled = false; dire(expliquer(r), 'err'); return; }
+        var nom = 'video-' + (EPRES || 'reseau') + '-' + new Date().toISOString().slice(0, 10) + '-' + String(Date.now()).slice(-5) + '.mp4';
+        P.enregistrerExport(nom, r.donnees).then(function(x){
+          bb.disabled = false;
+          dire(x && x.ok ? ('${T("Vidéo enregistrée : ")}' + nom) : '${T("La vidéo n’a pas pu être enregistrée.")}', x && x.ok ? 'bon' : 'err');
+        });
+      });
+    };
     (zp ? zp.querySelectorAll('[data-epmom]') : []).forEach(function(el){
       el.onclick = function(){ var q = el.getAttribute('data-epmom'); EPQD = q.slice(0, 10); EPQH = q.slice(11, 16); dessiner(); };
     });
@@ -1326,6 +1436,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       if (!EP) EP = epVide();
       if (ONGLET === 'epingle') dessiner();
     });
+    if (EPPUB === 'video') epVideoSonder();
     // (lot 2) Les publications à recycler (de retour en stock, anciens succès).
     appeler('sociaux:recyclage', []).then(function(r){
       RECY = (r && r.ok) ? (r.items || []) : [];
