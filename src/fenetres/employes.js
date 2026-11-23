@@ -21,7 +21,7 @@
  * États d'ouverture (pour les bancs de rendu, qui ne cliquent pas) :
  *   'horaires' | 'pointages' | 'paie' → l'onglet ouvert d'emblée.
  */
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_TUILES, CSS_JOUR, ICO, TETE } = require('./socle.js');
 const T = require('../langue').tr('employes');
 
 const CSS = `
@@ -175,7 +175,7 @@ function pageEmployes(ouverture) {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
   var corps = document.getElementById('corps');
   var elSous = document.getElementById('sous');
   var D = null, PAIE = null;
@@ -311,10 +311,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     h += '<div class="pied-j t">${T("Heures planifiées")}</div>' + parJour.map(function(x){ return '<div class="pied-j">' + (x ? h2(x) : '—') + '</div>'; }).join('')
       + '<div class="pied-j" style="text-align:right;font-weight:800">' + h2(totSem) + '</div></div>';
-    var tete = '<div class="em-tuiles">' + tuile('t1', '${T("Heures planifiées")}', h2(totSem), nbQ + ' ' + (nbQ > 1 ? '${T("quarts")}' : '${T("quart")}'))
+    var tete = szTuiles('<div class="em-tuiles">' + tuile('t1', '${T("Heures planifiées")}', h2(totSem), nbQ + ' ' + (nbQ > 1 ? '${T("quarts")}' : '${T("quart")}'))
       + tuile('t2', '${T("Personnel à l’horaire")}', String(l.filter(function(s){ return (D.horaires || []).some(function(q){ return q.staffId === s.id && D.semaine.indexOf(q.date) >= 0; }); }).length), '${T("sur")} ' + l.length)
       + tuile('t3', '${T("Aujourd’hui")}', h2(parJour[D.semaine.indexOf(D.aujourdhui)] || 0), D.semaine.indexOf(D.aujourdhui) >= 0 ? jourLong(D.aujourdhui) : '${T("hors de cette semaine")}')
-      + tuile('t4', '${T("En poste maintenant")}', String((D.enPoste || []).length), (D.enPoste || []).map(nomDe).join(', ')) + '</div>';
+      + tuile('t4', '${T("En poste maintenant")}', String((D.enPoste || []).length), (D.enPoste || []).map(nomDe).join(', ')) + '</div>');
     h = tete + h;
     if (FQ) {
       h += '<div class="carte em-form"><div class="tt"><b>' + esc('${T("Nouveau quart")}' + ' · ' + nomDe(FQ.staffId)) + '</b><span>' + esc(jourLong(FQ.date)) + '</span></div>'
@@ -329,10 +329,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function vuePointages(){
     var l = D.pointages || [];
     var hTot = 0, corr = 0; l.forEach(function(p){ if (p.sortie) hTot += +p.heures || 0; if (p.corrigePar) corr++; });
-    var h = '<div class="em-tuiles">' + tuile('t1', '${T("Heures pointées")}', h2(hTot), '${T("pointages fermés de la période")}')
+    var h = szTuiles('<div class="em-tuiles">' + tuile('t1', '${T("Heures pointées")}', h2(hTot), '${T("pointages fermés de la période")}')
       + tuile('t2', '${T("Pointages")}', String(l.length), '${T("dans la période")}')
       + tuile((D.enPoste || []).length ? 't3' : 't3', '${T("En poste maintenant")}', String((D.enPoste || []).length), (D.enPoste || []).map(nomDe).join(', '))
-      + tuile(corr ? 'att' : 't4', '${T("Corrigés")}', String(corr), corr ? '${T("à garder en tête à la paie")}' : '${T("aucune correction")}') + '</div>';
+      + tuile(corr ? 'att' : 't4', '${T("Corrigés")}', String(corr), corr ? '${T("à garder en tête à la paie")}' : '${T("aucune correction")}') + '</div>');
     if (D.peutModifier) {
       var F = FP || { staffId: ((D.personnel || [])[0] || {}).id || '', date: D.aujourdhui, entree: '09:00', sortie: '17:00', note: '' };
       h += '<div class="carte em-form"><div class="tt"><b>' + (FP && FP.id ? '${T("Corriger le pointage")}' : '${T("Saisir un pointage")}') + '</b>'
@@ -365,10 +365,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (PAIE.erreur) return '<div class="carte vide">' + esc(expliquer(PAIE.erreur)) + '</div>';
     var t = PAIE.totaux || {}, R = PAIE.reglages || {};
     var l = PAIE.lignes || [];
-    var h = '<div class="em-tuiles">' + tuile('t2', '${T("Heures régulières")}', h2(t.heures), l.length + ' ' + (l.length > 1 ? '${T("personnes à la paie")}' : '${T("personne à la paie")}'))
+    var h = szTuiles('<div class="em-tuiles">' + tuile('t2', '${T("Heures régulières")}', h2(t.heures), l.length + ' ' + (l.length > 1 ? '${T("personnes à la paie")}' : '${T("personne à la paie")}'))
       + tuile((t.heuresSup || 0) > 0 ? 'att' : 't3', '${T("Heures supplémentaires")}', h2(t.heuresSup), (t.heuresSup || 0) > 0 ? '${T("payées à")} ' + szNombre((R.tauxHS || 1.5) * 100, 0) + ' %' : '${T("aucune cette période")}')
       + tuile('t4', '${T("Commissions")}', szArgent(t.commissions || 0), '${T("ventes au comptoir")}')
-      + tuile('t1', '${T("Brut avant retenues")}', szArgent(t.brut || 0), esc(court(D.periode.debut) + ' – ' + court(D.periode.fin))) + '</div>';
+      + tuile('t1', '${T("Brut avant retenues")}', szArgent(t.brut || 0), esc(court(D.periode.debut) + ' – ' + court(D.periode.fin))) + '</div>');
     if (!l.length) h += '<div class="carte vide">${T("Rien à payer dans cette période : aucun pointage fermé et aucune vente au comptoir attribuée.")}</div>';
     else h += '<div class="carte"><table class="em-t"><thead><tr><th>${T("Membre du personnel")}</th><th class="n">${T("Heures")}</th>'
       + '<th class="n">${T("Supp.")}</th><th class="n">${T("Salaire")}</th><th class="n">${T("Ventes comptoir")}</th><th class="n">${T("Commissions")}</th><th class="n">${T("Brut")}</th></tr></thead><tbody>'
