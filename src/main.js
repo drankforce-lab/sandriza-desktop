@@ -3506,7 +3506,7 @@ const OPS_PONT = new Set([
   'paiements:compte',
   'config:taxes:donnees', 'config:taxes:ecrire', 'config:taxes:reinit',
   'config:taxes:reference', 'config:taxes:revision',
-  'config:paiements:donnees', 'config:paiements:ecrire', 'config:paiements:options',
+  'config:paiements:donnees', 'config:paiements:ecrire', 'config:paiements:options', 'config:boutique:maint', 'config:boutique:maintEcrire',
   'config:paiements:mode', 'config:paiements:tester',
   // Cles API (fenetre Cles, 2.34.0) — dernier onglet de << Paiement & taxes >>.
   // ⚠ AUCUNE CLE NE TRAVERSE LE PONT : << donnees >> ne rend que l existence et
@@ -4275,6 +4275,7 @@ const LIMITES_PONT = {
   // Le test de connexion part chez Square : il depend d un tiers.
   'config:paiements:donnees': 15000, 'config:paiements:ecrire': 45000,
   'config:paiements:options': 30000, 'config:paiements:mode': 15000, 'config:paiements:tester': 45000,
+  'config:boutique:maint': 15000, 'config:boutique:maintEcrire': 30000,
   // Cles API : chaque ecriture pousse plusieurs cles vers le nuage, awaitees.
   'config:cles:donnees': 15000, 'config:cles:ecrire': 30000, 'config:cles:retirer': 20000,
   'config:livraison:donnees': 15000, 'config:livraison:ecrire': 30000,

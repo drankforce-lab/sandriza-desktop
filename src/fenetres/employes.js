@@ -105,13 +105,13 @@ html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
 .em-tu{--emt:var(--vv-1,#5fd4a4);min-width:0;border-radius:14px;padding:.7rem .85rem;display:flex;flex-direction:column;gap:.15rem;
   background:color-mix(in srgb,var(--emt,var(--vv-1,#5fd4a4)) var(--vv-pct,20%),var(--f-carte));border:1px solid color-mix(in srgb,var(--emt,var(--vv-1,#5fd4a4)) 30%,var(--f-carte))}
 .em-tu.t2{--emt:var(--vv-2,#7cb4f5)} .em-tu.t3{--emt:var(--vv-3,#b49cf7)} .em-tu.t4{--emt:var(--vv-4,#f08fb8)}
-.em-tu .k{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--emt,var(--vv-1,#5fd4a4))}
+.em-tu .k{font-size:.68rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:color-mix(in srgb,var(--emt,var(--vv-1,#5fd4a4)) 45%,var(--tx))}
 .em-tu b{font-size:1.35rem;font-weight:800;font-variant-numeric:tabular-nums;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.em-tu span:not(.k){font-size:.74rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:1rem}
+.em-tu span:not(.k){font-size:.74rem;color:var(--tx);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;min-height:1rem}
 .em-tu.att{background:var(--ep-ambre-f);border-color:color-mix(in srgb,var(--ep-ambre-t) 30%,var(--ep-ambre-f))}
 .em-tu.att .k,.em-tu.att b{color:var(--ep-ambre-t)}
 .em-av{--emc:var(--vv-1,#5fd4a4);flex:none;width:2rem;height:2rem;border-radius:50%;display:inline-flex;align-items:center;justify-content:center;
-  font-size:.72rem;font-weight:800;background:color-mix(in srgb,var(--emc,var(--vv-1,#5fd4a4)) 22%,var(--f-carte));color:var(--emc,var(--vv-1,#5fd4a4))}
+  font-size:.72rem;font-weight:800;background:color-mix(in srgb,var(--emc,var(--vv-1,#5fd4a4)) 22%,var(--f-carte));color:color-mix(in srgb,var(--emc,var(--vv-1,#5fd4a4)) 40%,var(--tx))}
 .em-av.c2{--emc:var(--vv-2,#7cb4f5)} .em-av.c3{--emc:var(--vv-3,#b49cf7)} .em-av.c4{--emc:var(--vv-4,#f08fb8)}
 .em-qui{display:flex;align-items:center;gap:.55rem;min-width:0}
 .em-qui b{display:block;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -119,7 +119,7 @@ html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
 .em-t td{padding:.5rem .6rem}
 .em-t td.or{color:var(--tx-or,var(--tx));font-weight:800}
 .em-t th{color:var(--tx-or,var(--tx2))}
-.pill.src{background:color-mix(in srgb,var(--vv-2,#7cb4f5) 18%,var(--f-carte));color:var(--vv-2,#7cb4f5)}
+.pill.src{background:color-mix(in srgb,var(--vv-2,#7cb4f5) 18%,var(--f-carte));color:color-mix(in srgb,var(--vv-2,#7cb4f5) 40%,var(--tx))}
 .pill.ok{position:relative;padding-left:1.1rem}
 .pill.ok::before{content:"";position:absolute;left:.45rem;top:50%;width:.4rem;height:.4rem;margin-top:-.2rem;border-radius:50%;background:currentColor;animation:em-pouls 1.6s ease-in-out infinite}
 @keyframes em-pouls{50%{opacity:.25}}
@@ -127,7 +127,7 @@ html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
 /* La semaine : une rangée par personne, aujourd'hui en relief, les quarts aux couleurs de la personne. */
 .em-sem{grid-template-columns:12.5rem repeat(7,minmax(0,1fr)) 7rem;gap:5px}
 .em-sem .h{text-align:center;padding:.3rem .2rem;border-radius:8px}
-.em-sem .h.auj{background:color-mix(in srgb,var(--or) 18%,transparent);color:var(--tx-or,var(--or))}
+.em-sem .h.auj{background:color-mix(in srgb,var(--or) 18%,transparent);color:var(--tx)}
 .em-sem .c{border-radius:10px;min-height:3.4rem;padding:.35rem}
 .em-sem .c.auj{border-color:color-mix(in srgb,var(--or) 45%,var(--v07));background:color-mix(in srgb,var(--or) 6%,var(--f-carte))}
 .em-sem .c.nm{flex-direction:row;align-items:center;justify-content:flex-start;gap:.55rem}
@@ -139,8 +139,8 @@ html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
 .em-q{--emc:var(--vv-1,#5fd4a4);background:color-mix(in srgb,var(--emc,var(--vv-1,#5fd4a4)) 20%,var(--f-carte));color:var(--tx);border-left:3px solid var(--emc,var(--vv-1,#5fd4a4));
   border-radius:6px;padding:.15rem .35rem;font-size:.74rem;font-weight:600;justify-content:space-between}
 .em-q.c2,.em-barre.c2 i{--emc:var(--vv-2,#7cb4f5)} .em-q.c3,.em-barre.c3 i{--emc:var(--vv-3,#b49cf7)} .em-q.c4,.em-barre.c4 i{--emc:var(--vv-4,#f08fb8)}
-.em-sem .plus{align-self:stretch;margin-top:auto;border-radius:6px;opacity:.55}
-.em-sem .c:hover .plus{opacity:1}
+.em-sem .plus{align-self:stretch;margin-top:auto;border-radius:6px;color:var(--tx2)}
+.em-sem .c:hover .plus{color:var(--tx);border-color:var(--v20,var(--v16))}
 .em-sem .pied-j{text-align:center;font-size:.72rem;color:var(--tx2);font-variant-numeric:tabular-nums;padding:.25rem 0}
 .em-sem .pied-j.t{text-align:left;font-weight:700;text-transform:uppercase;letter-spacing:.05em;font-size:.66rem}
 /* Les formulaires (quart, pointage) et les réglages : une carte, des champs de même hauteur, une rangée de gestes. */
