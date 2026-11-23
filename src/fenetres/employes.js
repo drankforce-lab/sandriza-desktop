@@ -283,6 +283,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     periode_approuvee:  '${T("Cette date est dans une période de paie approuvée. Rouvrez la période dans l’onglet Paie pour la modifier.")}',
     pas_finie:          '${T("La période n’est pas terminée : elle s’approuve à partir du lendemain de son dernier jour.")}',
     deja:               '${T("Cette période est déjà approuvée.")}',
+    limite:             '${T("Trop d’envois en peu de temps. Réessayez dans une heure.")}',
     pointage_ouvert:    '${T("Un pointage de la période est encore ouvert. Fermez-le (oubli de sortie) avant d’approuver.")}',
     nuage:              '${T("Le nuage a refusé l’écriture : elle n’existe que sur ce poste. Vérifiez la connexion, puis refaites le geste.")}',
     echec:              '${T("L’opération a échoué.")}'
@@ -360,7 +361,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
         + esc(court(D.semaine[0]) + ' – ' + court(D.semaine[6])) + '</b><button data-sem="7" aria-label="${T("Semaine suivante")}">›</button>'
         + '<button data-sem="0">${T("Cette semaine")}</button></div>';
       if (D.peutModifier) h += '<button class="mini" id="em-copier" title="${T("Reprend les quarts de la semaine précédente (ceux déjà posés et les congés restent).")}">${T("Copier la semaine précédente")}</button>'
-        + '<button class="mini" data-act="conge">${T("Ajouter un congé")}</button>';
+        + '<button class="mini" data-act="conge">${T("Ajouter un congé")}</button>' + boutonPublier();
     } else if (ONGLET === 'paie') {
       h += '<div class="em-nav"><button data-per="-1" aria-label="${T("Période précédente")}">‹</button><b>'
         + esc('${T("Du ")}' + court(D.periode.debut) + ' ${T("au")} ' + court(D.periode.fin)) + '</b><button data-per="1" aria-label="${T("Période suivante")}">›</button></div>'
@@ -370,6 +371,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       if (hors) h += '<span class="pill">' + hors + ' ' + (hors > 1 ? '${T("personnes hors paie")}' : '${T("personne hors paie")}') + '</span>';
     }
     return h + '</div></div>';
+  }
+
+  /* La publication de l'horaire de la semaine affichée : publier, republier aux seules personnes touchées, ou « publié ». */
+  function boutonPublier(){
+    var p = D.publication || {};
+    if (!p.publiee) return (p.aPublier || []).length ? '<button class="prim mini" id="em-publier" title="${T("Envoie à chaque personne ses quarts de la semaine, par courriel.")}">${T("Publier l’horaire")} (' + p.aPublier.length + ')</button>' : '';
+    if ((p.changes || []).length) return '<button class="prim mini" id="em-publier" title="${T("L’horaire a changé depuis l’envoi : seules les personnes touchées le reçoivent de nouveau.")}">${T("Republier aux personnes touchées")} (' + p.changes.length + ')</button>';
+    return '<span class="pill v" title="' + esc('${T("Publié par")} ' + (p.par || '')) + '">${T("Publié le")} ' + esc(court(String(p.le || '').slice(0, 10))) + '</span>';
+  }
+  function publier(){
+    var p = D.publication || {};
+    var seuls = p.publiee ? (p.changes || []) : [];
+    var qui = (p.publiee ? p.changes : p.aPublier) || [];
+    szConfirmer({ titre: p.publiee ? '${T("Republier l’horaire")}' : '${T("Publier l’horaire")}',
+      texte: '${T("Semaine du")} ' + court(D.semaine[0]) + ' ${T("au")} ' + court(D.semaine[6]) + ' · ' + qui.map(nomDe).join(', ') + '. ${T("Chacun reçoit ses quarts et ses congés par courriel.")}',
+      oui: '${T("Envoyer")}' }).then(function(okc){
+      if (!okc) return;
+      dire('${T("Envoi de l’horaire…")}', '');
+      appeler('employes:publier', [D.semaine[0], seuls]).then(function(r){
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        var env = r.envois || [], bons = env.filter(function(x){ return x.ok; }), rates = env.filter(function(x){ return !x.ok; });
+        dire(bons.length + ' ' + (bons.length > 1 ? '${T("courriels envoyés")}' : '${T("courriel envoyé")}')
+          + (rates.length ? ' · ${T("non envoyé à")} ' + rates.map(function(x){ return x.nom + (x.motif === 'courriel' ? ' (${T("aucune adresse")})' : ''); }).join(', ') : ''), rates.length ? 'att' : 'bon');
+        charger();
+      });
+    });
   }
 
   /* ══ AUJOURD'HUI ══ */
@@ -864,6 +891,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       return;
     }
     if (t.id === 'em-mods' || t.id === 'em-reg') { boiteReglages(); return; }
+    if (t.id === 'em-publier') { publier(); return; }
     if (t.id === 'em-copier') {
       appeler('employes:copierSemaine', [D.semaine[0]]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
