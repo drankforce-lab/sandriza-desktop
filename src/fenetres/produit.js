@@ -606,7 +606,7 @@ html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
 .pf-gestes{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.5rem;margin-top:.6rem}
 .pf-gestes .mini-decor{margin:0!important;width:auto!important;min-height:2.5rem;border-radius:10px;font-size:.8rem;font-weight:600;display:flex;align-items:center;justify-content:center;gap:.35rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pf-gestes .mini-decor.pf-ia-photo{margin:0!important;background:var(--sz-btn-prim,var(--or));border-color:transparent!important;color:var(--sz-btn-prim-txt,#1a1208)!important;font-weight:800}
-.pf-gestes .mini-decor.pf-ia-photo:disabled{background:var(--f-carte);color:var(--tx2)!important;border-color:var(--v08)!important}
+.pf-gestes .mini-decor.pf-ia-photo:disabled{opacity:1!important;background:var(--f-carte);color:var(--tx2)!important;border-color:var(--v08)!important}
 #p-vues .pv-t{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--tx-or,var(--tx2));margin:0 0 .45rem}
 #p-vues .pv-grille{grid-template-columns:repeat(var(--pv-n,6),minmax(0,1fr))!important;gap:8px!important}
 #p-vues .vue .cadre{border-radius:10px}
@@ -854,7 +854,7 @@ function pageProduit(id, importId) {
       /* (2026-11-22, sa question : « où est le bouton pour lancer la création automatique par IA une fois l'image placée ? »)
          Il vivait seulement à l'étape 2, sous la description. Le même geste est offert ICI, là où la photo vient d'être posée :
          la proposition (nom + description) s'ouvre dans la boîte de révision, puis on passe à l'étape 2 pour la voir. */
-      + '<button type="button" id="p-ia-photo" class="mini-decor pf-ia-photo" disabled><span class="ic">✨</span> ${T("Rédiger avec l’IA")}</button></div></div>'
+      + '<button type="button" id="p-ia-photo" class="mini-decor pf-ia-photo" disabled><span aria-hidden="true">✨</span> ${T("Rédiger avec l’IA")}</button></div></div>'
       + '<div class="vues" id="p-vues"></div></div>'
       + '<div class="pf-outils"><div class="pf-outils-t">${T("Outils de la photo")}</div>'
       + '<div class="aide p-studio-attente" id="p-studio-attente" style="display:none"></div>'

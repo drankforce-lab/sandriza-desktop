@@ -59,7 +59,7 @@ button.dang{color:var(--tx-err2,var(--ep-rouge-t))}
   background:color-mix(in srgb,var(--vv-4,#f08fb8) 22%,var(--f-carte));color:color-mix(in srgb,var(--vv-4,#f08fb8) 40%,var(--tx))}
 .bx-l .n{display:flex;flex-direction:column;margin-right:auto;min-width:0}
 .bx-l .n b{font-size:.84rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.bx-l .n span{font-size:.7rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bx-l .n span{font-size:.7rem;color:color-mix(in srgb,var(--tx2) 55%,var(--tx));white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .pill{display:inline-flex;align-items:center;font-size:.68rem;font-weight:700;padding:.12rem .55rem;border-radius:99px;white-space:nowrap;background:var(--ep-neutre-f,var(--v08));color:var(--ep-neutre-t,var(--tx2))}
 .pill.a{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
 .pill.ok{background:color-mix(in srgb,var(--vv-1,#5fd4a4) 18%,var(--f-carte));color:color-mix(in srgb,var(--vv-1,#5fd4a4) 40%,var(--tx))}
@@ -70,7 +70,8 @@ button.dang{color:var(--tx-err2,var(--ep-rouge-t))}
 .bx-d .tt{display:flex;align-items:center;gap:.6rem}
 .bx-d .tt .g{display:flex;flex-direction:column;margin-right:auto}
 .bx-d .tt b{font-size:1rem}
-.bx-d .tt span{font-size:.76rem;color:var(--tx2)}
+/* (contrastes, 2026-11-23) Le sous-titre SEUL : « .tt span » repeignait aussi la pastille et l'avatar en gris. */
+.bx-d .tt .g span{font-size:.76rem;color:var(--tx2)}
 .bx-arts{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.6rem}
 .bx-a{display:flex;flex-direction:column;gap:.3rem;min-width:0}
 .bx-a .ph{height:clamp(6rem,26vh,13rem);border-radius:12px;background:var(--v06);overflow:hidden}

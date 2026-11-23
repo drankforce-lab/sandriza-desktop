@@ -214,6 +214,10 @@ tbody tr.attente{background:rgba(124,92,255,.09)}
 .mq tbody tr{cursor:pointer}
 .mq tbody tr:hover td{background:var(--v03)}
 .mq td.b,.mq th.b{padding:0;width:4px}
+.mq td.cl .mq-cl{display:inline-flex;align-items:center;gap:8px;max-width:100%;vertical-align:middle}
+.mq td.cl .nm{overflow:hidden;text-overflow:ellipsis}
+.mq td.cl.prio .nm{font-weight:700}
+.mq td.cl .prio-pill{width:18px;height:18px;font-size:11px}
 .mq td.b i{display:block;width:4px;height:38px;background:var(--mq-ton,#e8a35b)}
 .mq th.b i{display:block;width:4px;height:34px;background:var(--mq-ton,#e8a35b)}
 .mq .no{font-weight:700;text-overflow:clip!important}
@@ -1095,7 +1099,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     return '<tr class="' + ck.classe(o) + '" data-id="' + esc(o.id) + '" style="--mq-ton:' + g.ton + '" title="${T("Clic : détails · clic droit : changer le statut")}">'
       + '<td class="b"><i></i></td>' + ck.td(o)
       + '<td class="no">' + esc(o.numero) + '</td>'
-      + '<td>' + esc(o.client) + (o.prioritaire ? ' <span class="rf-pill ambre">${T("Prioritaire")}</span>' : '') + '</td>'
+      /* (2026-11-23, sa capture : « pas beau ») Plus de pastille dans la cellule : la règle Épuré « une pastille seule =
+         cellule pleine » la peignait en brun et la centrait. Le « ! » rond des Prioritaires, devant le nom, à gauche. */
+      + '<td class="cl' + (o.prioritaire ? ' prio' : '') + '"><span class="mq-cl">' + (o.prioritaire ? '<span class="prio-pill" title="${T("Traitement prioritaire")}">!</span>' : '')
+      +   '<span class="nm">' + esc(o.client) + '</span></span></td>'
       + '<td class="' + (r.v ? 'vieille' : '') + '">' + esc(r.t) + '</td>'
       + '<td class="mt">' + argent(o.total) + '</td>'
       /* (Monday) Les états en CELLULES PLEINES, trois tons : ambre (attend), rouge (annulée), neutre (le reste). */
