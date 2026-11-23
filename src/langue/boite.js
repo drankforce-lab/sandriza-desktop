@@ -117,4 +117,8 @@ module.exports = {
   "à composer ou valider": "to compose or approve",
   "à prélever (avant taxes)": "to charge (before tax)",
   "← Retour à la saison": "← Back to the season",
+  "Proposée par l’IA": "Proposed by AI",
+  "Proposée par les règles": "Proposed by the rules",
+  "En stock dans sa taille, jamais reçu, catégories variées.": "In stock in her size, never received, varied categories.",
+  "Proposer avec l’IA": "Propose with AI",
 };

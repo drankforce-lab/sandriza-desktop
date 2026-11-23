@@ -85,6 +85,12 @@ button.dang{color:var(--tx-err2,var(--ep-rouge-t))}
 .bx-res{display:flex;flex-direction:column;gap:2px;max-height:11rem;overflow:hidden}
 .bx-res button{display:flex;justify-content:space-between;gap:.6rem;border:0;background:transparent;text-align:left;border-radius:8px;font-size:.78rem}
 .bx-res button:hover{background:var(--v06)}
+.bx-ia{display:flex;flex-direction:column;gap:.15rem;padding:.55rem .75rem;border-radius:11px;font-size:.8rem;line-height:1.45;
+  background:color-mix(in srgb,var(--vv-3,#b49cf7) 14%,var(--f-carte));border:1px solid color-mix(in srgb,var(--vv-3,#b49cf7) 30%,var(--f-carte))}
+.bx-ia b{font-size:.74rem;text-transform:uppercase;letter-spacing:.05em;color:color-mix(in srgb,var(--vv-3,#b49cf7) 40%,var(--tx))}
+.bx-ia span{color:var(--tx)}
+.bx-ia.regle{background:var(--v04,var(--v05));border-color:var(--v08)}
+.bx-ia.regle b{color:var(--tx2)}
 .bx-sur{display:flex;align-items:center;gap:.7rem;flex-wrap:wrap;padding:.55rem .8rem;border-radius:12px;
   background:color-mix(in srgb,var(--vv-4,#f08fb8) 12%,var(--f-carte));border:1px solid color-mix(in srgb,var(--vv-4,#f08fb8) 25%,var(--f-carte));font-size:.8rem}
 .bx-sur b{color:color-mix(in srgb,var(--vv-4,#f08fb8) 40%,var(--tx))}
@@ -206,6 +212,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span>' + esc(b.email + (b.formule === 'annuel' ? ' · ${T("annuel, déjà payé")}' : ' · ' + argent(b.prixSaison) + ' ${T("par saison")}')) + '</span></div>'
       + (b.orderNumber ? '<span class="pill">' + esc('${T("Commande")} ' + b.orderNumber) + '</span>' : '<span class="pill ' + ((ST[b.statut] || [])[1] || '') + '">' + esc((ST[b.statut] || [b.statut])[0]) + '</span>') + '</div>';
     if (b.erreur) h += '<div class="pill r" style="align-self:flex-start">' + esc(b.erreur) + '</div>';
+    // (2026-11-23) La proposition de l'IA dit POURQUOI ; la proposition par règles le dit aussi (l'IA n'a pas répondu, ou pas de clé).
+    if (arts.length && b.source === 'ia') h += '<div class="bx-ia"><b>${T("Proposée par l’IA")}</b>' + (b.raison ? '<span>' + esc(b.raison) + '</span>' : '') + '</div>';
+    else if (arts.length && b.source === 'automatique') h += '<div class="bx-ia regle"><b>${T("Proposée par les règles")}</b><span>${T("En stock dans sa taille, jamais reçu, catégories variées.")}</span></div>';
     h += '<div class="bx-arts">' + arts.map(function(a, i){
       return '<div class="bx-a"><span class="ph">' + (a.image ? '<img src="' + esc(a.image) + '" alt="">' : '') + '</span><b title="' + esc(a.nom) + '">' + esc(a.nom) + '</b>'
         + '<span>' + esc([a.taille, a.couleur, argent(a.prix)].filter(Boolean).join(' · ')) + '</span>'
@@ -224,7 +233,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="k"><span>${T("Visée du palier")}</span><b>' + esc(argent(b.valeurVisee)) + ' ${T("et plus")}</b></div>'
       + '<span class="pill ' + (atteinte ? 'ok' : 'a') + '">' + (atteinte ? '${T("Atteinte")}' : '${T("Sous la visée")}') + '</span>'
       + '<div class="esp">'
-      + (modif ? '<button type="button" id="bx-prop">${T("Proposer automatiquement")}</button><button type="button" id="bx-enr">${T("Enregistrer")}</button>'
+      + (modif ? '<button type="button" id="bx-prop">${T("Proposer avec l’IA")}</button><button type="button" id="bx-enr">${T("Enregistrer")}</button>'
           + '<button type="button" class="prim" id="bx-val"' + (b.graceJusqu ? ' disabled title="' + esc('${T("Grâce jusqu’au")} ' + b.graceJusqu) + '"' : '') + '>${T("Valider la boîte")}</button>' : '')
       + (b.statut === 'validee' ? '<button type="button" id="bx-deval">${T("Dévalider")}</button>' : '') + '</div></div>'
       + '<p class="bx-note">' + (b.graceJusqu ? esc('${T("Période de grâce jusqu’au")} ' + b.graceJusqu + ' ${T(": la boîte se valide après.")}') + ' ' : '')

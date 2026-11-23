@@ -3489,7 +3489,7 @@ const JEU = {
   'boite.js': (function(){
     var B = [
       { aboId: 'bs_aaaaaaaaaaaaaaaaaaaa', userId: 'u1', envoi: '2027-03-15', statut: 'proposee', nom: 'Marie Tremblay', email: 'marie@exemple.ca', palier: 'classique', palierNom: 'Classique',
-        formule: 'saison', valeurVisee: 160, prixSaison: 99, valeur: 166.49, graceJusqu: '', orderNumber: '', erreur: '', surprise: { type: 'rabais', texte: '15 % — SURPRISE-7K2Q' },
+        formule: 'saison', valeurVisee: 160, prixSaison: 99, valeur: 166.49, graceJusqu: '', orderNumber: '', erreur: '', source: 'ia', raison: 'Une tenue de printemps douce : la chemise verte et la jupe prune se répondent, le foulard caramel les relie — dans les tons qu’elle achète déjà.', surprise: { type: 'rabais', texte: '15 % — SURPRISE-7K2Q' },
         articles: [ { productId: 'p1', nom: 'Chemise Walla', taille: 'M', couleur: 'vert', cle: 'M-vert', prix: 67.5, image: '' },
                     { productId: 'p2', nom: 'Jupe plissée', taille: 'M', couleur: 'prune', cle: 'M-prune', prix: 59, image: '' },
                     { productId: 'p3', nom: 'Foulard de soie', taille: 'U', couleur: 'caramel', cle: 'U-caramel', prix: 39.99, image: '' } ] },

@@ -4508,7 +4508,7 @@ const LIMITES_PONT = {
   'vehicules:deplacement': 30000, 'vehicules:deplacementOter': 30000, 'vehicules:changement': 30000,
   'vehicules:dpa': 30000,
   'calendrier:mois': 15000,
-  'boite:saison': 20000, 'boite:proposer': 30000, 'boite:composer': 20000, 'boite:prelever': 600000, 'boite:reglagesEcrire': 20000,
+  'boite:saison': 20000, 'boite:proposer': 60000, 'boite:composer': 20000, 'boite:prelever': 600000, 'boite:reglagesEcrire': 20000,
   /* 37 demandes paralleles a la NHTSA (une par marque), puis l ecriture de la
      configuration partagee : 10 a 30 s d habitude, davantage sur un reseau lent. */
   'vehicules:catalogue': 90000,
