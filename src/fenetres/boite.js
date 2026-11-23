@@ -211,13 +211,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (modif ? '<button type="button" data-retirer="' + i + '">${T("Retirer")}</button>' : '') + '</div>';
     }).join('') + (modif && arts.length < 8 ? '<button type="button" class="bx-ajout" id="bx-ajout">${T("+ Ajouter un morceau")}</button>' : '') + '</div>';
     if (modif && CHERCHE !== null && document.__bxCherche) {
-      h += '<div class="bx-chercher"><input type="search" id="bx-q" placeholder="${T("Chercher un produit en stock (nom, SKU)")}" value="' + esc(CHERCHE) + '"><div class="bx-res">'
+      h += '<div class="bx-chercher"><input type="search" id="bx-q" aria-label="${T("Chercher un produit en stock (nom, SKU)")}" placeholder="${T("Chercher un produit en stock (nom, SKU)")}" value="' + esc(CHERCHE) + '"><div class="bx-res">'
         + RES.slice(0, 8).map(function(p, i){ return '<button type="button" data-pris="' + i + '"><span>' + esc(p.nom + ' · ' + p.taille + (p.couleur ? ' · ' + p.couleur : '')) + '</span><b>' + esc(argent(p.prix)) + '</b></button>'; }).join('') + '</div></div>';
     }
     h += '<div class="bx-sur"><b>${T("Surprise")}</b>'
       + ['', 'rabais', 'cadeau', 'primeur'].map(function(t){ var l = { '': '${T("Aucune")}', rabais: '${T("Rabais surprise")}', cadeau: '${T("Petit cadeau")}', primeur: '${T("Accès en primeur")}' }[t];
           return '<label><input type="radio" name="bx-sur" value="' + t + '"' + ((sur.type || '') === t ? ' checked' : '') + (modif ? '' : ' disabled') + '> ' + l + '</label>'; }).join('')
-      + '<input type="text" id="bx-sur-t" maxlength="140" placeholder="${T("Ex. : 15 % sur la prochaine commande — SURPRISE-7K2Q")}" value="' + esc(sur.texte || '') + '"' + (modif ? '' : ' disabled') + '></div>';
+      + '<input type="text" id="bx-sur-t" maxlength="140" aria-label="${T("Surprise")}" placeholder="${T("Ex. : 15 % sur la prochaine commande — SURPRISE-7K2Q")}" value="' + esc(sur.texte || '') + '"' + (modif ? '' : ' disabled') + '></div>';
     var atteinte = b.valeur >= b.valeurVisee && b.valeurVisee > 0;
     h += '<div class="bx-val"><div class="k"><span>${T("Valeur")}</span><b>' + esc(argent(b.valeur)) + '</b></div>'
       + '<div class="k"><span>${T("Visée du palier")}</span><b>' + esc(argent(b.valeurVisee)) + ' ${T("et plus")}</b></div>'
@@ -248,9 +248,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="bx-note">${T("Éteinte, la page de la boutique dit « bientôt » et personne ne peut s’inscrire.")}</span></label>'
       + '<table><thead><tr><th>${T("Palier")}</th><th>${T("Prix par saison ($)")}</th><th>${T("Prix annuel ($)")}</th><th>${T("Contenu")}</th><th>${T("Valeur visée ($)")}</th><th>${T("Vedette")}</th></tr></thead><tbody>'
       + r.paliers.map(function(p, i){
-          return '<tr data-pal="' + i + '"><td><input data-c="nom" value="' + esc(p.nom) + '"></td><td><input type="number" step="1" min="1" data-c="prixSaison" value="' + esc(p.prixSaison) + '"></td>'
-            + '<td><input type="number" step="1" min="1" data-c="prixAnnuel" value="' + esc(p.prixAnnuel) + '"></td><td><input data-c="morceaux" value="' + esc(p.morceaux) + '"></td>'
-            + '<td><input type="number" step="1" min="0" data-c="valeurVisee" value="' + esc(p.valeurVisee) + '"></td><td><input type="radio" name="rg-ved" data-c="vedette"' + (p.vedette ? ' checked' : '') + '></td></tr>';
+          return '<tr data-pal="' + i + '"><td><input data-c="nom" aria-label="${T("Palier")}" value="' + esc(p.nom) + '"></td><td><input type="number" step="1" min="1" data-c="prixSaison" aria-label="${T("Prix par saison ($)")}" value="' + esc(p.prixSaison) + '"></td>'
+            + '<td><input type="number" step="1" min="1" data-c="prixAnnuel" aria-label="${T("Prix annuel ($)")}" value="' + esc(p.prixAnnuel) + '"></td><td><input data-c="morceaux" aria-label="${T("Contenu")}" value="' + esc(p.morceaux) + '"></td>'
+            + '<td><input type="number" step="1" min="0" data-c="valeurVisee" aria-label="${T("Valeur visée ($)")}" value="' + esc(p.valeurVisee) + '"></td><td><input type="radio" name="rg-ved" data-c="vedette" aria-label="${T("Vedette")}"' + (p.vedette ? ' checked' : '') + '></td></tr>';
         }).join('') + '</tbody></table>'
       + '<p class="bx-note">${T("Le prix annuel ne peut pas dépasser 3 boîtes par saison : la première boîte doit rester offerte. Les abonnements déjà en cours gardent leur prix jusqu’à leur renouvellement, annoncé 30 jours avant.")}</p></div>';
   }
