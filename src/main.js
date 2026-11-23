@@ -856,6 +856,23 @@ function _pleineZoneQuitter(w) {
   else { try { w._szPoseT = Date.now(); w.setBounds(avant); w._szVoulu = { ...avant }; } catch (e) {} }
 }
 const _pleineZoneArmer = (w) => {
+  /* ══ (2026-11-23, 9.2.6) « dès que le verrou s'active pour la commande, la fenêtre se réduit » ══
+     Le verrou pris, le site repeint la liste et la bande se redessine : un « maximize » arrive SANS QUE PERSONNE N'AIT
+     CLIQUÉ, sur une fenêtre toujours à sa pleine zone — lu comme « restaurer », il la remettait à 880 × 700. Les parades
+     par délai (900 ms, puis 3 s) ont toujours fini par être dépassées. ➡ Le critère n'est plus le temps mais le GESTE :
+     un clic sur le bouton □ passe par Windows (WM_NCLBUTTONDOWN/UP sur HTMAXBUTTON) ou par la commande système
+     (WM_SYSCOMMAND SC_MAXIMIZE / SC_RESTORE). Sans l'un d'eux dans les 2 s, une fenêtre en pleine zone y reste.
+     (Le double-clic dans la tête quitte la pleine zone par le site — _pleineZoneQuitter — et ne passe pas par ici.) */
+  if (process.platform === 'win32' && typeof w.hookWindowMessage === 'function') {
+    // Un unmaximize de la coquille (_poserApresRetour) passe aussi par SC_RESTORE : ce n'est pas un geste.
+    const marquer = () => { if (Date.now() - (w._szPoseT || 0) > 300) w._szGesteMaxT = Date.now(); };
+    try {
+      w.hookWindowMessage(0x0112, (wp) => { try { const c = wp.readUInt32LE(0) & 0xFFF0; if (c === 0xF030 || c === 0xF120) marquer(); } catch (e) {} });
+      w.hookWindowMessage(0x00A1, (wp) => { try { if (wp.readUInt32LE(0) === 9) marquer(); } catch (e) {} });
+      w.hookWindowMessage(0x00A2, (wp) => { try { if (wp.readUInt32LE(0) === 9) marquer(); } catch (e) {} });
+      w._szGesteMaxSuivi = true;
+    } catch (e) {}
+  }
   w.on('maximize', () => {
     try {
       const { screen } = require('electron');
@@ -880,6 +897,11 @@ const _pleineZoneArmer = (w) => {
          fenêtre retombait à sa petite taille, et le garde anti-rapetissement le laissait passer (geste de la coquille).
          3 s : un vrai « restaurer » dans ce délai ne fait rien ; un second clic le fait. */
       if (pz && (Date.now() - (w._szOvlT || 0)) < 3000) { _journalFenetre((w._szCle || 'principale') + ' maximize ignore (bande)'); _poserApresRetour(w, pz.zone); return; }
+      if (pz && w._szGesteMaxSuivi && (Date.now() - (w._szGesteMaxT || 0)) > 2000) {
+        _journalFenetre((w._szCle || 'principale') + ' maximize ignore (aucun geste) depuisBande=' + (Date.now() - (w._szOvlT || 0)) + 'ms');
+        // Toujours à sa pleine zone : elle y reste ; redimensionnée à la main entre-temps : elle garde cette taille.
+        _poserApresRetour(w, _pleineZoneSeuil(pz.zone, w.getNormalBounds()) ? pz.zone : w.getNormalBounds()); return;
+      }
       if (pz && _pleineZoneSeuil(pz.zone, w.getNormalBounds())) {
         w._szPleineZone = null;
         _journalFenetre((w._szCle || 'principale') + ' RESTAURE par la coquille -> ' + JSON.stringify(pz.avant) + ' depuisBande=' + (Date.now() - (w._szOvlT || 0)) + 'ms');
