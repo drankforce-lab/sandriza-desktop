@@ -744,8 +744,8 @@ const _journalFenetre = (texte) => {
 const _gardeRapetissement = (w, cle) => {
   const t0 = Date.now();
   let geste = 0;
-  w.on('will-resize', () => { geste = Date.now(); });
-  w.on('will-move', () => { geste = Date.now(); });
+  w.on('will-resize', () => { geste = Date.now(); w._szGesteT = geste; });
+  w.on('will-move', () => { geste = Date.now(); w._szGesteT = geste; });
   const retenirVoulu = () => { try { if (!w.isDestroyed() && !w.isMinimized() && !w.isFullScreen()) w._szVoulu = w.getBounds(); } catch (e) {} };
   w.once('show', () => setTimeout(retenirVoulu, 50));
   w.on('resized', () => { if (Date.now() - geste < 1500) retenirVoulu(); });
@@ -756,7 +756,7 @@ const _gardeRapetissement = (w, cle) => {
     try {
       if (w.isDestroyed() || w.isMinimized() || w.isFullScreen() || w.isMaximized()) return;
       const v = w._szVoulu, b = w.getBounds(), dt = Date.now() - t0;
-      if (!v || dt > 30000) return;
+      if (!v || (dt > 30000 && !_autourDuVerrou())) return;
       // Une taille posée par la coquille (hauteur ajustée, pleine zone…) devient la nouvelle taille voulue.
       if (Date.now() - (w._szPoseT || 0) < 1500) { clearTimeout(w._szVouluT); w._szVouluT = setTimeout(retenirVoulu, 120); return; }
       const plusPetite = (b.width < v.width - 40) || (b.height < v.height - 40);
@@ -768,6 +768,70 @@ const _gardeRapetissement = (w, cle) => {
       setTimeout(() => { try { if (!w.isDestroyed() && !w.isMinimized() && !w.isMaximized()) { w._szPoseT = Date.now(); w.setBounds(v); } } catch (e) {} }, 30);
     } catch (e) {}
   });
+};
+/* ══ LE VERROUILLAGE DE WINDOWS (2026-11-23, 9.2.5) ══
+   Son signalement : « le rapetissement de la fenêtre des détails de commande est toujours présent : dès que l'écran se
+   verrouille, la fenêtre se réduit ». Le garde ci-dessus ne veillait que 30 s après l'ouverture, et la coquille n'écoutait
+   PAS le verrouillage : à l'écran verrouillé, Windows éteint ou retire l'écran, puis replace les fenêtres — une fenêtre
+   aussi grande que la zone de travail en ressort réduite. fenetre.log du poste n'en portait rien (journal limité à 60 s).
+   ➡ Au verrouillage (et à la mise en veille, au retrait d'un écran), on PHOTOGRAPHIE les bornes de chaque fenêtre de
+   travail ; pendant le verrou et les 20 s qui suivent, le garde reprend du service ; au déverrouillage, trois relectures
+   (0,4 s, 1,5 s, 4 s) remettent la photo à toute fenêtre plus petite — sauf si la personne l'a redimensionnée elle-même,
+   ou si la photo tomberait hors de tout écran (écran vraiment débranché). Tout est journalisé. */
+let _verrouDebut = 0, _verrouFin = 0;
+const _autourDuVerrou = () => (_verrouDebut && !_verrouFin) || (Date.now() - _verrouFin < 20000);
+const _verrouPhotographier = (motif) => {
+  if (_verrouDebut && !_verrouFin) return;   // déjà photographiées : la photo d'AVANT le verrou fait foi
+  _verrouDebut = Date.now(); _verrouFin = 0;
+  _journalFenetre('VERROU ' + motif);
+  try {
+    for (const [cle, w] of fenetresNatives) {
+      if (!w || w.isDestroyed() || w.isMinimized() || w.isFullScreen() || !w.isVisible()) continue;
+      w._szAvantVerrou = w.getBounds();
+      _journalFenetre(cle + ' photo ' + JSON.stringify(w._szAvantVerrou));
+    }
+  } catch (e) {}
+};
+const _verrouRendre = (motif) => {
+  if (!_verrouDebut) return;
+  _verrouFin = Date.now(); _verrouDebut = 0;
+  _journalFenetre('DEVERROU ' + motif);
+  const { screen } = require('electron');
+  const visible = (r) => {
+    try {
+      const cx = r.x + r.width / 2, cy = r.y + r.height / 2;
+      return screen.getAllDisplays().some((d) => { const a = d.workArea; return cx >= a.x && cx < a.x + a.width && cy >= a.y && cy < a.y + a.height; });
+    } catch (e) { return false; }
+  };
+  const debut = _verrouFin;
+  [400, 1500, 4000].forEach((ms) => setTimeout(() => {
+    try {
+      for (const [cle, w] of fenetresNatives) {
+        const p = w && !w.isDestroyed() && w._szAvantVerrou;
+        if (!p || w.isMinimized() || w.isFullScreen() || w.isMaximized()) continue;
+        if ((w._szGesteT || 0) > debut) { w._szAvantVerrou = null; continue; }   // la personne a pris la main
+        const b = w.getBounds();
+        if (b.width >= p.width - 40 && b.height >= p.height - 40) continue;
+        if (!visible(p)) { _journalFenetre(cle + ' photo hors ecran, laissee ' + JSON.stringify(p)); continue; }
+        _journalFenetre(cle + ' rapetissee au verrou ' + JSON.stringify(b) + ' -> remise ' + JSON.stringify(p) + ' +' + ms + 'ms');
+        w._szPoseT = Date.now(); w.setBounds(p); w._szVoulu = { ...p };
+      }
+    } catch (e) {}
+  }, ms));
+};
+let _verrouArme = false;
+const _verrouArmer = () => {
+  if (_verrouArme) return; _verrouArme = true;
+  try {
+    const { powerMonitor, screen } = require('electron');
+    powerMonitor.on('lock-screen', () => _verrouPhotographier('lock-screen'));
+    powerMonitor.on('suspend', () => _verrouPhotographier('suspend'));
+    powerMonitor.on('unlock-screen', () => _verrouRendre('unlock-screen'));
+    powerMonitor.on('resume', () => { if (!_verrouDebut) return; setTimeout(() => _verrouRendre('resume'), 1500); });
+    screen.on('display-removed', () => _journalFenetre('ecran retire'));
+    screen.on('display-added', () => _journalFenetre('ecran ajoute'));
+    screen.on('display-metrics-changed', (e, d, ch) => _journalFenetre('ecran change ' + (ch || []).join(',')));
+  } catch (e) { _journalFenetre('verrou: armement impossible ' + (e && e.message)); }
 };
 /* ⚠⚠ (2026-11-18, son signalement : « le bug de rapetissage est généralisé partout où une fenêtre popup s'ouvre ou qu'un
    verrou s'applique » — la FENÊTRE ELLE-MÊME rapetisse, plein écran ou pas). Une fenêtre sans cadre qui couvre toute la
@@ -2282,6 +2346,7 @@ const createWindow = () => {
      `titleBarOverlay` (défaut d'Electron, prouvé) : la fenêtre n'est donc jamais
      « agrandie », elle prend la pleine zone. Voir `_pleineZoneArmer`. */
   _pleineZoneArmer(mainWindow);
+  _verrouArmer();
   /* ⚠ ET ON LA RETIRE AVEC LA FENÊTRE : une vue dont le parent meurt garde son
      processus de rendu et ses minuteries. */
   mainWindow.on('closed', () => { connexionRetirer(); mainWindow = null; });
