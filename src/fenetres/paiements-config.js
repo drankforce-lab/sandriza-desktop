@@ -75,7 +75,7 @@ body{background:var(--f-page);color:var(--tx);
 .jeton{font-size:.76rem;color:var(--tx2);margin-top:.35rem;display:flex;align-items:center;gap:.45rem;flex-wrap:wrap}
 .jeton b{color:var(--tx-ok)}
 .jeton.non b{color:var(--tx-jaune)}
-.tarifs{display:grid;grid-template-columns:repeat(auto-fit,minmax(11rem,1fr));gap:.6rem}
+.tarifs{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:.5rem}   /* une ligne : la carte partage sa rangée avec la maintenance (2026-11-23) */
 /* Fenetre basse (detachee, 2026-10-12 : 14 px de trop). */
 @media (max-height:820px){.tarifs{gap:.4rem}.tarifs>*{padding-top:.4rem!important;padding-bottom:.4rem!important}.corps .aide,.corps .sous{margin-bottom:.15rem!important}}
 .tarif{background:var(--f-pill);border:1px solid var(--v07);border-radius:9px;padding:.55rem .7rem}
@@ -296,16 +296,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h.push('</div>');
 
     // ── Maintenance de la boutique (2026-11-23) — sa propre carte, redessinée seule ─────────────────────
-    h.push('<div class="carte" id="maint"></div>');
+    h.push('<div class="rangee"><div class="carte" id="maint"></div>');
 
     // ── Tarifs (informatif) ────────────────────────────────────────────────
-    h.push('<div class="carte"><h2>${T("Tarifs Square — Canada")}</h2><div class="tarifs">');
+    h.push('<div class="carte"><h2>${T("Tarifs Square — Canada")} <span style="font-weight:500;text-transform:none;letter-spacing:0;color:var(--tx3)">· squareup.com/ca</span></h2><div class="tarifs">');
     TARIFS.forEach(function(t){
       h.push('<div class="tarif"><div class="t">' + esc(t[0]) + '</div><div class="r">' + esc(t[1])
         + '</div><div class="n">' + esc(t[2]) + '</div></div>');
     });
-    h.push('</div><p class="sous" style="margin:.7rem 0 0">${T("Tarifs en vigueur au Canada, à vérifier sur ")}'
-      + 'squareup.com/ca.</p></div>');
+    h.push('</div></div></div>');
 
     corps.innerHTML = h.join('');
     dessinerMaint();
@@ -431,54 +430,77 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + 'T' + z(d.getHours()) + ':' + z(d.getMinutes()); }
   function versIso(v){ if (!v) return ''; var d = new Date(v); return isNaN(d) ? '' : d.toISOString(); }
   function quandLisible(iso){ var d = new Date(iso); return isNaN(d) ? '' : d.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }); }
+  /* ⚠ COMPACTE (2026-11-23) : la fenêtre n'a pas de glissière (sa règle) et le contrôle « contrastes » l’a mesuré — les dates
+     sortaient sous le bas à 1400 × 833. La carte montre l'état et les deux gestes immédiats ; la planification (dates et
+     messages) s'ouvre dans une boîte. */
   function dessinerMaint(){
     var el = document.getElementById('maint'); if (!el) return;
     var m = MT || {};
     var etat = m.maintenance ? '<span class="rf-pill ambre">${T("Maintenance EN COURS — paiements en ligne suspendus")}</span>'
       : (m.avis ? '<span class="rf-pill ambre">${T("Avis affiché sur le site")}</span>'
       : (m.debut ? '<span class="rf-pill vert">${T("Planifiée")}</span>' : '<span class="rf-pill vert">${T("Boutique ouverte")}</span>'));
+    var quand = m.maintenance && m.fin ? '${T("Levée automatique :")} ' + esc(quandLisible(m.fin))
+      : (m.debut ? '${T("Activation automatique :")} ' + esc(quandLisible(m.debut)) + (m.fin ? ' → ' + esc(quandLisible(m.fin)) : '') : '');
     var dis = RO ? ' disabled' : '';
     el.innerHTML = '<h2>${T("Maintenance de la boutique")}</h2>'
-      + '<p class="sous">${T("Pendant la maintenance, aucun paiement en ligne n’est accepté (caisse, cartes-cadeaux, encan, boîte de style) ; la caisse du comptoir et les remboursements restent permis. Un bandeau l’annonce sur le site.")}</p>'
-      + '<div class="ch">' + etat + (m.maintenance && m.fin ? ' <span class="aide">${T("Levée automatique :")} ' + esc(quandLisible(m.fin)) + '</span>' : '')
-      + (m.avis && m.debut ? ' <span class="aide">${T("Activation automatique :")} ' + esc(quandLisible(m.debut)) + '</span>' : '') + '</div>'
-      + '<label class="bascule"><input type="checkbox" id="m-man"' + (m.manuel ? ' checked' : '') + dis + '><span><strong>${T("Activer maintenant")}</strong>'
-      + '<span class="d">${T("Tout de suite, jusqu’à ce que vous la leviez.")}</span></span></label>'
-      + '<h2 style="margin-top:1rem">${T("Planifier une maintenance")}</h2>'
-      + '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem">'
-      + '<div class="ch"><label>${T("Afficher l’avis sur le site à partir du")}</label><input type="datetime-local" id="m-avis" value="' + esc(versLocal(m.avisDes)) + '"' + dis + '></div>'
-      + '<div class="ch"><label>${T("Début de la maintenance (activation automatique)")}</label><input type="datetime-local" id="m-deb" value="' + esc(versLocal(m.debut)) + '"' + dis + '></div>'
-      + '<div class="ch"><label>${T("Fin (levée automatique)")}</label><input type="datetime-local" id="m-fin" value="' + esc(versLocal(m.fin)) + '"' + dis + '></div></div>'
-      + '<div style="display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.8rem">'
-      + '<div class="ch"><label>${T("Message de l’avis (facultatif)")}</label><input type="text" id="m-txa" maxlength="300" value="' + esc(m.messageAvis || '') + '" placeholder="${T("Par défaut : la date, les heures, et « les paiements en ligne seront suspendus »")}"' + dis + '></div>'
-      + '<div class="ch"><label>${T("Message pendant la maintenance (facultatif)")}</label><input type="text" id="m-txm" maxlength="300" value="' + esc(m.message || '') + '" placeholder="${T("Par défaut : « paiements en ligne suspendus jusqu’au … »")}"' + dis + '></div></div>'
-      + '<div class="gestes"><button id="m-lever"' + dis + '>${T("Lever maintenant")}</button><button class="prim" id="m-ok"' + dis + '>${T("Enregistrer la maintenance")}</button></div>';
-    var ok = document.getElementById('m-ok'), lv = document.getElementById('m-lever');
-    if (ok) ok.onclick = function(){ ecrireMaint(false); };
-    if (lv) lv.onclick = function(){ ecrireMaint(true); };
+      + '<p class="sous">${T("Aucun paiement en ligne pendant la maintenance ; le comptoir et les remboursements restent permis.")}</p>'
+      + '<div class="ch">' + etat + (quand ? ' <span class="aide">' + quand + '</span>' : '') + '</div>'
+      + '<div class="gestes" style="justify-content:flex-start;flex-wrap:wrap">'
+      + '<label class="bascule" style="margin:0 auto 0 0"><input type="checkbox" id="m-man"' + (m.manuel ? ' checked' : '') + dis + '><span><strong>${T("Activer maintenant")}</strong></span></label>'
+      + ((m.maintenance || m.debut) ? '<button id="m-lever"' + dis + '>${T("Lever maintenant")}</button>' : '')
+      + '<button class="prim" id="m-plan"' + dis + '>${T("Planifier…")}</button></div>';
+    var man = document.getElementById('m-man'), lv = document.getElementById('m-lever'), pl = document.getElementById('m-plan');
+    if (man) man.onchange = function(){ ecrireMaint({ manuel: man.checked, avisDes: m.avisDes || '', debut: m.debut || '', fin: m.fin || '', message: m.message || '', messageAvis: m.messageAvis || '' }, man); };
+    if (lv) lv.onclick = function(){ ecrireMaint({ manuel: false, debut: '', fin: '', avisDes: '', message: m.message || '', messageAvis: m.messageAvis || '' }, null, true); };
+    if (pl) pl.onclick = ouvrirPlanif;
   }
-  function ecrireMaint(lever){
+  function ouvrirPlanif(){
+    var m = MT || {};
+    var v = document.createElement('div');
+    v.className = 'voile';
+    v.setAttribute('style', 'position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;background:rgba(5,8,14,.55)');
+    v.innerHTML = '<div class="boite" role="dialog" aria-modal="true" aria-label="${T("Planifier une maintenance")}" style="width:min(46rem,94vw);border-radius:14px;padding:1.1rem 1.2rem;border:1px solid var(--v12)">'
+      + '<h3>${T("Planifier une maintenance")}</h3>'
+      + '<div style="display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.8rem">'
+      + '<div class="ch"><label>${T("Afficher l’avis à partir du")}</label><input type="datetime-local" id="m-avis" value="' + esc(versLocal(m.avisDes)) + '"></div>'
+      + '<div class="ch"><label>${T("Début (activation automatique)")}</label><input type="datetime-local" id="m-deb" value="' + esc(versLocal(m.debut)) + '"></div>'
+      + '<div class="ch"><label>${T("Fin (levée automatique)")}</label><input type="datetime-local" id="m-fin" value="' + esc(versLocal(m.fin)) + '"></div></div>'
+      + '<div class="ch"><label>${T("Message de l’avis (facultatif)")}</label><input type="text" id="m-txa" maxlength="300" value="' + esc(m.messageAvis || '') + '" placeholder="${T("Par défaut : la date, les heures, et « les paiements en ligne seront suspendus »")}"></div>'
+      + '<div class="ch"><label>${T("Message pendant la maintenance (facultatif)")}</label><input type="text" id="m-txm" maxlength="300" value="' + esc(m.message || '') + '" placeholder="${T("Par défaut : « paiements en ligne suspendus jusqu’au … »")}"></div>'
+      + '<div class="pied-boite gestes"><button id="m-x">${T("Annuler")}</button><button class="prim" id="m-ok">${T("Enregistrer la maintenance")}</button></div></div>';
+    document.body.appendChild(v);
+    var fermer = function(){ document.removeEventListener('keydown', clav, true); v.remove(); };
+    var clav = function(ev){ if (ev.key === 'Escape') { ev.preventDefault(); fermer(); } };
+    document.addEventListener('keydown', clav, true);
+    v.addEventListener('click', function(ev){ if (ev.target === v) fermer(); });
+    document.getElementById('m-x').onclick = fermer;
+    document.getElementById('m-ok').onclick = function(){
+      var val = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
+      var r = { manuel: !!m.manuel, avisDes: versIso(val('m-avis')), debut: versIso(val('m-deb')), fin: versIso(val('m-fin')), message: val('m-txm'), messageAvis: val('m-txa') };
+      if (r.debut && !r.fin) { dire('${T("Indiquez aussi la fin : la maintenance planifiée se lève seule à l’heure prévue.")}', 'att'); return; }
+      ecrireMaint(r, null, false, fermer);
+    };
+    try { document.getElementById('m-avis').focus(); } catch (e) {}
+  }
+  /* r : les réglages complets ; case : l'interrupteur à remettre si on renonce ; lever : levée ; ok : rappel au succès. */
+  function ecrireMaint(r, caseMan, lever, ok){
     if (RO) return;
-    var v = function(id){ var e = document.getElementById(id); return e ? e.value : ''; };
-    var r = lever ? { manuel: false, debut: '', fin: '', avisDes: '', message: v('m-txm'), messageAvis: v('m-txa') }
-      : { manuel: !!(document.getElementById('m-man') || {}).checked, avisDes: versIso(v('m-avis')), debut: versIso(v('m-deb')), fin: versIso(v('m-fin')),
-          message: v('m-txm'), messageAvis: v('m-txa') };
-    if (!lever && r.debut && !r.fin) { dire('${T("Indiquez aussi la fin : la maintenance planifiée se lève seule à l’heure prévue.")}', 'att'); return; }
     var go = function(){
       dire('${T("Enregistrement…")}');
       appeler('config:boutique:maintEcrire', [r]).then(function(x){
         if (!x || !x.ok) {
           var M = { fin_avant_debut: '${T("La fin doit suivre le début.")}', avis_apres_debut: '${T("L’avis doit commencer avant la maintenance.")}' };
+          if (caseMan) caseMan.checked = !caseMan.checked;
           dire(M[x && x.motif] || expliquer(x), 'err'); return;
         }
-        MT = x; dessinerMaint();
+        MT = x; dessinerMaint(); if (ok) ok();
         dire(lever ? '${T("Maintenance levée : la boutique accepte de nouveau les paiements en ligne.")}'
           : (x.maintenance ? '${T("Maintenance ACTIVE : les paiements en ligne sont suspendus.")}' : '${T("Maintenance enregistrée.")}'), x.maintenance ? 'att' : 'bon');
       });
     };
     if (!lever && r.manuel && !(MT && MT.manuel)) {
       szConfirmer({ danger: true, titre: '${T("Activer la maintenance maintenant")}', texte: '${T("Aucun client ne pourra payer en ligne tant que vous ne la lèverez pas. Le bandeau s’affiche sur le site.")}', oui: '${T("Activer")}' })
-        .then(function(oui){ if (oui) go(); });
+        .then(function(oui){ if (oui) go(); else if (caseMan) caseMan.checked = false; });
       return;
     }
     go();

@@ -205,4 +205,9 @@ module.exports = {
   'Activer la maintenance maintenant': 'Turn on maintenance now',
   'Aucun client ne pourra payer en ligne tant que vous ne la lèverez pas. Le bandeau s’affiche sur le site.': 'No customer can pay online until you lift it. The banner shows on the site.',
   'Activer': 'Turn on',
+  'Aucun paiement en ligne pendant la maintenance ; le comptoir et les remboursements restent permis.': 'No online payment during maintenance; the in-store register and refunds remain allowed.',
+  'Planifier…': 'Schedule…',
+  'Afficher l’avis à partir du': 'Show the notice from',
+  'Début (activation automatique)': 'Start (turns on automatically)',
+  'Annuler': 'Cancel',
 };
