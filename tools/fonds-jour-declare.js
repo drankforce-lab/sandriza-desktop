@@ -32,6 +32,9 @@ module.exports = {
     'encan-ecran.js': { 'html,body': '#111111', '.temps.plus': '#241C12', '.barre': '#2B2B2B' },
     // Atelier (lot 5) : la pastille ROUGE d'un contrôle avant impression en erreur — le rouge EST le message.
     'atelier.js': { '.mo-ctl.err i': '#DC2626' },
+    /* Gabarits courriel (2026-11-24) : l'APERÇU du courriel que reçoit la cliente — le bandeau du logo Sz EST noir
+       dans le courriel, quel que soit le thème du poste ; la pastille de la liste en est le rappel. */
+    'gabarits.js': { '.apercu .head.logo': '#111', '.swatch .b1.logo': '#111' },
     'chat-config.js': { '.b.prim': '#8f6f42' },
     'commandes.js': { '.badge2.vertf': '#166534', '.banniere': '#7f1d1d', '.ctx .warn': '#7f1d1d' },
     'config-navigation.js': { 'button.danger.arme': '#7f1d1d' },
