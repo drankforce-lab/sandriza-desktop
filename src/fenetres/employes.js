@@ -223,6 +223,10 @@ html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
 .mods .m{display:grid;grid-template-columns:minmax(0,1fr) 7rem 7rem auto;gap:.4rem;align-items:center}
 .mods .m input{height:2.1rem}
 #r-pals .m{grid-template-columns:11rem 9rem auto;justify-content:start}
+#a-cat .m{grid-template-columns:minmax(0,1fr) 9rem 7.5rem 6.5rem 6.5rem auto auto auto}
+#a-cat .m label{display:flex;align-items:center;gap:.25rem;font-size:.72rem;white-space:nowrap}
+.av-f{display:flex;flex-wrap:wrap;gap:.3rem 1rem}
+.av-t{display:grid;grid-template-columns:minmax(0,1fr) 9rem 7.5rem 6.5rem 6.5rem auto auto auto;gap:.4rem;font-size:.68rem;color:var(--tx2);font-weight:600}
 @media (max-width:980px){ .g2,.g3{grid-template-columns:1fr} .em-tuiles{grid-template-columns:repeat(2,minmax(0,1fr))} .tl,.sem{grid-template-columns:9rem minmax(0,1fr) 3.6rem} .sem{grid-template-columns:9rem repeat(7,minmax(0,1fr)) 3.6rem} }
 @media print{ body{overflow:visible;background:#fff;color:#000} .tete,.pied,.em-tete,#corps>*:not(.imp){display:none!important}
   #corps{overflow:visible} .imp{display:block!important} .imp>*:not(#bulletin){display:none!important} #bulletin{box-shadow:none;border:0} }
@@ -379,7 +383,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     } else if (ONGLET === 'paie') {
       h += '<div class="em-nav"><button data-per="-1" aria-label="${T("Période précédente")}">‹</button><b>'
         + esc('${T("Du ")}' + court(D.periode.debut) + ' ${T("au")} ' + court(D.periode.fin)) + '</b><button data-per="1" aria-label="${T("Période suivante")}">›</button></div>'
-        + '<button class="mini" id="em-reg">${T("Réglages de la paie")}</button><button class="mini" id="em-csv">${T("Exporter (CSV)")}</button>';
+        + '<button class="mini" id="em-reg">${T("Réglages de la paie")}</button><button class="mini" id="em-av">${T("Avantages sociaux")}</button><button class="mini" id="em-csv">${T("Exporter (CSV)")}</button>';
     } else if (ONGLET === 'politiques') {
       if (D.peutModifier) h += '<button class="prim mini" id="pol-neuve">${T("Nouvelle politique")}</button>';
     } else if (ONGLET === 'equipe') {
@@ -670,6 +674,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       if (x.vacancesVersees) h += ln('${T("Vacances versées")}', szArgent(x.vacancesVersees));
     } else h += ln('${T("Vacances")} ' + x.vacancesPct + ' % ${T("versées")}', szArgent(x.vacancesVersees || 0));
     h += '<div class="l t"><span>${T("Brut")}</span><b>' + szArgent(x.brut) + '</b></div>';
+    (x.avantages || []).forEach(function(a){
+      h += ln(esc(a.nom) + ' <span class="note">${T("employeur")} ' + szArgent(a.employeur) + ' · ${T("retenue")}</span>', szArgent(a.employe));
+    });
     h += '<div class="note">${T("Avant retenues : RRQ, AE, RQAP et impôts se calculent dans le logiciel de paie.")}</div>';
     h += '<div class="gestes"><button class="mini" id="em-imprimer">${T("Imprimer le bulletin")}</button></div></div>';
     return h;
@@ -831,12 +838,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       + '<label class="ch">${T("Heures par jour de vacances")}<span class="unite"><input type="number" id="f-hj" min="1" max="12" step="0.25" value="' + esc(f.heuresJour || 8) + '" aria-label="${T("Heures par jour de vacances")}"><i>h</i></span></label>'
       + '<label class="ch">${T("Jours de vacances par année")}<span class="unite"><input type="number" id="f-vj" min="0" max="60" step="0.5" value="' + esc(f.vacancesJours == null ? '' : f.vacancesJours) + '" placeholder="${T("selon l’ancienneté")}" aria-label="${T("Jours de vacances par année")}"><i>${T("jours")}</i></span></label>'
       + '<label class="ch large">${T("Note")}<input id="f-no" maxlength="300" value="' + esc(f.note || '') + '"></label>'
-      + '<label class="ch case large"><input type="checkbox" id="f-in"' + (f.inclus === false ? '' : ' checked') + '>${T("À la paie (décochez pour la propriétaire ou un compte technique)")}</label></div>'
+      + '<label class="ch case large"><input type="checkbox" id="f-in"' + (f.inclus === false ? '' : ' checked') + '>${T("À la paie (décochez pour la propriétaire ou un compte technique)")}</label>'
+      + (((D.reglages || {}).avantages || []).length ? '<div class="ch large">${T("Avantages sociaux")}<div class="av-f">' + D.reglages.avantages.map(function(a){
+          return '<label class="ch case"><input type="checkbox" data-fav="' + esc(a.id) + '"' + ((f.avantages || []).indexOf(a.id) >= 0 ? ' checked' : '') + '>' + esc(a.nom) + '</label>'; }).join('') + '</div></div>' : '')
+      + '</div>'
       + '<div class="note">${T("Le taux saisi ici CORRIGE le taux en vigueur. Pour une augmentation à une date, utilisez « Nouveau taux » : les périodes déjà payées ne bougent pas.")}</div>',
       '${T("Enregistrer")}');
     b.ok.onclick = function(){
       envoyer(b, 'employes:fiche', [{ id: s.id, poste: b.val('f-po'), emploi: b.val('f-em'), embauche: b.val('f-eb'), commission: b.val('f-co'), taux: b.val('f-tx'),
-        urgence: b.val('f-ur'), note: b.val('f-no'), inclus: b.val('f-in'), heuresJour: b.val('f-hj'), vacancesJours: b.val('f-vj') }], '${T("Fiche enregistrée : ")}' + s.nom);
+        urgence: b.val('f-ur'), note: b.val('f-no'), inclus: b.val('f-in'), heuresJour: b.val('f-hj'), vacancesJours: b.val('f-vj'),
+        avantages: ((D.reglages || {}).avantages || []).length ? Array.prototype.map.call(b.el.querySelectorAll('[data-fav]:checked'), function(c){ return c.getAttribute('data-fav'); }) : undefined }], '${T("Fiche enregistrée : ")}' + s.nom);
     };
   }
   /* LE DOSSIER CONFIDENTIEL (2026-11-24, portail RH etape 2a). Tout est chiffre au serveur ; le NAS et le
@@ -899,6 +910,42 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       + '<div class="note">${T("Les heures faites avant cette date restent payées à l’ancien taux.")}</div>',
       '${T("Enregistrer le taux")}');
     b.ok.onclick = function(){ envoyer(b, 'employes:taux', [{ staffId: s.id, taux: b.val('t-tx'), des: b.val('t-de') }], '${T("Nouveau taux enregistré.")}'); };
+  }
+  /* LES AVANTAGES SOCIAUX (2026-11-24, portail RH etape 2c) : le CATALOGUE de la boutique. Chaque fiche coche
+     les siens. Le logiciel de paie retient et declare ; ici on tient qui a quoi, la part de chacun, imposable ou non. */
+  var AV_TYPES = [['assurance', '${T("Assurance collective")}'], ['reer', '${T("REER collectif")}'], ['allocation', '${T("Allocation")}'], ['autre', '${T("Autre")}']];
+  function boiteAvantages(){
+    var R = (D && D.reglages) || {};
+    var cat = (R.avantages || []).slice();
+    var ligne = function(a, i){
+      return '<div class="m" data-ai="' + i + '" data-aid="' + esc(a.id || '') + '"><input data-ak="nom" maxlength="60" value="' + esc(a.nom || '') + '" aria-label="${T("Nom de l’avantage")}" placeholder="${T("Ex. : Assurance santé")}">'
+        + '<select data-ak="type" aria-label="${T("Type")}">' + AV_TYPES.map(function(x){ return '<option value="' + x[0] + '"' + (a.type === x[0] ? ' selected' : '') + '>' + x[1] + '</option>'; }).join('') + '</select>'
+        + '<select data-ak="calcul" aria-label="${T("Calcul")}"><option value="montant"' + (a.calcul !== 'pct' ? ' selected' : '') + '>${T("$ par paie")}</option><option value="pct"' + (a.calcul === 'pct' ? ' selected' : '') + '>${T("% du salaire")}</option></select>'
+        + '<input type="number" data-ak="employeur" min="0" step="0.01" value="' + esc(a.employeur || 0) + '" aria-label="${T("Part de l’employeur")}">'
+        + '<input type="number" data-ak="employe" min="0" step="0.01" value="' + esc(a.employe || 0) + '" aria-label="${T("Part de l’employé")}">'
+        + '<label><input type="checkbox" data-ak="imposableFed"' + (a.imposableFed ? ' checked' : '') + '>${T("Féd.")}</label>'
+        + '<label><input type="checkbox" data-ak="imposableQc"' + (a.imposableQc ? ' checked' : '') + '>${T("Qc")}</label>'
+        + '<button type="button" class="mini" data-ax="' + i + '" aria-label="${T("Retirer cet avantage")}">✕</button></div>';
+    };
+    var b = boite('${T("Avantages sociaux")}', '${T("Le catalogue de la boutique. Cochez ensuite ceux de chaque personne dans sa fiche.")}',
+      '<div class="ch large"><div class="av-t"><span>${T("Avantage")}</span><span>${T("Type")}</span><span>${T("Calcul")}</span><span>${T("Employeur")}</span><span>${T("Employé")}</span><span>${T("Imposable")}</span><span></span><span></span></div>'
+      + '<div class="mods" id="a-cat">' + cat.map(ligne).join('') + '</div>'
+      + '<button type="button" class="mini" id="a-add" style="align-self:flex-start">${T("+ Ajouter un avantage")}</button></div>'
+      + '<div class="note">${T("« Imposable » : la part de l’employeur est un avantage imposable pour la personne (au fédéral, au Québec, ou aux deux). Ex. : l’assurance maladie payée par l’employeur est imposable au Québec seulement ; l’assurance vie, aux deux. Le logiciel de paie fait les retenues et les feuillets.")}</div>',
+      '${T("Enregistrer")}', true);
+    var lire = function(){ var out = []; b.el.querySelectorAll('#a-cat .m').forEach(function(r){
+      var g = function(k){ var e = r.querySelector('[data-ak="' + k + '"]'); return e.type === 'checkbox' ? e.checked : e.value; };
+      out.push({ id: r.getAttribute('data-aid') || '', nom: g('nom'), type: g('type'), calcul: g('calcul'), employeur: +g('employeur') || 0, employe: +g('employe') || 0, imposableFed: g('imposableFed'), imposableQc: g('imposableQc') }); });
+      return out; };
+    b.el.addEventListener('click', function(ev){
+      var x = ev.target.closest && ev.target.closest('[data-ax]');
+      if (x) { cat = lire(); cat.splice(+x.getAttribute('data-ax'), 1); b.el.querySelector('#a-cat').innerHTML = cat.map(ligne).join(''); }
+      if (ev.target.id === 'a-add') { cat = lire(); cat.push({ nom: '', type: 'assurance', calcul: 'montant', employeur: 0, employe: 0, imposableQc: true }); b.el.querySelector('#a-cat').innerHTML = cat.map(ligne).join(''); }
+    });
+    b.ok.onclick = function(){
+      var l = lire().filter(function(a){ return String(a.nom).trim(); });
+      envoyer(b, 'employes:reglages', [{ avantages: l }], '${T("Avantages sociaux enregistrés.")}');
+    };
   }
   function boiteReglages(){
     var R = (D && D.reglages) || {};
@@ -1027,6 +1074,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       return;
     }
     if (t.id === 'em-mods' || t.id === 'em-reg') { boiteReglages(); return; }
+    if (t.id === 'em-av') { boiteAvantages(); return; }
     if (t.id === 'em-publier') { publier(); return; }
     if (t.id === 'pol-neuve') { boitePolitique(null); return; }
     if ((b = t.closest('[data-polmod]'))) { var pm = (POL || []).filter(function(x){ return x.id === b.getAttribute('data-polmod'); })[0]; if (pm) boitePolitique(pm); return; }
