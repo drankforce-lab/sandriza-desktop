@@ -304,6 +304,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     code:               '${T("Code à 6 chiffres refusé.")}',
     essais:             '${T("Trop de codes faux : reconnectez-vous.")}',
     vide:               '${T("Rien d’enregistré à dévoiler.")}',
+    // (2026-11-24) Le coffre des documents de paie.
+    stockage:           '${T("Le stockage des documents (R2) ne répond pas ou n’est pas configuré.")}',
+    type:               '${T("Choisissez le type de document.")}',
+    periode:            '${T("Indiquez la période : la date de la paie pour un talon, l’année pour un T4 ou un Relevé 1.")}',
+    fichier:            '${T("Choisissez un fichier PDF.")}',
+    trop_gros:          '${T("Le PDF dépasse 4 Mo.")}',
+    pas_pdf:            '${T("Ce fichier n’est pas un PDF.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){ var m = r && r.motif; return MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').'); }
@@ -621,7 +628,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       }).join('') + '</div>';
     }
     if (f.note) h += '<div class="note">' + esc(f.note) + '</div>';
-    if (D.peutModifier) h += '<div class="gestes"><button class="mini" data-act="fiche">${T("Modifier la fiche")}</button><button class="mini" data-act="dossier">${T("Dossier confidentiel")}</button>' + (inclus(s) ? '<button class="mini" data-act="taux">${T("Nouveau taux")}</button><button class="mini" data-act="conge">${T("Ajouter un congé")}</button>' : '') + '</div>';
+    if (D.peutModifier) h += '<div class="gestes"><button class="mini" data-act="fiche">${T("Modifier la fiche")}</button><button class="mini" data-act="dossier">${T("Dossier confidentiel")}</button><button class="mini" data-act="docs">${T("Documents de paie")}</button>' + (inclus(s) ? '<button class="mini" data-act="taux">${T("Nouveau taux")}</button><button class="mini" data-act="conge">${T("Ajouter un congé")}</button>' : '') + '</div>';
     return h + '</div>';
   }
 
@@ -903,6 +910,86 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       };
     });
   }
+  /* LE COFFRE DES DOCUMENTS DE PAIE (2026-11-24, portail RH etape 3, televersement MANUEL). Le PDF part au
+     serveur, qui le CHIFFRE et le depose dans R2 ; l employe le voit dans son portail et recoit un avis SANS le
+     document. Ouvrir ici l ENREGISTRE (telechargement) et laisse une trace au journal, comme chez l employe. */
+  var DOC_TYPES = [['talon', '${T("Talon de paie")}'], ['t4', 'T4'], ['rl1', '${T("Relevé 1")}'], ['autre', '${T("Autre document")}']];
+  function enregistrerPdf(nom, b64){
+    try {
+      var bin = atob(b64), u = new Uint8Array(bin.length);
+      for (var i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i);
+      var url = URL.createObjectURL(new Blob([u], { type: 'application/pdf' }));
+      var a = document.createElement('a'); a.href = url; a.download = nom || 'document.pdf';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(function(){ URL.revokeObjectURL(url); }, 300000);   // le code d exportation se tape avant le telechargement
+    } catch (e) { dire('${T("Le document n’a pas pu être enregistré.")}', 'err'); }
+  }
+  function boiteDocs(s){
+    dire('${T("Lecture du coffre…")}');
+    appeler('employes:docs', [s.id]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      dire('');
+      var docs = r.documents || [];
+      var nomType = function(t){ var x = DOC_TYPES.filter(function(d){ return d[0] === t; })[0]; return x ? x[1] : t; };
+      var liste = docs.length ? '<table class="tbl"><thead><tr><th>${T("Document")}</th><th>${T("Déposé")}</th><th>${T("Vu par l’employé")}</th><th class="n">${T("Ouvertures")}</th><th></th></tr></thead><tbody>'
+        + docs.map(function(d){ return '<tr' + (d.retire ? ' style="opacity:.5"' : '') + '><td><b>' + esc(d.titre) + '</b><br><span class="note">' + esc(nomType(d.type)) + (d.retire ? ' · ${T("retiré")}' : '') + '</span></td>'
+          + '<td>' + esc(String(d.le).slice(0, 10)) + '</td><td>' + (d.vu ? esc(String(d.vu).slice(0, 10)) : '—') + '</td><td class="n">' + (d.acces || 0) + '</td>'
+          + '<td style="white-space:nowrap"><button type="button" class="mini" data-dov="' + esc(d.id) + '">${T("Ouvrir")}</button> <button type="button" class="mini" data-djo="' + esc(d.id) + '">${T("Journal")}</button> '
+          + '<button type="button" class="mini" data-dre="' + esc(d.id) + '" data-rem="' + (d.retire ? '1' : '') + '">' + (d.retire ? '${T("Remettre")}' : '${T("Retirer")}') + '</button></td></tr>'; }).join('')
+        + '</tbody></table>' : '<div class="note">${T("Aucun document dans le coffre de cette personne.")}</div>';
+      var b = boite('${T("Documents de paie")}', esc(s.nom),
+        (r.cle === false ? '<div class="note" style="color:var(--tx-err)">${T("La clé de chiffrement (RH_CLE) n’est pas posée sur le serveur : rien ne peut être déposé.")}</div>' : '')
+        + (r.stockage === false ? '<div class="note" style="color:var(--tx-err)">${T("Le stockage des documents (R2) n’est pas configuré sur le serveur.")}</div>' : '')
+        + liste + '<div class="note" id="dj-v" style="margin-top:.4rem"></div>'
+        + '<h3 style="margin:.6rem 0 0">${T("Déposer un document")}</h3>'
+        + '<div class="champs"><label class="ch">${T("Type")}<select id="dc-t">' + DOC_TYPES.map(function(x){ return '<option value="' + x[0] + '">' + x[1] + '</option>'; }).join('') + '</select></label>'
+        + '<label class="ch">${T("Période")}<input id="dc-p" type="date" value="' + esc(D.aujourdhui || '') + '"></label>'
+        + '<label class="ch large">${T("Titre (facultatif)")}<input id="dc-ti" maxlength="120" placeholder="${T("Ex. : Talon du 15 novembre")}"></label>'
+        + '<label class="ch large">${T("Fichier PDF (4 Mo au plus)")}<input id="dc-f" type="file" accept="application/pdf"></label>'
+        + '<label class="ch case large"><input type="checkbox" id="dc-av" checked>${T("Aviser la personne par courriel (sans le document)")}</label></div>'
+        + '<div class="note">${T("Le PDF est chiffré sur le serveur avant d’être stocké. L’employé le consulte dans son portail (mot de passe et code). Chaque ouverture, la vôtre comprise, va au journal. Un document retiré reste conservé (6 ans) mais disparaît du portail.")}</div>',
+        '${T("Déposer")}', true);
+      if (r.cle === false || r.stockage === false) b.ok.disabled = true;
+      var tSel = b.el.querySelector('#dc-t'), pIn = b.el.querySelector('#dc-p');
+      tSel.onchange = function(){
+        var an = this.value === 't4' || this.value === 'rl1';
+        pIn.type = an ? 'number' : 'date'; pIn.value = an ? String(new Date().getFullYear() - 1) : (D.aujourdhui || '');
+        if (an) { pIn.min = '2000'; pIn.max = '2099'; }
+      };
+      b.el.addEventListener('click', function(ev){
+        var t = ev.target, id;
+        if ((id = t.getAttribute('data-dov'))) {
+          t.disabled = true;
+          appeler('employes:docOuvrir', [id]).then(function(x){ t.disabled = false; if (!x.ok) { dire(expliquer(x), 'err'); return; } enregistrerPdf(x.nom, x.pdf); dire('${T("Document enregistré dans vos téléchargements.")}', 'bon'); });
+        } else if ((id = t.getAttribute('data-djo'))) {
+          appeler('employes:docJournal', [id]).then(function(x){
+            var v = b.el.querySelector('#dj-v'); if (!x.ok) { v.textContent = expliquer(x); return; }
+            v.innerHTML = (x.acces || []).length ? '<b>${T("Ouvertures :")}</b> ' + x.acces.map(function(a){ return esc(a.qui) + ' (' + (a.role === 'employe' ? '${T("employé")}' : '${T("gestion")}') + ') ' + esc(String(a.le).replace('T', ' ').slice(0, 16)) + ' UTC'; }).join(' · ') : '${T("Jamais ouvert.")}';
+          });
+        } else if ((id = t.getAttribute('data-dre'))) {
+          var rem = !!t.getAttribute('data-rem');
+          appeler('employes:docRetirer', [id, rem]).then(function(x){ if (!x.ok) { dire(expliquer(x), 'err'); return; } b.fermer(); boiteDocs(s); });
+        }
+      });
+      b.ok.onclick = function(){
+        var f = b.el.querySelector('#dc-f').files[0];
+        if (!f) { dire('${T("Choisissez un fichier PDF.")}', 'att'); return; }
+        if (f.size > 4194304) { dire('${T("Le PDF dépasse 4 Mo.")}', 'err'); return; }
+        var lr = new FileReader();
+        lr.onload = function(){
+          var b64 = String(lr.result || '').replace(/^data:[^,]*,/, '');
+          b.ok.disabled = true; dire('${T("Chiffrement et dépôt…")}');
+          appeler('employes:docTeleverser', [{ staffId: s.id, type: b.val('dc-t'), periode: b.val('dc-p'), titre: b.val('dc-ti'), nom: f.name, pdf: b64, aviser: b.val('dc-av') }]).then(function(x){
+            b.ok.disabled = false;
+            if (!x.ok) { dire(expliquer(x), 'err'); return; }
+            dire('${T("Document déposé")}' + (x.avise ? '${T(" — la personne a été avisée par courriel.")}' : '.'), 'bon');
+            b.fermer(); boiteDocs(s);
+          });
+        };
+        lr.readAsDataURL(f);
+      };
+    });
+  }
   function boiteTaux(s){
     var b = boite('${T("Nouveau taux")}', esc(s.nom + ' · ${T("taux actuel")} ' + szArgent(s.taux || 0)),
       '<div class="champs"><label class="ch">${T("Nouveau taux")}<span class="unite"><input type="number" id="t-tx" min="0" max="500" step="0.01" value="" aria-label="${T("Nouveau taux")}"><i>$ / h</i></span></label>'
@@ -1039,6 +1126,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       else if (a === 'conge') boiteConge(ONGLET === 'equipe' && sel ? sel.id : ((equipe()[0] || {}).id || ''), ONGLET === 'horaire' ? JOUR : D.aujourdhui);
       else if (a === 'fiche' && sel) boiteFiche(sel);
       else if (a === 'dossier' && sel) boiteDossier(sel);
+      else if (a === 'docs' && sel) boiteDocs(sel);
       else if (a === 'taux' && sel) boiteTaux(sel);
       return;
     }
