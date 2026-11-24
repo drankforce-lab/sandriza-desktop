@@ -287,6 +287,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     limite:             '${T("Trop d’envois en peu de temps. Réessayez dans une heure.")}',
     pointage_ouvert:    '${T("Un pointage de la période est encore ouvert. Fermez-le (oubli de sortie) avant d’approuver.")}',
     nuage:              '${T("Le nuage a refusé l’écriture : elle n’existe que sur ce poste. Vérifiez la connexion, puis refaites le geste.")}',
+    // (2026-11-24) Le dossier confidentiel (lib-portail-rh.php).
+    cle_absente:        '${T("La clé de chiffrement des dossiers (RH_CLE) n’est pas posée sur le serveur : rien n’a été enregistré.")}',
+    illisible:          '${T("Ce dossier ne se déchiffre pas avec la clé du serveur (clé changée ?). Rien n’a été modifié.")}',
+    naissance:          '${T("La date de naissance est invalide.")}',
+    code_postal:        '${T("Le code postal doit avoir la forme A1A 1A1.")}',
+    courriel:           '${T("L’adresse courriel personnelle est invalide.")}',
+    nas:                '${T("Ce NAS n’est pas valide (9 chiffres, clé de contrôle).")}',
+    banque:             '${T("Dépôt direct : institution 3 chiffres, transit 5 chiffres, compte 5 à 12 chiffres.")}',
+    sans_code:          '${T("Votre compte n’a pas la double authentification : activez-la pour dévoiler un NAS ou un compte.")}',
+    code:               '${T("Code à 6 chiffres refusé.")}',
+    essais:             '${T("Trop de codes faux : reconnectez-vous.")}',
+    vide:               '${T("Rien d’enregistré à dévoiler.")}',
     echec:              '${T("L’opération a échoué.")}'
   };
   function expliquer(r){ var m = r && r.motif; return MOTIFS[m] || ('${T("Erreur inattendue (")}' + (m || '?') + ').'); }
@@ -604,7 +616,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       }).join('') + '</div>';
     }
     if (f.note) h += '<div class="note">' + esc(f.note) + '</div>';
-    if (D.peutModifier) h += '<div class="gestes"><button class="mini" data-act="fiche">${T("Modifier la fiche")}</button>' + (inclus(s) ? '<button class="mini" data-act="taux">${T("Nouveau taux")}</button><button class="mini" data-act="conge">${T("Ajouter un congé")}</button>' : '') + '</div>';
+    if (D.peutModifier) h += '<div class="gestes"><button class="mini" data-act="fiche">${T("Modifier la fiche")}</button><button class="mini" data-act="dossier">${T("Dossier confidentiel")}</button>' + (inclus(s) ? '<button class="mini" data-act="taux">${T("Nouveau taux")}</button><button class="mini" data-act="conge">${T("Ajouter un congé")}</button>' : '') + '</div>';
     return h + '</div>';
   }
 
@@ -826,6 +838,59 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
         urgence: b.val('f-ur'), note: b.val('f-no'), inclus: b.val('f-in'), heuresJour: b.val('f-hj'), vacancesJours: b.val('f-vj') }], '${T("Fiche enregistrée : ")}' + s.nom);
     };
   }
+  /* LE DOSSIER CONFIDENTIEL (2026-11-24, portail RH etape 2a). Tout est chiffre au serveur ; le NAS et le
+     compte n arrivent ici que MASQUES. Les laisser vides = garder ce qui est enregistre. Devoiler le complet
+     exige le code a 6 chiffres de la personne devant l ecran, et va au journal. */
+  function boiteDossier(s){
+    dire('${T("Lecture du dossier…")}');
+    appeler('employes:dossier', [s.id]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      dire('');
+      var d = r.dossier || {}, a = d.adresse || {}, bq = d.banque || {};
+      var cle = d.cle !== false;
+      var b = boite('${T("Dossier confidentiel")}', esc(s.nom) + ' · ' + (d.maj ? '${T("modifié le ")}' + esc(String(d.maj).slice(0, 10)) : '${T("aucun dossier encore")}'),
+        (cle ? '' : '<div class="note" style="color:var(--tx-err)">${T("La clé de chiffrement (RH_CLE) n’est pas posée sur le serveur : le dossier ne peut pas être enregistré.")}</div>')
+        + (d.lisible === false ? '<div class="note" style="color:var(--tx-err)">${T("Ce dossier ne se déchiffre pas avec la clé actuelle du serveur.")}</div>' : '')
+        + '<div class="champs"><label class="ch">${T("Date de naissance")}<input type="date" id="d-na" value="' + esc(d.naissance || '') + '"></label>'
+        + '<label class="ch">${T("Téléphone")}<input id="d-te" maxlength="30" value="' + esc(d.telephone || '') + '"></label>'
+        + '<label class="ch large">${T("Adresse")}<input id="d-ru" maxlength="120" value="' + esc(a.rue || '') + '" placeholder="${T("Numéro, rue, appartement")}"></label>'
+        + '<label class="ch">${T("Ville")}<input id="d-vi" maxlength="60" value="' + esc(a.ville || '') + '"></label>'
+        + '<label class="ch">${T("Province")}<input id="d-pr" maxlength="2" value="' + esc(a.province || 'QC') + '"></label>'
+        + '<label class="ch">${T("Code postal")}<input id="d-cp" maxlength="7" value="' + esc(a.codePostal || '') + '" placeholder="A1A 1A1"></label>'
+        + '<label class="ch">${T("Courriel personnel")}<input id="d-co" type="email" maxlength="120" value="' + esc(d.courriel || '') + '"></label>'
+        + '<label class="ch large">${T("NAS")}<input id="d-ns" inputmode="numeric" maxlength="11" autocomplete="off" value="" placeholder="' + esc(d.nas ? d.nas + ' — ${T("laisser vide pour le garder")}' : '${T("9 chiffres")}') + '"></label>'
+        + '<label class="ch">${T("Institution")}<input id="d-bi" inputmode="numeric" maxlength="3" value="' + esc(bq.institution || '') + '" placeholder="815"></label>'
+        + '<label class="ch">${T("Transit")}<input id="d-bt" inputmode="numeric" maxlength="5" value="' + esc(bq.transit || '') + '" placeholder="12345"></label>'
+        + '<label class="ch large">${T("Compte (dépôt direct)")}<input id="d-bc" inputmode="numeric" maxlength="12" autocomplete="off" value="" placeholder="' + esc(bq.compte ? bq.compte + ' — ${T("laisser vide pour le garder")}' : '${T("5 à 12 chiffres")}') + '"></label></div>'
+        + '<div class="note">${T("Chiffré sur le serveur. Le NAS et le compte ne s’affichent jamais en entier ici ; « Dévoiler » demande votre code à 6 chiffres et laisse une trace au journal.")}</div>'
+        + '<div class="champs" id="d-rv-z" hidden><label class="ch">${T("Votre code à 6 chiffres")}<input id="d-rv-c" inputmode="numeric" maxlength="6" autocomplete="one-time-code"></label>'
+        + '<div class="ch">&nbsp;<button type="button" class="mini" id="d-rv-ok">${T("Dévoiler")}</button></div><div class="note ch large" id="d-rv-v"></div></div>',
+        '${T("Enregistrer le dossier")}', true,
+        (d.nas ? '<button type="button" class="mini" id="d-rv-n">${T("Dévoiler le NAS")}</button>' : '')
+        + (bq.compte ? '<button type="button" class="mini" id="d-rv-b">${T("Dévoiler le compte")}</button>' : ''));
+      if (!cle || d.lisible === false) b.ok.disabled = true;
+      var champ = 'nas';
+      var ouvrir = function(c){ champ = c; var z = b.el.querySelector('#d-rv-z'); z.hidden = false; b.el.querySelector('#d-rv-v').textContent = ''; var i = b.el.querySelector('#d-rv-c'); i.value = ''; i.focus(); };
+      var bn = b.el.querySelector('#d-rv-n'); if (bn) bn.onclick = function(){ ouvrir('nas'); };
+      var bb = b.el.querySelector('#d-rv-b'); if (bb) bb.onclick = function(){ ouvrir('banque'); };
+      b.el.querySelector('#d-rv-ok').onclick = function(){
+        var btn = this; btn.disabled = true;
+        appeler('employes:dossierReveler', [s.id, champ, b.val('d-rv-c')]).then(function(x){
+          btn.disabled = false;
+          var v = b.el.querySelector('#d-rv-v');
+          if (!x.ok) { v.textContent = expliquer(x) + (x.reste != null ? ' (' + x.reste + ')' : ''); return; }
+          v.textContent = champ === 'nas' ? '${T("NAS : ")}' + x.valeur
+            : '${T("Institution ")}' + x.valeur.institution + ' · ${T("transit ")}' + x.valeur.transit + ' · ${T("compte ")}' + x.valeur.compte;
+          b.el.querySelector('#d-rv-c').value = '';
+        });
+      };
+      b.ok.onclick = function(){
+        envoyer(b, 'employes:dossierEcrire', [s.id, { naissance: b.val('d-na'), telephone: b.val('d-te'), courriel: b.val('d-co'),
+          adresse: { rue: b.val('d-ru'), ville: b.val('d-vi'), province: b.val('d-pr'), codePostal: b.val('d-cp') },
+          nas: b.val('d-ns'), banque: { institution: b.val('d-bi'), transit: b.val('d-bt'), compte: b.val('d-bc') } }], '${T("Dossier enregistré : ")}' + s.nom);
+      };
+    });
+  }
   function boiteTaux(s){
     var b = boite('${T("Nouveau taux")}', esc(s.nom + ' · ${T("taux actuel")} ' + szArgent(s.taux || 0)),
       '<div class="champs"><label class="ch">${T("Nouveau taux")}<span class="unite"><input type="number" id="t-tx" min="0" max="500" step="0.01" value="" aria-label="${T("Nouveau taux")}"><i>$ / h</i></span></label>'
@@ -912,6 +977,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       if (a === 'pointage') boitePointage({ staffId: (sel || {}).id || '', date: D.aujourdhui, entree: '09:00', sortie: '17:00' });
       else if (a === 'conge') boiteConge(ONGLET === 'equipe' && sel ? sel.id : ((equipe()[0] || {}).id || ''), ONGLET === 'horaire' ? JOUR : D.aujourdhui);
       else if (a === 'fiche' && sel) boiteFiche(sel);
+      else if (a === 'dossier' && sel) boiteDossier(sel);
       else if (a === 'taux' && sel) boiteTaux(sel);
       return;
     }
