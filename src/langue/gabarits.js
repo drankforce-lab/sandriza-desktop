@@ -129,4 +129,11 @@ module.exports = {
   "Duplication…": "Duplicating…",
   /* (2026-10-25, audit) Textes visibles qui restaient hors T(). */
   'Couleur invalide : utilisez un code hexadécimal comme #1a1a2e.': 'Invalid colour: use a hexadecimal code such as #1a1a2e.',
+  /* (2026-11-24) Le gabarit « Logo Sz ». « Logo Sz » est le NOM du gabarit (une donnée) : il reste tel quel. */
+  ' Logo Sz (bandeau noir et monogramme)': ' Sz logo (black banner and monogram)',
+  'L’en-tête devient le bandeau noir du logo Sandriza, souligné d’un filet caramel ; le pied crème porte le monogramme Sz. Image fixe, nette partout, Outlook compris. Les couleurs, l’effet animé et la bannière GIF ne s’appliquent pas.':
+    'The header becomes the black Sandriza logo banner, underlined in caramel; the cream footer carries the Sz monogram. A still image, sharp everywhere, Outlook included. Colours, the animated effect and the GIF banner do not apply.',
+  'Le gabarit « Logo Sz » est fourni avec l’application : il ne peut pas être supprimé.':
+    'The « Logo Sz » template comes with the application: it cannot be deleted.',
+  'en-tête : logo Sz': 'header: Sz logo',
 };

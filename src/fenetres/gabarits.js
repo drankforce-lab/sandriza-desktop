@@ -16,7 +16,7 @@
  * COMPRIS : le script vit dans un littéral de gabarit.
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, JS_BORNER } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, ICO, TETE, LIEU, JS_BORNER } = require('./socle.js');
 /* ⚠ LES DEUX LANGUES. Résolu À LA GÉNÉRATION : la page naît dans la
    langue du poste. ⚠⚠ On ne traduit QUE ce qui se lit — jamais une valeur
    enregistrable (voir src/langue/index.js). */
@@ -78,6 +78,12 @@ body{background:var(--f-page);color:var(--tx);
 .apercu .body{background:#fff;padding:10px 20px;color:#555;font-size:11px}
 .apercu .foot{padding:10px 24px;text-align:center;background:#FAF7F2;border-top:1px solid #EFE7DA}
 .apercu .foot .cp{font-size:10px;color:#565B6B;letter-spacing:.04em}
+/* Le gabarit << Logo Sz >> (2026-11-24) : le bandeau noir du logo, un filet caramel, le monogramme au pied. */
+.apercu .head.logo{padding:0;background:#111!important;border-bottom:3px solid #C49A6C;line-height:0}
+.apercu .head.logo img{display:block;width:100%;height:auto}
+.apercu .foot.logo{background:#FAF6EF}
+.apercu .foot img{display:block;margin:0 auto 6px;width:20px;height:24px}
+.swatch .b1.logo{background:#111!important;border-bottom:3px solid #C49A6C;height:11px}
 .gifwrap{max-width:420px;margin:0 0 .8rem}
 .ic-lg{vertical-align:-3px}
 .ic-lg svg{width:15px;height:15px}
@@ -146,6 +152,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
   var EDIT = null;      // null = liste ; '' = nouveau ; id = modification
   var DELCONF = '';     // id en attente de confirmation de suppression
   var gifTimer = null;
+  // Les images du gabarit << Logo Sz >> : celles que recoit la cliente (lib-courriel.php), dans la langue du poste.
+  var LG = ('${LIEU()}'.slice(0, 2) === 'en') ? 'en' : 'fr';
+  var IMG_ENTETE = 'https://www.sandriza.com/assets/marque/nouveau/courriel-entete-' + LG + '.png';
+  var IMG_MONO = 'https://www.sandriza.com/assets/marque/nouveau/monogramme-sz.png';
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -165,6 +175,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
     nom_requis:'${T("Le nom du gabarit est requis.")}',
     introuvable:'${T("Ce gabarit n’existe plus.")}',
     defaut_protege:'${T("Le gabarit « Défaut » ne peut pas être supprimé.")}',
+    integre_protege:'${T("Le gabarit « Logo Sz » est fourni avec l’application : il ne peut pas être supprimé.")}',
     echec:"${T('L\'opération a échoué.')}",
   };
   function expliquer(r){
@@ -214,17 +225,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
   }
   function editeurHtml(){
     var t = (EDIT ? gabParId(EDIT) : null) || { name: '', headerBgFrom: '#1a1a2e', headerBgTo: '#2d1b69',
-      headerSubtitle: '', footerBg: '#1a1a2e', footerTextColor: '#c4a882', animated: false, gifBanner: false };
+      headerSubtitle: '', footerBg: '#1a1a2e', footerTextColor: '#c4a882', animated: false, gifBanner: false, logoSz: false };
     var brand = (D && D.marque) || 'SANDRIZA';
     var h = '<div class="carte edit"><div class="stitre">' + (EDIT ? '${T("Modifier — ")}' + esc(t.name || '') : '${T("Nouveau gabarit")}') + '</div>';
     /* ⚠ DEUX COLONNES (sa demande : aucune barre de defilement) — reglages a
        gauche, apercus a droite. Empiles, ils depassaient la fenetre de 466 px. */
     h += '<div class="ged"><div class="ged-g">';
     h += '<div class="ch"><label for="g-name">${T("Nom du gabarit")}</label><input type="text" id="g-name" value="' + esc(t.name || '') + '"' + (RO ? ' disabled' : '') + '></div>';
-    h += '<div class="gr2">' + coulChamp('g-hfrom', '${T("En-tête : couleur de départ")}', t.headerBgFrom || '#1a1a2e')
+    h += '<label class="bascule"><input type="checkbox" id="g-logo"' + (t.logoSz ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
+      + '<span><span class="t"><span class="ico ic-lg" aria-hidden="true">${ICO.image}</span>${T(" Logo Sz (bandeau noir et monogramme)")}</span><br><span class="d">${T("L’en-tête devient le bandeau noir du logo Sandriza, souligné d’un filet caramel ; le pied crème porte le monogramme Sz. Image fixe, nette partout, Outlook compris. Les couleurs, l’effet animé et la bannière GIF ne s’appliquent pas.")}</span></span></label>';
+    h += '<div class="gr2 g-coul"' + (t.logoSz ? ' hidden' : '') + '>' + coulChamp('g-hfrom', '${T("En-tête : couleur de départ")}', t.headerBgFrom || '#1a1a2e')
       + coulChamp('g-hto', '${T("En-tête : couleur de fin")}', t.headerBgTo || '#2d1b69') + '</div>';
     h += '<div class="ch"><label for="g-sub">${T("Sous-titre (vide = tagline du pied de page)")}</label>'
       + '<input type="text" id="g-sub" value="' + esc(t.headerSubtitle || '') + '" placeholder="${T("ÉLÉGANCE · RAFFINEMENT · STYLE")}"' + (RO ? ' disabled' : '') + '></div>';
+    h += '<div class="g-coul"' + (t.logoSz ? ' hidden' : '') + '>';
     h += '<label class="bascule"><input type="checkbox" id="g-anim"' + (t.animated ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
       + '<span><span class="t"><span class="ic">✨</span>${T(" Effet animé CSS (en-tête)")}</span><br><span class="d">${T("Léger dégradé chatoyant, sans image. Visible dans Apple Mail / Mail iOS ; ailleurs (Gmail, Outlook) le dégradé reste fixe.")}</span></span></label>';
     h += '<label class="bascule"><input type="checkbox" id="g-gif"' + (t.gifBanner ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
@@ -233,14 +247,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
        courriels (lib-courriel.php). La « couleur du texte » ne colore plus que le SOUS-TITRE de
        l'en-tête (et de la bannière GIF) : le champ porte désormais ce nom-là. */
     h += '<div class="gr2">' + coulChamp('g-fcol', '${T("En-tête : couleur du sous-titre")}', t.footerTextColor || '#c4a882') + '</div>';
+    h += '</div>';
     // Aperçu CSS
     h += '</div><div class="ged-d">';
     h += '<div class="apercu" id="g-prev">'
-      + '<div class="head" id="g-prev-head"><div class="ti">' + esc(brand.toUpperCase()) + '</div><div class="su" id="g-prev-sub"></div></div>'
+      + '<div class="head" id="g-prev-head"><img id="g-prev-logo" alt="" hidden><div class="ti">' + esc(brand.toUpperCase()) + '</div><div class="su" id="g-prev-sub"></div></div>'
       + '<div class="body">${T("…contenu du courriel…")}</div>'
-      + '<div class="foot" id="g-prev-foot"><div class="cp" id="g-prev-cp">' + esc(brand.toUpperCase()) + ' · © ' + esc(brand) + '</div></div></div>';
+      + '<div class="foot" id="g-prev-foot"><img id="g-prev-mono" alt="" hidden><div class="cp" id="g-prev-cp">' + esc(brand.toUpperCase()) + ' · © ' + esc(brand) + '</div></div></div>';
     // Aperçu GIF (relayé)
-    h += '<div class="gifwrap" id="g-gifwrap" style="display:' + (t.gifBanner ? 'block' : 'none') + '">'
+    h += '<div class="gifwrap" id="g-gifwrap" style="display:' + ((t.gifBanner && !t.logoSz) ? 'block' : 'none') + '">'
       + '<div class="lg"><span class="ico ic-lg" aria-hidden="true">${ICO.image}</span>${T(" Aperçu de la bannière GIF ")}<button class="b" type="button" id="g-gifrefr" style="padding:.1rem .5rem">↻</button></div>'
       + '<img id="g-gifimg" alt="${T("Aperçu bannière")}"></div>';
     h += '</div></div>';
@@ -263,8 +278,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
       h += '<div class="ligne"><div class="nom">' + esc(t.name)
         /* « (defaut) » seulement si le nom ne le dit pas deja — « Defaut (defaut) » (2026-10-01). */
         + ((t.id === 'default' && !/^(d[ée]faut|default)$/i.test(String(t.name || '').trim())) ? '<span class="def">${T("(défaut)")}</span>' : '')
-        + '<div class="swatch"><div class="b1" style="background:linear-gradient(90deg,' + esc(t.headerBgFrom) + ',' + esc(t.headerBgTo) + ')"></div>'
-        + '<span class="lb">${T("en-tête")}</span></div></div>'
+        + '<div class="swatch"><div class="b1' + (t.logoSz ? ' logo' : '') + '" style="background:linear-gradient(90deg,' + esc(t.headerBgFrom) + ',' + esc(t.headerBgTo) + ')"></div>'
+        + '<span class="lb">' + (t.logoSz ? '${T("en-tête : logo Sz")}' : '${T("en-tête")}') + '</span></div></div>'
         + '<div style="display:flex;gap:.35rem">'
         + '<button class="b" type="button" data-edit="' + esc(t.id) + '"><span class="ic">✎</span>${T(" Modifier")}</button>'
         + (RO ? '' : '<button class="b" type="button" data-copy="' + esc(t.id) + '"><span class="ic">📋</span>${T(" Copier")}</button>')
@@ -348,6 +363,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
     });
     var sub = document.getElementById('g-sub'); if (sub) sub.oninput = function(){ majApercu(); planGif(); };
     var anim = document.getElementById('g-anim'); if (anim) anim.onchange = majApercu;
+    var lgo = document.getElementById('g-logo'); if (lgo) lgo.onchange = function(){
+      var zs = corps.querySelectorAll('.g-coul'); for (var z = 0; z < zs.length; z++) zs[z].hidden = this.checked;
+      var w = document.getElementById('g-gifwrap'); if (w) w.style.display = (!this.checked && chk('g-gif')) ? 'block' : 'none';
+      majApercu(); if (!this.checked && chk('g-gif')) rafraichirGif(); };
     var gif = document.getElementById('g-gif'); if (gif) gif.onchange = function(){ var w = document.getElementById('g-gifwrap'); if (w) w.style.display = this.checked ? 'block' : 'none'; if (this.checked) rafraichirGif(); };
     var gr = document.getElementById('g-gifrefr'); if (gr) gr.onclick = rafraichirGif;
     var sv = document.getElementById('g-save'); if (sv) sv.onclick = enregistrer;
@@ -364,6 +383,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
       head.style.backgroundSize = anim ? '220% 220%' : ''; if (anim) head.classList.add('anim'); else head.classList.remove('anim');
     }
     var ps = document.getElementById('g-prev-sub'); if (ps) { ps.style.color = fCol; ps.textContent = sub; }
+    // Le gabarit << Logo Sz >> : l image du bandeau remplace le nom et le degrade ; le monogramme coiffe le pied.
+    var lg = chk('g-logo'), il = document.getElementById('g-prev-logo'), im = document.getElementById('g-prev-mono');
+    var ft = document.getElementById('g-prev-foot');
+    if (head) { head.classList.toggle('logo', lg); var ti = head.querySelector('.ti'); if (ti) ti.hidden = lg; if (ps) ps.hidden = lg; }
+    if (il) { if (lg && !il.getAttribute('src')) il.src = IMG_ENTETE; il.hidden = !lg; }
+    if (im) { if (lg && !im.getAttribute('src')) im.src = IMG_MONO; im.hidden = !lg; }
+    if (ft) ft.classList.toggle('logo', lg);
   }
   function planGif(){ if (!chk('g-gif')) return; if (gifTimer) clearTimeout(gifTimer); gifTimer = setTimeout(rafraichirGif, 600); }
   function rafraichirGif(){
@@ -380,14 +406,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
   function saisieEditeur(){
     return { id: (EDIT || '__new__'), name: val('g-name'),
       headerBgFrom: coul('g-hfrom').v, headerBgTo: coul('g-hto').v, headerSubtitle: val('g-sub'),
-      footerTextColor: coul('g-fcol').v, animated: chk('g-anim'), gifBanner: chk('g-gif') };
+      footerTextColor: coul('g-fcol').v, animated: chk('g-anim'), gifBanner: chk('g-gif'), logoSz: chk('g-logo') };
   }
   function adopter(r){ D = r; RO = !r.peutModifier; }
 
   function enregistrer(){
     if (RO || OCCUPE) return;
     if (!val('g-name').trim()) { dire('${T("Le nom du gabarit est requis.")}', 'err'); return; }
-    var mauvaise = ['g-hfrom', 'g-hto', 'g-fcol'].map(coul).filter(function(c){ return !c.ok; })[0];
+    var mauvaise = chk('g-logo') ? null : ['g-hfrom', 'g-hto', 'g-fcol'].map(coul).filter(function(c){ return !c.ok; })[0];
     if (mauvaise) { dire('${T("Couleur invalide : utilisez un code hexadécimal comme #1a1a2e.")}', 'err'); mauvaise.el.focus(); return; }
     occuper(true); dire('${T("Enregistrement…")}');
     var avant = ((D && D.gabarits) || []).map(function(x){ return x.id; });
