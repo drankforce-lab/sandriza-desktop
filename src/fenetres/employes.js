@@ -1023,7 +1023,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
           + '<span>T4 : ' + etat(g.t4) + '</span><span>${T("RL-1 : ")}' + etat(g.rl1) + '</span></div>'; }).join('')
         : '<div class="note">${T("Personne n’a été payé cette année-là.")}</div>';
       var opts = '<option value="">${T("— choisir —")}</option>' + gens.map(function(g){ return '<option value="' + esc(g.id) + '">' + esc(g.nom) + '</option>'; }).join('');
-      var b = boite('${T("Feuillets T4 et Relevé 1")}', '${T("Année d’imposition ")}' + '<select id="fe-an">' + [0, 1, 2, 3].map(function(k){ var a = String(new Date().getFullYear() - k); return '<option' + (a === annee ? ' selected' : '') + '>' + a + '</option>'; }).join('') + '</select>',
+      var b = boite('${T("Feuillets T4 et Relevé 1")}', '${T("Année d’imposition ")}' + '<select id="fe-an" aria-label="${T("Année d’imposition")}">' + [0, 1, 2, 3].map(function(k){ var a = String(new Date().getFullYear() - k); return '<option' + (a === annee ? ' selected' : '') + '>' + a + '</option>'; }).join('') + '</select>',
         (r.cle === false ? '<div class="note fe-non">${T("La clé de chiffrement (RH_CLE) n’est pas posée sur le serveur : rien ne peut être déposé.")}</div>' : '')
         + tete + '<div style="margin:.4rem 0">' + liste + '</div>'
         + '<h3 style="margin:.6rem 0 0">${T("Déposer en lot")}</h3>'

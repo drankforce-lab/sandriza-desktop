@@ -509,4 +509,5 @@ module.exports = {
   "Dépôt ": "Uploading ",
   "plus de 4 Mo": "over 4 MB",
   "T4": "T4",
+  "Année d’imposition": "Tax year",
 };
