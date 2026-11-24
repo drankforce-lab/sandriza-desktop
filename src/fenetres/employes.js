@@ -222,6 +222,7 @@ html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
 .mods{display:flex;flex-direction:column;gap:.35rem}
 .mods .m{display:grid;grid-template-columns:minmax(0,1fr) 7rem 7rem auto;gap:.4rem;align-items:center}
 .mods .m input{height:2.1rem}
+#r-pals .m{grid-template-columns:11rem 9rem auto;justify-content:start}
 @media (max-width:980px){ .g2,.g3{grid-template-columns:1fr} .em-tuiles{grid-template-columns:repeat(2,minmax(0,1fr))} .tl,.sem{grid-template-columns:9rem minmax(0,1fr) 3.6rem} .sem{grid-template-columns:9rem repeat(7,minmax(0,1fr)) 3.6rem} }
 @media print{ body{overflow:visible;background:#fff;color:#000} .tete,.pied,.em-tete,#corps>*:not(.imp){display:none!important}
   #corps{overflow:visible} .imp{display:block!important} .imp>*:not(#bulletin){display:none!important} #bulletin{box-shadow:none;border:0} }
@@ -828,7 +829,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       + '<label class="ch">${T("Taux horaire actuel")}<span class="unite"><input type="number" id="f-tx" min="0" max="500" step="0.01" value="' + esc(s.taux || 0) + '" aria-label="${T("Taux horaire actuel")}"><i>$ / h</i></span></label>'
       + '<label class="ch">${T("Contact d’urgence")}<input id="f-ur" maxlength="120" value="' + esc(f.urgence || '') + '" placeholder="${T("Nom et téléphone")}"></label>'
       + '<label class="ch">${T("Heures par jour de vacances")}<span class="unite"><input type="number" id="f-hj" min="1" max="12" step="0.25" value="' + esc(f.heuresJour || 8) + '" aria-label="${T("Heures par jour de vacances")}"><i>h</i></span></label>'
-      + '<label class="ch">${T("Jours de vacances par année")}<span class="unite"><input type="number" id="f-vj" min="0" max="60" step="0.5" value="' + esc(f.vacancesJours == null ? '' : f.vacancesJours) + '" placeholder="${T("selon la loi")}" aria-label="${T("Jours de vacances par année")}"><i>${T("jours")}</i></span></label>'
+      + '<label class="ch">${T("Jours de vacances par année")}<span class="unite"><input type="number" id="f-vj" min="0" max="60" step="0.5" value="' + esc(f.vacancesJours == null ? '' : f.vacancesJours) + '" placeholder="${T("selon l’ancienneté")}" aria-label="${T("Jours de vacances par année")}"><i>${T("jours")}</i></span></label>'
       + '<label class="ch large">${T("Note")}<input id="f-no" maxlength="300" value="' + esc(f.note || '') + '"></label>'
       + '<label class="ch case large"><input type="checkbox" id="f-in"' + (f.inclus === false ? '' : ' checked') + '>${T("À la paie (décochez pour la propriétaire ou un compte technique)")}</label></div>'
       + '<div class="note">${T("Le taux saisi ici CORRIGE le taux en vigueur. Pour une augmentation à une date, utilisez « Nouveau taux » : les périodes déjà payées ne bougent pas.")}</div>',
@@ -902,6 +903,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
   function boiteReglages(){
     var R = (D && D.reglages) || {};
     var mods = (R.modeles || []).slice();
+    var pals = (R.vacPaliers || []).slice();
+    /* Les paliers de vacances (2026-11-24, etape 2b) : des N annees de service, J jours. Jamais sous la loi. */
+    var lignePal = function(p, i){ return '<div class="m" data-pi="' + i + '"><span class="unite"><input type="number" data-pk="ans" min="0" max="50" step="1" value="' + esc(p.ans) + '" aria-label="${T("Années de service")}"><i>${T("ans et plus")}</i></span>'
+      + '<span class="unite"><input type="number" data-pk="jours" min="0.5" max="60" step="0.5" value="' + esc(p.jours) + '" aria-label="${T("Jours de vacances")}"><i>${T("jours")}</i></span>'
+      + '<button type="button" class="mini" data-px="' + i + '" aria-label="${T("Retirer ce palier")}">✕</button></div>'; };
     var ligneMod = function(m, i){ return '<div class="m" data-mi="' + i + '"><input data-mk="nom" maxlength="30" value="' + esc(m.nom) + '" aria-label="${T("Nom du modèle")}">'
       + '<input type="time" data-mk="debut" value="' + esc(m.debut) + '" aria-label="${T("Début")}"><input type="time" data-mk="fin" value="' + esc(m.fin) + '" aria-label="${T("Fin")}">'
       + '<button type="button" class="mini" data-mx="' + i + '" aria-label="${T("Retirer ce modèle")}">✕</button></div>'; };
@@ -922,18 +928,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       + '<label class="ch">${T("Retard signalé après")}<span class="unite"><input type="number" id="r-rt" min="1" max="120" step="1" value="' + esc(R.retardMin) + '" aria-label="${T("Retard signalé après")}"><i>min</i></span></label></div>'
       + '<div class="ch large" style="margin-top:.2rem">${T("Modèles de quart")}<div class="mods" id="r-mods">' + mods.map(ligneMod).join('') + '</div>'
       + '<button type="button" class="mini" id="r-madd" style="align-self:flex-start">${T("+ Ajouter un modèle")}</button></div>'
+      + '<div class="ch large" style="margin-top:.2rem">${T("Vacances selon l’ancienneté (politique de la boutique)")}<div class="mods" id="r-pals">' + pals.map(lignePal).join('') + '</div>'
+      + '<button type="button" class="mini" id="r-padd" style="align-self:flex-start">${T("+ Ajouter un palier")}</button>'
+      + '<span class="note">${T("Années de service complètes au 1er mai. Chacun reçoit le plus généreux de la loi (10 jours dès 1 an, 15 dès 3 ans) et de son palier ; l’indemnité suit (2 % par semaine). Le réglage de la fiche d’une personne passe avant.")}</span></div>'
       + '<div class="note">${T("Normes du travail du Québec : supplémentaires au-delà de 40 h par semaine à 150 % ; pause de 30 min non payée après 5 h ; vacances 4 %, 6 % dès 3 ans ; fériés et maladie payés à 1/20 du salaire des 4 semaines précédentes. Le salaire minimum change chaque 1er mai.")}</div>',
       '${T("Enregistrer")}', true);
     var lire = function(){ var out = []; b.el.querySelectorAll('#r-mods .m').forEach(function(r){ var g = function(k){ return r.querySelector('[data-mk="' + k + '"]').value; };
       out.push({ id: 'm' + (out.length + 1), nom: g('nom'), debut: g('debut'), fin: g('fin') }); }); return out; };
+    var lirePal = function(){ var out = []; b.el.querySelectorAll('#r-pals .m').forEach(function(r){ var g = function(k){ return r.querySelector('[data-pk="' + k + '"]').value; };
+      if (g('ans') !== '' && g('jours') !== '') out.push({ ans: +g('ans'), jours: +g('jours') }); }); return out; };
     b.el.addEventListener('click', function(ev){
       var x = ev.target.closest && ev.target.closest('[data-mx]');
       if (x) { mods = lire(); mods.splice(+x.getAttribute('data-mx'), 1); b.el.querySelector('#r-mods').innerHTML = mods.map(ligneMod).join(''); }
+      var px = ev.target.closest && ev.target.closest('[data-px]');
+      if (px) { pals = lirePal(); pals.splice(+px.getAttribute('data-px'), 1); b.el.querySelector('#r-pals').innerHTML = pals.map(lignePal).join(''); }
+      if (ev.target.id === 'r-padd') { pals = lirePal(); var der = pals[pals.length - 1]; pals.push({ ans: der ? der.ans + 1 : 5, jours: der ? der.jours + 5 : 20 }); b.el.querySelector('#r-pals').innerHTML = pals.map(lignePal).join(''); }
       if (ev.target.id === 'r-madd') { mods = lire(); mods.push({ nom: '', debut: '09:00', fin: '17:00' }); b.el.querySelector('#r-mods').innerHTML = mods.map(ligneMod).join(''); }
     });
     b.ok.onclick = function(){
       envoyer(b, 'employes:reglages', [{ periodeJours: +b.val('r-p'), debutRef: b.val('r-d'), salaireMin: +b.val('r-mi') || 0, seuilHS: +b.val('r-s'), tauxHS: Math.round(+b.val('r-t')) / 100,
-        vacancesMode: b.val('r-v'), pauseAuto: b.val('r-pa'), pauseApresH: +b.val('r-ph'), pauseMin: +b.val('r-pm'), paques: b.val('r-pq'), retardMin: +b.val('r-rt'), modeles: lire() }],
+        vacancesMode: b.val('r-v'), pauseAuto: b.val('r-pa'), pauseApresH: +b.val('r-ph'), pauseMin: +b.val('r-pm'), paques: b.val('r-pq'), retardMin: +b.val('r-rt'), modeles: lire(), vacPaliers: lirePal() }],
         '${T("Réglages de la paie enregistrés.")}');
       PERIODE = '';
     };

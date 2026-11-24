@@ -408,4 +408,13 @@ module.exports = {
   "Institution ": "Institution ",
   "transit ": "transit ",
   "compte ": "account ",
+  /* (2026-11-24) Vacances par ancienneté (portail RH, étape 2b). */
+  "Années de service": "Years of service",
+  "ans et plus": "years and more",
+  "Jours de vacances": "Vacation days",
+  "Retirer ce palier": "Remove this tier",
+  "Vacances selon l’ancienneté (politique de la boutique)": "Vacation by seniority (store policy)",
+  "+ Ajouter un palier": "+ Add a tier",
+  "Années de service complètes au 1er mai. Chacun reçoit le plus généreux de la loi (10 jours dès 1 an, 15 dès 3 ans) et de son palier ; l’indemnité suit (2 % par semaine). Le réglage de la fiche d’une personne passe avant.": "Full years of service on May 1. Everyone gets the more generous of the law (10 days from 1 year, 15 from 3 years) and their tier; vacation pay follows (2% per week). A person’s own setting on their record takes precedence.",
+  "selon l’ancienneté": "by seniority",
 };
