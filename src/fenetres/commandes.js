@@ -433,6 +433,20 @@ html.jour .cm-c{box-shadow:0 10px 24px -16px rgba(20,30,50,.22)}
 .cm-rb{padding:14px 16px}
 .cm-chv .e{display:grid;grid-template-columns:18px minmax(0,1fr);gap:0 10px;align-items:start;padding-bottom:10px}
 .cm-chv .e:last-child{padding-bottom:0}
+/* (2026-11-24, sa capture : « tu perds trop d'espace dans le bas ») LA PAGE PREND TOUTE LA HAUTEUR : la carte des articles
+   s'étire (le total collé au pied), les lignes grandissent quand il y a de la place (vraies vignettes), et à droite la
+   chronologie occupe ce qui reste, les gestes en bas. */
+.cm-g>.cm-art{flex:1 1 auto}
+.cm-art .cm-lignes{flex:1 1 auto}
+.cm-art .cm-tot{margin-top:auto}
+.cm-cote>.cm-chv{flex:1 1 auto}
+.cm-cote>.gestes{margin-top:auto}
+.cm-art.grand .r{height:118px}
+.cm-art.grand .l{grid-template-columns:96px minmax(0,1fr) 60px 120px}
+.cm-art.grand .ph{width:96px;height:96px;border-radius:14px;font-size:28px}
+.cm-art.grand .nm b{font-size:16px}
+.cm-art.grand .nm span{font-size:13px}
+.cm-art.grand .m{font-size:16px}
 .cm-chv .e i{width:18px;height:18px;border-radius:50%;box-sizing:border-box;border:2px solid var(--v12);display:flex;align-items:center;justify-content:center}
 .cm-chv .e.fait i{background:var(--sz-btn-prim,#c9a27a);border-color:var(--sz-btn-prim,#c9a27a);color:var(--sz-btn-prim-txt,#1a1208)}
 .cm-chv .e.cours i{border-color:var(--ep-ambre-t);background:var(--ep-ambre-f)}
@@ -1437,6 +1451,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     var sec = z.parentNode;
     L.forEach(function(r){ r.hidden = false; });
     pag.hidden = true; sec.classList.remove('dense');
+    // Peu d articles : des lignes plus grandes (vignettes de 96 px), si TOUT tient encore — sinon la taille normale.
+    sec.classList.add('grand');
+    if (!L.length || L.length * L[0].offsetHeight > z.clientHeight) sec.classList.remove('grand');
     var hl = L.length ? L[0].offsetHeight : 77;
     var tient = Math.max(1, Math.floor(z.clientHeight / hl));
     // Trop d articles pour la carte : des lignes plus serrées d abord (vignettes de 40 px), les pages ensuite.

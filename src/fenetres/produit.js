@@ -1667,7 +1667,9 @@ function pageProduit(id, importId) {
     var bIa = document.getElementById('p-ia');
     if (bIa) bIa.onclick = rediger;
     var bIa2 = document.getElementById('p-ia-photo');
-    if (bIa2) bIa2.onclick = rediger;
+    // (2026-11-24, sa demande) Une fiche DÉJÀ créée n'a pas ce bouton à l'étape Photos (il reste à l'étape 2, sous la description).
+    if (bIa2 && ID) bIa2.remove();
+    else if (bIa2) bIa2.onclick = rediger;
     var tons = document.getElementById('p-ia-ton');
     if (tons) tons.onclick = function(ev){
       var b = ev.target.closest && ev.target.closest('[data-ton]'); if (!b) return;
