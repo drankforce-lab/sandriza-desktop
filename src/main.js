@@ -3749,7 +3749,7 @@ const OPS_PONT = new Set([
   'employes:demander', 'employes:demandeAnnuler', 'employes:mesDemandes', 'employes:demandeTraiter',
   'employes:politiques', 'employes:politiqueEcrire', 'employes:politiqueRetirer',
   'employes:dossier', 'employes:dossierEcrire', 'employes:dossierReveler',
-  'employes:docs', 'employes:docTeleverser', 'employes:docOuvrir', 'employes:docJournal', 'employes:docRetirer',
+  'employes:docs', 'employes:docTeleverser', 'employes:docOuvrir', 'employes:docJournal', 'employes:docRetirer', 'employes:feuillets',
   // Relance des clients endormis (fenetre Relance, 2026-11-20). `relance:envoyer` passe par Resend (infolettre).
   'relance:donnees', 'relance:apercu', 'relance:envoyer', 'relance:reglages',
   // Fermeture de caisse (fenetre Fermeture, 2026-11-21) : journee de comptoir, tiroir, rapport Z.

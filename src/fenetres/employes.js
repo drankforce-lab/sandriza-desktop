@@ -223,6 +223,8 @@ html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
 .mods .m{display:grid;grid-template-columns:minmax(0,1fr) 7rem 7rem auto;gap:.4rem;align-items:center}
 .mods .m input{height:2.1rem}
 #r-pals .m{grid-template-columns:11rem 9rem auto;justify-content:start}
+.fe-l{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,14rem) auto;gap:.5rem;align-items:center;font-size:.76rem;padding:.2rem 0;border-bottom:1px solid var(--v07)}
+.fe-ok{color:var(--tx-ok)}.fe-non{color:var(--tx-err)}.fe-att{color:var(--tx-jaune)}
 #a-cat .m{grid-template-columns:minmax(0,1fr) 9rem 7.5rem 6.5rem 6.5rem auto auto auto}
 #a-cat .m label{display:flex;align-items:center;gap:.25rem;font-size:.72rem;white-space:nowrap}
 .av-f{display:flex;flex-wrap:wrap;gap:.3rem 1rem}
@@ -390,7 +392,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     } else if (ONGLET === 'paie') {
       h += '<div class="em-nav"><button data-per="-1" aria-label="${T("Période précédente")}">‹</button><b>'
         + esc('${T("Du ")}' + court(D.periode.debut) + ' ${T("au")} ' + court(D.periode.fin)) + '</b><button data-per="1" aria-label="${T("Période suivante")}">›</button></div>'
-        + '<button class="mini" id="em-reg">${T("Réglages de la paie")}</button><button class="mini" id="em-av">${T("Avantages sociaux")}</button><button class="mini" id="em-csv">${T("Exporter (CSV)")}</button>';
+        + '<button class="mini" id="em-reg">${T("Réglages de la paie")}</button><button class="mini" id="em-av">${T("Avantages sociaux")}</button><button class="mini" id="em-fe">${T("Feuillets T4 / RL-1")}</button><button class="mini" id="em-csv">${T("Exporter (CSV)")}</button>';
     } else if (ONGLET === 'politiques') {
       if (D.peutModifier) h += '<button class="prim mini" id="pol-neuve">${T("Nouvelle politique")}</button>';
     } else if (ONGLET === 'equipe') {
@@ -913,7 +915,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
   /* LE COFFRE DES DOCUMENTS DE PAIE (2026-11-24, portail RH etape 3, televersement MANUEL). Le PDF part au
      serveur, qui le CHIFFRE et le depose dans R2 ; l employe le voit dans son portail et recoit un avis SANS le
      document. Ouvrir ici l ENREGISTRE (telechargement) et laisse une trace au journal, comme chez l employe. */
-  var DOC_TYPES = [['talon', '${T("Talon de paie")}'], ['t4', 'T4'], ['rl1', '${T("Relevé 1")}'], ['autre', '${T("Autre document")}']];
+  var DOC_TYPES = [['talon', '${T("Talon de paie")}'], ['t4', '${T("T4")}'], ['rl1', '${T("Relevé 1")}'], ['autre', '${T("Autre document")}']];
   function enregistrerPdf(nom, b64){
     try {
       var bin = atob(b64), u = new Uint8Array(bin.length);
@@ -987,6 +989,84 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
           });
         };
         lr.readAsDataURL(f);
+      };
+    });
+  }
+  /* LES FEUILLETS T4 ET RELEVE 1 (2026-11-24, portail RH etape 4). Le suivi d une annee (qui doit les recevoir,
+     deposes, consultes) et le DEPOT EN LOT : plusieurs PDF d un coup, chacun associe a une personne d apres son
+     NOM DE FICHIER (a corriger au besoin), deposes un par un par la meme porte que le coffre (doc_televerser). */
+  function sansAccent(x){ return String(x || '').normalize('NFD').replace(/[\u0300-\u036f]/g, '').toLowerCase(); }
+  function deviner(nomFichier, gens){
+    var f = sansAccent(nomFichier).replace(/[^a-z]+/g, ' ');
+    var mieux = '', score = 0;
+    gens.forEach(function(g){
+      var mots = sansAccent(g.nom).split(/[^a-z]+/).filter(function(m){ return m.length > 1; });
+      var n = mots.filter(function(m){ return (' ' + f + ' ').indexOf(' ' + m + ' ') >= 0; }).length;
+      if (n > score && n >= Math.min(2, mots.length)) { score = n; mieux = g.id; }
+    });
+    return mieux;
+  }
+  function boiteFeuillets(annee){
+    dire('${T("Lecture du suivi…")}');
+    appeler('employes:feuillets', [annee]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      dire('');
+      var gens = r.gens || [], auj = D.aujourdhui || '';
+      var etat = function(x){ return x ? '<span class="fe-ok">✓ ' + esc(String(x.le).slice(0, 10)) + (x.vu ? ' · ${T("vu")}' : '') + '</span>' : '<span class="fe-non">${T("à déposer")}</span>'; };
+      var manque = gens.filter(function(g){ return !g.t4 || !g.rl1; }).length;
+      var jours = Math.ceil((new Date(r.echeance + 'T23:59:59') - new Date()) / 86400000);
+      var tete = '<div class="note' + (manque && jours <= 30 ? ' fe-non' : '') + '"><b>${T("Échéance : ")}' + esc(r.echeance) + '</b> — '
+        + (manque ? manque + '${T(" personne(s) sans tous leurs feuillets")}' + (jours >= 0 ? ' · ' + jours + '${T(" jour(s) restant(s)")}' : '${T(" · ÉCHÉANCE DÉPASSÉE")}') : '${T("tous les feuillets sont déposés.")}') + '</div>';
+      var liste = gens.length ? gens.map(function(g){
+        return '<div class="fe-l"><span><b>' + esc(g.nom) + '</b>' + (g.actif ? '' : ' <span class="fe-att">${T("— compte désactivé : remettre le feuillet autrement (poste ou en main propre)")}</span>')
+          + (!g.courriel && g.actif ? ' <span class="fe-att">${T("— sans courriel")}</span>' : '') + '</span>'
+          + '<span>T4 : ' + etat(g.t4) + '</span><span>${T("RL-1 : ")}' + etat(g.rl1) + '</span></div>'; }).join('')
+        : '<div class="note">${T("Personne n’a été payé cette année-là.")}</div>';
+      var opts = '<option value="">${T("— choisir —")}</option>' + gens.map(function(g){ return '<option value="' + esc(g.id) + '">' + esc(g.nom) + '</option>'; }).join('');
+      var b = boite('${T("Feuillets T4 et Relevé 1")}', '${T("Année d’imposition ")}' + '<select id="fe-an">' + [0, 1, 2, 3].map(function(k){ var a = String(new Date().getFullYear() - k); return '<option' + (a === annee ? ' selected' : '') + '>' + a + '</option>'; }).join('') + '</select>',
+        (r.cle === false ? '<div class="note fe-non">${T("La clé de chiffrement (RH_CLE) n’est pas posée sur le serveur : rien ne peut être déposé.")}</div>' : '')
+        + tete + '<div style="margin:.4rem 0">' + liste + '</div>'
+        + '<h3 style="margin:.6rem 0 0">${T("Déposer en lot")}</h3>'
+        + '<div class="champs"><label class="ch">${T("Type")}<select id="fe-t"><option value="t4">${T("T4")}</option><option value="rl1">${T("Relevé 1")}</option></select></label>'
+        + '<label class="ch">${T("Fichiers PDF (un par personne)")}<input id="fe-f" type="file" accept="application/pdf" multiple></label>'
+        + '<label class="ch case large"><input type="checkbox" id="fe-av" checked>${T("Aviser chaque personne par courriel (sans le document)")}</label></div>'
+        + '<div id="fe-ass"></div>'
+        + '<div class="note">${T("Chaque fichier est associé à une personne d’après son nom de fichier (ex. : T4-2025-Marie-Tremblay.pdf). Vérifiez l’association avant de déposer : un feuillet déposé chez la mauvaise personne lui montre le NAS d’une autre.")}</div>',
+        '${T("Déposer les feuillets")}', true);
+      b.ok.disabled = true;
+      b.el.querySelector('#fe-an').onchange = function(){ b.fermer(); boiteFeuillets(this.value); };
+      var fichiers = [];
+      var dessinerAss = function(){
+        var z = b.el.querySelector('#fe-ass');
+        z.innerHTML = fichiers.map(function(x, i){ return '<div class="fe-l"><span>' + esc(x.f.name) + (x.etat ? ' <b class="' + (x.etat === 'ok' ? 'fe-ok' : 'fe-non') + '">' + esc(x.msg) + '</b>' : '') + '</span>'
+          + '<select data-fei="' + i + '" aria-label="${T("Personne")}"' + (x.etat === 'ok' ? ' disabled' : '') + '>' + opts.replace('value="' + esc(x.qui) + '"', 'value="' + esc(x.qui) + '" selected') + '</select><span></span></div>'; }).join('');
+        var pret = fichiers.length && fichiers.every(function(x){ return x.qui || x.etat === 'ok'; }) && fichiers.some(function(x){ return x.etat !== 'ok'; });
+        b.ok.disabled = !pret || r.cle === false;
+      };
+      b.el.querySelector('#fe-f').onchange = function(){
+        fichiers = Array.prototype.map.call(this.files, function(f){ return { f: f, qui: deviner(f.name, gens), etat: '', msg: '' }; });
+        dessinerAss();
+      };
+      b.el.addEventListener('change', function(ev){ var i = ev.target.getAttribute && ev.target.getAttribute('data-fei'); if (i !== null && i !== undefined && fichiers[+i]) { fichiers[+i].qui = ev.target.value; dessinerAss(); } });
+      var lire = function(f){ return new Promise(function(ok){ var lr = new FileReader(); lr.onload = function(){ ok(String(lr.result || '').replace(/^data:[^,]*,/, '')); }; lr.onerror = function(){ ok(''); }; lr.readAsDataURL(f); }); };
+      b.ok.onclick = function(){
+        var type = b.val('fe-t'), av = b.val('fe-av'), i = 0, bons = 0;
+        var doublons = {}; fichiers.forEach(function(x){ if (x.etat !== 'ok') doublons[x.qui] = (doublons[x.qui] || 0) + 1; });
+        if (Object.keys(doublons).some(function(k){ return doublons[k] > 1; })) { dire('${T("Deux fichiers sont associés à la même personne : corrigez avant de déposer.")}', 'err'); return; }
+        b.ok.disabled = true;
+        var suivant = function(){
+          while (i < fichiers.length && fichiers[i].etat === 'ok') i++;
+          if (i >= fichiers.length) { dire(bons + '${T(" feuillet(s) déposé(s).")}', 'bon'); b.fermer(); boiteFeuillets(annee); return; }
+          var x = fichiers[i]; dire('${T("Dépôt ")}' + (i + 1) + ' / ' + fichiers.length + '…');
+          if (x.f.size > 4194304) { x.etat = 'err'; x.msg = '${T("plus de 4 Mo")}'; i++; dessinerAss(); suivant(); return; }
+          lire(x.f).then(function(b64){
+            return appeler('employes:docTeleverser', [{ staffId: x.qui, type: type, periode: annee, nom: x.f.name, pdf: b64, aviser: av }]);
+          }).then(function(res){
+            if (res && res.ok) { x.etat = 'ok'; x.msg = '✓'; bons++; } else { x.etat = 'err'; x.msg = expliquer(res); }
+            i++; dessinerAss(); suivant();
+          });
+        };
+        suivant();
       };
     });
   }
@@ -1163,6 +1243,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     }
     if (t.id === 'em-mods' || t.id === 'em-reg') { boiteReglages(); return; }
     if (t.id === 'em-av') { boiteAvantages(); return; }
+    if (t.id === 'em-fe') { boiteFeuillets(String(new Date().getFullYear() - 1)); return; }
     if (t.id === 'em-publier') { publier(); return; }
     if (t.id === 'pol-neuve') { boitePolitique(null); return; }
     if ((b = t.closest('[data-polmod]'))) { var pm = (POL || []).filter(function(x){ return x.id === b.getAttribute('data-polmod'); })[0]; if (pm) boitePolitique(pm); return; }
