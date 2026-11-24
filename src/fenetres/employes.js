@@ -767,13 +767,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       + '<label class="ch">${T("Commission")}<span class="unite"><input type="number" id="f-co" min="0" max="50" step="0.1" value="' + esc(f.commission || 0) + '" aria-label="${T("Commission")}"><i>%</i></span></label>'
       + '<label class="ch">${T("Taux horaire actuel")}<span class="unite"><input type="number" id="f-tx" min="0" max="500" step="0.01" value="' + esc(s.taux || 0) + '" aria-label="${T("Taux horaire actuel")}"><i>$ / h</i></span></label>'
       + '<label class="ch">${T("Contact d’urgence")}<input id="f-ur" maxlength="120" value="' + esc(f.urgence || '') + '" placeholder="${T("Nom et téléphone")}"></label>'
+      + '<label class="ch">${T("Heures par jour de vacances")}<span class="unite"><input type="number" id="f-hj" min="1" max="12" step="0.25" value="' + esc(f.heuresJour || 8) + '" aria-label="${T("Heures par jour de vacances")}"><i>h</i></span></label>'
+      + '<label class="ch">${T("Jours de vacances par année")}<span class="unite"><input type="number" id="f-vj" min="0" max="60" step="0.5" value="' + esc(f.vacancesJours == null ? '' : f.vacancesJours) + '" placeholder="${T("selon la loi")}" aria-label="${T("Jours de vacances par année")}"><i>${T("jours")}</i></span></label>'
       + '<label class="ch large">${T("Note")}<input id="f-no" maxlength="300" value="' + esc(f.note || '') + '"></label>'
       + '<label class="ch case large"><input type="checkbox" id="f-in"' + (f.inclus === false ? '' : ' checked') + '>${T("À la paie (décochez pour la propriétaire ou un compte technique)")}</label></div>'
       + '<div class="note">${T("Le taux saisi ici CORRIGE le taux en vigueur. Pour une augmentation à une date, utilisez « Nouveau taux » : les périodes déjà payées ne bougent pas.")}</div>',
       '${T("Enregistrer")}');
     b.ok.onclick = function(){
       envoyer(b, 'employes:fiche', [{ id: s.id, poste: b.val('f-po'), emploi: b.val('f-em'), embauche: b.val('f-eb'), commission: b.val('f-co'), taux: b.val('f-tx'),
-        urgence: b.val('f-ur'), note: b.val('f-no'), inclus: b.val('f-in') }], '${T("Fiche enregistrée : ")}' + s.nom);
+        urgence: b.val('f-ur'), note: b.val('f-no'), inclus: b.val('f-in'), heuresJour: b.val('f-hj'), vacancesJours: b.val('f-vj') }], '${T("Fiche enregistrée : ")}' + s.nom);
     };
   }
   function boiteTaux(s){
