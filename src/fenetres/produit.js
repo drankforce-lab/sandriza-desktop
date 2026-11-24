@@ -133,6 +133,9 @@ const CSS_PROPRE = `
 .cab-sq{display:inline-block;height:1.1rem;width:9rem;border-radius:6px;background:var(--v06);animation:cabSq 1.2s ease-in-out infinite alternate}
 .cab-sq.c{width:6rem}
 @keyframes cabSq{to{opacity:.45}}
+html.jour .cab-etat.a{color:#6b5509}
+html.jour .cab-etat.ok{color:#1f6b3d}
+html.jour .cab-pb{color:#7a5a06!important}
 .pf-cab .cab-l{font-size:.78rem;color:var(--tx2);margin:.2rem 0}
 .pf-cab .cab-l b{color:var(--tx)}
 .pf-cab .cab-6{display:flex;gap:.4rem;align-items:center;cursor:pointer;color:var(--tx)}
