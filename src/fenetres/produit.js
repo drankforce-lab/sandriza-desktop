@@ -119,6 +119,20 @@ const CSS_PROPRE = `
 .pf-3d .pf-med-l{margin:0}
 .pf-cab{margin-bottom:.6rem}
 .pf-cab .t{font-weight:700;font-size:.85rem;margin-bottom:.3rem}
+.cab-tete{display:flex;align-items:center;gap:.6rem;margin-bottom:.35rem}
+.cab-tete b{font-size:.88rem;font-weight:700}
+.cab-etat{margin-left:auto;font-size:.72rem;font-weight:700;padding:.12rem .6rem;border-radius:99px;background:var(--v06);color:var(--tx2);white-space:nowrap}
+.cab-etat.ok{background:rgba(74,222,128,.14);color:var(--tx-ok)}
+.cab-etat.a{background:rgba(240,180,80,.14);color:var(--tx-jaune)}
+.cab-etat.att{color:var(--tx-att)}
+.cab-etat.err{color:var(--tx-err)}
+.cab-r{display:flex;align-items:center;gap:.4rem 1.1rem;flex-wrap:wrap;margin:.3rem 0;font-size:.78rem}
+.cab-r label{display:flex;align-items:center;gap:.4rem;color:var(--tx)}
+.cab-r select{font-size:.78rem;padding:.2rem .4rem;border-radius:7px}
+.cab-pb{color:var(--tx-jaune)!important}
+.cab-sq{display:inline-block;height:1.1rem;width:9rem;border-radius:6px;background:var(--v06);animation:cabSq 1.2s ease-in-out infinite alternate}
+.cab-sq.c{width:6rem}
+@keyframes cabSq{to{opacity:.45}}
 .pf-cab .cab-l{font-size:.78rem;color:var(--tx2);margin:.2rem 0}
 .pf-cab .cab-l b{color:var(--tx)}
 .pf-cab .cab-6{display:flex;gap:.4rem;align-items:center;cursor:pointer;color:var(--tx)}
@@ -862,7 +876,6 @@ function pageProduit(id, importId) {
       + '<div class="aide p-studio-attente" id="p-studio-attente" style="display:none"></div>'
       /* LA CABINE D ESSAYAGE (2026-10-30, ses décisions) : obligatoire pour les vêtements et les accessoires de tête ;
          le coût affiché PENDANT la création est celui du serveur (cabine:etat). Dessinée par dessinerCabine. */
-      + '<div class="pf-3d pf-cab" id="p-cab-carte" style="display:none" aria-live="polite"></div>'
       + '<div class="pf-3d" id="p-3d-carte">'
       + '<div class="outil-t"><span class="outil-ic" style="--oc:var(--vv-2,#7cb4f5)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"></path><path d="M3 7.5 12 12l9-4.5M12 12v9"></path></svg></span><b>${T("Aperçu 3D")}</b></div>'
       + '<div class="pf-med-l" id="p-3dg-l">'
@@ -891,6 +904,10 @@ function pageProduit(id, importId) {
          génère TOUJOURS le rendu le plus précis (la macro professionnelle) — pas de choix à faire. La boutique
          l'affiche EN GRAND, dans sa propre section. Champ de la fiche : photoFibre. */
       + '<div class="pv-fibre" id="p-fibre-bloc"></div>'
+      /* (2026-11-24, sa capture : « à l'ouverture je vois ça, et 5 secondes plus tard tout se déforme ») LA CABINE EN
+         DERNIER, et sa place RÉSERVÉE dès l'ouverture pour un vêtement (squelette de même hauteur) : la réponse du
+         serveur (≈ 5 s) ne pousse plus les outils et ne relance plus le calcul de la grande photo. */
+      + '<div class="pf-3d pf-cab" id="p-cab-carte" style="display:none" aria-live="polite"></div>'
       + '</div></div></div>'
       /* ⚠ LES MÉDIAS (2026-10-07, sa demande : « Sophie mesure 1,68 m et porte
          un S », « une courte vidéo de 5 secondes qui montre le tombé », « un 360
@@ -1378,12 +1395,19 @@ function pageProduit(id, importId) {
   var CAB_T = null;
   var CAB_ANGLES = { a000: '${T("Face")}', a060: '60°', a120: '120°', a180: '${T("Dos")}', a240: '240°', a300: '300°' };
   function cabCategorie(){ return String(val('p-cat') || '') + ' ' + (libCat(val('p-cat')) || ''); }
+  function cabRequiseLocale(){
+    var c = cabCategorie(), n = String(val('p-nom') || '');
+    if (!String(val('p-cat') || '')) return false;
+    return /chapeau|tuque|casquette|b[ée]ret|capeline|[ée]charpe|foulard|bandeau|turban|cache-cou/i.test(c + ' ' + n)
+      || !/chaussur|soulier|botte|sandale|espadrille|sacs?|sacoche|bijou|accessoir|ceinture|lunette|montre/i.test(c);
+  }
   function cabExigee(){ if (!CAB) return false; var t = CAB.t; return !!(t && t.ok && t.requise && t.ouverte); }
   function majCabine(force){
     if (!CAB) return;   // appelée par majFiche avant que la cabine soit posée (premier dessin)
     var k = [IMAGE || '', photoDos() || '', cabCategorie(), String(val('p-nom') || '').trim(), CAB.vues].join('|');
     if (!force && k === CAB.cle) return;
     CAB.cle = k;
+    if (!CAB.t) dessinerCabine();   // le squelette tout de suite : la place est prise avant la réponse
     clearTimeout(CAB_T);
     CAB_T = setTimeout(function(){
       var k0 = CAB.cle;
@@ -1411,57 +1435,68 @@ function pageProduit(id, importId) {
   function dessinerCabine(){
     var z = document.getElementById('p-cab-carte'); if (!z) return;
     var t = CAB.t;
-    if (!t || (t.ok && t.requise === false)) { z.style.display = 'none'; z.innerHTML = ''; z.removeAttribute('data-h'); return; }
+    var tete = function(etat, cl){ return '<div class="cab-tete"><b><span class="ic">👗</span> ${T("Cabine d’essayage")}</b><span class="cab-etat ' + (cl || '') + '">' + etat + '</span></div>'; };
+    // Pas encore de réponse : un squelette de la MÊME hauteur pour un vêtement, rien pour le reste.
+    if (!t) {
+      if (!cabRequiseLocale()) { z.style.display = 'none'; z.innerHTML = ''; z.removeAttribute('data-h'); return; }
+      z.style.display = '';
+      var hs = tete('${T("Lecture…")}', 'att') + '<div class="cab-r"><span class="cab-sq"></span><span class="cab-sq c"></span></div><div class="pf-med-l"><button type="button" disabled><span class="ic">👗</span> ${T("Préparer la cabine")}</button></div>';
+      if (z.getAttribute('data-h') !== hs) { z.setAttribute('data-h', hs); z.innerHTML = hs; }
+      return;
+    }
+    if (t.ok && t.requise === false) { z.style.display = 'none'; z.innerHTML = ''; z.removeAttribute('data-h'); return; }
     z.style.display = '';
-    var h = '<div class="t"><span class="ic">👗</span> ${T("Cabine d’essayage")}</div>';
-    if (!t.ok) h += '<div class="cab-l">' + esc(expliquer(t)) + '</div>';
-    else if (!t.ouverte) h += '<div class="cab-l">${T("Pas encore ouverte : la mannequin n’est pas configurée au serveur. Rien n’est exigé pour l’instant.")}</div>';
+    var h;
+    if (!t.ok) h = tete('${T("indisponible")}', 'err') + '<div class="cab-l">' + esc(expliquer(t)) + '</div>';
+    else if (!t.ouverte) h = tete('${T("pas encore ouverte")}', '') + '<div class="cab-l">${T("Rien n’est exigé pour l’instant.")}</div>';
     else {
-      if (!t.photosManquantes) {
-        var rec = function(x){ return x && x.reconnue ? (x.origine === 'retouche' ? '${T("✓ sans mannequin (Studio), retouchée")}' : '${T("✓ sans mannequin (Studio)")}') : '${T("✗ pas une photo « sans mannequin » du Studio")}'; };
-        h += '<div class="cab-l">${T("Face :")} <b>' + rec(t.face) + '</b></div><div class="cab-l">${T("Dos :")} <b>' + rec(t.dos) + '</b></div>';
-      }
-      h += '<label class="cab-l cab-6"><input type="checkbox" id="p-cab-6"' + (CAB.vues === '6' ? ' checked' : '') + (CAB.enCours ? ' disabled' : '') + '> '
-        + '${T("Vue 6 angles (rotation) pour cet article — 4 essayages de plus")}</label>';
-      // (lot 3) LE TYPE DE HAUT : la boutique ne superpose deux hauts que pour les paires permises (Configuration › Cabine)
+      var enCours = CAB.enCours || (t.angles || []).some(function(a){ return a.etat === 'cours'; });
+      h = t.pret ? tete(t.dejaPaye > 0 ? '${T("✓ prête · payé {0}")}'.split('{0}').join(prixUS(t.dejaPaye)) : '${T("✓ prête")}', 'ok')
+        : tete(enCours ? '${T("⏳ en préparation")}' : '${T("à préparer")}', enCours ? 'att' : 'a');
+      // Les photos : UNE ligne, seulement s'il y a un problème.
+      var rec = function(x){ return !!(x && x.reconnue); };
+      if (t.photosManquantes) h += '<div class="cab-l cab-pb">${T("Il manque la face ou le dos : photos « sans mannequin » du Studio.")}</div>';
+      else if (!rec(t.face) || !rec(t.dos)) h += '<div class="cab-l cab-pb">${T("Face")} ' + (rec(t.face) ? '✓' : '✗') + ' · ${T("Dos")} ' + (rec(t.dos) ? '✓' : '✗')
+        + ' — ${T("à refaire « sans mannequin » au Studio")}</div>';
+      else if (t.identiques) h += '<div class="cab-l cab-pb">${T("Le dos est la même photo que la face.")}</div>';
+      // Les réglages : une rangée.
+      h += '<div class="cab-r"><label class="cab-6"><input type="checkbox" id="p-cab-6"' + (CAB.vues === '6' ? ' checked' : '') + (CAB.enCours ? ' disabled' : '') + '> ${T("6 angles (+4 essais)")}</label>';
       if (/^(hauts|manteaux)$/.test(String(val('p-cat') || ''))) {
         var tys = (CAB.types && CAB.types.length) ? CAB.types.slice() : ['t-shirt', 'camisole', 'chemise', 'blouse', 'chandail', 'cardigan', 'veston', 'manteau'];
         if (CAB.type && tys.indexOf(CAB.type) < 0) tys = tys.concat([CAB.type]);
-        h += '<label class="cab-l">${T("Type de haut (cabine) :")} <select id="p-cab-type"><option value="">${T("Déduit du nom")}</option>'
+        h += '<label class="cab-ty">${T("Type")} <select id="p-cab-type" aria-label="${T("Type de haut (cabine)")}"><option value="">${T("selon le nom")}</option>'
           + tys.map(function(x){ return '<option' + (x === CAB.type ? ' selected' : '') + '>' + esc(x) + '</option>'; }).join('') + '</select></label>';
       }
-      h += '<div class="cab-a">' + (t.angles || []).filter(function(a){ return a.exige || a.etat === 'reussi'; }).map(function(a){
+      h += '</div>';
+      // Les angles : seulement quand il y a un progrès à montrer.
+      var ang = (t.angles || []).filter(function(a){ return a.exige || a.etat === 'reussi'; });
+      if (ang.some(function(a){ return a.etat; })) h += '<div class="cab-a">' + ang.map(function(a){
         var cl = a.etat === 'reussi' ? 'ok' : (a.etat === 'cours' ? 'cours' : (a.etat === 'rejete' ? 'rate' : ''));
         var ic = a.etat === 'reussi' ? '✓ ' : (a.etat === 'cours' ? '⏳ ' : (a.etat === 'rejete' ? '✗ ' : ''));
         return '<span class="' + cl + '">' + ic + esc(CAB_ANGLES[a.angle] || a.angle) + '</span>';
       }).join('') + '</div>';
-      // (étape 3) les essayages REÇUS, en vignettes : on voit ce qu on a payé, et on rejette ce qui est raté
       var vus = (t.angles || []).filter(function(a){ return a.image && (a.exige || a.etat === 'reussi'); });
       if (vus.length) h += '<div class="cab-v">' + vus.map(function(a){
         return '<figure' + (a.etat === 'rejete' ? ' class="rate"' : '') + '><a href="' + esc(a.image) + '" target="_blank" rel="noopener"><img src="' + esc(a.image) + '" alt=""></a><figcaption>'
           + esc(CAB_ANGLES[a.angle] || a.angle) + (a.etat === 'reussi' && !CAB.enCours ? ' <button type="button" class="cab-rej" data-angle="' + esc(a.angle) + '">${T("Rejeter")}</button>' : '')
           + '</figcaption></figure>';
       }).join('') + '</div>';
-      if (t.pret) h += '<div class="cab-l"><b>' + (t.dejaPaye > 0 ? '${T("✓ Cabine prête — payé : {0}")}'.split('{0}').join(prixUS(t.dejaPaye)) : '${T("✓ Cabine prête")}') + '</b></div>';
       if (t.pret) h += cabLigneCalques();
       else {
-        if (t.resteCredits != null && t.aFaire > 0) h += '<div class="cab-l">' + (t.dejaPaye > 0 ? '${T("Reste : {0} — déjà payé : {1}")}' : '${T("Reste : {0}")}')
-          .split('{0}').join('<b>' + t.aFaire + ' × ' + szNombre(t.creditsParEssai) + ' = ' + esc(cabMontant(t.resteCredits, t.resteDollars)) + '</b>').split('{1}').join(esc(prixUS(t.dejaPaye || 0))) + '</div>';
-        var r = raisonCabine();
-        if (r) h += '<div class="cab-l">' + esc(r) + '</div>';
         cabRates().forEach(function(a){
-          h += '<div class="cab-l">' + '${T("✗ {0} : essayage raté — {1}")}'.split('{0}').join(esc(CAB_ANGLES[a.angle] || a.angle)).split('{1}').join(esc(a.motif === 'manuel' ? '${T("rejeté à la main")}' : (a.motif || '${T("rejeté")}')))
+          h += '<div class="cab-l cab-pb">' + '${T("✗ {0} : essayage raté — {1}")}'.split('{0}').join(esc(CAB_ANGLES[a.angle] || a.angle)).split('{1}').join(esc(a.motif === 'manuel' ? '${T("rejeté à la main")}' : (a.motif || '${T("rejeté")}')))
             + (a.payes >= 2 ? ' ' + '${T("(plus de reprise possible : changez de photos)")}' : '') + '</div>';
         });
         var rep = cabRates().filter(function(a){ return a.payes < 2; });
         if (rep.length && t.prixParEssai != null && t.aFaire === 0) h += '<div class="pf-med-l"><button type="button" id="p-cab-rep"' + (CAB.enCours ? ' disabled' : '') + '>'
           + '<span class="ic">↻</span> ' + '${T("Reprendre ({0})")}'.split('{0}').join(cabMontant(rep.length * t.creditsParEssai, rep.length * t.prixParEssai)) + '</button></div>';
-        var peut = !CAB.enCours && t.aFaire > 0 && t.face && t.face.reconnue && t.dos && t.dos.reconnue && !t.identiques;
+        var peut = !CAB.enCours && t.aFaire > 0 && rec(t.face) && rec(t.dos) && !t.identiques;
+        // Le coût est DANS le bouton (plus de ligne « Reste : … » qui le répétait).
         if (t.aFaire > 0) h += '<div class="pf-med-l"><button type="button" id="p-cab-go"' + (peut ? '' : ' disabled') + '>'
-          + (CAB.enCours ? '<span class="ic">⏳</span> ${T("Lancement…")}' : '<span class="ic">👗</span> ' + '${T("Préparer la cabine ({0})")}'.split('{0}').join(cabMontant(t.resteCredits || 0, t.resteDollars || 0))) + '</button></div>';
+          + (CAB.enCours ? '<span class="ic">⏳</span> ${T("Lancement…")}' : '<span class="ic">👗</span> ' + '${T("Préparer la cabine · {0}")}'.split('{0}').join(cabMontant(t.resteCredits || 0, t.resteDollars || 0))) + '</button>'
+          + (t.dejaPaye > 0 ? '<span class="aide">' + '${T("déjà payé : {0}")}'.split('{0}').join(esc(prixUS(t.dejaPaye))) + '</span>' : '') + '</div>';
       }
     }
-    if (CAB.charge) h += '<div class="cab-l">${T("Lecture au serveur…")}</div>';
     if (z.getAttribute('data-h') === h) return;   // rien de changé, rien de réécrit (voir majFiche)
     z.setAttribute('data-h', h); z.innerHTML = h;
     // La carte change de hauteur : les cases photo se recalculent (sinon elles sortent de la carte).
@@ -4122,8 +4157,7 @@ function pageProduit(id, importId) {
         : '<span class="ic">🧊</span> ' + (MOD3D ? '${T("Regénérer l’aperçu 3D")}' : '${T("Générer l’aperçu 3D")}'))
         + ' (${T("par The New Black")}, ' + prix3d() + ')';
     // Ce qui sert, dit en clair : le devant part chez The New Black, le dos est projeté au poste.
-    if (pv) pv.textContent = '${T("Devant :")} ' + (IMAGE ? '✓ ${T("photo principale")}' : '—') + ' · ${T("Dos :")} '
-      + (photoDos() ? '✓ ' + (modeStandard() ? '${T("photo marquée « Dos »")}' : '${T("vue « Derrière »")}') : '—');
+    if (pv) pv.textContent = '${T("Devant")} ' + (IMAGE ? '✓' : '—') + ' · ${T("Dos")} ' + (photoDos() ? '✓' : '—');
     if (e && !G3D.enCours && !G3D.attente) e.textContent = raison;
     b.onclick = lancer3d;
     // un modèle en attente de confirmation : Publier quand même / Rejeter
@@ -4165,7 +4199,7 @@ function pageProduit(id, importId) {
   function dateCourte3d(ms){ try { return new Date(ms).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'long', year: 'numeric' }); } catch (e) { return ''; } }
   function raisonRefaire3d(){
     if (!BRUT3D || BRUT3D.ok) return '';
-    if (BRUT3D.motif === 'original_supprime') return '${T("Original supprimé après 30 jours — générez un nouvel aperçu 3D pour pouvoir refaire le rendu.")}';
+    if (BRUT3D.motif === 'original_supprime') return '${T("Original expiré (30 jours) : regénérez pour refaire le rendu.")}';
     if (BRUT3D.motif === 'original_absent') return '${T("L’original de The New Black n’a pas été conservé pour cet aperçu — générez un nouvel aperçu 3D pour pouvoir refaire le rendu.")}';
     return expliquer(BRUT3D);
   }
@@ -4331,7 +4365,7 @@ function pageProduit(id, importId) {
         + '<button type="button" id="p-vidia-retirer">${T("Retirer la vidéo")}</button>';
       return;
     }
-    e.textContent = '${T("5 secondes animées à partir de la photo principale, sans son. Rien n’est lancé sans votre clic.")}';
+    e.textContent = '${T("5 s animées, sans son, à partir de la photo principale.")}';
   }
   function vidiaLancer(forcer){
     var prix = VIDIA.prix || 0.42;
