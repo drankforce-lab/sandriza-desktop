@@ -178,7 +178,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="bx-nav"><button type="button" data-env="-1" aria-label="${T("Saison précédente")}">‹</button><button type="button" data-env="1" aria-label="${T("Saison suivante")}">›</button></div>'
       + '<button type="button" id="bx-rg">${T("Paliers et prix")}</button>'
       + '<button type="button" id="bx-auto"' + (c.aValider ? '' : ' disabled') + '>${T("Composer automatiquement")}</button>'
-      + '<button type="button" class="prim" id="bx-prel"' + (c.validees ? '' : ' disabled') + '>' + esc('${T("Prélever et expédier les validées")} (' + c.validees + ')') + '</button></div>'
+      + '<button type="button" class="prim" id="bx-prel" title="${T("Le stock n’est retiré qu’au prélèvement. « Prélever et expédier » débite les boîtes par saison et crée une commande par boîte, qui suit la préparation habituelle.")}"' + (c.validees ? '' : ' disabled') + '>' + esc('${T("Prélever et expédier les validées")} (' + c.validees + ')') + '</button></div>'
       + '<div class="bx-comptes"><span class="bx-c"><b>' + c.abonnees + '</b> ${T("abonnées")}</span>'
       + '<span class="bx-c' + (c.aValider ? ' a' : '') + '"><b>' + c.aValider + '</b> ${T("à composer ou valider")}</span>'
       + '<span class="bx-c"><b>' + c.validees + '</b> ${T("validées")}</span>'
@@ -236,8 +236,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (modif ? '<button type="button" id="bx-prop">${T("Proposer avec l’IA")}</button><button type="button" id="bx-enr">${T("Enregistrer")}</button>'
           + '<button type="button" class="prim" id="bx-val"' + (b.graceJusqu ? ' disabled title="' + esc('${T("Grâce jusqu’au")} ' + b.graceJusqu) + '"' : '') + '>${T("Valider la boîte")}</button>' : '')
       + (b.statut === 'validee' ? '<button type="button" id="bx-deval">${T("Dévalider")}</button>' : '') + '</div></div>'
-      + '<p class="bx-note">' + (b.graceJusqu ? esc('${T("Période de grâce jusqu’au")} ' + b.graceJusqu + ' ${T(": la boîte se valide après.")}') + ' ' : '')
-      + '${T("Le stock n’est retiré qu’au prélèvement. « Prélever et expédier » débite les boîtes par saison et crée une commande par boîte, qui suit la préparation habituelle.")}</p>';
+      /* (2026-11-23) La note générale est passée en infobulle de « Prélever et expédier » : elle faisait défiler le panneau
+         (travail contrastes, 1080 × 780, polices Linux). Seule la grâce, propre à cette boîte, reste ici. */
+      + (b.graceJusqu ? '<p class="bx-note">' + esc('${T("Période de grâce jusqu’au")} ' + b.graceJusqu + ' ${T(": la boîte se valide après.")}') + '</p>' : '');
     z.innerHTML = h;
   }
 
