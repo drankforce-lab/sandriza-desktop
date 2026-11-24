@@ -154,7 +154,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
   var gifTimer = null;
   // Les images du gabarit << Logo Sz >> : celles que recoit la cliente (lib-courriel.php), dans la langue du poste.
   var LG = ('${LIEU()}'.slice(0, 2) === 'en') ? 'en' : 'fr';
-  var IMG_ENTETE = 'https://www.sandriza.com/assets/marque/nouveau/courriel-entete-' + LG + '.png';
+  var IMG_ENTETE = 'https://www.sandriza.com/assets/marque/nouveau/courriel-entete-noir-anime-' + LG + '.gif';
   var IMG_MONO = 'https://www.sandriza.com/assets/marque/nouveau/monogramme-sz.png';
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
@@ -233,7 +233,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
     h += '<div class="ged"><div class="ged-g">';
     h += '<div class="ch"><label for="g-name">${T("Nom du gabarit")}</label><input type="text" id="g-name" value="' + esc(t.name || '') + '"' + (RO ? ' disabled' : '') + '></div>';
     h += '<label class="bascule"><input type="checkbox" id="g-logo"' + (t.logoSz ? ' checked' : '') + (RO ? ' disabled' : '') + '>'
-      + '<span><span class="t"><span class="ico ic-lg" aria-hidden="true">${ICO.image}</span>${T(" Logo Sz (bandeau noir et monogramme)")}</span><br><span class="d">${T("L’en-tête devient le bandeau noir du logo Sandriza, souligné d’un filet caramel ; le pied crème porte le monogramme Sz. Image fixe, nette partout, Outlook compris. Les couleurs, l’effet animé et la bannière GIF ne s’appliquent pas.")}</span></span></label>';
+      + '<span><span class="t"><span class="ico ic-lg" aria-hidden="true">${ICO.image}</span>${T(" Logo Sz animé (bandeau noir et monogramme)")}</span><br><span class="d">${T("L’en-tête devient le bandeau noir du logo Sandriza, souligné d’un filet caramel ; le pied crème porte le monogramme Sz. Le logo est animé (un reflet doré) ; Outlook de bureau montre le logo net. Les couleurs, l’effet animé et la bannière GIF ne s’appliquent pas.")}</span></span></label>';
     h += '<div class="gr2 g-coul"' + (t.logoSz ? ' hidden' : '') + '>' + coulChamp('g-hfrom', '${T("En-tête : couleur de départ")}', t.headerBgFrom || '#1a1a2e')
       + coulChamp('g-hto', '${T("En-tête : couleur de fin")}', t.headerBgTo || '#2d1b69') + '</div>';
     h += '<div class="ch"><label for="g-sub">${T("Sous-titre (vide = tagline du pied de page)")}</label>'
