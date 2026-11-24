@@ -4334,7 +4334,13 @@ const JEU = {
       'employes:fiche': { ok: true, id: 'st2' }, 'employes:quart': { ok: true, id: 'qt9' }, 'employes:quartSupprimer': { ok: true },
       'employes:copierSemaine': { ok: true, copies: 3 }, 'employes:pointage': { ok: true, id: 'pt9' }, 'employes:pointageSupprimer': { ok: true },
       'employes:reglages': { ok: true }, 'employes:taux': { ok: true }, 'employes:conge': { ok: true, jours: 1 }, 'employes:congeSupprimer': { ok: true },
-      'employes:approuver': { ok: true }, 'employes:rouvrir': { ok: true }, 'employes:publier': { ok: true, envois: [] }, 'employes:demandeTraiter': { ok: true } }; };
+      'employes:approuver': { ok: true }, 'employes:rouvrir': { ok: true }, 'employes:publier': { ok: true, envois: [] }, 'employes:demandeTraiter': { ok: true },
+      'employes:politiques': { ok: true, politiques: [
+        { id: 'pol_1', version: 2, actif: true, maj: '2026-11-20T15:00:00Z', titreFr: 'Code de conduite', titreEn: 'Code of conduct', texteFr: 'Respect, ponctualité, confidentialité.', texteEn: 'Respect, punctuality, confidentiality.', echeance: '2026-11-30',
+          suivi: [{ id: 'st2', nom: 'Camille Tremblay', signee: '2026-11-21T14:00:00Z', langue: 'fr' }, { id: 'st3', nom: 'Léa Gagnon', signee: '', langue: '' }, { id: 'st4', nom: 'Maude Roy', signee: '2026-11-22T10:00:00Z', langue: 'en' }] },
+        { id: 'pol_2', version: 1, actif: true, maj: '2026-11-22T15:00:00Z', titreFr: 'Réseaux sociaux', titreEn: 'Social media', texteFr: 'Aucune photo de clients sans leur accord.', texteEn: '', echeance: '',
+          suivi: [{ id: 'st2', nom: 'Camille Tremblay', signee: '', langue: '' }, { id: 'st3', nom: 'Léa Gagnon', signee: '', langue: '' }, { id: 'st4', nom: 'Maude Roy', signee: '', langue: '' }] } ] },
+      'employes:politiqueEcrire': { ok: true, id: 'pol_3', version: 1 }, 'employes:politiqueRetirer': { ok: true } }; };
     var FINIE = Object.assign({}, D, { aujourdhui: '2026-12-08' });
     return [
       { nom: 'aujourd’hui', id: 'aujourdhui', reponses: rep(D), exige: ['data-pmod="pt2"', 'data-absent="2"', 'data-dok="dm1"'] },
@@ -4343,6 +4349,7 @@ const JEU = {
       { nom: 'paie en cours', id: 'paie', reponses: rep(D), exige: ['id="em-csv"', 'id="bulletin"', 'data-ligne="st4"'] },
       { nom: 'paie prête à approuver', id: 'paie', reponses: rep(Object.assign({}, FINIE, { anomalies: [] })), exige: ['id="em-approuver"'] },
       { nom: 'paie approuvée', id: 'paie', reponses: rep(D, PAIE_OK), exige: ['id="em-rouvrir"', 'data-allerper="2026-11-08"'] },
+      { nom: 'politiques à signer', id: 'politiques', reponses: rep(D), exige: ['data-polmod="pol_1"', 'id="pol-neuve"'] },
       { nom: 'réglages de la paie', id: 'reglages', reponses: rep(D), exige: ['id="r-mi"', 'id="r-mods"'] },
       { nom: 'aucun personnel', id: 'equipe', reponses: rep(Object.assign({}, D, { personnel: [], horaires: [], pointages: [], enPoste: [], anomalies: [] })) },
       { nom: 'droit absent', id: '', reponses: { identite: IDENTITE, 'employes:donnees': { ok: false, motif: 'droit' } } },

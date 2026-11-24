@@ -211,6 +211,7 @@ html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
 .ch{display:flex;flex-direction:column;gap:.3rem;font-size:.74rem;font-weight:600;color:var(--tx2);min-width:0}
 .ch.large{grid-column:1 / -1}
 .ch input:not([type=checkbox]):not([type=radio]),.ch select{height:2.3rem;width:100%;border-radius:9px;color:var(--tx)}
+.ch textarea{width:100%;border-radius:9px;color:var(--tx);resize:vertical;line-height:1.45}
 .ch.case{flex-direction:row;align-items:center;gap:.5rem;font-size:.82rem;color:var(--tx)}
 .unite{position:relative;display:flex;align-items:center}
 .unite input{padding-right:3.4rem;text-align:right}
@@ -227,7 +228,7 @@ html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
 `;
 
 function pageEmployes(ouverture) {
-  const ok = ['aujourdhui', 'horaire', 'equipe', 'paie', 'reglages'];
+  const ok = ['aujourdhui', 'horaire', 'equipe', 'paie', 'politiques', 'reglages'];
   // Les anciens noms d'onglets (bancs, liens) mènent au plus proche.
   const ancien = { horaires: 'horaire', pointages: 'horaire' };
   const o = ancien[String(ouverture || '')] || String(ouverture || '');
@@ -336,7 +337,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       if (!JOUR || r.semaine.indexOf(JOUR) < 0) JOUR = r.semaine.indexOf(r.aujourdhui) >= 0 ? r.aujourdhui : r.semaine[1];
       var n = equipe().length, ep = (r.enPoste || []).length;
       elSous.textContent = n + ' ' + (n > 1 ? '${T("personnes à la paie")}' : '${T("personne à la paie")}') + (ep ? ' · ' + ep + ' ${T("en poste")}' : '');
-      if (ONGLET === 'paie') chargerPaie(); else dessiner();
+      if (ONGLET === 'paie') chargerPaie(); else if (ONGLET === 'politiques') chargerPol(); else dessiner();
       if (OUVRIR_REGLAGES) { OUVRIR_REGLAGES = false; setTimeout(boiteReglages, 0); }
     });
   }
@@ -353,7 +354,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     var nA = (D.anomalies || []).length + (D.demandes || []).length;
     var og = function(v, l, nb){ return '<button type="button" class="' + (ONGLET === v ? 'on' : '') + '" data-og="' + v + '">' + l + (nb ? '<span class="nb">' + nb + '</span>' : '') + '</button>'; };
     var h = '<div class="em-tete"><div class="ed-seg">' + og('aujourdhui', '${T("Aujourd’hui")}', nA) + og('horaire', '${T("Horaire")}')
-      + og('equipe', '${T("Équipe")}') + og('paie', '${T("Paie")}') + '</div><div class="droite">';
+      + og('equipe', '${T("Équipe")}') + og('paie', '${T("Paie")}') + og('politiques', '${T("Politiques")}') + '</div><div class="droite">';
     if (ONGLET === 'aujourdhui') {
       if (D.peutModifier) h += '<button class="mini" data-act="pointage">${T("Ajouter un pointage")}</button><button class="mini" data-act="conge">${T("Ajouter un congé")}</button>';
     } else if (ONGLET === 'horaire') {
@@ -366,6 +367,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       h += '<div class="em-nav"><button data-per="-1" aria-label="${T("Période précédente")}">‹</button><b>'
         + esc('${T("Du ")}' + court(D.periode.debut) + ' ${T("au")} ' + court(D.periode.fin)) + '</b><button data-per="1" aria-label="${T("Période suivante")}">›</button></div>'
         + '<button class="mini" id="em-reg">${T("Réglages de la paie")}</button><button class="mini" id="em-csv">${T("Exporter (CSV)")}</button>';
+    } else if (ONGLET === 'politiques') {
+      if (D.peutModifier) h += '<button class="prim mini" id="pol-neuve">${T("Nouvelle politique")}</button>';
     } else if (ONGLET === 'equipe') {
       var hors = ((D && D.personnel) || []).length - equipe().length;
       if (hors) h += '<span class="pill">' + hors + ' ' + (hors > 1 ? '${T("personnes hors paie")}' : '${T("personne hors paie")}') + '</span>';
@@ -667,12 +670,57 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     }).join('') + '</div></div>';
   }
 
+  /* ══ POLITIQUES À SIGNER (2026-11-23, portail RH étape 1b) ══
+     Publier une politique (titre et texte en français ET en anglais, une échéance) ; chaque employé la signe dans son
+     portail (nom tapé + « j'ai lu et j'accepte » ; date, adresse IP et empreinte du texte gardées). Modifier le TEXTE =
+     nouvelle version : tout le monde signe de nouveau. */
+  var POL = null;
+  function chargerPol(){
+    appeler('employes:politiques', []).then(function(r){ POL = (r && r.ok) ? r.politiques || [] : { erreur: r }; dessiner(); });
+  }
+  function vuePolitiques(){
+    if (!POL) return '<div class="carte vide">${T("Chargement en cours")}</div>';
+    if (POL.erreur) return '<div class="carte vide">' + esc(expliquer(POL.erreur)) + '</div>';
+    if (!POL.length) return '<div class="carte vide">${T("Aucune politique. « Nouvelle politique » en publie une : chaque employé la lira et la signera dans son portail.")}</div>';
+    return POL.map(function(p){
+      var n = (p.suivi || []).length, ok = (p.suivi || []).filter(function(x){ return x.signee; }).length;
+      var pct = n ? Math.round(ok / n * 100) : 0;
+      return '<div class="carte"><h3>' + esc(p.titreFr) + ' <span class="pill">v' + p.version + '</span>' + (p.actif ? '' : ' <span class="pill">${T("retirée")}</span>')
+        + (p.echeance ? ' <span class="pill' + (p.echeance < D.aujourdhui && ok < n ? ' a' : '') + '">${T("échéance")} ' + esc(court(p.echeance)) + '</span>' : '')
+        + '<span class="dr"><span class="pill ' + (ok === n && n ? 'v' : 'a') + '">' + ok + ' / ' + n + ' ${T("signées")}</span>'
+        + (D.peutModifier && p.actif ? ' <button class="mini" data-polmod="' + esc(p.id) + '">${T("Modifier")}</button> <button class="mini dang" data-polret="' + esc(p.id) + '">${T("Retirer")}</button>' : '') + '</span></h3>'
+        + '<div class="jauge" style="margin:.6rem 0"><i style="width:' + pct + '%"></i></div>'
+        + '<div class="hp">' + (p.suivi || []).map(function(x){
+            return '<button type="button" tabindex="-1"><b>' + esc(x.nom) + '</b><span>' + (x.signee ? '${T("signée le")} ' + esc(court(x.signee.slice(0, 10))) + (x.langue === 'en' ? ' · EN' : '') : '<span class="pill a">${T("à signer")}</span>') + '</span></button>';
+          }).join('') + '</div></div>';
+    }).join('');
+  }
+  function boitePolitique(p){
+    p = p || {};
+    var b = boite(p.id ? '${T("Modifier la politique")}' : '${T("Nouvelle politique")}', '${T("Modifier le texte crée une nouvelle version : chaque employé devra la signer de nouveau.")}',
+      '<div class="champs"><label class="ch">${T("Titre (français)")}<input id="po-tf" maxlength="140" value="' + esc(p.titreFr || '') + '"></label>'
+      + '<label class="ch">${T("Titre (anglais)")}<input id="po-te" maxlength="140" value="' + esc(p.titreEn || '') + '"></label>'
+      + '<label class="ch large">${T("Texte (français)")}<textarea id="po-xf" rows="8" aria-label="${T("Texte (français)")}">' + esc(p.texteFr || '') + '</textarea></label>'
+      + '<label class="ch large">${T("Texte (anglais)")}<textarea id="po-xe" rows="8" aria-label="${T("Texte (anglais)")}">' + esc(p.texteEn || '') + '</textarea></label>'
+      + '<label class="ch">${T("Signer avant le")}<input type="date" id="po-ec" value="' + esc(p.echeance || '') + '"></label></div>',
+      p.id ? '${T("Enregistrer")}' : '${T("Publier")}', true);
+    b.ok.onclick = function(){
+      b.ok.disabled = true;
+      appeler('employes:politiqueEcrire', [{ id: p.id || '', titreFr: b.val('po-tf'), titreEn: b.val('po-te'), texteFr: b.val('po-xf'), texteEn: b.val('po-xe'), echeance: b.val('po-ec') }]).then(function(r){
+        b.ok.disabled = false;
+        if (!r.ok) { dire(r.motif === 'incomplet' ? '${T("Le titre et le texte en français sont obligatoires.")}' : expliquer(r), 'err'); return; }
+        b.fermer(); dire(r.nouvelleVersion ? '${T("Nouvelle version publiée : chacun la signera de nouveau.")}' : '${T("Politique enregistrée.")}', 'bon'); chargerPol();
+      });
+    };
+  }
+
   function dessiner(){
     if (!D) return;
     var h = tete();
     if (ONGLET === 'horaire') h += vueHoraire();
     else if (ONGLET === 'equipe') h += vueEquipe();
     else if (ONGLET === 'paie') h += vuePaie();
+    else if (ONGLET === 'politiques') h += vuePolitiques();
     else h += vueAujourdhui();
     corps.innerHTML = h;
   }
@@ -843,7 +891,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
   corps.addEventListener('click', function(ev){
     var t = ev.target; if (!t || !t.closest) return;
     var b;
-    if ((b = t.closest('[data-og]'))) { ONGLET = b.getAttribute('data-og'); ARME = null; if (ONGLET === 'aujourdhui') SEMAINE = ''; if (ONGLET === 'paie') { PAIE = null; dessiner(); chargerPaie(); } else if (ONGLET === 'aujourdhui') charger(); else dessiner(); return; }
+    if ((b = t.closest('[data-og]'))) { ONGLET = b.getAttribute('data-og'); ARME = null; if (ONGLET === 'aujourdhui') SEMAINE = ''; if (ONGLET === 'paie') { PAIE = null; dessiner(); chargerPaie(); } else if (ONGLET === 'politiques') { POL = null; dessiner(); chargerPol(); } else if (ONGLET === 'aujourdhui') charger(); else dessiner(); return; }
     if ((b = t.closest('[data-sem]'))) { var n = +b.getAttribute('data-sem'); SEMAINE = n ? plus(D.semaine[0], n) : ''; JOUR = n ? plus(JOUR, n) : ''; charger(); return; }
     if ((b = t.closest('[data-jour]'))) { JOUR = b.getAttribute('data-jour'); dessiner(); return; }
     if ((b = t.closest('[data-per]'))) {
@@ -900,6 +948,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     }
     if (t.id === 'em-mods' || t.id === 'em-reg') { boiteReglages(); return; }
     if (t.id === 'em-publier') { publier(); return; }
+    if (t.id === 'pol-neuve') { boitePolitique(null); return; }
+    if ((b = t.closest('[data-polmod]'))) { var pm = (POL || []).filter(function(x){ return x.id === b.getAttribute('data-polmod'); })[0]; if (pm) boitePolitique(pm); return; }
+    if ((b = t.closest('[data-polret]'))) {
+      var pid2 = b.getAttribute('data-polret');
+      szConfirmer({ titre: '${T("Retirer la politique")}', texte: '${T("Elle disparaît du portail des employés. Les signatures déjà données sont gardées.")}', oui: '${T("Retirer")}' }).then(function(okc){
+        if (!okc) return;
+        appeler('employes:politiqueRetirer', [pid2]).then(function(r){ if (!r.ok) { dire(expliquer(r), 'err'); return; } chargerPol(); });
+      });
+      return;
+    }
     if ((b = t.closest('[data-dok]'))) {
       var did = b.getAttribute('data-dok'); b.disabled = true;
       appeler('employes:demandeTraiter', [did, true, '']).then(function(r){ b.disabled = false; if (!r.ok) { dire(expliquer(r), 'err'); return; } dire('${T("Demande acceptée : le congé est posé à l’horaire.")}', 'bon'); charger(); });
