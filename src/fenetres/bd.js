@@ -299,7 +299,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     dire('${T("Enregistrement de l’accès…")}');
     appeler('config:bt:accesEcrire', [v]).then(function(r){
       if (b) b.disabled = false;
-      if (r && r.ok) { BT.acces = r.acces; dessiner(); dire(r.acces.ips.length ? '${T("Accès enregistré : la boutique de test s’ouvre à ces adresses.")}' : '${T("Liste vide : la boutique de test est fermée à tout le monde.")}', 'bon'); return; }
+      if (r && r.ok) { BT.acces = r.acces; BT.jeton = true; dessiner(); btCharger(); dire(r.acces.ips.length ? '${T("Accès enregistré : la boutique de test s’ouvre à ces adresses.")}' : '${T("Liste vide : la boutique de test est fermée à tout le monde.")}', 'bon'); return; }
       dire(r && r.motif === 'ip_invalide' ? ('${T("Adresse IP invalide : ")}' + esc(r.valeur || '')) : r && r.motif === 'droit' ? '${T("Réservé aux super-administrateurs.")}' : r && r.motif === 'jeton_test_absent' ? '${T("Le serveur n’a pas le jeton de la base de test (TESTBD_SANDRIZA).")}' : ('${T("Échec : ")}' + expliquer(r)), 'err');
     });
   }
