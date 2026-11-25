@@ -306,12 +306,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var k = syCle(e), ch = SY.choix[k] != null ? SY.choix[k] : syDefaut(e);
     var champs = (e.champs || []).slice(0, 12).map(function(c){
       var n = CHN[c.champ] || c.champ;
-      return '<div class="sy-c sy-' + esc(c.sens) + '"><span class="n">' + esc(n) + (c.sens === 'conflit' ? ' ⚠' : '') + '</span>'
+      return '<div class="sy-c sy-' + esc(c.sens) + '"><span class="n">' + esc(n) + (c.sens === 'conflit' ? ' <span class="ic">⚠</span>' : '') + '</span>'
         + '<span class="v"><b>${T("Production :")}</b> ' + syVal(c.prod) + '</span><span class="v"><b>${T("Test :")}</b> ' + syVal(c.test) + '</span></div>';
     }).join('') + ((e.champs || []).length > 12 ? '<div class="sy-c"><span class="n">+' + (e.champs.length - 12) + ' ${T("autres champs")}</span></div>' : '');
     return '<div class="sy-el sy-' + esc(e.sens) + '"><div class="sy-t"><span class="sy-b">' + esc(SEN[e.sens] || e.sens) + '</span>'
       + '<b>' + esc(e.titre || e.cle) + '</b><small>' + (e.tbl === 'products' ? '${T("Produit")}' : '${T("Réglage")}') + ' · ' + esc(TYN[e.type] || e.type) + '</small></div>'
-      + (e.avert === 'ugs_double' ? '<div class="sy-av">${T("⚠ Cette UGS existe déjà en production sur un autre produit : l’envoi sera refusé tant qu’elle n’est pas changée dans le test.")}</div>' : '')
+      + (e.avert === 'ugs_double' ? '<div class="sy-av"><span class="ic">⚠</span> ${T("Cette UGS existe déjà en production sur un autre produit : l’envoi sera refusé tant qu’elle n’est pas changée dans le test.")}</div>' : '')
       + '<div class="sy-cs">' + champs + '</div>'
       + '<label class="sy-ch">${T("Que faire :")} <select data-sy="' + i + '" aria-label="${T("Que faire de cet élément")}">' + syOptions(e).map(function(o){
           return '<option value="' + o[0] + '"' + (o[0] === ch ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label></div>';
@@ -421,7 +421,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var v = (BT && BT.verrou) || { actif: false }, u = v.urgence;
     var h = '<div class="carte"><div class="stitre">${T("Production verrouillée")}</div>'
       + '<div class="expl">${T("Verrouillée, la production refuse toute création ou modification de produit (le stock reste permis) et de réglage de la boutique : tout passe par le test, puis par la synchronisation. Les finances et le RH ne sont pas touchés. Une <b>urgence</b> rouvre la production pour un temps, avec un motif ; chaque modification faite pendant ce temps va au journal.")}</div>'
-      + '<div class="bt-etat">' + (v.actif ? '<span class="non">${T("🔒 Verrouillée")}</span>' : '<span>${T("🔓 Déverrouillée : le catalogue se modifie encore directement en production.")}</span>')
+      + '<div class="bt-etat">' + (v.actif ? '<span class="non"><span class="ic">🔒</span> ${T("Verrouillée")}</span>' : '<span><span class="ic">🔓</span> ${T("Déverrouillée : le catalogue se modifie encore directement en production.")}</span>')
       + (u ? ' · <span class="att">${T("Urgence ouverte jusqu’à")} ' + new Date(u.jusqu * 1000).toLocaleTimeString().slice(0, 5) + ' — ' + esc(u.motif) + '</span>' : '') + '</div>';
     if (!v.actif) h += '<div class="sy-av">${T("À activer une fois que l’application sait basculer vers la boutique de test (prochaine étape) : d’ici là, le catalogue ne se modifierait plus nulle part.")}</div>';
     h += '<div class="gestes"><button class="b" type="button" id="vr-bascule">' + (v.actif ? '${T("Déverrouiller la production")}' : '${T("Verrouiller la production")}') + '</button></div>';
