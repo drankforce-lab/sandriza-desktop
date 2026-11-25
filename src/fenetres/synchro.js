@@ -24,6 +24,26 @@
 
 const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, TETE } = require('./socle.js');
 const T = require('../langue').tr('synchro');
+/* (2026-11-25) Sa remarque : « c'est pas beau ça, je ne veux pas voir de code » (le détail montrait le JSON de
+   l'entretien). Les valeurs se LISENT désormais : consignes en mots, listes en pastilles, objets en lignes
+   « libellé — valeur », et seulement ce qui diffère. Les consignes : la même liste que le site (shop.js, SZ_ENTRETIEN). */
+const ENTRETIEN = {
+  lav_froid: ['Laver à la machine à l’eau froide', 'Machine wash cold'], lav_30: ['Laver à la machine à 30 °C au plus', 'Machine wash at 30 °C max'],
+  lav_delicat: ['Cycle délicat', 'Gentle cycle'], lav_main: ['Laver à la main à l’eau froide', 'Hand wash cold'],
+  lav_couleurs: ['Laver avec des couleurs semblables', 'Wash with similar colours'], lav_envers: ['Laver à l’envers', 'Wash inside out'],
+  lav_sac: ['Laver dans un sac à lessive en filet', 'Wash in a mesh laundry bag'], lav_separe: ['Laver séparément les premières fois', 'Wash separately the first few times'],
+  pas_lavage: ['Ne pas laver', 'Do not wash'], pas_javel: ['Ne pas utiliser de javellisant', 'Do not bleach'],
+  javel_sans_cl: ['Javellisant sans chlore seulement', 'Non-chlorine bleach only'], sech_bas: ['Sécher par culbutage à basse température', 'Tumble dry low'],
+  pas_sech: ['Ne pas sécher par culbutage', 'Do not tumble dry'], sech_plat: ['Sécher à plat', 'Dry flat'], sech_suspendu: ['Suspendre pour sécher', 'Line dry'],
+  sech_ombre: ['Sécher à l’ombre', 'Dry in the shade'], pas_tordre: ['Ne pas tordre', 'Do not wring'],
+  rep_bas: ['Repasser à basse température au besoin', 'Low iron if needed'], rep_moyen: ['Repasser à température moyenne', 'Iron on medium heat'],
+  rep_envers: ['Repasser à l’envers', 'Iron inside out'], pas_rep_deco: ['Ne pas repasser les imprimés ni les ornements', 'Do not iron prints or embellishments'],
+  vapeur: ['Défroisser à la vapeur', 'Steam to remove wrinkles'], pas_rep: ['Ne pas repasser', 'Do not iron'],
+  sec_ok: ['Nettoyage à sec permis', 'Dry clean'], sec_seul: ['Nettoyage à sec seulement', 'Dry clean only'], pas_sec: ['Ne pas nettoyer à sec', 'Do not dry clean'],
+  pas_assoupl: ['Ne pas utiliser d’assouplissant', 'Do not use fabric softener'], detacher: ['Détacher localement au besoin', 'Spot clean as needed'],
+  ranger_plie: ['Ranger plié pour garder la forme', 'Store folded to keep its shape'],
+};
+const entretienLib = () => { const en = require('../langue').langueCourante() === 'en'; const o = {}; Object.keys(ENTRETIEN).forEach((k) => { o[k] = ENTRETIEN[k][en ? 1 : 0]; }); return o; };
 const H = (s) => String(T(s)).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]);
 
 const CSS = `
@@ -99,6 +119,18 @@ button{font:inherit;color:inherit}
 .duo .av{color:var(--tx2)}
 .duo .ap{color:var(--tx)}
 .duo .vide{color:var(--tx3);font-style:italic}
+.nul{color:var(--tx3);font-style:italic}
+.pas{display:flex;flex-wrap:wrap;gap:.3rem;white-space:normal}
+.pa{display:inline-flex;align-items:center;gap:.35rem;font-size:.76rem;line-height:1.3;padding:.22rem .6rem;border-radius:999px;background:var(--v05);border:1px solid var(--v08)}
+.pa.plus,.ob.plus{border-color:var(--tx-ok);color:var(--tx)}
+.pa.moins,.ob.moins{opacity:.45;text-decoration:line-through}
+.kvs{display:grid;gap:.45rem;white-space:normal}
+.kv{display:grid;gap:.1rem}
+.kk{font-size:.68rem;color:var(--tx3);letter-spacing:.02em}
+.obs{display:grid;gap:.3rem;white-space:normal}
+.ob{font-size:.8rem;padding:.3rem .55rem;border-radius:8px;background:var(--v05);border:1px solid var(--v06)}
+.ph.mini{width:40px;height:40px;display:inline-block;vertical-align:middle}
+.pastille{display:inline-block;width:.8rem;height:.8rem;border-radius:50%;margin-right:.35rem;vertical-align:-1px;border:1px solid var(--v08)}
 .photos{display:flex;flex-wrap:wrap;gap:.45rem}
 .ph{width:68px;height:68px;border-radius:9px;background:var(--v05) center/cover no-repeat;border:1px solid var(--v08);position:relative}
 .ph.plus{box-shadow:0 0 0 2px var(--tx-ok)}
@@ -182,6 +214,7 @@ html.jour .et.nouveau{color:#226b3c}html.jour .et.modifie{color:#2a5794}html.jou
 `;
 
 function pageSynchro() {
+  const ENT_LIB = entretienLib();
   return `${TETE()}
 <title>${H('Publication — Administration Sandriza')}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
@@ -233,7 +266,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var CHAMPS = { name: '${T("Nom")}', price: '${T("Prix")}', salePrice: '${T("Prix soldé")}', compareAtPrice: '${T("Prix barré")}', cost: '${T("Coût")}',
     description: '${T("Description")}', images: '${T("Photos")}', image: '${T("Photo principale")}', additionalImages: '${T("Autres photos")}', photoDos: '${T("Photo du dos")}',
     category: '${T("Catégorie")}', sizes: '${T("Tailles")}', colors: '${T("Couleurs")}', tags: '${T("Étiquettes")}', sku: '${T("UGS")}', active: '${T("Active")}',
-    visible: '${T("Visible")}', featured: '${T("En vedette")}', brand: '${T("Marque")}', material: '${T("Matière")}', '(fiche)': '${T("Fiche entière")}', '(valeur)': '${T("Valeur")}' };
+    visible: '${T("Visible")}', featured: '${T("En vedette")}', brand: '${T("Marque")}', material: '${T("Matière")}', '(fiche)': '${T("Fiche entière")}', '(valeur)': '${T("Valeur")}',
+    entretien: '${T("Entretien")}', genre: '${T("Genre")}', ageGroup: '${T("Groupe d’âge")}', style: '${T("Style")}', sizeGuideId: '${T("Guide des tailles")}',
+    tag: '${T("Étiquette")}', supplierId: '${T("Fournisseur")}', ajustement: '${T("Ajustement")}', acquisitionCost: '${T("Coût d’acquisition")}', weight: '${T("Poids")}',
+    lowStock: '${T("Seuil de stock bas")}', buyMaxClient: '${T("Achat maximal par client")}', regime: '${T("Régime fiscal")}', retours: '${T("Retours")}',
+    accesAnticipe: '${T("Accès anticipé")}', publieLe: '${T("Publié le")}', anticipeExclu: '${T("Publication directe")}', precommande: '${T("Précommande")}',
+    secondeMain: '${T("Seconde main")}', belowCost: '${T("Sous le coût")}', belowCostReason: '${T("Raison du prix sous le coût")}', photoFibre: '${T("Photo de la fibre")}',
+    cabineVues: '${T("Vues de la cabine")}', cabineType: '${T("Type de haut (cabine)")}', mesuresVetement: '${T("Mesures du vêtement")}', colorVariants: '${T("Photos par couleur")}',
+    stock: '${T("Stock")}', stockLoc: '${T("Emplacements")}', mannequin: '${T("Mannequin")}', video: '${T("Vidéo")}', vue360: '${T("Vue 360°")}', composition: '${T("Composition")}' };
+  /* Les sous-clés des valeurs structurées ; une clé absente d'ici s'écrit en mots (« buyMax » donne « Buy max »). */
+  var SOUS = { autre: '${T("Autre consigne")}', codes: '${T("Consignes")}', composition: '${T("Composition")}', actif: '${T("Active")}', date: '${T("Date")}',
+    max: '${T("Plafond")}', etat: '${T("État")}', texte: '${T("Texte")}', titre: '${T("Titre")}', lien: '${T("Lien")}', couleur: '${T("Couleur")}',
+    accent: '${T("Accent")}', fibre: '${T("Fibre")}', pct: '%', nom: '${T("Nom")}', name: '${T("Nom")}', prix: '${T("Prix")}', debut: '${T("Début")}', fin: '${T("Fin")}' };
+  var ENT = ${JSON.stringify(ENT_LIB)};
   var CLES = { promo_bar_cfg: '${T("Barre promotionnelle")}', promos: '${T("Promotions")}', theme: '${T("Thème")}', apparence: '${T("Apparence")}', store_theme: '${T("Thème de la boutique")}',
     footer_cfg: '${T("Pied de page")}', nav_cfg: '${T("Navigation")}', hp_blocks_v2: '${T("Page d’accueil")}', homepage: '${T("Page d’accueil")}', custom_pages: '${T("Pages")}',
     collections: '${T("Collections")}', ship_cfg: '${T("Livraison")}', intl_ship: '${T("Livraison internationale")}', tax_rules: '${T("Taxes")}', seo: '${T("Référencement")}',
@@ -348,7 +393,54 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     brancherPub();
     if (focus) { var ri = document.getElementById('rech'); ri.focus(); try { ri.setSelectionRange(pos, pos); } catch (e) {} }
   }
-  function valeur(v){ return v == null ? '<span class="vide">' + '${T("(vide)")}' + '</span>' : esc(v); }
+  var VIDE = '<span class="nul">' + '${T("(vide)")}' + '</span>';
+  function lire(v){
+    if (typeof v !== 'string') return v;
+    var t = v.trim();
+    if (t.charAt(0) === '{' || t.charAt(0) === '[') { try { return JSON.parse(t); } catch (e) {} }
+    if (t === 'true') return true; if (t === 'false') return false; if (t === 'null') return null;
+    return v;
+  }
+  function estVide(x){ return x == null || x === '' || (Array.isArray(x) && !x.length) || (typeof x === 'object' && !Array.isArray(x) && !Object.keys(x).length); }
+  function estPrim(x){ return x == null || typeof x !== 'object'; }
+  function motCle(k){ return SOUS[k] || String(k).replace(/_/g, ' ').replace(/([a-z])([A-Z])/g, '$1 $2').replace(/^./, function(c){ return c.toUpperCase(); }).replace(/ [A-Z](?=[a-z])/g, function(c){ return c.toLowerCase(); }); }
+  function prim(x){
+    if (x === true) return '${T("Oui")}'; if (x === false) return '${T("Non")}';
+    if (x == null || x === '') return VIDE;
+    var s = String(x);
+    if (ENT[s]) return esc(ENT[s]);
+    if (s.indexOf('data:image') === 0 || /^https?:[^ ]+[.](jpe?g|png|webp|avif|gif)([?]|$)/i.test(s)) return '<span class="ph mini" style="background-image:url(&quot;' + esc(s) + '&quot;)"></span>';
+    if (/^#[0-9a-f]{3,8}$/i.test(s)) return '<span class="pastille" style="background:' + esc(s) + '"></span>' + esc(s);
+    return esc(s);
+  }
+  function resume(o){
+    if (estPrim(o)) return prim(o);
+    if (Array.isArray(o)) return o.map(resume).join(', ');
+    var n = o.name || o.nom || o.label || o.titre || o.title;
+    if (n != null && typeof n !== 'object') return esc(n);
+    if (o.fibre != null && o.pct != null) return esc(o.pct + ' % ' + o.fibre);
+    return Object.keys(o).filter(function(k){ return !estVide(o[k]); }).map(function(k){ return '<span class="kk">' + esc(motCle(k)) + '</span> ' + resume(o[k]); }).join(' · ') || VIDE;
+  }
+  function egal(a, b){ return JSON.stringify(a) === JSON.stringify(b); }
+  /* cote : 'av' (en ligne) ou 'ap' (préparée) ; autre : la valeur d'en face, pour marquer ce qui part et ce qui arrive. */
+  function rendre(x, autre, cote){
+    if (estVide(x)) return VIDE;
+    if (Array.isArray(x)) {
+      var ao = Array.isArray(autre) ? autre.map(function(i){ return JSON.stringify(i); }) : null;
+      var marque = function(i){ return ao && ao.indexOf(JSON.stringify(i)) < 0 ? (cote === 'ap' ? ' plus' : ' moins') : ''; };
+      if (x.every(estPrim)) return '<div class="pas">' + x.map(function(i){ return '<span class="pa' + marque(i) + '">' + prim(i) + '</span>'; }).join('') + '</div>';
+      return '<div class="obs">' + x.map(function(i){ return '<div class="ob' + marque(i) + '">' + resume(i) + '</div>'; }).join('') + '</div>';
+    }
+    if (typeof x === 'object') {
+      var face = (autre && typeof autre === 'object' && !Array.isArray(autre)) ? autre : null;
+      var cles = Object.keys(x); if (face) Object.keys(face).forEach(function(k){ if (cles.indexOf(k) < 0) cles.push(k); });
+      var dif = face ? cles.filter(function(k){ return !egal(x[k], face[k]) && !(estVide(x[k]) && estVide(face[k])); }) : cles.filter(function(k){ return !estVide(x[k]); });
+      if (!dif.length) dif = cles;
+      return '<div class="kvs">' + dif.map(function(k){ return '<div class="kv"><span class="kk">' + esc(motCle(k)) + '</span><span class="vv">' + rendre(x[k], face ? face[k] : undefined, cote) + '</span></div>'; }).join('') + '</div>';
+    }
+    return prim(x);
+  }
+  function valeur(v, autre, cote){ return rendre(lire(v), lire(autre), cote); }
   function detailHtml(){
     var e = R && R.elements.filter(function(x){ return cle(x) === ACTIF; })[0];
     if (!e) return '<div class="etat"><div class="in"><p>' + '${T("Choisissez un changement pour voir le détail.")}' + '</p></div></div>';
@@ -368,7 +460,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           + '<div class="c ap"><small>' + '${T("Préparée")}' + '</small>' + (c.test == null ? '<span class="vide">' + '${T("(retirée)")}' + '</span>' : '${T("présente")}') + '</div></div>';
         if (e.photos && e.photos.test && e.photos.test.length && c.test != null) h += '<div class="photos" style="margin-top:.6rem">' + e.photos.test.map(function(u){ return '<span class="ph" style="background-image:url(&quot;' + esc(u) + '&quot;)"></span>'; }).join('') + '</div>';
       } else {
-        h += '<div class="duo"><div class="c av"><small>' + '${T("En ligne")}' + '</small>' + valeur(c.prod) + '</div><div class="c ap"><small>' + '${T("Préparée")}' + '</small>' + valeur(c.test) + '</div></div>';
+        h += '<div class="duo"><div class="c av"><small>' + '${T("En ligne")}' + '</small>' + valeur(c.prod, c.test, 'av') + '</div><div class="c ap"><small>' + '${T("Préparée")}' + '</small>' + valeur(c.test, c.prod, 'ap') + '</div></div>';
       }
       h += '</div>';
     });
