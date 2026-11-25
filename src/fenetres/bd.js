@@ -86,6 +86,11 @@ button.prim:disabled{opacity:.5;cursor:default}
 .bt-ch textarea{min-height:5.2rem;resize:vertical;font-family:ui-monospace,Consolas,monospace}
 .bt-etat{font-size:.76rem;color:var(--tx2);margin:.2rem 0 .6rem}
 .bt-etat .ok{color:var(--tx-ok)}.bt-etat .non{color:var(--tx-err)}
+.bt-jr{max-height:13rem;overflow-y:auto;background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.45rem .6rem;font-size:.74rem;line-height:1.55}
+.bt-jr div{color:var(--tx2)}.bt-jr .ok{color:var(--tx-ok)}.bt-jr .err{color:var(--tx-err)}.bt-jr .att{color:var(--tx-jaune)}
+.bt-jr time{color:var(--tx3);margin-right:.4rem;font-variant-numeric:tabular-nums}
+.bt-prog{height:.5rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:99px;overflow:hidden;margin:0 0 .5rem}
+.bt-prog i{display:block;height:100%;background:var(--or);transition:width .3s}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -111,7 +116,7 @@ function pageBd() {
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
-  var D = null, RO = false, OCCUPE = false, STOCK = null, CONF = '', BT = null;
+  var D = null, RO = false, OCCUPE = false, STOCK = null, CONF = '', BT = null, JR = [], JR_ID = 0, CP = null;
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
@@ -189,6 +194,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     for (var i=0;i<bs.length;i++) bs[i].onclick = function(){ agir(this.getAttribute('data-act')); };
     var b1 = document.getElementById('bt-moi'); if (b1) b1.onclick = btAjouterMoi;
     var b2 = document.getElementById('bt-ok'); if (b2) b2.onclick = btEnregistrer;
+    var b3 = document.getElementById('bt-copier'); if (b3) b3.onclick = btCopier;
   }
   /* LA BOUTIQUE DE TEST — SA PORTE (2026-11-24). Seules ces IP (et ces pays, si on en met) ouvrent test.sandriza.com.
      Liste vide = personne. Super-administrateur seulement (le serveur le vérifie). */
@@ -207,7 +213,50 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="bt-etat">' + (BT.jeton ? '<span class="ok">${T("✓ Base de test branchée")}</span>' : '<span class="non">${T("✗ Jeton de la base de test absent du serveur (TESTBD_SANDRIZA)")}</span>')
       + (BT.durci ? '' : ' · ${T("Conseil : poser SZ_CF_SECRET durcit cette porte.")}') + '</div>'
       + '<div class="gestes"><button class="prim" type="button" id="bt-ok">${T("Enregistrer l’accès")}</button></div></div>';
+    /* LA COPIE PRODUCTION → TEST (lot 3) : son bouton, sa progression, son journal en direct. */
+    h += '<div class="carte"><div class="stitre">${T("Boutique de test — copie depuis la production")}</div>'
+      + '<div class="expl">${T("Remplace le contenu du test par celui de la production : catalogue et réglages tels quels, <b>clients brouillés</b> (noms, courriels, téléphones, adresses). Les <b>finances et le RH ne sont jamais copiés</b> ; Square passe en bac à sable.")}</div>'
+      + (BT.derniere ? '<div class="bt-etat">${T("Dernière copie :")} ' + esc(String(BT.derniere.le || '').replace('T', ' ').slice(0, 16)) + ' UTC</div>' : '')
+      + (CP ? '<div class="bt-prog" role="progressbar" aria-label="${T("Progression de la copie")}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + CP.pct + '"><i style="width:' + CP.pct + '%"></i></div>' : '')
+      + '<div class="gestes"><button class="b" type="button" id="bt-copier"' + (CP ? ' disabled' : '') + '>${T("Copier la production vers le test")}</button></div>'
+      + '<div class="bt-jr" id="bt-jr" role="log" aria-label="${T("Journal de la boutique de test")}">' + (JR.length ? JR.map(jrLigne).join('') : '<div>${T("Le journal est vide.")}</div>') + '</div></div>';
     return h;
+  }
+  function jrLigne(l){ var d = new Date((l.le || 0) * 1000); var hh = ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + ':' + ('0' + d.getSeconds()).slice(-2);
+    return '<div class="' + esc(l.niveau || '') + '"><time>' + hh + '</time>' + esc(l.texte || '') + '</div>'; }
+  function jrLire(){ return appeler('config:bt:journal', [JR_ID]).then(function(r){
+    if (r && r.ok && r.lignes && r.lignes.length) { JR = JR.concat(r.lignes).slice(-300); JR_ID = JR[JR.length - 1].id; var b = document.getElementById('bt-jr');
+      if (b) { b.innerHTML = JR.map(jrLigne).join(''); b.scrollTop = b.scrollHeight; } } }); }
+  function cpMaj(pct){ CP.pct = Math.max(0, Math.min(100, Math.round(pct))); var b = document.querySelector('.bt-prog'); if (b) { b.setAttribute('aria-valuenow', CP.pct); b.firstChild.style.width = CP.pct + '%'; } }
+  function btCopier(){
+    if (CP) return;
+    dire('${T("Lecture de la production…")}');
+    appeler('config:bt:copie', ['plan']).then(function(p){
+      if (!p || !p.ok) { dire('${T("Échec : ")}' + expliquer(p), 'err'); return; }
+      var total = 0; var lst = (p.tables || []).map(function(t){ total += t.lignes; return t.nom + ' (' + t.lignes + ')'; }).join(', ');
+      return szConfirmer({ danger: true, titre: '${T("Copier la production vers le test")}',
+        texte: '${T("Tout le contenu actuel du test sera remplacé, y compris ce qui y a été modifié et pas encore synchronisé vers la production. Tables copiées : ")}' + lst + '.',
+        oui: '${T("Remplacer le test")}' }).then(function(ok){ if (ok) btCopieLancer(p.tables || [], total); else dire(''); });
+    });
+  }
+  function btCopieLancer(tables, total){
+    CP = { pct: 0, fait: 0 }; dessiner(); dire('${T("Copie en cours…")}', 'att');
+    var minuteur = setInterval(jrLire, 2000);
+    function finir(ok, msg){ clearInterval(minuteur); CP = null; jrLire().then(function(){ btCharger(); }); dire(msg, ok ? 'bon' : 'err'); }
+    appeler('config:bt:copie', ['preparer', { ecraser: true }]).then(function(r){
+      if (!r || !r.ok) return finir(false, '${T("Échec : ")}' + expliquer(r));
+      var i = 0;
+      function suivante(apres){
+        if (i >= tables.length) return appeler('config:bt:copie', ['fin']).then(function(f){ finir(f && f.ok, f && f.ok ? '${T("Copie terminée : le test est à jour.")}' : ('${T("Échec : ")}' + expliquer(f))); });
+        var t = tables[i];
+        appeler('config:bt:copie', ['table', { table: t.nom, apres: apres }]).then(function(x){
+          if (!x || !x.ok) return finir(false, '${T("Échec : ")}' + expliquer(x));
+          CP.fait += (x.copiees || 0) + (x.ecartees || 0); cpMaj(total ? CP.fait * 100 / total : 100);
+          if (x.suivant != null) suivante(x.suivant); else { i++; suivante(0); }
+        });
+      }
+      suivante(0);
+    });
   }
   function btLire(){ var t = document.getElementById('bt-ips'), p = document.getElementById('bt-pays');
     return { ips: (t ? t.value : '').split(/[\\s,;]+/).map(function(x){ return x.trim(); }).filter(Boolean),
@@ -228,7 +277,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       dire(r && r.motif === 'ip_invalide' ? ('${T("Adresse IP invalide : ")}' + esc(r.valeur || '')) : r && r.motif === 'droit' ? '${T("Réservé aux super-administrateurs.")}' : r && r.motif === 'jeton_test_absent' ? '${T("Le serveur n’a pas le jeton de la base de test (TESTBD_SANDRIZA).")}' : ('${T("Échec : ")}' + expliquer(r)), 'err');
     });
   }
-  function btCharger(){ appeler('config:bt:acces').then(function(r){ BT = r || { ok: false, motif: 'echec' }; dessiner(); }); }
+  function btCharger(){ appeler('config:bt:acces').then(function(r){ BT = r || { ok: false, motif: 'echec' };
+    if (!BT.ok) { dessiner(); return; }
+    appeler('config:bt:copie', ['plan']).then(function(p){ if (p && p.ok) BT.derniere = p.derniere; dessiner(); jrLire(); }); }); }
 
   function agir(act){
     if (OCCUPE) return;
