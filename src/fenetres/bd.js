@@ -212,9 +212,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     var dis = RO ? ' disabled' : '';
-    /* (2026-11-25, lot 6 — SA DÉCISION) La boutique se prépare TOUJOURS dans le test depuis l'application ; la publier
-       est LE geste de cette fenêtre : il vient en premier, analysé dès l'ouverture. */
-    var h = (BT && BT.ok ? syHtml() : '') + '<div class="carte"><div class="stitre"><span class="ic">☁</span>${T(" Turso Cloud DB")}</div>'
+    /* (2026-11-25, SA DEMANDE : « surtout pas fusionné avec Base de données ») La publication a SON module (fenêtre
+       « synchro », bouton « Publier » de la barre). Ici : l'accès au test, la copie, le journal. */
+    var h = '<div class="carte"><div class="stitre"><span class="ic">☁</span>${T(" Turso Cloud DB")}</div>'
       + '<div class="expl">${T("Toute la configuration (thèmes, logos, clés API, navigation, profil…) est ")}'
       + '${T("synchronisée vers Turso à <b>chaque sauvegarde</b>. Ces boutons servent à forcer une synchronisation, ")}'
       + '${T("par exemple après avoir vidé le cache du navigateur.")}</div>'
@@ -244,7 +244,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var b1 = document.getElementById('bt-moi'); if (b1) b1.onclick = btAjouterMoi;
     var b2 = document.getElementById('bt-ok'); if (b2) b2.onclick = btEnregistrer;
     var b3 = document.getElementById('bt-copier'); if (b3) b3.onclick = btCopier;
-    if (BT && BT.ok) { syBrancher(); vrBrancher(); }
+    if (BT && BT.ok) { vrBrancher(); }
   }
   /* LA BOUTIQUE DE TEST — SA PORTE (2026-11-24). Seules ces IP (et ces pays, si on en met) ouvrent test.sandriza.com.
      Liste vide = personne. Super-administrateur seulement (le serveur le vérifie). */
@@ -277,151 +277,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="bt-jr" id="bt-jr" role="log" aria-label="${T("Journal de la boutique de test")}">' + (JR.length ? JR.map(jrLigne).join('') : '<div>${T("Le journal est vide.")}</div>') + '</div></div>';
     return h;
   }
-  /* LA SYNCHRONISATION TEST → PRODUCTION (lot 4, 2026-11-24). SA DEMANDE : un résumé des changements faits en test,
-     un journal pendant la réplication, des indications et des options en cas de conflit. Le serveur compare à
-     TROIS voies (test, production, référence de la dernière copie) ; cette fenêtre montre et fait choisir. */
-  var CHN = { name: '${T("Nom")}', price: '${T("Prix")}', salePrice: '${T("Prix soldé")}', compareAtPrice: '${T("Prix barré")}', description: '${T("Description")}',
-    images: '${T("Photos")}', image: '${T("Photo principale")}', category: '${T("Catégorie")}', sizes: '${T("Tailles")}', colors: '${T("Couleurs")}', tags: '${T("Étiquettes")}',
-    sku: '${T("UGS")}', active: '${T("Active")}', visible: '${T("Visible")}', featured: '${T("En vedette")}', '(fiche)': '${T("Fiche entière")}', '(valeur)': '${T("Valeur")}' };
-  var TYN = { ajout: '${T("Nouveau dans le test")}', suppression: '${T("Supprimé dans le test")}', ajout_prod: '${T("Créé en production seulement")}',
-    suppression_prod: '${T("Supprimé en production seulement")}', modif: '${T("Modifié")}', creation_double: '${T("Créé des deux côtés sous le même numéro")}' };
-  var SEN = { test: '${T("À envoyer")}', mixte: '${T("À envoyer")}', conflit: '${T("Conflit")}', prod: '${T("Changé en production")}' };
-  function syCle(e){ return e.tbl + ':' + e.cle; }
-  function syOptions(e){
-    var o = [];
-    var entier = /^(ajout|suppression|ajout_prod|suppression_prod)$/.test(e.type);
-    if (e.sens === 'conflit') {
-      o.push(['', '${T("— Choisir —")}']);
-      o.push(['test', '${T("Le test l’emporte")}']);
-      if (!entier) o.push(['fusion', '${T("Fusionner : le reste part, la production garde ses valeurs en conflit")}']);
-      o.push(['prod', '${T("La production l’emporte (le test est réaligné)")}']);
-    } else if (e.sens === 'prod') {
-      o.push(['prod', '${T("Reprendre dans le test")}']);
-      if (entier) o.push(['test', '${T("Imposer la version du test en production")}']);
-    } else {
-      o.push(['test', e.type === 'suppression' ? '${T("Supprimer aussi en production")}' : '${T("Envoyer en production")}']);
-      o.push(['prod', '${T("Abandonner ce changement (le test reprend la production)")}']);
-    }
-    o.push(['sauter', '${T("Plus tard")}']);
-    return o;
-  }
-  function syDefaut(e){ return e.sens === 'conflit' ? '' : (e.sens === 'prod' ? 'prod' : 'test'); }
-  function syVal(v){ return v == null ? '<i>${T("(absent)")}</i>' : esc(v); }
-  function syElHtml(e, i){
-    var k = syCle(e), ch = SY.choix[k] != null ? SY.choix[k] : syDefaut(e);
-    var champs = (e.champs || []).slice(0, 12).map(function(c){
-      var n = CHN[c.champ] || c.champ;
-      return '<div class="sy-c sy-' + esc(c.sens) + '"><span class="n">' + esc(n) + (c.sens === 'conflit' ? ' <span class="ic">⚠</span>' : '') + '</span>'
-        + '<span class="v"><b>${T("Production :")}</b> ' + syVal(c.prod) + '</span><span class="v"><b>${T("Test :")}</b> ' + syVal(c.test) + '</span></div>';
-    }).join('') + ((e.champs || []).length > 12 ? '<div class="sy-c"><span class="n">+' + (e.champs.length - 12) + ' ${T("autres champs")}</span></div>' : '');
-    return '<div class="sy-el sy-' + esc(e.sens) + '"><div class="sy-t"><span class="sy-b">' + esc(SEN[e.sens] || e.sens) + '</span>'
-      + '<b>' + esc(e.titre || e.cle) + '</b><small>' + (e.tbl === 'products' ? '${T("Produit")}' : '${T("Réglage")}') + ' · ' + esc(TYN[e.type] || e.type) + '</small></div>'
-      + (e.avert === 'ugs_double' ? '<div class="sy-av"><span class="ic">⚠</span> ${T("Cette UGS existe déjà en production sur un autre produit : l’envoi sera refusé tant qu’elle n’est pas changée dans le test.")}</div>' : '')
-      + '<div class="sy-cs">' + champs + '</div>'
-      + '<label class="sy-ch">${T("Que faire :")} <select data-sy="' + i + '" aria-label="${T("Que faire de cet élément")}">' + syOptions(e).map(function(o){
-          return '<option value="' + o[0] + '"' + (o[0] === ch ? ' selected' : '') + '>' + esc(o[1]) + '</option>'; }).join('') + '</select></label></div>';
-  }
-  function syAFaire(){ if (!SY || !SY.res) return []; return SY.res.elements.filter(function(e){ var c = SY.choix[syCle(e)] != null ? SY.choix[syCle(e)] : syDefaut(e); return c === 'test' || c === 'fusion' || c === 'prod'; }); }
-  function syHtml(){
-    var h = '<div class="carte sy-publier"><div class="stitre">${T("Publier en production")}</div>'
-      + '<div class="expl">${T("Tout ce que vous modifiez dans la boutique (produits, photos, prix, promotions, pages, thème, réglages) est préparé dans le test : la vraie boutique ne change qu’ici. Vérifiez le résumé, puis publiez.")}</div>'
-      + '<div class="expl">${T("Compare le test à la production, champ par champ, depuis la dernière copie. Seuls le <b>catalogue</b> et les <b>réglages de la boutique</b> partent — jamais les clients, les commandes, les finances ni le RH. Le <b>stock</b> reste celui de la production. Chaque envoi est sauvegardé et peut être annulé.")}</div>';
-    if (SY && SY.res) {
-      var n = SY.res.compte || {}, l = SY.res.elements || [];
-      h += '<div class="sy-res">' + (l.length
-        ? '<span class="ok">' + (n.test || 0) + ' ${T("à envoyer")}</span> · <span class="' + (n.conflit ? 'non' : '') + '">' + (n.conflit || 0) + ' ${T("conflit(s)")}</span> · <span>' + (n.prod || 0) + ' ${T("changé(s) en production seulement")}</span>'
-        : '<span class="ok">${T("✓ Rien à synchroniser : le test et la production sont pareils.")}</span>') + '</div>';
-      if (SY.res.reference_empreinte_seule) h += '<div class="sy-av">${T("La dernière copie date d’avant ce module : la comparaison est moins fine (tout écart touchant un produit vendu depuis passe pour un conflit). Une nouvelle copie la rendra exacte.")}</div>';
-      if (SY.res.trop) h += '<div class="sy-av">${T("Plus de 400 éléments : seuls les 400 premiers sont montrés. Synchronisez-les, puis relancez l’analyse.")}</div>';
-      if (l.length) h += '<div class="sy-liste">' + l.map(syElHtml).join('') + '</div>';
-    } else if (SY && SY.err) h += '<div class="sy-av">' + SY.err + '</div>';
-    if (SY && SY.pct != null) h += '<div class="bt-prog" id="sy-prog" role="progressbar" aria-label="${T("Progression de la synchronisation")}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + SY.pct + '"><i style="width:' + SY.pct + '%"></i></div>';
-    var nb = syAFaire().length, occ = SY && (SY.lecture || SY.pct != null);
-    h += '<div class="gestes"><button class="b" type="button" id="sy-analyser"' + (occ ? ' disabled' : '') + '>' + (SY && SY.res ? '${T("Relancer l’analyse")}' : '${T("Analyser les changements")}') + '</button>'
-      + (SY && SY.res && SY.res.elements.length ? '<button class="prim" type="button" id="sy-envoyer"' + (occ || !nb ? ' disabled' : '') + '>${T("Publier en production")} (' + nb + ')</button>' : '') + '</div>';
-    if (HI && HI.length) {
-      h += '<div class="r2d"><div class="t">${T("Historique des publications")}</div><div class="sy-hi">' + HI.map(function(x){
-        var d = new Date(x.le * 1000);
-        return '<div><time>' + d.toLocaleDateString() + ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + '</time><span>' + esc(x.titre || x.cle)
-          + ' <small>' + (x.creation ? '${T("créé")}' : x.suppression ? '${T("supprimé")}' : '${T("modifié")}') + '</small></span>'
-          + (x.annule ? '<small>${T("annulé")}</small>' : '<button class="b" type="button" data-annuler="' + x.id + '">${T("Annuler")}</button>') + '</div>';
-      }).join('') + '</div></div>';
-    }
-    return h + '</div>';
-  }
-  function syBrancher(){
-    var a = document.getElementById('sy-analyser'); if (a) a.onclick = syAnalyser;
-    var e = document.getElementById('sy-envoyer'); if (e) e.onclick = syEnvoyer;
-    var ss = corps.querySelectorAll('select[data-sy]');
-    for (var i = 0; i < ss.length; i++) ss[i].onchange = function(){
-      var el = SY.res.elements[+this.getAttribute('data-sy')]; SY.choix[syCle(el)] = this.value;
-      var b = document.getElementById('sy-envoyer'), nb = syAFaire().length;
-      if (b) { b.disabled = !nb; b.textContent = '${T("Appliquer les choix")} (' + nb + ')'; }
-    };
-    var hs = corps.querySelectorAll('button[data-annuler]');
-    for (var j = 0; j < hs.length; j++) hs[j].onclick = function(){ syAnnuler(+this.getAttribute('data-annuler')); };
-  }
-  function syMotif(r){
-    var m = r && r.motif;
-    return m === 'jamais_copie' ? '${T("Aucune copie de référence : lancez d’abord « Copier la production vers le test ».")}'
-      : m === 'change_depuis_analyse' ? '${T("Cet élément a changé depuis l’analyse : relancez-la.")}'
-      : m === 'ugs_double' ? '${T("UGS déjà prise en production.")}'
-      : m === 'modifie_depuis' ? '${T("L’élément a été modifié en production depuis cet envoi : l’annulation l’écraserait. Rien n’est fait.")}'
-      : m === 'production_occupee' ? '${T("La production change sans arrêt (ventes en cours ?) : réessayez dans un instant.")}'
-      : expliquer(r);
-  }
-  function syAnalyser(){
-    SY = SY || { choix: {} }; SY.lecture = true; SY.err = null; dessiner();
-    dire('${T("Analyse du test et de la production…")}');
-    appeler('config:bt:sync', ['analyser']).then(function(r){
-      SY.lecture = false;
-      if (!r || !r.ok) { SY.res = null; SY.err = syMotif(r); dessiner(); dire('${T("Échec : ")}' + SY.err, 'err'); return; }
-      if (!Array.isArray(r.elements)) r.elements = [];   // (lot 6) analysée à l'ouverture : une réponse sans liste ne doit rien casser
-      SY.res = r; SY.choix = {}; dessiner();
-      dire(r.elements.length ? '${T("Analyse terminée : vérifiez chaque élément, puis appliquez.")}' : '${T("Rien à synchroniser.")}', 'bon');
-    });
-    syHistorique();
-  }
-  function syHistorique(){ appeler('config:bt:sync', ['historique']).then(function(r){ if (r && r.ok) { HI = r.envois || []; if (!SY || SY.pct == null) dessiner(); } }); }
-  function syEnvoyer(){
-    var l = syAFaire(); if (!l.length || !SY || SY.pct != null) return;
-    var nT = 0, nP = 0; l.forEach(function(e){ var c = SY.choix[syCle(e)] != null ? SY.choix[syCle(e)] : syDefaut(e); if (c === 'prod') nP++; else nT++; });
-    var sans = SY.res.elements.filter(function(e){ return e.sens === 'conflit' && !SY.choix[syCle(e)]; }).length;
-    szConfirmer({ danger: nT > 0, titre: '${T("Appliquer les choix")}',
-      texte: nT + ' ${T("élément(s) partiront en PRODUCTION (la boutique en ligne change aussitôt) ;")} ' + nP + ' ${T("seront repris dans le test.")}'
-        + (sans ? ' ' + sans + ' ${T("conflit(s) sans choix resteront en attente.")}' : '') + ' ${T("Chaque envoi est sauvegardé : il pourra être annulé.")}',
-      oui: '${T("Appliquer")}' }).then(function(ok){ if (ok) syLancer(l); });
-  }
-  function syLancer(l){
-    SY.pct = 0; dessiner(); dire('${T("Synchronisation en cours…")}', 'att');
-    var minuteur = setInterval(jrLire, 1500), i = 0, err = 0;
-    appeler('config:bt:sync', ['debut', { n: l.length }]).then(function(){ jrLire(); suivant(); });
-    function suivant(){
-      if (i >= l.length) {
-        return appeler('config:bt:sync', ['fin', { n: l.length, erreurs: err }]).then(function(){
-          clearInterval(minuteur); jrLire(); SY.pct = null;
-          dire(err ? (err + ' ${T("élément(s) en échec : voir le journal.")}') : '${T("Synchronisation terminée.")}', err ? 'err' : 'bon');
-          syAnalyser();
-        });
-      }
-      var e = l[i], c = SY.choix[syCle(e)] != null ? SY.choix[syCle(e)] : syDefaut(e);
-      appeler('config:bt:sync', ['appliquer', { tbl: e.tbl, cle: e.cle, choix: c, jeton: e.jeton }]).then(function(r){
-        if (!r || !r.ok) err++;
-        i++; SY.pct = Math.round(i * 100 / l.length);
-        var b = document.getElementById('sy-prog'); if (b) { b.setAttribute('aria-valuenow', SY.pct); b.firstChild.style.width = SY.pct + '%'; }
-        suivant();
-      });
-    }
-  }
-  function syAnnuler(id){
-    var x = (HI || []).filter(function(h){ return h.id === id; })[0]; if (!x) return;
-    szConfirmer({ danger: true, titre: '${T("Annuler cet envoi")}', texte: '${T("La production retrouve la version d’avant l’envoi pour :")} « ' + (x.titre || x.cle) + ' ». ${T("Le stock actuel est gardé. Le test, lui, ne change pas.")}', oui: '${T("Annuler l’envoi")}' })
-      .then(function(ok){ if (!ok) return;
-        dire('${T("Annulation…")}');
-        appeler('config:bt:sync', ['annuler', { id: id }]).then(function(r){ jrLire(); syHistorique();
-          dire(r && r.ok ? '${T("Envoi annulé : la production a retrouvé sa version d’avant.")}' : ('${T("Échec : ")}' + syMotif(r)), r && r.ok ? 'bon' : 'err'); }); });
-  }
-
+  /* (2026-11-25) La synchronisation test → production a quitté cette fenêtre : c'est le module « Publication »
+     (src/fenetres/synchro.js), ouvert par le bouton « Publier » de la barre. */
   /* LE VERROU DE LA PRODUCTION (lot 4) : SA RÈGLE — « toute modification devra impérativement passer en test avant
      d’être poussée en production » (la boutique seulement). L’urgence rouvre pour un temps, avec un motif, et tout est noté. */
   function vrHtml(){
@@ -519,8 +376,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function btCharger(){ appeler('config:bt:acces').then(function(r){ BT = r || { ok: false, motif: 'echec' };
     if (!BT.ok) { dessiner(); return; }
-    appeler('config:bt:copie', ['plan']).then(function(p){ if (p && p.ok) BT.derniere = p.derniere; dessiner(); jrLire(); syHistorique();
-      if (!SY) syAnalyser();   // (lot 6) le résumé de ce qui attend d'être publié, dès l'ouverture
+    appeler('config:bt:copie', ['plan']).then(function(p){ if (p && p.ok) BT.derniere = p.derniere; dessiner(); jrLire();
     }); }); }
 
   function agir(act){

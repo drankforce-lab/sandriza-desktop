@@ -5375,6 +5375,8 @@ const PAGES_ANCRABLES = () => ({
   'config-logotheque': ['Logothèque', () => pageLogotheque()],
   'config-analytics': ['Statistiques (Google Analytics)', () => pageAnalytics()],
   'config-turso': ['Base de données', () => pageBd()],
+  // (2026-11-25) LE MODULE DE PUBLICATION : la boutique préparée (test) → la boutique en ligne. Ouvert par le bouton « Publier » de la barre.
+  'synchro': ['Publication', () => pageSynchro()],
   'config-homepage': ['Page d’accueil', () => pageAccueil()],
   'config-launch': ['Mode lancement', () => pageLancement()],
   'pages': ['Pages du site', () => pagePages()],
@@ -7980,6 +7982,7 @@ const { pageGabarits } = require('./fenetres/gabarits');
 const { pageLogotheque } = require('./fenetres/logotheque');
 const { pageAnalytics } = require('./fenetres/analytics');
 const { pageBd } = require('./fenetres/bd');
+const { pageSynchro } = require('./fenetres/synchro');
 const { pageAccueil } = require('./fenetres/accueil');
 const { pageLancement } = require('./fenetres/lancement');
 const { pagePages } = require('./fenetres/pages');
@@ -8326,6 +8329,9 @@ const actionApp = (nom, arg) => {
        repare pas un bouton muet en changeant l endroit ou l on appuie.
        ➡ Un banc suit maintenant ce chemin : `banc-modules-ouvrables.js`. */
     case 'corbeille': _ouvrirAncre('corbeille'); break;   // (2026-11-18) ancré, comme les autres modules
+    /* (2026-11-25) LA PUBLICATION : née native, sans section du site — donc PAS la branche « dock:naviguer » (clic muet,
+       le piège de la corbeille). Ancrée comme les modules ; elle se détache. */
+    case 'synchro': _ouvrirAncre('synchro'); break;
     /* ⚠ LES GÉNÉRATIONS (2026-10-18) : ni `dock:naviguer` (aucune section du site ne la porte — le clic serait
        muet, le piège de la corbeille), ni `ouvrirNative` (elle ne pourrait plus s'ancrer) : `_dockOuvrir`, le corps
        de dock:ouvrir. Ancrée, elle a besoin de la fenêtre principale à l'écran. */

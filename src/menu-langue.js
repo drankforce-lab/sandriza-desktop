@@ -78,7 +78,6 @@ const MENU_EN = {
  * pareil, et « ? » est un signe. Elles sont écrites en toutes lettres plutôt
  * qu'omises, sinon le banc ne saurait pas les distinguer d'un trou. */
 const MENU_APP_EN = {
-  'Publier en production…': 'Publish to production…',   // (lot 6, 2026-11-25) menu Boutique
   '?': '?',
   'Abonnés de l’infolettre': 'Newsletter subscribers',
   'Accès utilisateurs': 'User access',
