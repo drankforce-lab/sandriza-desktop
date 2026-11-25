@@ -59,6 +59,19 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .jauge .barre{height:.55rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:99px;overflow:hidden}
 .jauge .barre i{display:block;height:100%;background:var(--or)}
 .jauge .sous{font-size:.7rem;color:var(--tx3);margin-top:.2rem}
+/* (2026-11-24) Le titre sur sa ligne, le chiffre dessous : « Turso (base de données) » ne se casse plus en deux. */
+.jauge .lg{flex-wrap:wrap}
+.jauge .lg strong{flex:1 1 100%}
+.jauge .lg .v{margin-left:0}
+.jauge .barre i{min-width:3px}
+.r2d{margin-top:.9rem;border-top:1px solid var(--v08);padding-top:.7rem}
+.r2d .t{font-size:.76rem;font-weight:700;color:var(--tx-bleute);margin:0 0 .45rem}
+.r2d .l{display:grid;grid-template-columns:minmax(0,1fr) 7rem 4.2rem;gap:.15rem .7rem;align-items:center;font-size:.76rem}
+.r2d .n{color:var(--tx);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.r2d .n small{color:var(--tx3);margin-left:.35rem}
+.r2d .b{height:.4rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:99px;overflow:hidden}
+.r2d .b i{display:block;height:100%;background:var(--or);min-width:2px}
+.r2d .o{color:var(--tx2);text-align:right;font-variant-numeric:tabular-nums}
 .cles{display:flex;flex-wrap:wrap;gap:.3rem}
 .cles code{font-size:.6875rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:4px;padding:.12rem .38rem;color:var(--tx2)}
 .pied{flex:0 0 auto;display:flex;align-items:center;gap:.6rem;padding:.55rem 1.05rem;
@@ -151,6 +164,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="barre"><i style="width:' + pct + '%"></i></div>'
       + '<div class="sous">' + esc(sous) + '</div></div>';
   }
+  var R2NOMS = { 'sauvegardes-nuit': '${T("Sauvegardes de nuit (chiffrées)")}', products: '${T("Photos des produits")}', produits: '${T("Photos des produits")}',
+    vignettes: '${T("Vignettes (miniatures)")}', cabine: '${T("Cabine d’essayage")}', videos: '${T("Vidéos")}', receipts: '${T("Reçus")}',
+    'rh-coffre': '${T("Talons de paie (RH, chiffrés)")}', corbeille: '${T("Corbeille")}', tnb: '${T("Photos détourées")}', '(racine)': '${T("Hors dossier")}' };
   function stockHtml(){
     if (STOCK === null) return '<div class="vide charge">${T("Lecture de l’occupation…")}</div>';
     if (STOCK.erreur) return '<div class="vide">' + esc(STOCK.erreur) + '</div>';
@@ -159,7 +175,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     // (audit H2-m18) une liste R2 interrompue donne un MINIMUM : on le dit plutôt que d'afficher un chiffre faux
     if (STOCK.r2 && STOCK.r2.bytes != null) h += jauge('${T("Cloudflare R2 (fichiers)")}', '${T("Reçus, photos, logos, documents, sauvegardes…")}' + (STOCK.r2.complet === false ? ' ${T("— au moins : l’inventaire s’est arrêté avant la fin.")}' : ''), STOCK.r2.bytes, STOCK.r2.limit);
     else h += '<div class="jauge"><div class="sous"><span class="ic">📦</span>${T(" Cloudflare R2 : en attente de connexion.")}</div></div>';
-    return h + '</div>';
+    h += '</div>';
+    /* (2026-11-24, sa question : « 1,2 Go, ça se compose de quoi ? ») Le détail par dossier, du plus lourd au plus léger. */
+    var ds = (STOCK.r2 && STOCK.r2.dossiers) || [];
+    if (ds.length) {
+      var max = ds[0].bytes || 1;
+      h += '<div class="r2d"><div class="t">${T("Ce qui occupe Cloudflare R2")}</div><div class="l">' + ds.map(function(d){
+        return '<span class="n" title="' + esc(d.nom) + '/">' + esc(R2NOMS[d.nom] || d.nom) + '<small>' + d.n + ' ' + szPl(d.n, '${T("fichier")}', '${T("fichiers")}') + '</small></span>'
+          + '<span class="b"><i style="width:' + Math.max(1, Math.round(d.bytes / max * 100)) + '%"></i></span><span class="o">' + octets(d.bytes) + '</span>';
+      }).join('') + '</div></div>';
+    }
+    return h;
   }
 
   function dessiner(){
