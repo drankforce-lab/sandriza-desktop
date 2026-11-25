@@ -3538,7 +3538,7 @@ const OPS_PONT = new Set([
   'config:gabarits:supprimer', 'config:gabarits:attributions', 'config:gabarits:gifApercu',
   'config:logotheque:donnees', 'config:logotheque:ajouter', 'config:logotheque:renommer', 'config:logotheque:retirer',
   'config:analytics:donnees', 'config:analytics:ecrire',
-  'config:bd:donnees', 'config:bd:tester', 'config:bd:pousser', 'config:bd:restaurer', 'config:bd:migrer', 'config:bd:stockage',
+  'config:bd:donnees', 'config:bd:tester', 'config:bd:pousser', 'config:bd:restaurer', 'config:bd:migrer', 'config:bd:stockage', 'config:bt:acces', 'config:bt:accesEcrire',
   'config:accueil:donnees', 'config:accueil:ecrire', 'config:accueil:reinit',
   'config:lancement:donnees', 'config:lancement:basculer',
   // Liste VIP du prelancement (carte de la fenetre Mode lancement, 2026-10-07).
@@ -4305,7 +4305,7 @@ const LIMITES_PONT = {
   'config:gabarits:supprimer': 20000, 'config:gabarits:attributions': 20000, 'config:gabarits:gifApercu': 25000,
   'config:logotheque:donnees': 15000, 'config:logotheque:ajouter': 60000, 'config:logotheque:renommer': 20000, 'config:logotheque:retirer': 20000,
   'config:analytics:donnees': 15000, 'config:analytics:ecrire': 30000,
-  'config:bd:donnees': 15000, 'config:bd:tester': 30000, 'config:bd:pousser': 120000, 'config:bd:restaurer': 60000, 'config:bd:migrer': 300000, 'config:bd:stockage': 30000,
+  'config:bd:donnees': 15000, 'config:bd:tester': 30000, 'config:bd:pousser': 120000, 'config:bd:restaurer': 60000, 'config:bd:migrer': 300000, 'config:bd:stockage': 30000, 'config:bt:acces': 15000, 'config:bt:accesEcrire': 30000,
   'config:accueil:donnees': 15000, 'config:accueil:ecrire': 30000, 'config:accueil:reinit': 20000,
   'config:lancement:donnees': 20000, 'config:lancement:basculer': 20000,
   /* Liste VIP : l envoi des codes enchaine des lots de courriels cote serveur

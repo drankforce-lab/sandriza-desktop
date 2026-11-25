@@ -78,6 +78,14 @@ button.prim:disabled{opacity:.5;cursor:default}
 .mini{font:inherit;font-size:.74rem;padding:.14rem .5rem;margin-left:.6rem;border:1px solid var(--v16);
   border-radius:7px;background:var(--v05);color:var(--tx);cursor:pointer;-webkit-user-select:none;user-select:none}
 .mini:hover:not(:disabled){background:var(--v10)}
+/* La boutique de test — sa porte (2026-11-24) */
+.bt-moi{display:flex;flex-wrap:wrap;gap:.4rem .9rem;align-items:center;font-size:.8rem;margin:0 0 .6rem}
+.bt-moi code{font-size:.78rem;background:var(--f-champ);border:1px solid var(--v12);border-radius:5px;padding:.1rem .4rem;color:var(--tx)}
+.bt-ch{display:flex;flex-direction:column;gap:.25rem;font-size:.78rem;color:var(--tx2);margin:0 0 .6rem}
+.bt-ch textarea,.bt-ch input{font:inherit;font-size:.82rem;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;padding:.45rem .6rem;width:100%}
+.bt-ch textarea{min-height:5.2rem;resize:vertical;font-family:ui-monospace,Consolas,monospace}
+.bt-etat{font-size:.76rem;color:var(--tx2);margin:.2rem 0 .6rem}
+.bt-etat .ok{color:var(--tx-ok)}.bt-etat .non{color:var(--tx-err)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 `;
 
@@ -103,7 +111,7 @@ function pageBd() {
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
-  var D = null, RO = false, OCCUPE = false, STOCK = null, CONF = '';
+  var D = null, RO = false, OCCUPE = false, STOCK = null, CONF = '', BT = null;
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl){ szDire(t, cl); }
@@ -165,6 +173,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="expl" style="margin:0">${T("<b>Pousser</b> : envoie toutes les configs locales vers Turso. ")}'
       + '${T("<b>Restaurer</b> : recharge depuis Turso puis recharge la fenêtre principale (utile après un vidage de cache). ")}'
       + '${T("<b>Migrer</b> : déplace vers R2 les images encore stockées en base64 (à lancer une fois).")}</div></div>';
+    h += btHtml();
     h += '<div class="carte"><div class="stitre">${T("Occupation du stockage")}</div>' + stockHtml() + '</div>';
     var cles = (D && D.cles) || [];
     h += '<div class="carte"><div class="stitre">${T("Clés synchronisées (")}' + cles.length + ')</div>'
@@ -178,7 +187,48 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function brancher(){
     var bs = corps.querySelectorAll('button[data-act]');
     for (var i=0;i<bs.length;i++) bs[i].onclick = function(){ agir(this.getAttribute('data-act')); };
+    var b1 = document.getElementById('bt-moi'); if (b1) b1.onclick = btAjouterMoi;
+    var b2 = document.getElementById('bt-ok'); if (b2) b2.onclick = btEnregistrer;
   }
+  /* LA BOUTIQUE DE TEST — SA PORTE (2026-11-24). Seules ces IP (et ces pays, si on en met) ouvrent test.sandriza.com.
+     Liste vide = personne. Super-administrateur seulement (le serveur le vérifie). */
+  function btHtml(){
+    var h = '<div class="carte"><div class="stitre">${T("Boutique de test — accès")}</div>'
+      + '<div class="expl">${T("Seules les adresses IP de cette liste ouvrent <b>test.sandriza.com</b>. Une liste vide ferme le test à tout le monde. Les pays, s’il y en a, s’ajoutent comme seconde condition.")}</div>';
+    if (!BT) return h + '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i></div></div>';
+    if (!BT.ok) return h + '<div class="vide">' + (BT.motif === 'droit' ? '${T("Réservé aux super-administrateurs.")}' : expliquer(BT)) + '</div></div>';
+    var a = BT.acces || { ips: [], pays: [] }, moi = BT.moi || {};
+    h += '<div class="bt-moi">${T("Votre adresse :")} <code>' + esc(moi.ip || '?') + '</code> ${T("pays :")} <code>' + esc(moi.pays || '?') + '</code>'
+      + '<button class="b" type="button" id="bt-moi">${T("Ajouter mon adresse")}</button></div>'
+      + '<label class="bt-ch">${T("Adresses IP autorisées (une par ligne ; un bloc comme 203.0.113.0/24 est accepté)")}'
+      + '<textarea id="bt-ips" spellcheck="false" aria-label="${T("Adresses IP autorisées")}">' + esc((a.ips || []).join('\\n')) + '</textarea></label>'
+      + '<label class="bt-ch">${T("Pays autorisés (codes à deux lettres, séparés par des virgules ; vide = tous)")}'
+      + '<input id="bt-pays" spellcheck="false" aria-label="${T("Pays autorisés")}" value="' + esc((a.pays || []).join(', ')) + '"></label>'
+      + '<div class="bt-etat">' + (BT.jeton ? '<span class="ok">${T("✓ Base de test branchée")}</span>' : '<span class="non">${T("✗ Jeton de la base de test absent du serveur (TESTBD_SANDRIZA)")}</span>')
+      + (BT.durci ? '' : ' · ${T("Conseil : poser SZ_CF_SECRET durcit cette porte.")}') + '</div>'
+      + '<div class="gestes"><button class="prim" type="button" id="bt-ok">${T("Enregistrer l’accès")}</button></div></div>';
+    return h;
+  }
+  function btLire(){ var t = document.getElementById('bt-ips'), p = document.getElementById('bt-pays');
+    return { ips: (t ? t.value : '').split(/[\\s,;]+/).map(function(x){ return x.trim(); }).filter(Boolean),
+             pays: (p ? p.value : '').split(/[\\s,;]+/).map(function(x){ return x.trim().toUpperCase(); }).filter(Boolean) }; }
+  function btAjouterMoi(){
+    var t = document.getElementById('bt-ips'); var ip = BT && BT.moi && BT.moi.ip; if (!t || !ip) return;
+    var l = btLire().ips; if (l.indexOf(ip) < 0) l.push(ip); t.value = l.join('\\n');
+    var p = document.getElementById('bt-pays'), pays = BT.moi.pays;
+    if (p && pays && /^[A-Z]{2}$/.test(pays)) { var lp = btLire().pays; if (lp.length && lp.indexOf(pays) < 0) { lp.push(pays); p.value = lp.join(', '); } }
+    dire('${T("Adresse ajoutée à la liste : enregistrez pour l’appliquer.")}', 'att');
+  }
+  function btEnregistrer(){
+    var v = btLire(); var b = document.getElementById('bt-ok'); if (b) b.disabled = true;
+    dire('${T("Enregistrement de l’accès…")}');
+    appeler('config:bt:accesEcrire', [v]).then(function(r){
+      if (b) b.disabled = false;
+      if (r && r.ok) { BT.acces = r.acces; dessiner(); dire(r.acces.ips.length ? '${T("Accès enregistré : la boutique de test s’ouvre à ces adresses.")}' : '${T("Liste vide : la boutique de test est fermée à tout le monde.")}', 'bon'); return; }
+      dire(r && r.motif === 'ip_invalide' ? ('${T("Adresse IP invalide : ")}' + esc(r.valeur || '')) : r && r.motif === 'droit' ? '${T("Réservé aux super-administrateurs.")}' : r && r.motif === 'jeton_test_absent' ? '${T("Le serveur n’a pas le jeton de la base de test (TESTBD_SANDRIZA).")}' : ('${T("Échec : ")}' + expliquer(r)), 'err');
+    });
+  }
+  function btCharger(){ appeler('config:bt:acces').then(function(r){ BT = r || { ok: false, motif: 'echec' }; dessiner(); }); }
 
   function agir(act){
     if (OCCUPE) return;
@@ -246,7 +296,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('config:bd:donnees').then(function(r){
       if (!r || !r.ok) { corps.innerHTML = '<div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div>'; dire(expliquer(r), 'err'); return; }
       D = r; RO = !r.peutModifier; dessiner(); dire('');
-      chargerStock();
+      chargerStock(); btCharger();
     });
   }
 
