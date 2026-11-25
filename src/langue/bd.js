@@ -287,4 +287,8 @@ module.exports = {
   "Production déverrouillée.": "Production unlocked.",
   "Urgence ouverte : chaque modification est notée au journal.": "Emergency open: every change is logged.",
   "Urgence fermée.": "Emergency closed.",
+  "Courriels du test envoyés à (tous, quel que soit le destinataire ; vide = aucun courriel)": "Test store emails sent to (all of them, whoever the recipient; empty = no email)",
+  "Adresse de redirection des courriels du test": "Redirect address for test store emails",
+  "Les textos ne partent jamais du test : il n’a pas la configuration de Twilio.": "Text messages never leave the test store: it does not have the Twilio configuration.",
+  "Adresse courriel invalide : ": "Invalid email address: ",
 };

@@ -44,6 +44,8 @@ const MENU_EN = {
   'Réduire': 'Minimize',
   'Vérifier les mises à jour…': 'Check for updates…',
   'À propos': 'About',
+  'Basculer vers la boutique de test…': 'Switch to the test store…',
+  'Revenir à la production': 'Back to production',
 };
 
 /* ══ ET TOUT LE RESTE DU MENU — CELUI QU'ON NE VOIT QU'UNE FOIS CONNECTÉ ═════

@@ -83,12 +83,21 @@ const garde = require('./brouillon-garde');
 // admin (adm.sandriza.com), jamais la boutique. Modifiable via la variable
 // d'environnement ELG_ADMIN_URL, sans rebâtir.
 const APP_URL = process.env.ELG_ADMIN_URL || 'https://adm.sandriza.com/';
+/* (2026-11-24, lot 5) LA BOUTIQUE DE TEST. L'application ouvre la production, OU l'administration du test
+   (admtest.sandriza.com : base de test, derrière sa porte IP) quand le réglage du POSTE « environnement » vaut
+   « test ». La bascule passe par le menu (Aide › Boutique de test) et REDÉMARRE l'application : rien d'une base ne
+   reste ouvert dans l'autre. Lu à chaque usage (et non une fois au chargement du module) : le dossier des réglages
+   n'est sûr qu'une fois l'application nommée. */
+const APP_URL_TEST = 'https://admtest.sandriza.com/';
+const enTest = () => { try { return require('./reglages').get('environnement') === 'test'; } catch { return false; } };
+const appUrl = () => (enTest() ? APP_URL_TEST : APP_URL);
 
 // Seul le portail admin reste DANS la fenêtre. Tout lien vers la boutique
 // (www.sandriza.com/.ca) ou ailleurs s'ouvre dans le navigateur par défaut :
 // l'application ne montre QUE l'administration.
 const ALLOWED_HOSTS = [
   'adm.sandriza.com',
+  'admtest.sandriza.com',   // (lot 5) l'administration de la boutique de test
 ];
 
 // ── CLÉ D'APPLICATION (verrou navigateur) ────────────────────────────────────
@@ -2917,7 +2926,7 @@ const infosApropos = () => {
   return [
     [TA('Application'), [
       [TA('Version'), app.isPackaged ? app.getVersion() : TA('{0}  (développement)', app.getVersion())],
-      [TA('Portail'), APP_URL],
+      [TA('Portail'), appUrl()],
       [TA('Mises à jour'), TA('vérifiées à chaque lancement')],
       [TA('Impression'), TA('native, sans agent local')],
     ]],
@@ -7027,7 +7036,7 @@ const poserCadreNatif = () => {
 
     vueCadre.webContents.loadURL('data:text/html;charset=utf-8,'
       + encodeURIComponent(pageCadre())).catch(() => {});
-    vueSite.webContents.loadURL(APP_URL).catch(() => {});
+    vueSite.webContents.loadURL(appUrl()).catch(() => {});
     return true;
   } catch (e) {
     /* ⚠ ON REVIENT AU CHEMIN D HIER PLUTOT QUE DE LAISSER UNE FENETRE VIDE. Un
@@ -7035,7 +7044,7 @@ const poserCadreNatif = () => {
        pas un rectangle noir dans lequel on ne peut rien faire — sinon on ne peut
        meme plus l eteindre. */
     vueSite = null; vueCadre = null;
-    try { mainWindow.loadURL(APP_URL).catch(() => {}); } catch (er) {}
+    try { mainWindow.loadURL(appUrl()).catch(() => {}); } catch (er) {}
     return false;
   }
 };
@@ -7075,7 +7084,7 @@ const ouvrirAdmin = () => {
        la fenetre principale comme depuis toujours. Allume, on pose les deux
        vues et la fenetre principale ne charge plus rien elle-meme. */
     if (cadreNatifAllume() && poserCadreNatif()) return;
-    mainWindow.loadURL(APP_URL).catch(() => {});
+    mainWindow.loadURL(appUrl()).catch(() => {});
   };
   try {
     // Un souffle apres la peinture : sans lui, l image n a pas le temps d etre
@@ -8051,6 +8060,44 @@ const actionApp = (nom, arg) => {
   const id = String(arg == null ? '' : arg);
   const wc = mainWindow && !mainWindow.isDestroyed() ? mainWindow.webContents : null;
   switch (nom) {
+    /* (lot 5) LA BASCULE PRODUCTION ⇄ BOUTIQUE DE TEST. Vers le test : on demande d'abord au serveur si CE poste y
+       entre (sa porte IP) — sinon l'application s'ouvrirait sur un renvoi vers la boutique. Puis on enregistre et on
+       redémarre. */
+    case 'env-test':
+    case 'env-prod': {
+      const versTest = nom === 'env-test';
+      if (versTest === enTest()) break;
+      const parent = mainWindow && !mainWindow.isDestroyed() ? mainWindow : null;
+      const basculer = () => {
+        if (fermetureBloquee()) { refuserFermeture(); return; }
+        reglages.set('environnement', versTest ? 'test' : 'production');
+        app.relaunch();
+        quitterVraiment();
+      };
+      if (!versTest) {
+        dialog.showMessageBox(parent, { type: 'question', title: TA('Boutique de test'), message: TA('Revenir à la production ?'),
+          detail: TA('L’application redémarre sur la vraie boutique. Vous devrez vous reconnecter.'), buttons: [TA('Redémarrer'), TA('Annuler')], defaultId: 0, cancelId: 1, noLink: true })
+          .then((r) => { if (r.response === 0) basculer(); }).catch(() => {});
+        break;
+      }
+      const { net } = require('electron');
+      net.fetch(APP_URL_TEST, { redirect: 'manual', headers: { 'X-Sandriza-App': APP_KEY }, cache: 'no-store' })
+        .then((rep) => rep.status)
+        .catch(() => 0)
+        .then((st) => {
+          if (st !== 200) {
+            const pourquoi = (st >= 300 && st < 400) ? TA('Ce poste n’est pas autorisé : ajoutez son adresse IP dans Configuration › Base de données › Boutique de test — accès.')
+              : TA('Le serveur de la boutique de test ne répond pas (code {0}). Vérifiez que admtest.sandriza.com est bien branché sur le service de test.', String(st || '—'));
+            dialog.showMessageBox(parent, { type: 'warning', title: TA('Boutique de test'), message: TA('Impossible d’ouvrir la boutique de test'), detail: pourquoi, buttons: [TA('Fermer')], noLink: true }).catch(() => {});
+            return;
+          }
+          return dialog.showMessageBox(parent, { type: 'question', title: TA('Boutique de test'), message: TA('Basculer vers la boutique de test ?'),
+            detail: TA('L’application redémarre sur la base de TEST : ce que vous y faites ne touche pas la vraie boutique, jusqu’à la synchronisation. Les courriels partent à l’adresse de redirection ; aucun texto ne part. Vous devrez vous connecter.'),
+            buttons: [TA('Redémarrer sur le test'), TA('Annuler')], defaultId: 0, cancelId: 1, noLink: true })
+            .then((r) => { if (r.response === 0) basculer(); });
+        }).catch(() => {});
+      break;
+    }
     // Le bouton de la barre dessinée et l'entrée « Quitter » du menu passent tous
     // deux par ici : un seul garde couvre les deux.
     /* ⚠ `quitterVraiment()` ET NON `app.quit()` (2026-09-08) : depuis que le X
@@ -9636,6 +9683,13 @@ if (!app.requestSingleInstanceLock()) {
      principale vient d etre reduite, elle est relevee. Une seule place —
      patcher fenetre par fenetre, c est en oublier une. */
   app.on('browser-window-created', (ev, win) => {
+    /* (lot 5) EN TEST, CHAQUE FENÊTRE LE DIT dans son titre — une fenêtre native ressemble trait pour trait à celle de
+       la production ; seul ce mot les distingue. */
+    if (enTest()) {
+      const marquer = (t) => (String(t || '').indexOf('[TEST]') === 0 ? String(t || '') : '[TEST] ' + String(t || ''));
+      try { win.setTitle(marquer(win.getTitle())); } catch {}
+      win.on('page-title-updated', (e, t) => { e.preventDefault(); try { win.setTitle(marquer(t)); } catch {} });
+    }
     win.on('closed', () => {
       setTimeout(() => {
         try {

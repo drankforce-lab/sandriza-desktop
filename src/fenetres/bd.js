@@ -258,6 +258,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<textarea id="bt-ips" spellcheck="false" aria-label="${T("Adresses IP autorisées")}">' + esc((a.ips || []).join('\\n')) + '</textarea></label>'
       + '<label class="bt-ch">${T("Pays autorisés (codes à deux lettres, séparés par des virgules ; vide = tous)")}'
       + '<input id="bt-pays" spellcheck="false" aria-label="${T("Pays autorisés")}" value="' + esc((a.pays || []).join(', ')) + '"></label>'
+      + '<label class="bt-ch">${T("Courriels du test envoyés à (tous, quel que soit le destinataire ; vide = aucun courriel)")}'
+      + '<input id="bt-courriel" type="email" spellcheck="false" aria-label="${T("Adresse de redirection des courriels du test")}" value="' + esc(a.courriel || '') + '"></label>'
+      + '<div class="expl" style="margin:.2rem 0 .5rem">${T("Les textos ne partent jamais du test : il n’a pas la configuration de Twilio.")}</div>'
       + '<div class="bt-etat">' + (BT.jeton ? '<span class="ok">${T("✓ Base de test branchée")}</span>' : '<span class="non">${T("✗ Jeton de la base de test absent du serveur (TESTBD_SANDRIZA)")}</span>')
       + (BT.durci ? '' : ' · ${T("Conseil : poser SZ_CF_SECRET durcit cette porte.")}') + '</div>'
       + '<div class="gestes"><button class="prim" type="button" id="bt-ok">${T("Enregistrer l’accès")}</button></div></div>';
@@ -492,7 +495,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function btLire(){ var t = document.getElementById('bt-ips'), p = document.getElementById('bt-pays');
     return { ips: (t ? t.value : '').split(/[\\s,;]+/).map(function(x){ return x.trim(); }).filter(Boolean),
-             pays: (p ? p.value : '').split(/[\\s,;]+/).map(function(x){ return x.trim().toUpperCase(); }).filter(Boolean) }; }
+             pays: (p ? p.value : '').split(/[\\s,;]+/).map(function(x){ return x.trim().toUpperCase(); }).filter(Boolean),
+             courriel: ((document.getElementById('bt-courriel') || {}).value || '').trim() }; }
   function btAjouterMoi(){
     var t = document.getElementById('bt-ips'); var ip = BT && BT.moi && BT.moi.ip; if (!t || !ip) return;
     var l = btLire().ips; if (l.indexOf(ip) < 0) l.push(ip); t.value = l.join('\\n');
@@ -506,7 +510,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('config:bt:accesEcrire', [v]).then(function(r){
       if (b) b.disabled = false;
       if (r && r.ok) { BT.acces = r.acces; BT.jeton = true; dessiner(); btCharger(); dire(r.acces.ips.length ? '${T("Accès enregistré : la boutique de test s’ouvre à ces adresses.")}' : '${T("Liste vide : la boutique de test est fermée à tout le monde.")}', 'bon'); return; }
-      dire(r && r.motif === 'ip_invalide' ? ('${T("Adresse IP invalide : ")}' + esc(r.valeur || '')) : r && r.motif === 'droit' ? '${T("Réservé aux super-administrateurs.")}' : r && r.motif === 'jeton_test_absent' ? '${T("Le serveur n’a pas le jeton de la base de test (TESTBD_SANDRIZA).")}' : ('${T("Échec : ")}' + expliquer(r)), 'err');
+      dire(r && r.motif === 'courriel_invalide' ? ('${T("Adresse courriel invalide : ")}' + esc(r.valeur || '')) : r && r.motif === 'ip_invalide' ? ('${T("Adresse IP invalide : ")}' + esc(r.valeur || '')) : r && r.motif === 'droit' ? '${T("Réservé aux super-administrateurs.")}' : r && r.motif === 'jeton_test_absent' ? '${T("Le serveur n’a pas le jeton de la base de test (TESTBD_SANDRIZA).")}' : ('${T("Échec : ")}' + expliquer(r)), 'err');
     });
   }
   function btCharger(){ appeler('config:bt:acces').then(function(r){ BT = r || { ok: false, motif: 'echec' };
