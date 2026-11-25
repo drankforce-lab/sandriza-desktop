@@ -1404,10 +1404,17 @@ function pageProduit(id, importId) {
     return /chapeau|tuque|casquette|b[ée]ret|capeline|[ée]charpe|foulard|bandeau|turban|cache-cou/i.test(c + ' ' + n)
       || !/chaussur|soulier|botte|sandale|espadrille|sacs?|sacoche|bijou|accessoir|ceinture|lunette|montre/i.test(c);
   }
-  function cabExigee(){ if (!CAB) return false; var t = CAB.t; return !!(t && t.ok && t.requise && t.ouverte); }
+  /* (2026-11-25, sa capture : un vieux veston refusé pour un simple changement de prix) LA RÈGLE DU SERVEUR
+     (lib-cabine.php, cabine_fiche_refus) : une fiche EXISTANTE dont la photo principale, le dos, le nom, la catégorie
+     et les vues de la cabine n'ont pas changé s'enregistre sans cabine. La cabine s'exige dès qu'on touche à l'un d'eux. */
+  function cleCab(){ return [IMAGE || '', photoDos() || '', cabCategorie(), String(val('p-nom') || '').trim(), CAB.vues].join('|'); }
+  // Comparé aux valeurs de la FICHE ouverte (pas au formulaire au chargement : une liste pas encore garnie fausserait tout).
+  function cabInchangee(){ var o = CAB.orig; return !!o && (IMAGE || '') === o.i && (photoDos() || '') === o.d && String(val('p-cat') || '') === o.c
+    && String(val('p-nom') || '').trim() === o.n && CAB.vues === o.v; }
+  function cabExigee(){ if (!CAB) return false; var t = CAB.t; return !!(t && t.ok && t.requise && t.ouverte) && !cabInchangee(); }
   function majCabine(force){
     if (!CAB) return;   // appelée par majFiche avant que la cabine soit posée (premier dessin)
-    var k = [IMAGE || '', photoDos() || '', cabCategorie(), String(val('p-nom') || '').trim(), CAB.vues].join('|');
+    var k = cleCab();
     if (!force && k === CAB.cle) return;
     CAB.cle = k;
     if (!CAB.t) dessinerCabine();   // le squelette tout de suite : la place est prise avant la réponse
@@ -4732,6 +4739,7 @@ function pageProduit(id, importId) {
     FIBRE = (typeof p.photoFibre === 'string' && p.photoFibre) ? p.photoFibre : '';
     CAB.vues = p.cabineVues === '6' ? '6' : 'fd';   // la case « Vue 6 angles » de la cabine
     CAB.type = typeof p.cabineType === 'string' ? p.cabineType : '';   // le type de haut (superpositions en boutique)
+    try { CAB.orig = { i: p.image || '', d: photoDos() || '', c: String(p.category || ''), n: String(p.name || '').trim(), v: CAB.vues }; } catch (e) { CAB.orig = null; }   // (2026-11-25) la fiche ouverte (cabInchangee)
     // ⚠ COPIE PROFONDE : chaque couleur porte son propre objet. Une copie de
     // surface les partagerait avec la fiche d origine, et retirer une photo ici
     // la retirerait aussi de la reference qui sert a detecter les conflits.
