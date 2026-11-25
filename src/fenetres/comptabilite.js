@@ -186,7 +186,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   /* « 0,00 $ » et jamais « −0,00 $ » : un montant nul negatif (livraison
      remboursee quand il n y en a pas) sortait avec son signe (2026-09-29). */
   function argent(n){ var v = Number(n) || 0; return szArgent(v === 0 ? 0 : v); }

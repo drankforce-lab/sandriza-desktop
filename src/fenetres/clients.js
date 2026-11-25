@@ -236,7 +236,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* Le bandeau de message : une seule regle, dans le socle (szDire) —
      tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
      par des points de suspension, qui annonce un travail en cours. */
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   /* ══ LA PASTILLE DE SEGMENT (#150, 2026-09-24) ════════════════════════════
      ⚠⚠ AUCUNE REGLE ICI, ET AUCUN LIBELLE NON PLUS. Le site envoie << segment >>
      (la cle) et << segLabel >> (le mot), tous deux issus de la MEME regle qui

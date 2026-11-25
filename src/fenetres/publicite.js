@@ -211,7 +211,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function plur(n){ return n === 1 ? '' : 's'; }
   /* Deux formes ENTIERES (2026-09-25) : << ' commande' + plur >> ne se
      traduisait jamais. On garde plur pour les mots qui restent a relire. */

@@ -416,7 +416,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function riche(s){
     return esc(s).replace(/&lt;b&gt;/g, '<b>').replace(/&lt;\\/b&gt;/g, '</b>');
   }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function chkv(id){ var e=document.getElementById(id); return !!(e&&e.checked); }
   function txv(id){ var e=document.getElementById(id); return e?String(e.value||''):''; }
 

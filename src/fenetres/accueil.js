@@ -187,7 +187,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   var EFFETS = [['fade','${T("Fondu (Fade)")}'],['slide','${T("Glissement (Slide)")}'],['zoom','${T("Zoom (Ken Burns)")}']];
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function val(id){ var e=document.getElementById(id); return e ? String(e.value) : ''; }
   function chk(id){ var e=document.getElementById(id); return !!(e && e.checked); }
 

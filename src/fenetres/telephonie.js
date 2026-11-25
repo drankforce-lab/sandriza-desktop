@@ -264,7 +264,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function val(id){ var e = document.getElementById(id); return e ? String(e.value).trim() : ''; }
   function chk(id){ var e = document.getElementById(id); return !!(e && e.checked); }
 

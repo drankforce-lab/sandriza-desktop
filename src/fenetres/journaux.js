@@ -174,7 +174,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('journaux')}
   var ENV_Q = '', ENV_ECHECS = false, ENV_ARME = false;
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   /* « 13 août 2026, 08:00:12 » plutôt que « 2026-08-13 08 h 00 min 12 s » (le format
      par defaut de fr-CA) : un journal garde ses secondes, mais se lit d un coup d oeil. */
   function fdate(ts){ if (!ts) return '—'; try { var d = new Date(ts); if (isNaN(d)) return '—';

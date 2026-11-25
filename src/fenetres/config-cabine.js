@@ -145,7 +145,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function nomDe(u){ if (u === 'studio') return '${T("Studio")}'; var f = (R.fonds || []).filter(function(x){ return x.image === u && x.nom; })[0]; return (f && f.nom) || nomFond(u) || '${T("Votre image")}'; }
   function vignStyle(u){ return u === 'studio' ? 'background:linear-gradient(180deg,#F4EEE6,#E6DCCE)' : 'background-image:url(' + esc(src(u)) + ')'; }
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"']/g, function(c){ return '&#' + c.charCodeAt(0) + ';'; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   var MOTIFS = {
   maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session: '${T("Aucune session ouverte. Connectez-vous dans la fenêtre principale.")}',

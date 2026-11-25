@@ -116,7 +116,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   var MOTIFS = {
   maj_en_cours: '${T("Une mise à jour s’installe : cette opération est suspendue jusqu’au redémarrage de l’application.")}',
     session:              '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',

@@ -339,7 +339,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'pol-t':120,'pol-s':200})}${JS_BROUILLO
   ];
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function val(id){ var e=document.getElementById(id); return e?String(e.value||'').trim():''; }
 
   /* ⚠ L ELEMENT AJOUTE (OU DEPLACE) DOIT SE VOIR : les listes sont en pages, et le

@@ -69,7 +69,7 @@ function pageCollection(id) {
   /* Le bandeau de message : une seule regle, dans le socle (szDire) —
      tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
      par des points de suspension, qui annonce un travail en cours. */
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function vide(titre, detail){
     document.getElementById('corps').innerHTML =
       '<div class="vide"><div class="gros">' + esc(titre) + '</div><div>' + esc(detail || '') + '</div></div>';

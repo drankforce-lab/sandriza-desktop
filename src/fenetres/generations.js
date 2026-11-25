@@ -183,7 +183,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   // Le coût chez The New Black est en DOLLARS AMÉRICAINS : « 0,65 $ US » / « US$0.65 » — le nombre par le socle (groupement).
   function argent(n){ return '${T("{m} $ US")}'.replace('{m}', szArgentNombre(n, 2)); }
   function fdate(ts){ if (!ts) return ''; try { return new Date(ts).toLocaleString('${LIEU()}', { dateStyle: 'medium', timeStyle: 'short' }); } catch (e) { return ''; } }

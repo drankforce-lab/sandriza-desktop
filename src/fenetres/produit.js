@@ -807,7 +807,7 @@ function pageProduit(id, importId) {
   /* Le bandeau de message : une seule regle, dans le socle (szDire) —
      tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
      par des points de suspension, qui annonce un travail en cours. */
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function vide(titre, detail){
     document.getElementById('corps').innerHTML =
       '<div class="vide"><div class="gros">' + esc(titre) + '</div><div>' + esc(detail || '') + '</div></div>';
@@ -5823,7 +5823,8 @@ function pageProduit(id, importId) {
     if (_exC.requise && (_exC.vide || _exC.manquantes.length)) {
       Assist.aller(5); majCompo();
       dire(_exC.vide ? '${T("La composition est obligatoire : le nom ou la description nomme")} ' + guillemets(_exC.mots) + '.'
-        : '${T("Le texte annonce")} ' + guillemets(_exC.manquantes) + ' ${T("mais la composition ne le contient pas.")}', 'err');
+        : '${T("Le texte annonce")} ' + guillemets(_exC.manquantes) + ' ${T("mais la composition ne le contient pas.")}', 'err',
+        function(){ Assist.aller(5); return 'p-compo'; });
       var _eC = document.getElementById('p-compo'); if (_eC) _eC.focus();
       return;
     }
@@ -5832,18 +5833,19 @@ function pageProduit(id, importId) {
        Le bloc ne pouvait plus s exécuter et laissait croire à une question qui ne venait jamais. */
     if (!tailles().length || !couleurs().length) {
       Assist.aller(2);
-      dire('${T("Choisissez au moins une taille ET une couleur avant d’enregistrer.")}', 'err');
+      dire('${T("Choisissez au moins une taille ET une couleur avant d’enregistrer.")}', 'err',
+        function(){ Assist.aller(2); return tailles().length ? 'p-couleurs' : 'p-tailles'; });
       return;
     }
     if (!IMAGE) {
       Assist.aller(0);
-      dire('${T("La photo principale est obligatoire.")}', 'err');
+      dire('${T("La photo principale est obligatoire.")}', 'err', function(){ Assist.aller(0); return 'p-vign'; });
       return;
     }
     // LA CABINE D ESSAYAGE (2026-10-30) : le pont refait la même vérification au serveur (double filet)
     if (cabExigee() && !CAB.t.pret) {
       Assist.aller(0);
-      dire(raisonCabine(), 'err');
+      dire(raisonCabine(), 'err', function(){ Assist.aller(0); return 'p-cab-carte'; });
       return;
     }
     // Les médias sont facultatifs, mais un mannequin à moitié décrit ou une
@@ -5866,7 +5868,7 @@ function pageProduit(id, importId) {
     }); });
     if (!ID && !enStock.length) {
       Assist.aller(7);
-      dire('${T("Saisissez une quantité pour au moins une variante avant d’enregistrer.")}', 'err');
+      dire('${T("Saisissez une quantité pour au moins une variante avant d’enregistrer.")}', 'err', function(){ Assist.aller(7); return 'p-zone'; });
       return;
     }
     if (CTX && (CTX.entrepots || []).length) {
@@ -5912,7 +5914,8 @@ function pageProduit(id, importId) {
     if (sansPhoto.length) {
       VAR_FAITES = false;
       Assist.aller(3); dessinerVues();
-      dire('${T("Photo obligatoire pour chaque couleur secondaire — manquante :")} ' + sansPhoto.join(', ') + '.', 'err');
+      dire('${T("Photo obligatoire pour chaque couleur secondaire — manquante :")} ' + sansPhoto.join(', ') + '.', 'err',
+        function(){ Assist.aller(3); return 'p-parcoul-carte'; });
       return;
     }
     // Le stock est purge des variantes qui n existent plus : garder une quantite

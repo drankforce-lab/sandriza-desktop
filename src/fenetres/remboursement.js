@@ -153,7 +153,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* Le bandeau de message : une seule regle, dans le socle (szDire) —
      tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
      par des points de suspension, qui annonce un travail en cours. */
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   /* ⚠ Le symbole change de COTE en anglais : << $12.50 >>. Voir szArgent (socle). */
   function argent(n){ return szArgent(n); }
   function cle(a){ return a.productId + '|' + a.taille + '|' + a.couleur; }

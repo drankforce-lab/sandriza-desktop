@@ -225,7 +225,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   /* ⚠ Le symbole change de COTE en anglais : << $12.50 >>. Voir szArgent (socle). */
   function argent(n){ return szArgent(n); }
 

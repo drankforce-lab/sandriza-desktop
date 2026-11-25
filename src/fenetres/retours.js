@@ -181,7 +181,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* Le bandeau de message : une seule regle, dans le socle (szDire) —
      tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
      par des points de suspension, qui annonce un travail en cours. */
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   /* (2026-10-25, audit) Une date absente ou illisible rend un tiret : toLocaleDateString
      d une date invalide ne leve pas, il ECRIT « Invalid Date ». */
   function fmtDate(d){

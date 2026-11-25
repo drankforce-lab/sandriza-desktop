@@ -105,7 +105,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var D = null, RO = false, OCCUPE = false;
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function numv(id, def){ var e=document.getElementById(id); var n=e?parseInt(e.value,10):NaN; return Number.isFinite(n)?n:def; }
   function chkv(id){ var e=document.getElementById(id); return !!(e&&e.checked); }
   function txv(id){ var e=document.getElementById(id); return e?String(e.value||''):''; }

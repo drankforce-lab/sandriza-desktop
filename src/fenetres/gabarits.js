@@ -159,7 +159,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function val(id){ var e = document.getElementById(id); return e ? String(e.value) : ''; }
   function chk(id){ var e = document.getElementById(id); return !!(e && e.checked); }
 

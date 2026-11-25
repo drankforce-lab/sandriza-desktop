@@ -356,6 +356,7 @@ module.exports = {
   "bilan": "summary",
   "et {0} autres": "and {0} more",
   "Fermer": "Close",
+  "Corriger": "Fix it",
   // Gestes groupés (2026-10-29)
   "Cochez des lignes pour agir sur plusieurs à la fois — Maj+clic coche une plage.": "Tick rows to act on several at once — Shift+click ticks a range.",
 };

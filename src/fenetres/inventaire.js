@@ -637,7 +637,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   /* Le bandeau de message : une seule regle, dans le socle (szDire) —
      tout verdict s efface seul apres cinq secondes, sauf ce qui se termine
      par des points de suspension, qui annonce un travail en cours. */
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
 
   // ⚠ CHAQUE REFUS A SA PHRASE. Un ecran muet sur un refus de droit ressemble a
   // une panne, et l on cherche partout sauf dans les permissions.

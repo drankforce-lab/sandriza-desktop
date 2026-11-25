@@ -400,7 +400,7 @@ function pageCommande(id) {
      aussi (deja_expediee) : ceci evite d y aller. */
   var EXPEDITION = '';
 
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function vide(titre, detail){
     document.getElementById('corps').innerHTML =
       '<div class="vide"><div class="gros">' + esc(titre) + '</div><div>' + esc(detail || '') + '</div></div>';

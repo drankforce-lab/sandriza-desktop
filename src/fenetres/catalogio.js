@@ -239,7 +239,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   /* (2026-10-25, audit) DES PHRASES ENTIERES, PLUS DE « s » COLLE. plur() fabriquait « 3 lignes »
      en accolant un « s » francais — la page anglaise lisait « 3 ligne », « 3 variantes sur 4 produit »…
      nb() choisit l une des deux phrases (szPl, regle de la langue) et y pose le nombre a la place de {0}. */

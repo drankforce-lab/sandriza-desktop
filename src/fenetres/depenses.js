@@ -277,7 +277,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
   }
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   /* ══ LES FRAIS DE VEHICULE (2026-10-02) ═══════════════════════════════════
      Une depense de la categorie << vehicule >> se RATTACHE a un vehicule du
      registre et porte un TYPE de frais : c est ce qui lui donne sa part

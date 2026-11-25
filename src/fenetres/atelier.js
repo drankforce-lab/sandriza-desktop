@@ -682,7 +682,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   };
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' })[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function expliquer(r){ var m = r && r.motif; return MOTIFS[m] || ((r && r.detail) ? String(r.detail) : ('${T("Erreur inattendue (")}' + esc(m || '?') + ').')); }
   function appeler(op, args){
     var id = op === 'atelier:ecrire' ? (args && args[0] && args[0].id) : (op === 'atelier:supprimer' || op === 'atelier:dupliquer' || op === 'atelier:restaurer') ? (args && args[0]) : '';

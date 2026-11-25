@@ -128,7 +128,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps'), elSous = document.getElementById('sous');
   var S = null, REG = null, ENVOI = '', SEL = '', VUE = 'saison', PAGE = 0, CHERCHE = '', RES = [];
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   var MOTIFS = {
     session: '${T("Aucune session ouverte dans l’application. Connectez-vous dans la fenêtre principale.")}',
     droit: '${T("Votre rôle ne permet pas de gérer la boîte de style.")}',

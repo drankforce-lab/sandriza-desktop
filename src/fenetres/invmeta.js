@@ -227,7 +227,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   /* (2026-10-25, audit) DES PHRASES ENTIERES, singulier et pluriel : plur() collait
      un « s » (et des fragments francais hors T()) — l anglais lisait « 3 products
      ont its own threshold ». {0} recoit le nombre. */

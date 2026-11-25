@@ -137,7 +137,7 @@ function pageMaintenance() {
      reponses prouvaient que les trois ECRANS se dessinent ; ils ne pouvaient
      pas prouver qu un bouton fonctionne. Les deux fenetres soeurs (presence,
      tableau) portent cette meme ligne : je l ai simplement oubliee. */
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]; }); }

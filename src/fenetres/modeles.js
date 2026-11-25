@@ -150,7 +150,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
 
   /* ⚠ L ELEMENT AJOUTE DOIT SE VOIR : les mannequins sont en pages, et le socle
      revient a la page 1 quand le nombre change. On pagine tout de suite, on repart

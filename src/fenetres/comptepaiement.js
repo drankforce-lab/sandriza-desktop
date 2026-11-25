@@ -140,7 +140,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptepaiement')}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   /* ⚠⚠ ON PASSE PAR << szArgent >>, LA PIECE COMMUNE — ET C EST LE BANC QUI L A
      EXIGE, pas la relecture. J avais refabrique une mise en forme de monnaie
      ici meme : elle collait le symbole << $ >> APRES le nombre, ce qui est juste

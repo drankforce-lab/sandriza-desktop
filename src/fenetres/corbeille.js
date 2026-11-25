@@ -147,7 +147,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('corbeille')}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
 
   /* ⚠ LE MONTANT ET LA DATE PASSENT PAR LES PIECES COMMUNES (szArgent, LIEU) :
      en anglais il faut << $12.50 >> et non << 12,50 $ >>. */

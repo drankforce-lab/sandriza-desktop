@@ -188,7 +188,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   // La monnaie dans la langue de la page : szArgent du socle (le « $ » passe devant en anglais).
   function argent(n){ return szArgent(n); }
   // Un cout dans un champ numerique : deux decimales (12.50, pas 12.5). Le point est celui que le champ attend.

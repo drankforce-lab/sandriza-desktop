@@ -120,7 +120,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var RATIOS = [['1:1',1,1],['4:3',4,3],['3:2',3,2],['2:1',2,1],['16:9',16,9],['3:4',3,4],['${T("libre")}',0,0]];
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function fr(v){ return (Math.round(v*100)/100).toString().replace('.', '${SEP_DEC()}'); }
   function num(v, d){ var n = parseFloat(v); return isFinite(n) ? n : d; }
 

@@ -380,9 +380,69 @@ const JS_TD = () => 'var SZ_TD = ' + JSON.stringify(LANGUE.langueCourante() === 
   + ' return Object.prototype.hasOwnProperty.call(SZ_TD, s) ? SZ_TD[s] : s; }';
 const JS_DIRE_BASE = () => JS_TD() + `
 var _szDireT = null;
-function szDire(texte, genre){
+/* (2026-11-25) LES ERREURS EN BULLE — sa demande : « l'affichage des erreurs à revoir, plus moderne que l'affichage dans
+   le bas des modules ; une bulle moderne qui nous amène là où nous devons corriger, tout en affichant l'erreur — partout
+   dans l'application ». Une erreur (genre 'err') s'affiche dans une BULLE flottante ; son bouton « Corriger » mène à la
+   CIBLE : szDire(texte, 'err', cible) — un élément, son id, ou une fonction (qui ouvre la bonne étape et peut rendre
+   l'élément). Sans cible : le premier champ marqué invalide de la fenêtre (aria-invalid, :invalid, .invalide).
+   ⚠ Le pied garde le texte (lecteurs d'écran, bancs), mais ne l'affiche plus en rouge : la bulle le dit. */
+var _szBulleT = null;
+function _szCibleEl(c){
+  if (!c) return null;
+  if (typeof c === 'string') return document.getElementById(c) || (function(){ try { return document.querySelector(c); } catch (e) { return null; } })();
+  return (c && c.nodeType === 1) ? c : null;
+}
+function _szVisible(el){ return !!(el && el.getClientRects && el.getClientRects().length); }
+function _szCibleAuto(){
+  var l = document.querySelectorAll('[aria-invalid="true"],.invalide,input:invalid,select:invalid,textarea:invalid');
+  for (var i = 0; i < l.length; i++) if (_szVisible(l[i]) && !l[i].closest('#sz-bulle')) return l[i];
+  return null;
+}
+function _szAller(cible){
+  var el = null;
+  if (typeof cible === 'function') { try { el = _szCibleEl(cible()); } catch (e) {} }
+  else el = _szCibleEl(cible);
+  if (!el) el = _szCibleAuto();
+  if (!el) return;
+  setTimeout(function(){
+    try { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } catch (e) { try { el.scrollIntoView(); } catch (e2) {} }
+    var f = /^(INPUT|SELECT|TEXTAREA|BUTTON)$/.test(el.tagName) ? el : el.querySelector('input:not([type=hidden]),select,textarea,button');
+    if (f) { try { f.focus({ preventScroll: true }); } catch (e) {} }
+    el.classList.remove('sz-a-corriger'); void el.offsetWidth; el.classList.add('sz-a-corriger');
+    setTimeout(function(){ el.classList.remove('sz-a-corriger'); }, 2600);
+  }, typeof cible === 'function' ? 220 : 0);
+}
+function szBulleFermer(){
+  var b = document.getElementById('sz-bulle'); if (!b) return;
+  clearTimeout(_szBulleT); b.classList.remove('on');
+  setTimeout(function(){ if (!b.classList.contains('on')) b.hidden = true; }, 220);
+}
+function szBulle(t, cible){
+  var b = document.getElementById('sz-bulle');
+  if (!b) {
+    b = document.createElement('div'); b.id = 'sz-bulle'; b.setAttribute('role', 'alert'); b.hidden = true;
+    b.innerHTML = '<span class="sz-bi" aria-hidden="true">!</span><span class="sz-bt"></span>'
+      + '<button type="button" class="sz-bc">${T("Corriger")}</button>'
+      + '<button type="button" class="sz-bx" aria-label="${T("Fermer")}" title="${T("Fermer")}">×</button>';
+    document.body.appendChild(b);
+    b.querySelector('.sz-bx').onclick = szBulleFermer;
+    b.onmouseenter = function(){ clearTimeout(_szBulleT); };
+    b.onmouseleave = function(){ clearTimeout(_szBulleT); _szBulleT = setTimeout(szBulleFermer, 4000); };
+  }
+  b.querySelector('.sz-bt').textContent = t;
+  var a = cible || _szCibleAuto();
+  var bc = b.querySelector('.sz-bc');
+  bc.hidden = !a;
+  bc.onclick = function(){ szBulleFermer(); _szAller(a); };
+  b.hidden = false; void b.offsetWidth; b.classList.add('on');
+  clearTimeout(_szBulleT); _szBulleT = setTimeout(szBulleFermer, 9000);
+}
+function szDire(texte, genre, cible){
   var t = texte == null ? '' : String(texte);
-  szDireSurcouche(t, genre);
+  var bulle = genre === 'err' && !!t;
+  if (bulle) szBulle(t, cible);
+  else if (genre === 'bon') szBulleFermer();   // un succès efface l'erreur d'avant
+  szDireSurcouche(bulle ? '' : t, genre);
   var m = document.getElementById('msg');
   if (!m) return;
   m.textContent = t;
@@ -3480,6 +3540,31 @@ html.jour .sz-btnplein:hover{background:#efece4}
 .sz-btnfen:hover{background:var(--v08)}
 html.jour .sz-btnfen{color:#1d2433;background:#ffffff;border-color:rgba(15,23,42,.18)}
 html.jour .sz-btnfen:hover{background:#efece4}
+/* (2026-11-25) LA BULLE DES ERREURS (szBulle) : flottante, au-dessus de tout (surcouches comprises), avec « Corriger ».
+   Le pied garde le texte pour les lecteurs d'écran (#msg.err rendu invisible : la bulle le dit déjà). */
+#sz-bulle{position:fixed;left:50%;bottom:4.2rem;z-index:2147483000;display:flex;align-items:center;gap:.7rem;
+  max-width:min(40rem,calc(100vw - 2rem));padding:.65rem .65rem .65rem .8rem;border-radius:14px;
+  background:var(--f-carte);color:var(--tx);border:1px solid rgba(248,113,113,.38);
+  box-shadow:0 18px 48px rgba(0,0,0,.42),0 2px 6px rgba(0,0,0,.25);font-size:.84rem;line-height:1.45;
+  opacity:0;transform:translate(-50%,10px) scale(.98);transition:opacity .2s ease,transform .2s ease}
+#sz-bulle.on{opacity:1;transform:translate(-50%,0) scale(1)}
+#sz-bulle[hidden]{display:none}
+#sz-bulle .sz-bi{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.9rem;
+  background:rgba(248,113,113,.16);color:var(--tx-err)}
+#sz-bulle .sz-bt{flex:1 1 auto;min-width:0}
+#sz-bulle .sz-bc{flex:0 0 auto;font:inherit;font-weight:650;font-size:.8rem;cursor:pointer;border-radius:9px;padding:.4rem .8rem;
+  border:1px solid var(--or);background:var(--or);color:#1a1208;white-space:nowrap}
+#sz-bulle .sz-bc[hidden]{display:none}
+#sz-bulle .sz-bx{flex:0 0 auto;font:inherit;font-size:1.05rem;line-height:1;cursor:pointer;border:0;background:transparent;color:var(--tx3);
+  width:28px;height:28px;border-radius:8px}
+#sz-bulle .sz-bx:hover{background:var(--v06);color:var(--tx)}
+html.jour #sz-bulle{background:#ffffff;color:#1d2433;border-color:rgba(185,28,28,.35);box-shadow:0 18px 48px rgba(15,23,42,.18)}
+html.jour #sz-bulle .sz-bi{background:rgba(185,28,28,.1);color:#9f1d1d}
+html.jour #sz-bulle .sz-bx{color:#5b6273}
+#msg.err{position:absolute!important;width:1px!important;height:1px!important;overflow:hidden!important;clip:rect(0 0 0 0)!important;white-space:nowrap!important}
+/* Le champ à corriger : un halo qui pulse deux fois, le temps que l'œil le trouve. */
+.sz-a-corriger{animation:sz-corr 1.2s ease 2;border-radius:8px}
+@keyframes sz-corr{0%{box-shadow:0 0 0 0 rgba(248,113,113,.0)}35%{box-shadow:0 0 0 4px rgba(248,113,113,.55)}100%{box-shadow:0 0 0 10px rgba(248,113,113,0)}}
 /* Message posé DANS la surcouche par szDire, quand la fenêtre n'a pas déjà sa
    propre zone (.msgsur). */
 .sz-msgauto{margin-top:.75rem;padding:.5rem .7rem;border-radius:8px;font-size:.8rem;

@@ -438,7 +438,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   (function(){
     var dl = document.getElementById('sugg-rab');
     if (dl) dl.innerHTML = SZ_DONNEES.suggRab.split('|').map(function(s){ return '<option value="' + esc(s) + '">'; }).join('');

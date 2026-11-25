@@ -154,7 +154,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function fdate(ts){ if (!ts) return ''; try { return new Date(ts).toLocaleString('${LIEU()}', { dateStyle: 'medium', timeStyle: 'short' }); } catch (e) { return ''; } }
 
   /* << vu il y a … >> en mots, pas en secondes. 340 s ne se lit pas ; << il y a

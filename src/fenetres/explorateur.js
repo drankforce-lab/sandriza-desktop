@@ -329,7 +329,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   /* L adresse du reseau si la photo en a une, sinon la vignette rapatriee.
      ⚠ UN SEUL ENDROIT QUI TRANCHE : les trois surfaces (colonne de la liste,
      tuile de la grille, volet d apercu) l appellent, sinon l une des trois

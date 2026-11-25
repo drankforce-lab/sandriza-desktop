@@ -153,7 +153,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var D = null, RO = false, OCCUPE = false, STOCK = null, CONF = '', BT = null, JR = [], JR_ID = 0, CP = null, SY = null, HI = null;
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   /* ⚠ Ko, Mo, Go sont FRANCAIS — l anglais ecrit KB, MB, GB. La recette unique
      est szOctets, posee par le socle dans les 99 fenetres. */
   function octets(n){ return szOctets(n); }

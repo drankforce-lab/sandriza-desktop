@@ -159,7 +159,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'c-nom':40,'c-photo':500,'c-courriel':1
   var AGENTS = [];
 
   function esc(s){ return String(s==null?'':s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
-  function dire(t, cl){ szDire(t, cl); }
+  function dire(t, cl, ci){ szDire(t, cl, ci); }
   function el(id){ return document.getElementById(id); }
   function txv(id){ var e=el(id); return e?String(e.value||''):''; }
   function coche(id){ var e=el(id); return !!(e&&e.checked); }
