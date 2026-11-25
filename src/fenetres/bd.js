@@ -212,7 +212,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     var dis = RO ? ' disabled' : '';
-    var h = '<div class="carte"><div class="stitre"><span class="ic">☁</span>${T(" Turso Cloud DB")}</div>'
+    /* (2026-11-25, lot 6 — SA DÉCISION) La boutique se prépare TOUJOURS dans le test depuis l'application ; la publier
+       est LE geste de cette fenêtre : il vient en premier, analysé dès l'ouverture. */
+    var h = (BT && BT.ok ? syHtml() : '') + '<div class="carte"><div class="stitre"><span class="ic">☁</span>${T(" Turso Cloud DB")}</div>'
       + '<div class="expl">${T("Toute la configuration (thèmes, logos, clés API, navigation, profil…) est ")}'
       + '${T("synchronisée vers Turso à <b>chaque sauvegarde</b>. Ces boutons servent à forcer une synchronisation, ")}'
       + '${T("par exemple après avoir vidé le cache du navigateur.")}</div>'
@@ -270,7 +272,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (BT.derniere ? '<div class="bt-etat">${T("Dernière copie :")} ' + esc(String(BT.derniere.le || '').replace('T', ' ').slice(0, 16)) + ' UTC</div>' : '')
       + (CP ? '<div class="bt-prog" role="progressbar" aria-label="${T("Progression de la copie")}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + CP.pct + '"><i style="width:' + CP.pct + '%"></i></div>' : '')
       + '<div class="gestes"><button class="b" type="button" id="bt-copier"' + (CP ? ' disabled' : '') + '>${T("Copier la production vers le test")}</button></div></div>';
-    h += syHtml() + vrHtml();
+    h += vrHtml();   // (lot 6) « Publier en production » est EN TÊTE de la fenêtre (dessiner)
     h += '<div class="carte"><div class="stitre">${T("Journal de la boutique de test")}</div>'
       + '<div class="bt-jr" id="bt-jr" role="log" aria-label="${T("Journal de la boutique de test")}">' + (JR.length ? JR.map(jrLigne).join('') : '<div>${T("Le journal est vide.")}</div>') + '</div></div>';
     return h;
@@ -321,7 +323,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function syAFaire(){ if (!SY || !SY.res) return []; return SY.res.elements.filter(function(e){ var c = SY.choix[syCle(e)] != null ? SY.choix[syCle(e)] : syDefaut(e); return c === 'test' || c === 'fusion' || c === 'prod'; }); }
   function syHtml(){
-    var h = '<div class="carte"><div class="stitre">${T("Boutique de test — synchronisation vers la production")}</div>'
+    var h = '<div class="carte sy-publier"><div class="stitre">${T("Publier en production")}</div>'
+      + '<div class="expl">${T("Tout ce que vous modifiez dans la boutique (produits, photos, prix, promotions, pages, thème, réglages) est préparé dans le test : la vraie boutique ne change qu’ici. Vérifiez le résumé, puis publiez.")}</div>'
       + '<div class="expl">${T("Compare le test à la production, champ par champ, depuis la dernière copie. Seuls le <b>catalogue</b> et les <b>réglages de la boutique</b> partent — jamais les clients, les commandes, les finances ni le RH. Le <b>stock</b> reste celui de la production. Chaque envoi est sauvegardé et peut être annulé.")}</div>';
     if (SY && SY.res) {
       var n = SY.res.compte || {}, l = SY.res.elements || [];
@@ -335,9 +338,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (SY && SY.pct != null) h += '<div class="bt-prog" id="sy-prog" role="progressbar" aria-label="${T("Progression de la synchronisation")}" aria-valuemin="0" aria-valuemax="100" aria-valuenow="' + SY.pct + '"><i style="width:' + SY.pct + '%"></i></div>';
     var nb = syAFaire().length, occ = SY && (SY.lecture || SY.pct != null);
     h += '<div class="gestes"><button class="b" type="button" id="sy-analyser"' + (occ ? ' disabled' : '') + '>' + (SY && SY.res ? '${T("Relancer l’analyse")}' : '${T("Analyser les changements")}') + '</button>'
-      + (SY && SY.res && SY.res.elements.length ? '<button class="prim" type="button" id="sy-envoyer"' + (occ || !nb ? ' disabled' : '') + '>${T("Appliquer les choix")} (' + nb + ')</button>' : '') + '</div>';
+      + (SY && SY.res && SY.res.elements.length ? '<button class="prim" type="button" id="sy-envoyer"' + (occ || !nb ? ' disabled' : '') + '>${T("Publier en production")} (' + nb + ')</button>' : '') + '</div>';
     if (HI && HI.length) {
-      h += '<div class="r2d"><div class="t">${T("Derniers envois en production")}</div><div class="sy-hi">' + HI.map(function(x){
+      h += '<div class="r2d"><div class="t">${T("Historique des publications")}</div><div class="sy-hi">' + HI.map(function(x){
         var d = new Date(x.le * 1000);
         return '<div><time>' + d.toLocaleDateString() + ' ' + ('0' + d.getHours()).slice(-2) + ':' + ('0' + d.getMinutes()).slice(-2) + '</time><span>' + esc(x.titre || x.cle)
           + ' <small>' + (x.creation ? '${T("créé")}' : x.suppression ? '${T("supprimé")}' : '${T("modifié")}') + '</small></span>'
@@ -373,6 +376,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     appeler('config:bt:sync', ['analyser']).then(function(r){
       SY.lecture = false;
       if (!r || !r.ok) { SY.res = null; SY.err = syMotif(r); dessiner(); dire('${T("Échec : ")}' + SY.err, 'err'); return; }
+      if (!Array.isArray(r.elements)) r.elements = [];   // (lot 6) analysée à l'ouverture : une réponse sans liste ne doit rien casser
       SY.res = r; SY.choix = {}; dessiner();
       dire(r.elements.length ? '${T("Analyse terminée : vérifiez chaque élément, puis appliquez.")}' : '${T("Rien à synchroniser.")}', 'bon');
     });
@@ -515,7 +519,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function btCharger(){ appeler('config:bt:acces').then(function(r){ BT = r || { ok: false, motif: 'echec' };
     if (!BT.ok) { dessiner(); return; }
-    appeler('config:bt:copie', ['plan']).then(function(p){ if (p && p.ok) BT.derniere = p.derniere; dessiner(); jrLire(); syHistorique(); }); }); }
+    appeler('config:bt:copie', ['plan']).then(function(p){ if (p && p.ok) BT.derniere = p.derniere; dessiner(); jrLire(); syHistorique();
+      if (!SY) syAnalyser();   // (lot 6) le résumé de ce qui attend d'être publié, dès l'ouverture
+    }); }); }
 
   function agir(act){
     if (OCCUPE) return;
