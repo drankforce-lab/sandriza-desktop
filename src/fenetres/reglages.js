@@ -61,6 +61,10 @@ html.jour .rg-ic{background:#3d4456}
 .rg-ct h2{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .rg-ct .nb{min-width:22px;height:20px;padding:0 7px;border-radius:99px;background:var(--v08);display:inline-flex;align-items:center;justify-content:center;font-variant-numeric:tabular-nums}
 .rg-e span{white-space:nowrap;overflow:hidden}
+/* (2026-11-25, sa capture : « tout est encore tronqué ») La mesure de larges() n'avait pas eu lieu sur la page affichée
+   (préparée cachée, puis montrée ou agrandie) : 30 entrées coupées net. GARANTIE qui ne dépend d'aucune mesure : hors
+   mesure, une entrée trop longue passe à la ligne — jamais coupée. La mesure (.rg-mesure) remet une ligne pour juger. */
+.rg-grille:not(.rg-mesure) .rg-e span{white-space:normal;overflow:visible;overflow-wrap:anywhere}
 .rg-ent{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));column-gap:6px}
 .rg-ent.une{grid-template-columns:minmax(0,1fr)}
 .rg-e{display:flex;align-items:center;gap:6px;padding:6px 8px;border-radius:7px;font:inherit;font-size:13px;font-weight:500;
@@ -157,6 +161,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function larges(niv){
     niv = niv || 0;
     if (niv) grille.setAttribute('data-serre', String(niv)); else grille.removeAttribute('data-serre');
+    grille.classList.add('rg-mesure');
     var bs = grille.querySelectorAll('.rg-e');
     Array.prototype.forEach.call(bs, function(b){ b.classList.remove('large'); });
     Array.prototype.forEach.call(grille.querySelectorAll('.rg-ent'), function(z){ z.classList.remove('une'); });
@@ -167,6 +172,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        pour la demi-colonne passe TOUTE en une colonne : plus de « Transporteurs | Imprimantes » côte à côte sous des
        entrées pleine largeur. */
     Array.prototype.forEach.call(grille.querySelectorAll('.rg-ent'), function(z){ if (z.querySelector('.rg-e.large')) z.classList.add('une'); });
+    grille.classList.remove('rg-mesure');
     var haut = ranger();
     var dispo = window.innerHeight - grille.getBoundingClientRect().top - 14;
     if (haut > dispo && niv < 2) larges(niv + 1);
@@ -190,7 +196,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return Math.max.apply(null, cols.map(function(c){ return c.offsetHeight; }));
   }
   var minutR = null;
-  window.addEventListener('resize', function(){ clearTimeout(minutR); minutR = setTimeout(larges, 120); });
+  function remesurer(){ clearTimeout(minutR); minutR = setTimeout(larges, 120); }
+  window.addEventListener('resize', remesurer);
+  /* (2026-11-25) La page est PRÉPARÉE CACHÉE : sa largeur et sa police finales n'arrivent qu'à l'affichage. On remesure
+     quand elle devient visible, reprend le focus, ou que la grille change de largeur (zoom, panneau, ancrage du menu). */
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) remesurer(); });
+  window.addEventListener('focus', remesurer);
+  try { var largeurVue = 0; new ResizeObserver(function(){ var l = grille.clientWidth; if (l && l !== largeurVue) { largeurVue = l; remesurer(); } }).observe(grille); } catch (e) {}
   function filtrer(){
     var v = sansAccent(q.value.trim());
     Array.prototype.forEach.call(grille.querySelectorAll('.rg-carte'), function(c){
