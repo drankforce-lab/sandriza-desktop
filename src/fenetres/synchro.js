@@ -105,6 +105,59 @@ button{font:inherit;color:inherit}
 .case.mi{background:var(--or);border-color:var(--or)}
 .case.mi{color:#1a1208}
 .case.mi::after{content:'';width:8px;height:2px;background:currentColor;border-radius:2px}
+/* (2026-11-25) Le flux : cartes (option A) ou liste compacte. */
+.sy-aff{margin-left:auto;display:inline-flex;padding:2px;border-radius:9px;border:1px solid var(--v07);background:var(--v04)}
+.sy-aff button{border:0;background:transparent;width:30px;height:26px;border-radius:7px;display:grid;place-items:center;color:var(--tx3);cursor:pointer}
+.sy-aff button:hover{color:var(--tx)}
+.sy-aff button.on{background:var(--f-carte);color:var(--tx);box-shadow:0 1px 2px rgba(0,0,0,.25)}
+.sy-aff + .tout{margin-left:0}
+.sy-flux{flex:1 1 auto;min-height:0;overflow-y:auto;padding:1rem 1.5rem 1.5rem;display:flex;flex-direction:column;gap:.8rem;border-top:1px solid var(--v06)}
+.sy-flux::-webkit-scrollbar{width:8px}.sy-flux::-webkit-scrollbar-thumb{background:var(--v10);border-radius:8px}
+.sy-carte{border:1px solid var(--v08);border-radius:16px;background:var(--v02);padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.85rem;transition:opacity .15s}
+.sy-carte.conflit{border-color:rgba(251,191,36,.45)}
+.sy-carte.sy-exclue,.sy-rang.sy-exclue .sy-tete{opacity:.5}
+.sy-tete{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;gap:.8rem;align-items:center}
+.sy-carte .vig{width:48px;height:48px;border-radius:11px}
+.sy-tete .tx{min-width:0}
+.sy-tete .t{font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sy-tete .s{font-size:.74rem;color:var(--tx3);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.sy-case-vide{width:17px}
+.sy-corps{display:flex;flex-direction:column;gap:.75rem}
+.sy-tuiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(15rem,1fr));gap:.55rem}
+.sy-tuile{border-radius:11px;background:var(--f-page);border:1px solid var(--v05);padding:.65rem .8rem;display:flex;flex-direction:column;gap:.35rem;min-width:0}
+.sy-tuile.sy-large{grid-column:1/-1}
+.sy-tuile.sy-tconf{border-color:rgba(251,191,36,.4)}
+.sy-tuile.sy-trouve{border-color:var(--or);box-shadow:0 0 0 1px var(--or)}
+.sy-tuile .n{font-size:.66rem;font-weight:650;color:var(--tx3);text-transform:uppercase;letter-spacing:.06em;display:flex;gap:.5rem;align-items:center}
+.sy-tuile .v{font-size:.84rem;line-height:1.5;word-break:break-word;min-width:0}
+.sy-avt{color:var(--tx3);text-decoration:line-through;text-decoration-color:var(--v30)}
+.sy-avt .nul,.sy-avt .sy-pas,.sy-avt .kvs{display:inline-block;text-decoration:none}
+.sy-apt{color:var(--tx);font-weight:550}
+.sy-fl{color:var(--tx3);margin:0 .45rem}
+.sy-long{white-space:pre-wrap}
+.sy-long > div + div{margin-top:.35rem}
+.sy-long del{color:var(--tx3);text-decoration:line-through;background:rgba(248,113,113,.10);border-radius:3px}
+.sy-long ins{text-decoration:none;color:var(--tx);background:rgba(74,222,128,.16);border-radius:3px;padding:0 1px}
+.sy-corps .choix{margin:0;display:flex;align-items:center;gap:.6rem 1rem;flex-wrap:wrap;padding:.7rem .85rem}
+.sy-corps .choix .q{margin:0;font-size:.78rem}
+.sy-corps .opts{display:flex;gap:.4rem;flex-wrap:wrap}
+.sy-corps .opt{padding:.4rem .8rem;border-radius:99px;font-size:.78rem}
+.sy-corps .opt.on{font-weight:600}
+.sy-corps .actions-d{margin:0;justify-content:flex-end}
+.sy-flux.sy-compact{gap:0;padding-top:.3rem}
+.sy-rang{border-bottom:1px solid var(--v05)}
+.sy-rang .sy-tete{padding:.45rem .5rem;cursor:pointer;border-radius:10px;gap:.7rem}
+.sy-rang .sy-tete:hover{background:var(--v03)}
+.sy-rang .vig{width:30px;height:30px;border-radius:8px}
+.sy-rang .vig svg{width:14px;height:14px}
+.sy-rang .sy-tete .t{font-size:.84rem}
+.sy-rang .sy-tete .s{color:var(--tx2)}
+.sy-rang .sy-tete .s b{font-weight:600;color:var(--tx2)}
+.sy-mut{color:var(--tx3)}
+.sy-rang .sy-corps{padding:.25rem .5rem 1rem 3.4rem}
+.sy-chev{color:var(--tx3);transition:transform .2s;display:grid}
+.sy-rang.sy-ouvert .sy-chev{transform:rotate(90deg)}
+html.jour .sy-tuile{background:#ffffff}
 /* Détail */
 .detail{overflow-y:auto;padding:1.4rem 1.8rem 2rem}
 .dt{display:flex;gap:1rem;align-items:center;margin-bottom:1.3rem}
@@ -120,10 +173,10 @@ button{font:inherit;color:inherit}
 .duo .ap{color:var(--tx)}
 .duo .vide{color:var(--tx3);font-style:italic}
 .nul{color:var(--tx3);font-style:italic}
-.pas{display:flex;flex-wrap:wrap;gap:.3rem;white-space:normal}
-.pa{display:inline-flex;align-items:center;gap:.35rem;font-size:.76rem;line-height:1.3;padding:.22rem .6rem;border-radius:999px;background:var(--v05);border:1px solid var(--v08)}
-.pa.plus,.ob.plus{border-color:var(--tx-ok);color:var(--tx)}
-.pa.moins,.ob.moins{opacity:.45;text-decoration:line-through}
+.sy-pas{display:flex;flex-wrap:wrap;gap:.3rem;white-space:normal}
+.sy-pa{display:inline-flex;align-items:center;gap:.35rem;font-size:.76rem;line-height:1.3;padding:.22rem .6rem;border-radius:999px;background:var(--v05);border:1px solid var(--v08)}
+.sy-pa.plus,.ob.plus{border-color:var(--tx-ok);color:var(--tx)}
+.sy-pa.moins,.ob.moins{opacity:.45;text-decoration:line-through}
 .kvs{display:grid;gap:.45rem;white-space:normal}
 .kv{display:grid;gap:.1rem}
 .kk{font-size:.68rem;color:var(--tx3);letter-spacing:.02em}
@@ -237,7 +290,12 @@ function pageSynchro() {
 ${JS_ACTIVITE()}${JS_DIRE()}
   var vPub = document.getElementById('v-pub'), vHist = document.getElementById('v-hist');
   var R = null, ERR = null, LECTURE = false, T0 = 0, MINUT = null;
-  var SEL = {}, CHOIX = {}, ACTIF = null, FILTRE = 'tout', RECH = '', HI = null, OUVERTS = {};
+  var SEL = {}, CHOIX = {}, ACTIF = null, FILTRE = 'tout', RECH = '', HI = null, OUVERTS = {}, DEPLIE = {};
+  /* (2026-11-25) Sa demande : l'option A de la maquette (« A est parfait ») + « un affichage liste plus compacte »
+     + « une recherche intégrée dans les changements ». AFF : 'cartes' (une carte par élément, l'avant → après de chaque
+     champ) ou 'liste' (une ligne par élément, qui se déplie). Le choix est retenu sur ce poste. */
+  var AFF = 'cartes';
+  try { if (localStorage.getItem('sz-synchro-aff') === 'liste') AFF = 'liste'; } catch (e) {}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function appeler(op, args){
@@ -321,15 +379,33 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (FILTRE === 'conflits' && e.sens !== 'conflit') return false;
       if (FILTRE === 'enligne' && e.sens !== 'prod') return false;
       if (FILTRE === 'tout' && !aPublier(e)) return false;
-      if (q && (nomCle(e) + ' ' + e.cle).toLowerCase().indexOf(q) < 0) return false;
+      if (q && (nomCle(e) + ' ' + e.cle).toLowerCase().indexOf(q) < 0 && !trouveDans(e, q).length) return false;
       return true;
     });
+  }
+  /* Le texte cherchable d'un champ : son nom, et ses deux valeurs telles qu'on les LIT (consignes en mots, Oui/Non). */
+  function texteDe(x){
+    x = lire(x);
+    if (x == null) return '';
+    if (typeof x !== 'object') { var s0 = String(x); return s0 + (ENT[s0] ? ' ' + ENT[s0] : '') + (x === true ? ' ' + '${T("Oui")}' : (x === false ? ' ' + '${T("Non")}' : '')); }
+    if (Array.isArray(x)) return x.map(texteDe).join(' ');
+    return Object.keys(x).map(function(k){ return motCle(k) + ' ' + texteDe(x[k]); }).join(' ');
+  }
+  /* Les champs d'un élément où la recherche apparaît (leurs noms techniques). */
+  function trouveDans(e, q){
+    if (!q) return [];
+    return (e.champs || []).filter(function(c){
+      return ((CHAMPS[c.champ] || c.champ) + ' ' + texteDe(c.prod) + ' ' + texteDe(c.test)).toLowerCase().indexOf(q) >= 0;
+    }).map(function(c){ return c.champ; });
   }
   function selection(){ return R ? R.elements.filter(function(e){ return aPublier(e) && SEL[cle(e)] && (e.sens !== 'conflit' || choixDe(e)); }) : []; }
 
   /* ── Le dessin ── */
   var SVG_OK = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
   var SVG_REG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>';
+  var SVG_CARTES = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/></svg>';
+  var SVG_LISTE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>';
+  var SVG_CHEV = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
   function vig(e, cl){
     if (e.tbl === 'products' && e.vignette) return '<span class="' + (cl || 'vig') + '" style="background-image:url(&quot;' + esc(e.vignette) + '&quot;)"></span>';
     return '<span class="' + (cl || 'vig') + '">' + SVG_REG + '</span>';
@@ -359,37 +435,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       vPub.innerHTML = '<div class="etat"><div class="in"><div class="rond ok"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg></div>'
         + '<h3>' + '${T("Tout est publié")}' + '</h3><p>' + '${T("La boutique en ligne est identique à la boutique préparée. Ce que vous modifierez dans la boutique apparaîtra ici.")}' + '</p>'
         + (nEnLigne ? '<button type="button" class="btn" id="voirEnLigne">' + nEnLigne + ' ' + '${T("changement(s) faits directement en ligne")}' + '</button>' : '') + '</div></div>';
-      var v = document.getElementById('voirEnLigne'); if (v) v.onclick = function(){ FILTRE = 'enligne'; ACTIF = null; dessiner(); };
+      var v = document.getElementById('voirEnLigne'); if (v) v.onclick = function(){ FILTRE = 'enligne'; dessiner(); };
       return;
     }
     var n = { tout: nPub, produits: 0, reglages: 0, conflits: 0, enligne: nEnLigne };
     R.elements.forEach(function(e){ if (!aPublier(e)) return; if (e.tbl === 'products') n.produits++; else n.reglages++; if (e.sens === 'conflit') n.conflits++; });
     var puce = function(id, lib, pt){ return (id !== 'tout' && !n[id]) ? '' : '<button type="button" class="puce' + (FILTRE === id ? ' on' : '') + '" data-f="' + id + '">' + (pt ? '<span class="pt"></span>' : '') + lib + ' <b>' + n[id] + '</b></button>'; };
     var vis = visibles();
-    if (!ACTIF || !vis.some(function(e){ return cle(e) === ACTIF; })) ACTIF = vis[0] ? cle(vis[0]) : null;
     var pubVis = vis.filter(aPublier), tousSel = pubVis.length && pubVis.every(function(e){ return SEL[cle(e)]; }), certains = pubVis.some(function(e){ return SEL[cle(e)]; });
     var h = '<div class="outils"><label class="rech"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'
-      + '<input id="rech" type="search" placeholder="' + esc('${T("Rechercher")}') + '" aria-label="' + esc('${T("Rechercher")}') + '" value="' + esc(RECH) + '"></label>'
+      + '<input id="rech" type="search" placeholder="' + esc('${T("Rechercher dans les changements")}') + '" aria-label="' + esc('${T("Rechercher dans les changements")}') + '" value="' + esc(RECH) + '"></label>'
       + puce('tout', '${T("Tout")}') + puce('produits', '${T("Produits")}') + puce('reglages', '${T("Réglages")}') + puce('conflits', '${T("Conflits")}', true) + puce('enligne', '${T("Changés en ligne")}')
+      + '<div class="sy-aff" role="group" aria-label="' + esc('${T("Affichage")}') + '">'
+      + '<button type="button" data-aff="cartes" class="' + (AFF === 'cartes' ? 'on' : '') + '" title="' + esc('${T("Cartes")}') + '" aria-label="' + esc('${T("Cartes")}') + '" aria-pressed="' + (AFF === 'cartes') + '">' + SVG_CARTES + '</button>'
+      + '<button type="button" data-aff="liste" class="' + (AFF === 'liste' ? 'on' : '') + '" title="' + esc('${T("Liste compacte")}') + '" aria-label="' + esc('${T("Liste compacte")}') + '" aria-pressed="' + (AFF === 'liste') + '">' + SVG_LISTE + '</button></div>'
       + (pubVis.length ? '<span class="tout" id="toutSel"><button type="button" class="case' + (tousSel ? ' on' : (certains ? ' mi' : '')) + '" aria-label="' + esc('${T("Tout sélectionner")}') + '">' + SVG_OK + '</button>' + '${T("Tout sélectionner")}' + '</span>' : '')
       + '</div>';
-    h += '<div class="split"><div class="liste" role="listbox" aria-label="' + esc('${T("Changements")}') + '">';
-    h += vis.map(function(e){
-      var k = cle(e), et = etiquette(e);
-      return '<div class="ligne' + (k === ACTIF ? ' sel' : '') + '" data-k="' + esc(k) + '" role="option" aria-selected="' + (k === ACTIF) + '">'
-        + (aPublier(e) ? '<button type="button" class="case' + (SEL[k] ? ' on' : '') + '" data-c="' + esc(k) + '" aria-label="' + esc('${T("Inclure dans la publication")}') + '">' + SVG_OK + '</button>' : '<span style="width:17px"></span>')
-        + vig(e) + '<div class="tx"><div class="t">' + esc(nomCle(e)) + '</div><div class="s">' + esc(sousTitre(e)) + '</div></div>'
-        + '<span class="et ' + et[0] + '">' + esc(et[1]) + '</span></div>';
-    }).join('') || '<div class="etat"><div class="in"><p>' + '${T("Aucun résultat.")}' + '</p></div></div>';
-    h += '</div><div class="detail" id="detail">' + detailHtml() + '</div></div>';
+    h += '<div class="sy-flux' + (AFF === 'liste' ? ' sy-compact' : '') + '" id="flux">';
+    h += vis.map(AFF === 'liste' ? ligneHtml : carteHtml).join('') || '<div class="etat"><div class="in"><p>' + '${T("Aucun résultat.")}' + '</p></div></div>';
+    h += '</div>';
     var sel = selection(), sansChoix = R.elements.filter(function(e){ return e.sens === 'conflit' && SEL[cle(e)] && !choixDe(e); }).length;
     h += '<div class="pied"><div class="r">' + (sel.length ? '<b>' + sel.length + '</b> ' + '${T("changement(s) sélectionné(s)")}' : '${T("Rien de sélectionné")}')
       + (sansChoix ? ' · <span style="color:var(--tx-att)">' + sansChoix + ' ' + '${T("conflit(s) à trancher")}' + '</span>' : '')
       + (R.ms ? ' <span class="msg">· ' + '${T("analysé en")}' + ' ' + (R.ms / 1000).toFixed(1) + ' s</span>' : '') + '</div>'
       + '<button type="button" class="btn pri" id="publier"' + (sel.length ? '' : ' disabled') + '><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>'
       + (sel.length ? '${T("Publier")}' + ' ' + sel.length + ' ' + (sel.length > 1 ? '${T("changements")}' : '${T("changement")}') : '${T("Publier")}') + '</button></div>';
+    var fx = document.getElementById('flux'), haut = fx ? fx.scrollTop : 0;
     var focus = document.activeElement && document.activeElement.id === 'rech', pos = focus ? document.activeElement.selectionStart : 0;
     vPub.innerHTML = h;
+    var fx2 = document.getElementById('flux'); if (fx2) fx2.scrollTop = haut;
     brancherPub();
     if (focus) { var ri = document.getElementById('rech'); ri.focus(); try { ri.setSelectionRange(pos, pos); } catch (e) {} }
   }
@@ -428,7 +502,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (Array.isArray(x)) {
       var ao = Array.isArray(autre) ? autre.map(function(i){ return JSON.stringify(i); }) : null;
       var marque = function(i){ return ao && ao.indexOf(JSON.stringify(i)) < 0 ? (cote === 'ap' ? ' plus' : ' moins') : ''; };
-      if (x.every(estPrim)) return '<div class="pas">' + x.map(function(i){ return '<span class="pa' + marque(i) + '">' + prim(i) + '</span>'; }).join('') + '</div>';
+      if (x.every(estPrim)) return '<div class="sy-pas">' + x.map(function(i){ return '<span class="sy-pa' + marque(i) + '">' + prim(i) + '</span>'; }).join('') + '</div>';
       return '<div class="obs">' + x.map(function(i){ return '<div class="ob' + marque(i) + '">' + resume(i) + '</div>'; }).join('') + '</div>';
     }
     if (typeof x === 'object') {
@@ -441,61 +515,157 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return prim(x);
   }
   function valeur(v, autre, cote){ return rendre(lire(v), lire(autre), cote); }
-  function detailHtml(){
-    var e = R && R.elements.filter(function(x){ return cle(x) === ACTIF; })[0];
-    if (!e) return '<div class="etat"><div class="in"><p>' + '${T("Choisissez un changement pour voir le détail.")}' + '</p></div></div>';
-    var et = etiquette(e), h = '<div class="dt">' + vig(e) + '<div><h2>' + esc(nomCle(e)) + '</h2><div class="k"><span class="et ' + et[0] + '">' + esc(et[1]) + '</span>'
-      + esc(e.tbl === 'products' ? '${T("Produit")}' : '${T("Réglage de la boutique")}') + '</div></div></div>';
+  /* ── L'avant → après d'un champ, lisible (option A) ── */
+  function court(x){ x = lire(x); if (x == null || x === '') return '—'; if (x === true) return '${T("Oui")}'; if (x === false) return '${T("Non")}'; var s0 = String(x); return ENT[s0] || s0; }
+  function motsDiff(x, y){
+    var A = x.split(' '), B = y.split(' '), n = A.length, m = B.length, i, j;
+    if (n * m > 250000) return null;
+    var Lc = []; for (i = 0; i <= n; i++) Lc.push(new Array(m + 1).fill(0));
+    for (i = n - 1; i >= 0; i--) for (j = m - 1; j >= 0; j--) Lc[i][j] = A[i] === B[j] ? Lc[i + 1][j + 1] + 1 : Math.max(Lc[i + 1][j], Lc[i][j + 1]);
+    var o = []; i = 0; j = 0;
+    while (i < n && j < m) {
+      if (A[i] === B[j]) { o.push(esc(A[i])); i++; j++; }
+      else if (Lc[i + 1][j] >= Lc[i][j + 1]) { o.push('<del>' + esc(A[i]) + '</del>'); i++; }
+      else { o.push('<ins>' + esc(B[j]) + '</ins>'); j++; }
+    }
+    while (i < n) o.push('<del>' + esc(A[i++]) + '</del>');
+    while (j < m) o.push('<ins>' + esc(B[j++]) + '</ins>');
+    return o.join(' ');
+  }
+  function listeDelta(A, B){
+    var jA = A.map(function(x){ return JSON.stringify(x); }), jB = B.map(function(x){ return JSON.stringify(x); });
+    var prims = A.concat(B).every(estPrim);
+    var bloc = function(x, cl){ return prims ? '<span class="sy-pa' + cl + '">' + prim(x) + '</span>' : '<div class="ob' + cl + '">' + resume(x) + '</div>'; };
+    var h = B.map(function(x, i){ return bloc(x, jA.indexOf(jB[i]) < 0 ? ' plus' : ''); })
+      .concat(A.filter(function(x, i){ return jB.indexOf(jA[i]) < 0; }).map(function(x){ return bloc(x, ' moins'); }));
+    return h.length ? (prims ? '<div class="sy-pas">' : '<div class="obs">') + h.join('') + '</div>' : VIDE;
+  }
+  function deltaVal(a, b){
+    if (estVide(a) && estVide(b)) return VIDE;
+    if (estPrim(a) && estPrim(b)) {
+      var sa = a == null ? '' : String(a), sb = b == null ? '' : String(b);
+      if (sa.length > 60 || sb.length > 60) {
+        var d = (sa && sb) ? motsDiff(sa, sb) : null;
+        if (d) return '<div class="sy-long">' + d + '</div>';
+        return '<div class="sy-long"><div class="sy-avt">' + prim(a) + '</div><div class="sy-apt">' + prim(b) + '</div></div>';
+      }
+      return '<span class="sy-avt">' + prim(a) + '</span><span class="sy-fl">→</span><span class="sy-apt">' + prim(b) + '</span>';
+    }
+    var la = Array.isArray(a) || estVide(a), lb = Array.isArray(b) || estVide(b);
+    if (la && lb) return listeDelta(Array.isArray(a) ? a : [], Array.isArray(b) ? b : []);
+    var oa = (a && typeof a === 'object' && !Array.isArray(a)) ? a : (estVide(a) ? {} : null);
+    var ob = (b && typeof b === 'object' && !Array.isArray(b)) ? b : (estVide(b) ? {} : null);
+    if (oa && ob) {
+      var cles = Object.keys(ob); Object.keys(oa).forEach(function(k){ if (cles.indexOf(k) < 0) cles.push(k); });
+      var dif = cles.filter(function(k){ return !egal(oa[k], ob[k]) && !(estVide(oa[k]) && estVide(ob[k])); });
+      if (!dif.length) return VIDE;
+      return '<div class="kvs">' + dif.map(function(k){ return '<div class="kv"><span class="kk">' + esc(motCle(k)) + '</span><span class="vv">' + deltaVal(oa[k], ob[k]) + '</span></div>'; }).join('') + '</div>';
+    }
+    return '<div class="sy-long"><div class="sy-avt">' + rendre(a, b, 'av') + '</div><div class="sy-apt">' + rendre(b, a, 'ap') + '</div></div>';
+  }
+  function photosDelta(av, ap){
+    var h = ap.map(function(u){ return '<span class="ph' + (av.indexOf(u) < 0 ? ' plus' : '') + '" style="background-image:url(&quot;' + esc(u) + '&quot;)"></span>'; })
+      .concat(av.filter(function(u){ return ap.indexOf(u) < 0; }).map(function(u){ return '<span class="ph moins" style="background-image:url(&quot;' + esc(u) + '&quot;)"></span>'; }));
+    return h.length ? '<div class="photos">' + h.join('') + '</div>' : VIDE;
+  }
+  function tuile(e, c, trouves){
+    var nom = CHAMPS[c.champ] || c.champ, v;
+    if (e.tbl === 'products' && PHOTO.test(c.champ) && e.photos && ((e.photos.test || []).length || (e.photos.prod || []).length)) v = photosDelta(e.photos.prod || [], e.photos.test || []);
+    else v = deltaVal(lire(c.prod), lire(c.test));
+    var large = v.length > 420 || /class="(sy-long|kvs|obs|photos)"/.test(v);
+    return '<div class="sy-tuile' + (large ? ' sy-large' : '') + (c.sens === 'conflit' ? ' sy-tconf' : '') + (trouves.indexOf(c.champ) >= 0 ? ' sy-trouve' : '') + '">'
+      + '<span class="n">' + esc(nom) + (c.sens === 'conflit' ? '<span class="et conflit">' + '${T("Conflit")}' + '</span>' : '') + '</span><div class="v">' + v + '</div></div>';
+  }
+  function sousCarte(e){
+    if (e.type === 'ajout') return '${T("Nouveau dans la boutique préparée")}';
+    if (e.type === 'suppression') return '${T("Retiré de la boutique préparée")}';
+    if (e.sens === 'prod') return '${T("Changé directement en ligne")}';
+    if (e.sens === 'conflit') return '${T("Changé aussi en ligne depuis la préparation")}';
+    var n = (e.champs || []).length;
+    return n + ' ' + (n > 1 ? '${T("champs modifiés")}' : '${T("champ modifié")}');
+  }
+  /* Le résumé d'une ligne compacte : « Prix soldé 89 → 69 · Tailles +XS · Entretien ». */
+  function resumeLigne(e){
+    if (e.type === 'ajout' || e.type === 'suppression') return esc(sousTitre(e));
+    return (e.champs || []).map(function(c){
+      var nom = '<b>' + esc(CHAMPS[c.champ] || c.champ) + '</b>', a = lire(c.prod), b = lire(c.test);
+      if (estPrim(a) && estPrim(b)) {
+        var ca = court(a), cb = court(b);
+        if (ca.length <= 24 && cb.length <= 24) return nom + ' <span class="sy-mut">' + esc(ca) + ' →</span> ' + esc(cb);
+        return nom;
+      }
+      if ((Array.isArray(a) || estVide(a)) && (Array.isArray(b) || estVide(b))) {
+        var A = Array.isArray(a) ? a : [], B = Array.isArray(b) ? b : [];
+        if (A.concat(B).every(estPrim)) {
+          var sA = A.map(String), sB = B.map(String);
+          var pl = sB.filter(function(x){ return sA.indexOf(x) < 0; }).map(function(x){ return '+' + court(x); });
+          var mo = sA.filter(function(x){ return sB.indexOf(x) < 0; }).map(function(x){ return '−' + court(x); });
+          var t = pl.concat(mo); if (t.length) return nom + ' ' + esc(t.slice(0, 3).join(' ') + (t.length > 3 ? ' …' : ''));
+        }
+      }
+      return nom;
+    }).join('<span class="sy-mut"> · </span>');
+  }
+  function teteHtml(e, compact){
+    var k = cle(e), et = etiquette(e);
+    return (aPublier(e) ? '<button type="button" class="case' + (SEL[k] ? ' on' : '') + '" data-c="' + esc(k) + '" aria-label="' + esc('${T("Inclure dans la publication")}') + '">' + SVG_OK + '</button>' : '<span class="sy-case-vide"></span>')
+      + vig(e) + '<div class="tx"><div class="t">' + esc(nomCle(e)) + '</div><div class="s">' + (compact ? resumeLigne(e) : esc(sousCarte(e))) + '</div></div>'
+      + '<span class="et ' + et[0] + '">' + esc(et[1]) + '</span>';
+  }
+  function corpsHtml(e){
+    var k = cle(e), h = '<div class="sy-corps">', q = RECH.trim().toLowerCase(), tr = trouveDans(e, q);
     if (e.avert === 'ugs_double') h += '<div class="avert">' + '${T("Cette UGS existe déjà en ligne sur un autre produit : la publication sera refusée tant qu’elle n’est pas changée.")}' + '</div>';
     if (e.sens === 'prod') h += '<div class="avert">' + '${T("Ce changement a été fait directement en ligne : la boutique préparée ne l’a pas. « Reprendre » l’aligne sur la version en ligne.")}' + '</div>';
-    (e.champs || []).forEach(function(c){
-      var nom = CHAMPS[c.champ] || c.champ;
-      h += '<div class="champ"><div class="n">' + esc(nom) + (c.sens === 'conflit' ? '<span class="et conflit">' + '${T("Conflit")}' + '</span>' : '') + '</div>';
-      if (e.tbl === 'products' && (PHOTO.test(c.champ) || c.champ === '(fiche)') && e.photos && (e.photos.test.length || e.photos.prod.length) && c.champ !== '(fiche)') {
-        var av = e.photos.prod || [], ap = e.photos.test || [];
-        h += '<div class="duo"><div class="c"><small>' + '${T("En ligne")}' + '</small><div class="photos">' + (av.map(function(u){ return '<span class="ph' + (ap.indexOf(u) < 0 ? ' moins' : '') + '" style="background-image:url(&quot;' + esc(u) + '&quot;)"></span>'; }).join('') || '<span class="vide">' + '${T("(aucune)")}' + '</span>') + '</div></div>'
-          + '<div class="c"><small>' + '${T("Préparée")}' + '</small><div class="photos">' + (ap.map(function(u){ return '<span class="ph' + (av.indexOf(u) < 0 ? ' plus' : '') + '" style="background-image:url(&quot;' + esc(u) + '&quot;)"></span>'; }).join('') || '<span class="vide">' + '${T("(aucune)")}' + '</span>') + '</div></div></div>';
-      } else if (c.champ === '(fiche)') {
-        h += '<div class="duo"><div class="c av"><small>' + '${T("En ligne")}' + '</small>' + (c.prod == null ? '<span class="vide">' + '${T("(absente)")}' + '</span>' : '${T("présente")}') + '</div>'
-          + '<div class="c ap"><small>' + '${T("Préparée")}' + '</small>' + (c.test == null ? '<span class="vide">' + '${T("(retirée)")}' + '</span>' : '${T("présente")}') + '</div></div>';
-        if (e.photos && e.photos.test && e.photos.test.length && c.test != null) h += '<div class="photos" style="margin-top:.6rem">' + e.photos.test.map(function(u){ return '<span class="ph" style="background-image:url(&quot;' + esc(u) + '&quot;)"></span>'; }).join('') + '</div>';
-      } else {
-        h += '<div class="duo"><div class="c av"><small>' + '${T("En ligne")}' + '</small>' + valeur(c.prod, c.test, 'av') + '</div><div class="c ap"><small>' + '${T("Préparée")}' + '</small>' + valeur(c.test, c.prod, 'ap') + '</div></div>';
-      }
-      h += '</div>';
-    });
-    var entier = /^(ajout|suppression|ajout_prod|suppression_prod)$/.test(e.type), ch = choixDe(e);
-    var opt = function(v, titre, txt){ return '<button type="button" class="opt' + (ch === v ? ' on' : '') + '" data-o="' + v + '"><span class="r"></span><span><b>' + titre + '</b>' + txt + '</span></button>'; };
-    if (e.sens === 'conflit') {
-      h += '<div class="choix"><div class="q">' + '${T("Les deux versions ont changé. Laquelle garder ?")}' + '</div><div class="opts">'
-        + opt('test', '${T("La version préparée")}', '${T("Elle remplace la version en ligne.")}')
-        + (entier ? '' : opt('fusion', '${T("Fusionner")}', '${T("Le reste de la version préparée part ; la version en ligne garde ses valeurs en conflit.")}'))
-        + opt('prod', '${T("La version en ligne")}', '${T("La boutique préparée reprend la version en ligne.")}') + '</div></div>';
-    } else if (e.sens === 'prod') {
-      h += '<div class="actions-d"><button type="button" class="btn" id="reprendre">' + '${T("Reprendre dans la boutique préparée")}' + '</button></div>';
+    if (e.type === 'ajout' || e.type === 'suppression') {
+      var ph = e.photos ? (e.type === 'ajout' ? (e.photos.test || []) : (e.photos.prod || [])) : [];
+      h += '<div class="sy-tuiles"><div class="sy-tuile large"><span class="n">' + (e.type === 'ajout' ? '${T("Nouvelle fiche")}' : '${T("Fiche retirée")}') + '</span><div class="v">'
+        + (e.type === 'ajout' ? '${T("Elle sera ajoutée à la boutique en ligne.")}' : '${T("Elle sera retirée de la boutique en ligne.")}')
+        + (ph.length ? '<div class="photos" style="margin-top:.5rem">' + ph.map(function(u){ return '<span class="ph" style="background-image:url(&quot;' + esc(u) + '&quot;)"></span>'; }).join('') + '</div>' : '') + '</div></div></div>';
     } else {
-      h += '<div class="actions-d"><button type="button" class="lien" id="abandon">' + '${T("Abandonner ce changement")}' + '</button></div>';
+      h += '<div class="sy-tuiles">' + (e.champs || []).map(function(c){ return tuile(e, c, tr); }).join('') + '</div>';
     }
-    return h;
+    if (e.sens === 'conflit') {
+      var ch = choixDe(e), entier = /^(ajout|suppression|ajout_prod|suppression_prod)$/.test(e.type);
+      var opt = function(v, t, ti){ return '<button type="button" class="opt' + (ch === v ? ' on' : '') + '" data-o="' + v + '" data-k="' + esc(k) + '"' + (ti ? ' title="' + esc(ti) + '"' : '') + '>' + t + '</button>'; };
+      h += '<div class="choix"><span class="q">' + '${T("Les deux versions ont changé. Laquelle garder ?")}' + '</span><div class="opts">'
+        + opt('prod', '${T("La version en ligne")}', '${T("La boutique préparée reprend la version en ligne.")}')
+        + (entier ? '' : opt('fusion', '${T("Fusionner")}', '${T("Le reste de la version préparée part ; la version en ligne garde ses valeurs en conflit.")}'))
+        + opt('test', '${T("La version préparée")}', '${T("Elle remplace la version en ligne.")}') + '</div></div>';
+    } else if (e.sens === 'prod') {
+      h += '<div class="actions-d"><button type="button" class="btn" data-rp="' + esc(k) + '">' + '${T("Reprendre dans la boutique préparée")}' + '</button></div>';
+    } else {
+      h += '<div class="actions-d"><button type="button" class="lien" data-ab="' + esc(k) + '">' + '${T("Abandonner ce changement")}' + '</button></div>';
+    }
+    return h + '</div>';
+  }
+  function carteHtml(e){
+    var k = cle(e);
+    return '<article class="sy-carte' + (e.sens === 'conflit' ? ' conflit' : '') + (aPublier(e) && !SEL[k] && e.sens !== 'conflit' ? ' sy-exclue' : '') + '" data-k="' + esc(k) + '"><div class="sy-tete">' + teteHtml(e, false) + '</div>' + corpsHtml(e) + '</article>';
+  }
+  function ligneHtml(e){
+    var k = cle(e), q = RECH.trim().toLowerCase();
+    var o = DEPLIE[k] != null ? DEPLIE[k] : !!(q && trouveDans(e, q).length);
+    return '<article class="sy-rang' + (o ? ' sy-ouvert' : '') + (aPublier(e) && !SEL[k] && e.sens !== 'conflit' ? ' sy-exclue' : '') + '" data-k="' + esc(k) + '"><div class="sy-tete" data-plier="' + esc(k) + '" aria-expanded="' + o + '">'
+      + teteHtml(e, true) + '<span class="sy-chev" aria-hidden="true">' + SVG_CHEV + '</span></div>' + (o ? corpsHtml(e) : '') + '</article>';
   }
   function brancherPub(){
     var ri = document.getElementById('rech');
-    if (ri) ri.oninput = function(){ RECH = ri.value; dessinerPub(); };
-    vPub.querySelectorAll('.puce').forEach(function(b){ b.onclick = function(){ FILTRE = b.getAttribute('data-f'); ACTIF = null; dessinerPub(); }; });
+    if (ri) ri.oninput = function(){ RECH = ri.value; DEPLIE = {}; dessinerPub(); };
+    vPub.querySelectorAll('.puce').forEach(function(b){ b.onclick = function(){ FILTRE = b.getAttribute('data-f'); dessinerPub(); }; });
+    vPub.querySelectorAll('[data-aff]').forEach(function(b){ b.onclick = function(){
+      AFF = b.getAttribute('data-aff'); try { localStorage.setItem('sz-synchro-aff', AFF); } catch (e) {} dessinerPub();
+    }; });
     var ts = document.getElementById('toutSel');
     if (ts) ts.onclick = function(){ var vis = visibles().filter(aPublier), tous = vis.every(function(e){ return SEL[cle(e)]; }); vis.forEach(function(e){ SEL[cle(e)] = !tous; }); dessinerPub(); };
-    vPub.querySelectorAll('.ligne').forEach(function(l){ l.onclick = function(ev){
-      var c = ev.target.closest('[data-c]');
-      if (c) { var k = c.getAttribute('data-c'); SEL[k] = !SEL[k]; dessinerPub(); return; }
-      ACTIF = l.getAttribute('data-k'); dessinerPub();
-    }; });
-    vPub.querySelectorAll('.opt').forEach(function(o){ o.onclick = function(){ CHOIX[ACTIF] = o.getAttribute('data-o'); SEL[ACTIF] = true; dessinerPub(); }; });
-    var ab = document.getElementById('abandon'); if (ab) ab.onclick = function(){
-      var k = ACTIF, e = R.elements.filter(function(x){ return cle(x) === k; })[0]; if (!e) return;
+    vPub.querySelectorAll('[data-c]').forEach(function(c){ c.onclick = function(ev){ ev.stopPropagation(); var k = c.getAttribute('data-c'); SEL[k] = !SEL[k]; dessinerPub(); }; });
+    vPub.querySelectorAll('[data-plier]').forEach(function(t){ t.onclick = function(){ var k = t.getAttribute('data-plier'); DEPLIE[k] = t.getAttribute('aria-expanded') !== 'true'; dessinerPub(); }; });
+    vPub.querySelectorAll('.opt[data-k]').forEach(function(o){ o.onclick = function(){ var k = o.getAttribute('data-k'); CHOIX[k] = o.getAttribute('data-o'); SEL[k] = true; dessinerPub(); }; });
+    vPub.querySelectorAll('[data-ab]').forEach(function(b){ b.onclick = function(){
+      var k = b.getAttribute('data-ab'), e = R.elements.filter(function(x){ return cle(x) === k; })[0]; if (!e) return;
       szConfirmer({ danger: true, titre: '${T("Abandonner ce changement")}', texte: '« ' + nomCle(e) + ' » — ' + '${T("La boutique préparée reprendra la version en ligne. Confirmer ?")}', oui: '${T("Abandonner")}' })
         .then(function(ok){ if (ok) unSeul(k, 'prod', '${T("Changement abandonné : la boutique préparée a repris la version en ligne.")}'); });
-    };
-    var rp = document.getElementById('reprendre'); if (rp) rp.onclick = function(){ unSeul(ACTIF, 'prod', '${T("Repris dans la boutique préparée.")}'); };
+    }; });
+    vPub.querySelectorAll('[data-rp]').forEach(function(b){ b.onclick = function(){ unSeul(b.getAttribute('data-rp'), 'prod', '${T("Repris dans la boutique préparée.")}'); }; });
     var pb = document.getElementById('publier'); if (pb) pb.onclick = confirmer;
   }
   function unSeul(k, choix, ok){
