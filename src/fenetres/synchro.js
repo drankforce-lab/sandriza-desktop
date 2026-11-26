@@ -116,7 +116,7 @@ button{font:inherit;color:inherit}
 .sy-carte{border:1px solid var(--v08);border-radius:16px;background:var(--v02);padding:1rem 1.1rem;display:flex;flex-direction:column;gap:.85rem;transition:opacity .15s}
 .sy-carte.conflit{border-color:rgba(251,191,36,.45)}
 .sy-carte.sy-exclue,.sy-rang.sy-exclue .sy-tete{opacity:.5}
-.sy-tete{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto;gap:.8rem;align-items:center}
+.sy-tete{display:grid;grid-template-columns:auto auto minmax(0,1fr) auto auto auto;gap:.8rem;align-items:center}
 .sy-carte .vig{width:48px;height:48px;border-radius:11px}
 .sy-tete .tx{min-width:0}
 .sy-tete .t{font-size:.9rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -158,6 +158,43 @@ button{font:inherit;color:inherit}
 .sy-chev{color:var(--tx3);transition:transform .2s;display:grid}
 .sy-rang.sy-ouvert .sy-chev{transform:rotate(90deg)}
 html.jour .sy-tuile{background:#ffffff}
+.sy-foc{outline:2px solid var(--or);outline-offset:2px}
+.sy-rang.sy-foc{outline-offset:-2px;border-radius:10px}
+.sy-al{min-width:1.3rem;height:1.3rem;padding:0 .35rem;border-radius:99px;display:inline-grid;place-items:center;font-size:.66rem;font-weight:700;background:rgba(251,191,36,.16);color:var(--tx-att)}
+html.jour .sy-al{color:#6e4f0c}
+.sy-ctrl{display:flex;flex-wrap:wrap;gap:.35rem;align-items:center;font-size:.76rem;color:var(--tx2)}
+.sy-ctrl b{font-weight:600;padding:.15rem .55rem;border-radius:99px;background:rgba(251,191,36,.12);color:var(--tx-att)}
+html.jour .sy-ctrl b{color:#6e4f0c}
+.sy-kbd{font-size:.68rem;color:var(--tx3);display:inline-flex;gap:.2rem;align-items:center;white-space:nowrap}
+.sy-kbd kbd{font:inherit;font-size:.64rem;padding:.05rem .32rem;border-radius:5px;border:1px solid var(--v12);background:var(--v04);color:var(--tx2)}
+.sy-f{display:flex;flex-direction:column;gap:.3rem;margin-top:.9rem;font-size:.78rem;color:var(--tx2)}
+.sy-f i{font-style:normal;color:var(--tx3)}
+.sy-f input{font:inherit;font-size:.84rem;color:var(--tx);background:var(--v04);border:1px solid var(--v10);border-radius:9px;padding:.5rem .7rem;outline:none}
+.sy-f input:focus{border-color:var(--or)}
+.sy-f small{font-size:.72rem;color:var(--tx3)}
+.sy-f small[hidden],.sy-f input[hidden]{display:none}
+.sy-quand{display:flex;gap:.4rem;align-items:center;flex-wrap:wrap}
+.sy-quand button{border:1px solid var(--v10);background:transparent;border-radius:99px;padding:.35rem .85rem;font-size:.78rem;cursor:pointer;color:var(--tx2)}
+.sy-quand button.on{background:var(--tx);color:var(--f-page);border-color:var(--tx);font-weight:600}
+.sy-quand input{flex:1 1 12rem;color-scheme:dark}
+html.jour .sy-quand input{color-scheme:light}
+.sy-ctl{margin-top:.9rem;padding:.7rem .8rem;border-radius:11px;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.25);font-size:.78rem;display:grid;gap:.3rem}
+.sy-ctl b{color:var(--tx-att);font-weight:650}
+html.jour .sy-ctl b{color:#6e4f0c}
+.sy-ctl div{display:flex;gap:.6rem;justify-content:space-between}
+.sy-ctl span{color:var(--tx);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sy-ctl em{font-style:normal;color:var(--tx2);text-align:right}
+.sy-ok{margin-top:.9rem;font-size:.78rem;color:var(--tx-ok);display:flex;gap:.4rem;align-items:center}
+.sy-fin{width:48px;height:48px;border-radius:50%;display:grid;place-items:center;margin-bottom:.8rem;background:rgba(74,222,128,.12);color:var(--tx-ok)}
+.sy-fin svg{width:20px;height:20px}
+html.jour .sy-fin{color:#1f6b3d}
+.sy-pl-t{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);margin:1.1rem 0 .1rem}
+.sy-pl{display:flex;gap:.9rem;align-items:center;border:1px solid rgba(147,197,253,.28);border-radius:14px;margin:.6rem 0 0;padding:.8rem 1rem;background:rgba(147,197,253,.05)}
+.sy-pl-i{flex:0 0 auto;width:34px;height:34px;border-radius:10px;display:grid;place-items:center;background:rgba(147,197,253,.12);color:var(--tx-bleu)}
+html.jour .sy-pl-i{color:#2a5794}
+.sy-pl-x{flex:1 1 auto;min-width:0}
+.sy-pl-x .q{font-size:.86rem;font-weight:600}
+.sy-pl-x .w{font-size:.74rem;color:var(--tx3)}
 /* Détail */
 .detail{overflow-y:auto;padding:1.4rem 1.8rem 2rem}
 .dt{display:flex;gap:1rem;align-items:center;margin-bottom:1.3rem}
@@ -294,7 +331,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* (2026-11-25) Sa demande : l'option A de la maquette (« A est parfait ») + « un affichage liste plus compacte »
      + « une recherche intégrée dans les changements ». AFF : 'cartes' (une carte par élément, l'avant → après de chaque
      champ) ou 'liste' (une ligne par élément, qui se déplie). Le choix est retenu sur ce poste. */
-  var AFF = 'cartes';
+  var AFF = 'cartes', FOC = null, PL = null, NOMS = {};
   try { if (localStorage.getItem('sz-synchro-aff') === 'liste') AFF = 'liste'; } catch (e) {}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -312,6 +349,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     modifie_depuis: '${T("Modifié en production depuis cette publication : l’annuler écraserait ce changement.")}',
     production_occupee: '${T("La production change en ce moment (ventes ?) : réessayez dans un instant.")}',
     deja_annule: '${T("Déjà annulé.")}',
+    quand_passe: '${T("Choisissez une date et une heure à venir (dans plus d’une minute).")}',
+    quand_loin: '${T("Une publication se planifie au plus 90 jours à l’avance.")}',
+    deja_partie: '${T("Cette publication planifiée est déjà partie (ou annulée).")}',
     limite: '${T("Trop d’opérations d’affilée : patientez une minute.")}',
     delai: '${T("La fenêtre principale n’a pas répondu à temps.")}',
     pont_indisponible: '${T("La fenêtre principale ne répond pas.")}',
@@ -342,6 +382,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     collections: '${T("Collections")}', ship_cfg: '${T("Livraison")}', intl_ship: '${T("Livraison internationale")}', tax_rules: '${T("Taxes")}', seo: '${T("Référencement")}',
     email_tpl: '${T("Modèles de courriel")}', brand_name: '${T("Nom de la marque")}', banner: '${T("Bannière")}', annonce: '${T("Annonce")}', launch: '${T("Lancement")}' };
   var PHOTO = /^(image|images|additionalImages|photoDos|photos)$/;
+  /* (2026-11-25) LE CONTRÔLE AVANT DÉPART (calculé au serveur, bt_controles) : rien n'est bloqué, tout est montré. */
+  var CTRL = { sans_nom: '${T("Sans nom")}', sans_photo: '${T("Sans photo")}', prix_nul: '${T("Prix à zéro")}', solde_invalide: '${T("Prix soldé au-dessus du prix")}',
+    sous_cout: '${T("Vendu sous le coût")}', stock_vide: '${T("Aucun stock")}', ugs_double: '${T("UGS déjà prise en ligne")}' };
+  function alertes(e){ var a = (e.controles || []).slice(); if (e.avert === 'ugs_double') a.push('ugs_double'); return a; }
   function nomCle(e){ return e.tbl === 'products' ? (e.titre || e.cle) : (CLES[e.cle] || e.cle); }
   function etiquette(e){
     if (e.sens === 'conflit') return ['conflit', '${T("Conflit")}'];
@@ -458,6 +502,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="pied"><div class="r">' + (sel.length ? '<b>' + sel.length + '</b> ' + '${T("changement(s) sélectionné(s)")}' : '${T("Rien de sélectionné")}')
       + (sansChoix ? ' · <span style="color:var(--tx-att)">' + sansChoix + ' ' + '${T("conflit(s) à trancher")}' + '</span>' : '')
       + (R.ms ? ' <span class="msg">· ' + '${T("analysé en")}' + ' ' + (R.ms / 1000).toFixed(1) + ' s</span>' : '') + '</div>'
+      + '<span class="sy-kbd" title="' + esc('${T("↑ ↓ naviguer · Espace inclure · Entrée déplier · / chercher · V affichage · Ctrl + Entrée publier")}') + '"><kbd>↑</kbd><kbd>↓</kbd> <kbd>' + '${T("Espace")}' + '</kbd> <kbd>Ctrl</kbd>+<kbd>↵</kbd></span>'
       + '<button type="button" class="btn pri" id="publier"' + (sel.length ? '' : ' disabled') + '><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 19V5M5 12l7-7 7 7"/></svg>'
       + (sel.length ? '${T("Publier")}' + ' ' + sel.length + ' ' + (sel.length > 1 ? '${T("changements")}' : '${T("changement")}') : '${T("Publier")}') + '</button></div>';
     var fx = document.getElementById('flux'), haut = fx ? fx.scrollTop : 0;
@@ -610,12 +655,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var k = cle(e), et = etiquette(e);
     return (aPublier(e) ? '<button type="button" class="case' + (SEL[k] ? ' on' : '') + '" data-c="' + esc(k) + '" aria-label="' + esc('${T("Inclure dans la publication")}') + '">' + SVG_OK + '</button>' : '<span class="sy-case-vide"></span>')
       + vig(e) + '<div class="tx"><div class="t">' + esc(nomCle(e)) + '</div><div class="s">' + (compact ? resumeLigne(e) : esc(sousCarte(e))) + '</div></div>'
+      + (alertes(e).length ? '<span class="sy-al" title="' + esc(alertes(e).map(function(a){ return CTRL[a] || a; }).join(' · ')) + '">' + alertes(e).length + '</span>' : '')
       + '<span class="et ' + et[0] + '">' + esc(et[1]) + '</span>';
   }
   function corpsHtml(e){
     var k = cle(e), h = '<div class="sy-corps">', q = RECH.trim().toLowerCase(), tr = trouveDans(e, q);
     if (e.avert === 'ugs_double') h += '<div class="avert">' + '${T("Cette UGS existe déjà en ligne sur un autre produit : la publication sera refusée tant qu’elle n’est pas changée.")}' + '</div>';
     if (e.sens === 'prod') h += '<div class="avert">' + '${T("Ce changement a été fait directement en ligne : la boutique préparée ne l’a pas. « Reprendre » l’aligne sur la version en ligne.")}' + '</div>';
+    var ctl = (e.controles || []);
+    if (ctl.length) h += '<div class="sy-ctrl"><span>' + '${T("Contrôle avant départ :")}' + '</span>' + ctl.map(function(a){ return '<b>' + esc(CTRL[a] || a) + '</b>'; }).join('') + '</div>';
     if (e.type === 'ajout' || e.type === 'suppression') {
       var ph = e.photos ? (e.type === 'ajout' ? (e.photos.test || []) : (e.photos.prod || [])) : [];
       h += '<div class="sy-tuiles"><div class="sy-tuile large"><span class="n">' + (e.type === 'ajout' ? '${T("Nouvelle fiche")}' : '${T("Fiche retirée")}') + '</span><div class="v">'
@@ -640,12 +688,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function carteHtml(e){
     var k = cle(e);
-    return '<article class="sy-carte' + (e.sens === 'conflit' ? ' conflit' : '') + (aPublier(e) && !SEL[k] && e.sens !== 'conflit' ? ' sy-exclue' : '') + '" data-k="' + esc(k) + '"><div class="sy-tete">' + teteHtml(e, false) + '</div>' + corpsHtml(e) + '</article>';
+    return '<article class="sy-carte' + (cle(e) === FOC ? ' sy-foc' : '') + (e.sens === 'conflit' ? ' conflit' : '') + (aPublier(e) && !SEL[k] && e.sens !== 'conflit' ? ' sy-exclue' : '') + '" data-k="' + esc(k) + '"><div class="sy-tete">' + teteHtml(e, false) + '</div>' + corpsHtml(e) + '</article>';
   }
   function ligneHtml(e){
     var k = cle(e), q = RECH.trim().toLowerCase();
     var o = DEPLIE[k] != null ? DEPLIE[k] : !!(q && trouveDans(e, q).length);
-    return '<article class="sy-rang' + (o ? ' sy-ouvert' : '') + (aPublier(e) && !SEL[k] && e.sens !== 'conflit' ? ' sy-exclue' : '') + '" data-k="' + esc(k) + '"><div class="sy-tete" data-plier="' + esc(k) + '" aria-expanded="' + o + '">'
+    return '<article class="sy-rang' + (k === FOC ? ' sy-foc' : '') + (o ? ' sy-ouvert' : '') + (aPublier(e) && !SEL[k] && e.sens !== 'conflit' ? ' sy-exclue' : '') + '" data-k="' + esc(k) + '"><div class="sy-tete" data-plier="' + esc(k) + '" aria-expanded="' + o + '">'
       + teteHtml(e, true) + '<span class="sy-chev" aria-hidden="true">' + SVG_CHEV + '</span></div>' + (o ? corpsHtml(e) : '') + '</article>';
   }
   function brancherPub(){
@@ -678,23 +726,62 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ── La publication ── */
   var voile = document.getElementById('voile'), feuille = document.getElementById('feuille');
+  var QUAND = 'maintenant';
+  function dateLocale(d){ var z = function(n){ return (n < 10 ? '0' : '') + n; }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + 'T' + z(d.getHours()) + ':' + z(d.getMinutes()); }
   function confirmer(){
     var l = selection(); if (!l.length) return;
     var nP = l.filter(function(e){ return e.tbl === 'products'; }).length, nR = l.length - nP;
+    var al = l.filter(function(e){ return alertes(e).length; });
+    var demain = new Date(Date.now() + 86400000); demain.setMinutes(0, 0, 0);
     feuille.innerHTML = '<div class="fh"><h3>' + '${T("Publier dans la boutique en ligne ?")}' + '</h3><p>'
       + (nP ? nP + ' ' + '${T("produit(s)")}' : '') + (nP && nR ? ' · ' : '') + (nR ? nR + ' ' + '${T("réglage(s)")}' : '')
-      + '. ' + '${T("Vos clients les verront aussitôt. Chaque envoi est sauvegardé et peut être annulé depuis l’historique.")}' + '</p></div>'
-      + '<div class="ff"><button type="button" class="btn" id="non">' + '${T("Annuler")}' + '</button><button type="button" class="btn pri" id="oui">' + '${T("Publier")}' + '</button></div>';
-    voile.hidden = false; document.getElementById('oui').focus();
+      + '. ' + '${T("Chaque envoi est sauvegardé et peut être annulé.")}' + '</p>'
+      + '<label class="sy-f"><span>' + '${T("Nom de la publication")}' + ' <i>' + '${T("(facultatif)")}' + '</i></span><input id="pnom" maxlength="80" placeholder="' + esc('${T("Ex : Collection hiver")}') + '"></label>'
+      + '<div class="sy-f"><span>' + '${T("Quand")}' + '</span><div class="sy-quand" role="group">'
+      + '<button type="button" data-q="maintenant" class="' + (QUAND === 'maintenant' ? 'on' : '') + '">' + '${T("Maintenant")}' + '</button>'
+      + '<button type="button" data-q="plus" class="' + (QUAND === 'plus' ? 'on' : '') + '">' + '${T("Planifier")}' + '</button>'
+      + '<input type="datetime-local" id="pquand" value="' + dateLocale(demain) + '"' + (QUAND === 'plus' ? '' : ' hidden') + '></div>'
+      + '<small id="pq-aide"' + (QUAND === 'plus' ? '' : ' hidden') + '>' + '${T("À l’heure dite, la version préparée DU MOMENT part (à 10 minutes près).")}' + '</small></div>'
+      + (al.length ? '<div class="sy-ctl"><b>' + al.length + ' ' + '${T("élément(s) à vérifier avant le départ")}' + '</b>'
+        + al.slice(0, 6).map(function(e){ return '<div><span>' + esc(nomCle(e)) + '</span><em>' + esc(alertes(e).map(function(a){ return CTRL[a] || a; }).join(' · ')) + '</em></div>'; }).join('')
+        + (al.length > 6 ? '<div><em>+ ' + (al.length - 6) + '</em></div>' : '') + '</div>' : '<div class="sy-ok">' + SVG_OK + ' ' + '${T("Contrôle avant départ : rien à signaler.")}' + '</div>')
+      + '</div><div class="ff"><button type="button" class="btn" id="non">' + '${T("Annuler")}' + '</button><button type="button" class="btn pri" id="oui"></button></div>';
+    voile.hidden = false;
+    var oui = document.getElementById('oui'), pq = document.getElementById('pquand');
+    var peindre = function(){
+      oui.textContent = QUAND === 'plus' ? '${T("Planifier")}' : (al.length ? '${T("Publier quand même")}' : '${T("Publier")}');
+      feuille.querySelectorAll('[data-q]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-q') === QUAND); });
+      pq.hidden = QUAND !== 'plus'; document.getElementById('pq-aide').hidden = QUAND !== 'plus';
+    };
+    feuille.querySelectorAll('[data-q]').forEach(function(b){ b.onclick = function(){ QUAND = b.getAttribute('data-q'); peindre(); if (QUAND === 'plus') pq.focus(); }; });
+    peindre(); document.getElementById('pnom').focus();
     document.getElementById('non').onclick = function(){ voile.hidden = true; };
-    document.getElementById('oui').onclick = function(){ publier(l); };
+    oui.onclick = function(){
+      var nom = document.getElementById('pnom').value.trim();
+      if (QUAND !== 'plus') { publier(l, nom); return; }
+      var t = new Date(pq.value).getTime();
+      if (!(t > Date.now() + 60000)) { szDire(MOTIFS.quand_passe, 'err', pq); return; }
+      planifier(l, nom, Math.floor(t / 1000));
+    };
   }
-  function publier(l){
+  function planifier(l, nom, quand){
+    var oui = document.getElementById('oui'); oui.disabled = true;
+    appeler('config:bt:sync', ['planifier', { quand: quand, nom: nom, elements: l.map(function(e){ return { tbl: e.tbl, cle: e.cle, choix: choixDe(e), titre: nomCle(e) }; }) }]).then(function(r){
+      if (!r || !r.ok) { oui.disabled = false; szDire(motif(r), 'err'); return; }
+      feuille.innerHTML = '<div class="fh"><div class="sy-fin ok">' + SVG_OK + '</div><h3>' + '${T("Publication planifiée")}' + '</h3><p>'
+        + (nom ? '« ' + esc(nom) + ' » · ' : '') + l.length + ' ' + '${T("changement(s)")}' + ' · ' + esc(quand_(quand)) + '</p><p>' + '${T("Vous pouvez l’annuler depuis l’historique tant qu’elle n’est pas partie.")}' + '</p></div>'
+        + '<div class="ff"><button type="button" class="btn" id="vh">' + '${T("Voir l’historique")}' + '</button><button type="button" class="btn pri" id="ok">' + '${T("Terminé")}' + '</button></div>';
+      document.getElementById('ok').onclick = function(){ voile.hidden = true; };
+      document.getElementById('vh').onclick = function(){ voile.hidden = true; vue('hist'); };
+      historique();
+    });
+  }
+  function publier(l, nom){
     var lot = 'p' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8), i = 0, err = 0, faits = [];
     feuille.innerHTML = '<div class="fh"><h3 id="ph">' + '${T("Publication en cours…")}' + '</h3><p id="pc">0 / ' + l.length + '</p><div class="prog"><i id="pg"></i></div></div>'
       + '<div class="suivi" id="suivi">' + l.map(function(e, j){ return '<div id="s' + j + '"><span class="st"></span><span>' + esc(nomCle(e)) + '</span></div>'; }).join('') + '</div>'
       + '<div class="ff" id="pf" hidden></div>';
-    appeler('config:bt:sync', ['debut', { n: l.length }]).then(suivant);
+    appeler('config:bt:sync', ['debut', { n: l.length, lot: lot, nom: nom || '' }]).then(suivant);
     function suivant(){
       if (i >= l.length) return fin();
       var e = l[i], ligne = document.getElementById('s' + i);
@@ -711,11 +798,26 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     function fin(){
       appeler('config:bt:sync', ['fin', { n: l.length, erreurs: err }]);
-      document.getElementById('ph').textContent = err ? ('${T("Publication terminée avec")}' + ' ' + err + ' ' + '${T("échec(s)")}') : '${T("Publié")}';
+      document.getElementById('ph').textContent = err ? ('${T("Publication terminée avec")}' + ' ' + err + ' ' + '${T("échec(s)")}') : ((nom ? '« ' + nom + ' » ' : '') + '${T("est en ligne")}');
       document.getElementById('pc').textContent = (l.length - err) + ' ' + '${T("changement(s) en ligne.")}' + (err ? ' ' + '${T("Ceux en échec restent à publier.")}' : '');
       var pf = document.getElementById('pf'); pf.hidden = false;
-      pf.innerHTML = '<button type="button" class="btn" id="vh">' + '${T("Voir l’historique")}' + '</button><button type="button" class="btn pri" id="ok">' + '${T("Terminé")}' + '</button>';
+      /* (2026-11-25) L'ÉCRAN DE FIN : « Annuler cette publication » tout de suite, sans aller chercher dans l'historique. */
+      pf.innerHTML = (faits.length ? '<button type="button" class="btn dgr" id="annl">' + '${T("Annuler cette publication")}' + '</button><span style="flex:1"></span>' : '')
+        + '<button type="button" class="btn" id="vh">' + '${T("Voir l’historique")}' + '</button><button type="button" class="btn pri" id="ok">' + '${T("Terminé")}' + '</button>';
       document.getElementById('ok').onclick = function(){ voile.hidden = true; };
+      var an = document.getElementById('annl');
+      if (an) an.onclick = function(){
+        szConfirmer({ danger: true, titre: '${T("Annuler cette publication")}', texte: faits.length + ' ' + '${T("changement(s) : la boutique en ligne retrouvera leur version d’avant. Le stock du moment est gardé.")}', oui: '${T("Annuler cette publication")}' })
+          .then(function(ok){
+            if (!ok) return;
+            an.disabled = true;
+            appeler('config:bt:sync', ['historique']).then(function(h){
+              var ids = (h && h.ok ? (h.envois || []) : []).filter(function(x){ return x.lot === lot && !x.annule; }).map(function(x){ return x.id; });
+              if (!ids.length) { szDire('${T("Rien à annuler pour cette publication.")}', 'att'); return; }
+              voile.hidden = true; annuler(ids, an);
+            });
+          });
+      };
       document.getElementById('vh').onclick = function(){ voile.hidden = true; vue('hist'); };
       analyser(); historique();
     }
@@ -723,8 +825,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
 
   /* ── L'historique ── */
   function historique(){
-    appeler('config:bt:sync', ['historique']).then(function(r){ HI = r && r.ok ? (r.envois || []) : { err: motif(r) }; dessinerHist(); });
+    appeler('config:bt:sync', ['historique']).then(function(r){ HI = r && r.ok ? (r.envois || []) : { err: motif(r) }; NOMS = (r && r.noms) || {}; dessinerHist(); });
+    appeler('config:bt:sync', ['planifs']).then(function(r){ PL = r && r.ok ? (r.planifs || []) : []; dessinerHist(); });
   }
+  function quand_(t){ return quand(t); }
   function lots(){
     var out = [], par = {};
     (HI || []).forEach(function(x){
@@ -742,10 +846,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (HI === null) { vHist.innerHTML = '<div class="squel"><i></i><i></i><i></i></div>'; return; }
     if (HI.err) { vHist.innerHTML = '<div class="etat"><div class="in"><p>' + HI.err + '</p></div></div>'; return; }
     var L = lots();
+    /* (2026-11-25) Les publications PLANIFIÉES, en tête : celles qui attendent (annulables), et celles parties avec des échecs. */
+    var pl = (PL || []).filter(function(p){ return p.etat === 'attente' || p.etat === 'cours' || (p.etat === 'fait' && p.bilan && p.bilan.erreurs && p.bilan.erreurs.length); });
+    var hp = pl.length ? '<div class="sy-pl-t">' + '${T("Planifiées")}' + '</div>' + pl.map(function(p){
+      var et = p.etat === 'attente' ? '${T("en attente")}' : (p.etat === 'cours' ? '${T("en cours")}' : (p.bilan.ok + ' ' + '${T("en ligne")}' + ', ' + p.bilan.erreurs.length + ' ' + '${T("en échec")}'));
+      return '<div class="sy-pl"><div class="sy-pl-i"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>'
+        + '<div class="sy-pl-x"><div class="q">' + (p.nom ? '« ' + esc(p.nom) + ' » · ' : '') + esc(quand(p.quand)) + '</div><div class="w">' + p.elements.length + ' ' + '${T("changement(s)")}' + (p.par ? ' · ' + '${T("par")}' + ' ' + esc(p.par) : '') + ' · ' + esc(et) + '</div>'
+        + (p.etat === 'fait' ? '<div class="w">' + p.bilan.erreurs.slice(0, 4).map(function(x){ return esc((x.titre || x.cle) + ' — ' + motif({ motif: x.motif })); }).join('<br>') + '</div>' : '') + '</div>'
+        + (p.etat === 'attente' ? '<button type="button" class="mini" data-dp="' + p.id + '">' + '${T("Annuler la planification")}' + '</button>' : '') + '</div>';
+    }).join('') : '';
+    if (!L.length && hp) { vHist.innerHTML = '<div class="hist">' + hp + '</div>'; brancherPl(); return; }
     if (!L.length) { vHist.innerHTML = '<div class="etat"><div class="in"><div class="rond"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><h3>' + '${T("Aucune publication")}' + '</h3><p>' + '${T("Chaque publication apparaîtra ici, avec ce qu’elle a changé, qui l’a faite et quand.")}' + '</p></div></div>'; return; }
-    vHist.innerHTML = '<div class="hist">' + L.map(function(g){
+    vHist.innerHTML = '<div class="hist">' + hp + (hp ? '<div class="sy-pl-t">' + '${T("Publiées")}' + '</div>' : '') + L.map(function(g){
       var actifs = g.el.filter(function(x){ return !x.annule; }).length;
-      return '<div class="lot' + (OUVERTS[g.k] ? ' ouvert' : '') + '" data-l="' + esc(g.k) + '"><div class="lt"><div><div class="q">' + esc(quand(g.le)) + '</div>'
+      return '<div class="lot' + (OUVERTS[g.k] ? ' ouvert' : '') + '" data-l="' + esc(g.k) + '"><div class="lt"><div><div class="q">' + (NOMS[g.k] ? '« ' + esc(NOMS[g.k]) + ' » · ' : '') + esc(quand(g.le)) + '</div>'
         + '<div class="w">' + g.el.length + ' ' + (g.el.length > 1 ? '${T("changements")}' : '${T("changement")}') + (g.par ? ' · ' + '${T("par")}' + ' ' + esc(g.par) : '')
         + (actifs < g.el.length ? ' · ' + (g.el.length - actifs) + ' ' + '${T("annulé(s)")}' : '') + '</div></div>'
         + '<svg class="chev" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="m9 6 6 6-6 6"/></svg></div>'
@@ -755,6 +869,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + (x.annule ? '<span class="x">' + '${T("annulé")}' + '</span>' : '<button type="button" class="mini" data-a="' + x.id + '">' + '${T("Annuler l’envoi")}' + '</button>') + '</div>';
         }).join('') + (actifs > 1 ? '<div class="bas"><button type="button" class="mini" data-al="' + esc(g.k) + '">' + '${T("Annuler toute la publication")}' + '</button></div>' : '') + '</div></div>';
     }).join('') + '</div>';
+    brancherPl();
     vHist.querySelectorAll('.lot .lt').forEach(function(t){ t.onclick = function(){ var k = t.parentNode.getAttribute('data-l'); OUVERTS[k] = !OUVERTS[k]; t.parentNode.classList.toggle('ouvert'); }; });
     vHist.querySelectorAll('[data-a]').forEach(function(b){ b.onclick = function(){
       var id = +b.getAttribute('data-a'), x = (HI || []).filter(function(y){ return y.id === id; })[0]; if (!x) return;
@@ -766,6 +881,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var ids = g.el.filter(function(x){ return !x.annule; }).map(function(x){ return x.id; });
       szConfirmer({ danger: true, titre: '${T("Annuler toute la publication")}', texte: ids.length + ' ' + '${T("changement(s) : la boutique en ligne retrouvera leur version d’avant. Le stock du moment est gardé.")}', oui: '${T("Annuler toute la publication")}' })
         .then(function(ok){ if (ok) annuler(ids, b); });
+    }; });
+  }
+  function brancherPl(){
+    vHist.querySelectorAll('[data-dp]').forEach(function(b){ b.onclick = function(){
+      var id = +b.getAttribute('data-dp');
+      szConfirmer({ danger: true, titre: '${T("Annuler la planification")}', texte: '${T("Rien ne partira à la date prévue. Les changements restent dans la boutique préparée.")}', oui: '${T("Annuler la planification")}' })
+        .then(function(ok){ if (!ok) return; b.disabled = true;
+          appeler('config:bt:sync', ['deplanifier', { id: id }]).then(function(r){ if (r && r.ok) szDire('${T("Planification annulée.")}', 'bon'); else szDire(motif(r), 'err'); historique(); }); });
     }; });
   }
   function annuler(ids, bouton){
@@ -788,6 +911,30 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   document.querySelectorAll('.seg button').forEach(function(b){ b.onclick = function(){ vue(b.getAttribute('data-vue')); }; });
   document.getElementById('rafr').onclick = function(){ if (!LECTURE) { analyser(); if (!vHist.hidden) historique(); } };
   document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && !voile.hidden && !document.getElementById('pf')) voile.hidden = true; });
+  /* (2026-11-25, sa demande) LES RACCOURCIS — vue « À publier », hors d'un champ de saisie et hors d'une feuille ouverte :
+     ↑ ↓ (ou J K) passent d'un changement à l'autre ; Espace l'inclut ou l'exclut ; Entrée le déplie (liste compacte) ;
+     / cherche ; Échap vide la recherche ; V change d'affichage ; Ctrl + Entrée publie. */
+  document.addEventListener('keydown', function(ev){
+    if (vPub.hidden || !voile.hidden || !R) return;
+    var t = ev.target, saisie = t && /^(INPUT|TEXTAREA|SELECT)$/.test(t.tagName);
+    if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); if (selection().length) confirmer(); return; }
+    if (saisie) { if (ev.key === 'Escape' && t.id === 'rech') { RECH = ''; t.value = ''; dessinerPub(); t.blur(); } if (ev.key === 'ArrowDown' && t.id === 'rech') { ev.preventDefault(); t.blur(); bouger(1); } return; }
+    if (ev.ctrlKey || ev.metaKey || ev.altKey) return;
+    var k = ev.key;
+    if (k === 'ArrowDown' || k === 'j' || k === 'J') { ev.preventDefault(); bouger(1); }
+    else if (k === 'ArrowUp' || k === 'k' || k === 'K') { ev.preventDefault(); bouger(-1); }
+    else if (k === ' ' && FOC) { ev.preventDefault(); var e = R.elements.filter(function(x){ return cle(x) === FOC; })[0]; if (e && aPublier(e)) { SEL[FOC] = !SEL[FOC]; dessinerPub(); } }
+    else if (k === 'Enter' && FOC && AFF === 'liste') { ev.preventDefault(); var o = vPub.querySelector('[data-plier="' + FOC.replace(/"/g, '') + '"]'); DEPLIE[FOC] = !(o && o.getAttribute('aria-expanded') === 'true'); dessinerPub(); }
+    else if (k === '/') { ev.preventDefault(); var ri = document.getElementById('rech'); if (ri) ri.focus(); }
+    else if (k === 'v' || k === 'V') { AFF = AFF === 'liste' ? 'cartes' : 'liste'; try { localStorage.setItem('sz-synchro-aff', AFF); } catch (e2) {} dessinerPub(); }
+  });
+  function bouger(d){
+    var v = visibles(); if (!v.length) return;
+    var i = -1; v.forEach(function(e, j){ if (cle(e) === FOC) i = j; });
+    i = Math.max(0, Math.min(v.length - 1, i < 0 ? 0 : i + d));
+    FOC = cle(v[i]); dessinerPub();
+    var el = vPub.querySelector('.sy-foc'); if (el) try { el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) { el.scrollIntoView(); }
+  }
   analyser();
 })();
 </script></body></html>`;
