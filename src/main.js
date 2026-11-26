@@ -3097,6 +3097,8 @@ const OPS_PONT = new Set([
   'brouillon:lire', 'brouillon:ecrire', 'brouillon:jeter',
   // La traduction pendant la frappe (champ FR -> champ anglais), 2026-10-07.
   'langue:traduire',
+  // Un exemple de chaque courriel à mon adresse (2026-11-26, fenêtre Gabarits courriel).
+  'courriels:exemples',
   'produit:brouillonLire', 'produit:brouillonEcrire', 'produit:brouillonJeter',
   'produit:changements', 'produit:historique', 'produit:ajustement',
   'caisse:etat',
@@ -4178,6 +4180,8 @@ const LIMITES_PONT = {
   'produit:mesureMasque': 120000,
   // Groq a 6 s de delai cote site : 10 s couvre l aller-retour.
   'langue:traduire': 10000,
+  // Neuf courriels rédigés et envoyés l'un après l'autre (Resend ~2 par seconde, une commande relue chaque fois).
+  'courriels:exemples': 120000,
   /* ⚠⚠ LA CONNEXION A UN PLAFOND LARGE, ET C EST LE CAS OU UN DELAI COUTE LE
      PLUS CHER (#57). `connexion:entrer` fait un aller-retour au serveur pour
      verifier le mot de passe, PUIS lit la fiche complete du compte, PUIS ouvre

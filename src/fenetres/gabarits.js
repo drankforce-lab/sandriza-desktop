@@ -127,7 +127,7 @@ function pageGabarits(ouverture) {
   return `${TETE()}
 <title>${T("Gabarits courriel — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.gabarit}</span><h1>${T("Gabarits courriel")}</h1><span class="droite"><button class="prim" id="b-nouveau" style="display:none">${T("+ Nouveau gabarit")}</button></span></div>
+<div class="tete"><span class="ico">${ICO.gabarit}</span><h1>${T("Gabarits courriel")}</h1><span class="droite"><button class="b" id="b-exemples" style="margin-right:.5rem" title="${T("Chaque courriel envoyé aux clientes, rédigé par le vrai code, part à votre adresse avec le mot « [Exemple] » : rien n’est marqué, les vrais courriels partiront toujours.")}">${T("Recevoir un exemple de chaque courriel")}</button><button class="prim" id="b-nouveau" style="display:none">${T("+ Nouveau gabarit")}</button></span></div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
 <div class="corps"><div class="zone" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -148,6 +148,26 @@ function pageGabarits(ouverture) {
 ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'g-hto-t':7,'g-fcol-t':7})}
   var corps = document.getElementById('corps');
   var bnouveau = document.getElementById('b-nouveau');
+  /* (2026-11-26, sa demande : « fais le bouton d'abord ») UN EXEMPLE DE CHAQUE COURRIEL À MON ADRESSE : le pont
+     (courriels:exemples) fait rédiger chaque courriel par le vrai code, sujet « [Exemple] », à l'adresse du membre du
+     personnel connecté. Le bilan dit, courriel par courriel, ce qui est parti. */
+  var bexemples = document.getElementById('b-exemples');
+  if (bexemples) bexemples.onclick = function(){
+    szConfirmer({ titre: '${T("Recevoir un exemple de chaque courriel")}',
+      texte: '${T("Une dizaine de courriels vont partir à votre adresse, chacun marqué « [Exemple] ». Ils utilisent votre dernière commande, votre dernier retour et des cartes-cadeaux fictives : aucune cliente ne reçoit rien, et rien n’est marqué comme envoyé.")}',
+      oui: '${T("Envoyer les exemples")}', non: '${T("Annuler")}' }).then(function(ok){
+      if (!ok) return;
+      bexemples.disabled = true; dire('${T("Envoi des exemples… (environ une minute)")}', 'info');
+      appeler('courriels:exemples', []).then(function(r){
+        bexemples.disabled = false;
+        if (!r || !r.ok) { dire('${T("Les exemples n’ont pas pu partir.")}', 'err'); return; }
+        dire('', '');
+        szConfirmer({ titre: '${T("Exemples envoyés")}' + (r.a ? ' — ' + r.a : ''), seul: true, oui: '${T("Fermer")}',
+          texte: '${T("Ouvrez votre boîte de réception : chaque courriel commence par « [Exemple] ».")}',
+          details: (r.lignes || []).map(function(l){ return [l.nom, l.etat]; }) });
+      });
+    });
+  };
   var D = null, RO = false, OCCUPE = false;
   // Ouverture directe sur un éditeur (utilisé par le banc d'essai ; vide en prod).
   var OUVERTURE = ${JSON.stringify(String(ouverture || ''))};
