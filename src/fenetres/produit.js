@@ -1481,6 +1481,21 @@ function pageProduit(id, importId) {
       });
     }, 400);
   }
+  /* (2026-11-25) RECONNAÎTRE des photos du Studio faites avant le registre de la cabine — le super-administrateur atteste,
+     le serveur l'inscrit à son nom (tnb-proxy.php, cabineAttester). */
+  function cabAttester(){
+    if (!IMAGE || !photoDos()) { dire('${T("Il faut une photo principale et une photo du dos.")}', 'err'); return; }
+    szConfirmer({ prudent: true, titre: '${T("Reconnaître ces photos")}',
+      texte: '${T("Vous confirmez que la face et le dos de cet article sont des photos « sans mannequin » faites par le Studio (The New Black). La confirmation est notée à votre nom. Rien n’est payé maintenant : l’essayage se lance ensuite, à son prix.")}',
+      oui: '${T("Reconnaître")}' }).then(function(ok){
+        if (!ok) return;
+        dire('${T("Un instant…")}');
+        P.appeler('cabine:attester', { face: IMAGE, dos: photoDos() }).then(function(r){
+          if (r && r.ok) { dire('${T("Photos reconnues : la cabine peut maintenant s’en servir.")}', 'bon'); CAB.t = null; majCabine(true); }
+          else dire(r && r.motif === 'reserve_superadmin' ? '${T("Seul un super-administrateur peut reconnaître des photos.")}' : expliquer(r), 'err');
+        });
+      });
+  }
   function cabMontant(cr, us){ return szNombre(cr) + ' ' + szPl(cr, '${T("crédit")}', '${T("crédits")}') + ' (' + prixUS(us) + ')'; }
   // Ce qui manque, en une phrase — la même pour la carte et pour le refus d enregistrer.
   function raisonCabine(){
@@ -1523,13 +1538,17 @@ function pageProduit(id, importId) {
          existent bien (l'aperçu 3D les voit), mais la cabine ne peut pas s'en servir. Une fiche existante dont rien
          d'essentiel ne change n'exige rien (cabInchangee) : on le dit en une ligne, sans bouton grisé ni croix. */
       if (!t.pret && cabInchangee() && (t.photosManquantes || !rec(t.face) || !rec(t.dos))) {
-        h = tete('${T("facultative")}', '') + '<div class="cab-l">${T("Ces photos ne viennent pas du Studio « sans mannequin » : la cabine ne peut pas s’en servir. Rien n’est exigé tant que la photo, le dos, le nom et la catégorie restent les mêmes.")}</div>';
+        h = tete('${T("facultative")}', '') + (t.photosManquantes ? '<div class="cab-l">${T("Il manque la face ou le dos. Rien n’est exigé tant que la photo, le dos, le nom et la catégorie restent les mêmes.")}</div>'
+          : '<div class="cab-l">${T("Ces photos ne sont pas inscrites comme « sans mannequin » du Studio — sans doute faites avant l’arrivée de la cabine. Si elles viennent bien du Studio, reconnaissez-les : la cabine pourra s’en servir.")}</div>'
+            + '<div class="pf-med-l"><button type="button" id="p-cab-att"><span class="ic">✓</span> ${T("Reconnaître ces photos")}</button></div>');
         if (z.getAttribute('data-h') !== h) { z.setAttribute('data-h', h); z.innerHTML = h; }
+        var ba = document.getElementById('p-cab-att'); if (ba) ba.onclick = cabAttester;
         return;
       }
       if (t.photosManquantes) h += '<div class="cab-l cab-pb">${T("Il manque la face ou le dos : photos « sans mannequin » du Studio.")}</div>';
       else if (!rec(t.face) || !rec(t.dos)) h += '<div class="cab-l cab-pb">${T("Face")} ' + (rec(t.face) ? '✓' : '✗') + ' · ${T("Dos")} ' + (rec(t.dos) ? '✓' : '✗')
-        + ' — ${T("à refaire « sans mannequin » au Studio")}</div>';
+        + ' — ${T("pas inscrites comme « sans mannequin » du Studio")}</div>'
+        + '<div class="pf-med-l"><button type="button" id="p-cab-att"><span class="ic">✓</span> ${T("Elles viennent du Studio : les reconnaître")}</button></div>';
       else if (t.identiques) h += '<div class="cab-l cab-pb">${T("Le dos est la même photo que la face.")}</div>';
       // Les réglages : une rangée.
       h += '<div class="cab-r"><label class="cab-6"><input type="checkbox" id="p-cab-6"' + (CAB.vues === '6' ? ' checked' : '') + (CAB.enCours ? ' disabled' : '') + '> ${T("6 angles (+4 essais)")}</label>';
@@ -1574,6 +1593,7 @@ function pageProduit(id, importId) {
     // La carte change de hauteur : les cases photo se recalculent (sinon elles sortent de la carte).
     try { requestAnimationFrame(ajusterPhotos); } catch (e) {}
     var b = document.getElementById('p-cab-go'); if (b) b.onclick = preparerCabine;
+    var ba2 = document.getElementById('p-cab-att'); if (ba2) ba2.onclick = cabAttester;
     var br = document.getElementById('p-cab-rep'); if (br) br.onclick = reprendreCabine;
     Array.prototype.forEach.call(z.querySelectorAll('.cab-rej'), function(x){ x.onclick = function(){ rejeterCabine(x.getAttribute('data-angle')); }; });
     var cty = document.getElementById('p-cab-type');

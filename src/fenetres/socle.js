@@ -5774,7 +5774,25 @@ html.sz-wco .tete :is(button,a,input,select,label,[role=button]){-webkit-app-reg
    (chiffres tabulaires). Restent en chasse fixe ce qui EST du code : champs de saisie, <code>, <pre>, <kbd>. */
 :is(td,th),:is(td,th) :not(code,pre,kbd,input,textarea,code *,pre *){font-family:inherit!important}
 td{font-variant-numeric:tabular-nums}
-.rf-code{font-family:inherit!important;letter-spacing:.01em}
+.rf-code{font-family:inherit!important;letter-spacing:.01em}/* ══ LES ONGLETS UNIFIÉS (2026-11-25, sa demande : « unifie les onglets partout ») ══════════════════════════════════════
+   UN SEUL dessin pour toutes les rangées d'onglets du look : le COMMUTATEUR ARRONDI de la Publication (un fond discret, l'onglet
+   actif en carte claire et ombrée). Il remplace les onglets soulignés (.onglets, .ed-seg, .vue-bascule), les dossiers des
+   Transporteurs (.tr-ong), ceux de l'Atelier (.st-onglets) et du Chat (.ong). Les rangées de CHOIX (.ed-seg[role=group])
+   gardent leurs puces. Posé en dernier : ces règles l'emportent sur les précédentes du même look. */
+html[data-sz-theme="epure"] :is(.onglets,.tr-ong,.st-onglets,body>.ong,.ed-seg:not([role="group"]),.vue-bascule){display:flex!important;flex-wrap:wrap;align-items:center;
+  width:fit-content;max-width:100%;box-sizing:border-box;gap:2px!important;padding:3px!important;border-radius:11px!important;background:var(--v04)!important;
+  border:1px solid var(--v07)!important;box-shadow:none!important}
+html[data-sz-theme="epure"] body>:is(.onglets,.tr-ong,.st-onglets,.ong){margin:12px 16px 10px!important;max-width:calc(100% - 32px)}
+html[data-sz-theme="epure"] .tete>:is(.ed-seg,.onglets){flex:0 1 auto!important;margin:6px 0 4px!important;border:1px solid var(--v07)!important}
+html[data-sz-theme="epure"] :is(.onglets,.tr-ong,.st-onglets,body>.ong,.ed-seg:not([role="group"]),.vue-bascule) button{height:32px;padding:0 14px!important;margin:0!important;
+  border:0!important;border-radius:8px!important;background:transparent!important;color:var(--tx2)!important;font-size:13px;font-weight:600;box-shadow:none!important;
+  white-space:nowrap;display:inline-flex;align-items:center;gap:6px}
+html[data-sz-theme="epure"] :is(.onglets,.tr-ong,.st-onglets,body>.ong,.ed-seg:not([role="group"]),.vue-bascule) button:hover:not(:disabled){color:var(--tx)!important;background:var(--v03)!important}
+html[data-sz-theme="epure"] :is(.onglets,.tr-ong,.st-onglets,body>.ong,.ed-seg:not([role="group"]),.vue-bascule) button:is(.on,.actif,[aria-selected="true"]){
+  background:var(--f-carte)!important;color:var(--tx)!important;box-shadow:0 1px 2px rgba(0,0,0,.28)!important}
+html[data-sz-theme="epure"].jour :is(.onglets,.tr-ong,.st-onglets,body>.ong,.ed-seg:not([role="group"]),.vue-bascule) button:is(.on,.actif,[aria-selected="true"]){
+  background:#ffffff!important;color:#1d2433!important;box-shadow:0 1px 2px rgba(15,23,42,.14)!important}
+html[data-sz-theme="epure"] :is(.onglets,.tr-ong,.st-onglets,body>.ong,.ed-seg:not([role="group"]),.vue-bascule) button:is(.on,.actif,[aria-selected="true"]) *{color:inherit!important}
 `;
 
 const CSS_VIVANT = `

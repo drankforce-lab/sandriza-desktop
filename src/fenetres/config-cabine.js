@@ -93,14 +93,51 @@ button:disabled{opacity:.5;cursor:default}
 button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weight:700}
 button.prim:hover:not(:disabled){background:var(--or-clair)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* ══ (2026-11-25, sa demande : « refais complètement le menu et les onglets, plus propre et épuré ») ══════════════════ */
+.tete{background:transparent;border-bottom:0;padding:1rem 1.5rem .2rem;gap:.85rem}
+.tete h1{margin:0;font-size:1.18rem;font-weight:650;letter-spacing:-.01em}
+.tete .ti{display:flex;flex-direction:column;min-width:0;flex:1 1 auto}
+.tete .ti p{margin:.1rem 0 0;font-size:.78rem;color:var(--tx3)}
+.tete .ico{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;background:var(--v05);border:1px solid var(--v08)}
+.cb-onglets{flex:0 0 auto;display:flex;border-bottom:0;padding:.8rem 1.5rem .9rem;gap:0}
+.cb-onglets .seg{display:inline-flex;padding:3px;border-radius:11px;background:var(--v04);border:1px solid var(--v07)}
+.cb-onglets button{border:0;border-radius:8px;padding:.42rem 1rem;font-size:.82rem;color:var(--tx2);background:transparent;display:inline-flex;align-items:center;gap:.45rem}
+.cb-onglets button:hover{background:transparent;color:var(--tx)}
+.cb-onglets button.actif{background:var(--f-carte);color:var(--tx);box-shadow:0 1px 2px rgba(0,0,0,.25);font-weight:600}
+.cb-onglets .nb{min-width:1.2rem;padding:0 .35rem;border-radius:99px;background:var(--v08);font-size:.68rem;font-weight:700;line-height:1.2rem;text-align:center;color:var(--tx2)}
+.cb-onglets .nb:empty{display:none}
+html.jour .cb-onglets .nb{color:#3f4856}
+.corps{padding:0 1.5rem 1.5rem;padding-top:.4rem;grid-template-columns:repeat(auto-fit,minmax(24rem,1fr));gap:1rem}
+.carte{border-radius:16px;padding:1.15rem 1.25rem;gap:.7rem;border-color:var(--v07);background:var(--v02)}
+.carte h2{font:650 .95rem/1.3 inherit;text-transform:none;letter-spacing:0;color:var(--tx)}
+.carte .sous{font-size:.8rem;line-height:1.55;color:var(--tx3)}
+.bascule{padding:.75rem .85rem;border-radius:12px;background:var(--v03);border:1px solid var(--v06)}
+.puce{padding:.22rem .3rem .22rem .75rem;background:var(--v04);border-color:var(--v10)}
+.alerte{border-radius:11px}
+.pied{background:transparent;border-top:1px solid var(--v06);padding:.75rem 1.5rem}
+button.prim{border-radius:10px;padding:.5rem 1.2rem}
+/* Les articles : l'état dit ce qu'il faut faire, et la fiche s'ouvre d'un clic. */
+.art-t{display:flex;align-items:center;gap:.6rem;flex-wrap:wrap}
+.art-t .compte{margin-right:auto}
+.art-f{display:inline-flex;gap:.3rem}
+.art-f button{border-radius:99px;padding:.25rem .75rem;font-size:.76rem;color:var(--tx2);background:transparent;border-color:var(--v10)}
+.art-f button.on{background:var(--tx);color:var(--f-page);border-color:var(--tx);font-weight:600}
+.art{grid-template-columns:44px minmax(0,1fr) auto auto;gap:.85rem;padding:.6rem .2rem;border-bottom:1px solid var(--v05)}
+.art:last-child{border-bottom:0}
+.art img{width:44px;height:56px;border-radius:9px}
+.art .nm{display:flex;flex-direction:column;min-width:0}
+.art .nm b{font-weight:600;font-size:.86rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.art .nm small{font-size:.74rem;color:var(--tx3)}
+.art .ouvrir{font-size:.76rem;padding:.3rem .75rem;border-radius:9px}
+.etat{font-weight:600;padding:.18rem .65rem}
 `;
 
 function pageConfigCabine() {
   return `${TETE()}
 <title>${T("Cabine d’essayage — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.config || ''}</span><h1>${T("Cabine d’essayage")}</h1></div>
-<div class="onglets" id="onglets" role="tablist"><button type="button" role="tab" data-o="general">${T("Général")}</button><button type="button" role="tab" data-o="fonds">${T("Fonds")}</button><button type="button" role="tab" data-o="textes">${T("Textes")}</button><button type="button" role="tab" data-o="articles">${T("Articles")}</button></div>
+<div class="tete"><span class="ico">${ICO.config || ''}</span><div class="ti"><h1>${T("Cabine d’essayage")}</h1><p>${T("Ce que la boutique montre dans la cabine, et pour quels articles.")}</p></div></div>
+<div class="cb-onglets" id="onglets"><div class="seg" role="tablist"><button type="button" role="tab" data-o="general">${T("Général")}</button><button type="button" role="tab" data-o="fonds">${T("Fonds")}</button><button type="button" role="tab" data-o="textes">${T("Textes")}</button><button type="button" role="tab" data-o="articles">${T("Articles")}<span class="nb" id="nb-art"></span></button></div></div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter les réglages, pas les modifier.")}</div>
 <div class="corps" id="corps"><div class="carte"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span>
@@ -124,9 +161,11 @@ function pageConfigCabine() {
   };
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps'), bsave = document.getElementById('b-save'), fichier = document.getElementById('f-fichier');
-  var D = null, R = null, RO = false, OCCUPE = false, CIBLE = null, APERCU = '', ARTICLES = null, ONGLET = 'general';
+  var D = null, R = null, RO = false, OCCUPE = false, CIBLE = null, APERCU = '', ARTICLES = null, ONGLET = 'general', FA = 'tous';
   /* (2026-10-30) EN ONGLETS : la règle de l application — jamais de glissière dans une fenêtre ; les listes se paginent. */
   Array.prototype.forEach.call(document.querySelectorAll('#onglets button'), function(b){ b.onclick = function(){ ONGLET = b.getAttribute('data-o'); if (R) dessiner(); }; });
+  // Le retour sur l'écran (module ancré) relit l'état des articles : une fiche préparée entre-temps y paraît.
+  window.szRevenir = function(){ if (R) appeler('cabine:articles').then(function(a){ ARTICLES = a || { ok: false, motif: 'echec' }; dessiner(); }); };
   // LE FOND D'UN JOUR — la même règle que le serveur (lib-cabine.php cabine_fond_actif) : événement d'abord, puis des dates
   // précises avant une période annuelle, puis l'ordre de la liste ; un fond en pause ne compte pas.
   function aujourdhui(){ var d = new Date(); return d.getFullYear() + '-' + ('0' + (d.getMonth() + 1)).slice(-2) + '-' + ('0' + d.getDate()).slice(-2); }
@@ -227,12 +266,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div><label for="t-sousEn">${T("Phrase d’accueil (anglais)")}</label><textarea id="t-sousEn" data-t="sousEn" maxlength="200"' + dis + '>' + esc(tx.sousEn || '') + '</textarea></div></div></div>');
     // LES ARTICLES DE LA CABINE (ce que voient les clientes)
     var A = ARTICLES;
-    if (O === 'articles') h.push('<div class="carte large"><h2>${T("Articles de la cabine")}</h2><p class="sous">${T("Les vêtements et accessoires de tête en vente, et ce que la cabine en montre. Un article se prépare dans sa fiche (carte « Cabine d’essayage »).")}</p>'
+    /* (2026-11-25, sa capture : il croyait ses articles déjà dans la cabine) La liste est celle des articles QUI POURRAIENT y
+       être (vêtements et accessoires de tête en vente) ; l'état dit si le client peut les essayer, et quoi faire sinon. */
+    var vis = A && A.ok ? A.lignes.filter(function(x){ return FA === 'tous' || (FA === 'prets' ? x.etat !== 'non' : x.etat === 'non'); }) : [];
+    if (O === 'articles') h.push('<div class="carte large"><h2>${T("Articles et cabine")}</h2><p class="sous">${T("Les vêtements et accessoires de tête en vente. « Essayable » : le client peut le passer dans la cabine. « À préparer » : l’essayage n’est pas fait — ouvrez la fiche (carte « Cabine d’essayage ») pour le lancer.")}</p>'
       + (!A ? '<div class="vide">${T("Lecture…")}</div>' : !A.ok ? '<div class="vide">' + esc(expliquer(A)) + '</div>'
-        : '<div class="compte">' + '${T("{0} prêt(s) sur {1}")}'.split('{0}').join(A.prets).split('{1}').join(A.total) + '</div><div data-pages="cab-articles">'
-          + A.lignes.map(function(x){ return '<div class="art"><img src="' + esc(x.image) + '" alt="" onerror="this.style.visibility=&quot;hidden&quot;"><span>' + esc(x.nom) + (x.type ? ' <span class="compte">· ' + esc(x.type) + '</span>' : '') + '</span>'
-            + (x.etat === '6' ? '<span class="etat e6">${T("Prêt · 6 angles")}</span>' : x.etat === 'fd' ? '<span class="etat efd">${T("Prêt · face et dos")}</span>' : '<span class="etat enon">${T("Pas encore préparé")}</span>') + '</div>'; }).join('')
+        : '<div class="art-t"><span class="compte">' + '${T("{0} essayable(s) sur {1}")}'.split('{0}').join(A.prets).split('{1}').join(A.total) + '</span>'
+          + '<span class="art-f"><button type="button" data-fa="tous" class="' + (FA === 'tous' ? 'on' : '') + '">${T("Tous")}</button><button type="button" data-fa="afaire" class="' + (FA === 'afaire' ? 'on' : '') + '">${T("À préparer")}</button><button type="button" data-fa="prets" class="' + (FA === 'prets' ? 'on' : '') + '">${T("Essayables")}</button></span></div>'
+          + '<div data-pages="cab-articles">'
+          + (vis.map(function(x){ return '<div class="art"><img src="' + esc(x.image) + '" alt="" onerror="this.style.visibility=&quot;hidden&quot;"><span class="nm"><b>' + esc(x.nom) + '</b>' + (x.type ? '<small>' + esc(x.type) + '</small>' : '') + '</span>'
+            + (x.etat === '6' ? '<span class="etat e6">${T("Essayable · 6 angles")}</span>' : x.etat === 'fd' ? '<span class="etat efd">${T("Essayable · face et dos")}</span>' : '<span class="etat enon">${T("À préparer")}</span>')
+            + '<button type="button" class="ouvrir" data-ouvrir="' + esc(x.id) + '">${T("Ouvrir la fiche")}</button></div>'; }).join('') || '<div class="vide">${T("Aucun article ici.")}</div>')
           + '</div>') + '</div>');
+    var nb = document.getElementById('nb-art'); if (nb) nb.textContent = A && A.ok ? String(A.total - A.prets || '') : '';
     corps.innerHTML = h.join('');
     lier(); sale();
   }
@@ -260,6 +306,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     Array.prototype.forEach.call(corps.querySelectorAll('[data-fond]'), function(b){ b.onclick = function(){ R.fond = b.getAttribute('data-fond'); dessiner(); sale(); }; });
     Array.prototype.forEach.call(corps.querySelectorAll('[data-ajout-pret]'), function(b){ b.onclick = function(){
       var u = b.getAttribute('data-ajout-pret'); (R.fonds = R.fonds || []).push({ nom: nomFond(u), image: u, debut: '', fin: '', promo: false }); dessiner(); }; });
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-fa]'), function(b){ b.onclick = function(){ FA = b.getAttribute('data-fa'); dessiner(); }; });
+    Array.prototype.forEach.call(corps.querySelectorAll('[data-ouvrir]'), function(b){ b.onclick = function(){
+      appeler('produits:ouvrir', [b.getAttribute('data-ouvrir')]).then(function(r){ if (r && r.ok === false) dire(expliquer(r), 'err'); }); }; });
     on('b-fond', function(){ CIBLE = 'defaut'; fichier.click(); });
     on('b-fprog', function(){ CIBLE = 'nouveau'; fichier.click(); });
   }

@@ -356,7 +356,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
   /* (2026-11-25) Sa demande : l'option A de la maquette (« A est parfait ») + « un affichage liste plus compacte »
      + « une recherche intégrée dans les changements ». AFF : 'cartes' (une carte par élément, l'avant → après de chaque
      champ) ou 'liste' (une ligne par élément, qui se déplie). Le choix est retenu sur ce poste. */
-  var AFF = 'cartes', FOC = null, PL = null, NOMS = {}, DET = {};
+  var AFF = 'cartes', FOC = null, PL = null, NOMS = {}, DET = {}, FINI = false;
   try { if (localStorage.getItem('sz-synchro-aff') === 'liste') AFF = 'liste'; } catch (e) {}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -888,6 +888,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
       });
     }
     function fin(){
+      FINI = true;
       appeler('config:bt:sync', ['fin', { n: l.length, erreurs: err }]);
       document.getElementById('ph').textContent = err ? ('${T("Publication terminée avec")}' + ' ' + err + ' ' + '${T("échec(s)")}') : ((nom ? '« ' + nom + ' » ' : '') + '${T("est en ligne")}');
       document.getElementById('pc').textContent = (l.length - err) + ' ' + '${T("changement(s) en ligne.")}' + (err ? ' ' + '${T("Ceux en échec restent à publier.")}' : '');
@@ -895,7 +896,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
       /* (2026-11-25) L'ÉCRAN DE FIN : « Annuler cette publication » tout de suite, sans aller chercher dans l'historique. */
       pf.innerHTML = (faits.length ? '<button type="button" class="btn dgr" id="annl">' + '${T("Annuler cette publication")}' + '</button><span style="flex:1"></span>' : '')
         + '<button type="button" class="btn" id="vh">' + '${T("Voir l’historique")}' + '</button><button type="button" class="btn pri" id="ok">' + '${T("Terminé")}' + '</button>';
-      document.getElementById('ok').onclick = function(){ voile.hidden = true; };
+      document.getElementById('ok').onclick = function(){ FINI = false; voile.hidden = true; };
       var an = document.getElementById('annl');
       if (an) an.onclick = function(){
         szConfirmer({ danger: true, titre: '${T("Annuler cette publication")}', texte: faits.length + ' ' + '${T("changement(s) : la boutique en ligne retrouvera leur version d’avant. Le stock du moment est gardé.")}', oui: '${T("Annuler cette publication")}' })
@@ -1055,10 +1056,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
      qu'elle revient devant (clic sur « Publier », Alt+Tab…) — sauf pendant une lecture ou une publication, et pas plus
      d'une fois toutes les 3 secondes. Les cases cochées et les conflits tranchés sont gardés (voir analyser). */
   var DERNIERE = Date.now();
-  function relancer(){
-    if (LECTURE || !voile.hidden || Date.now() - DERNIERE < 3000) return;
+  /* (2026-11-25, sa capture en 9.2.38 : de retour sur « Publier » (« À jour »), l'écran de fin de la publication d'avant
+     était encore là) Un retour sur la fenêtre FERME ce qui appartient au passé — l'écran de fin, la fiche complète, la
+     planification confirmée — puis relit. Seule une publication EN COURS (ou une confirmation pas encore répondue) reste. */
+  function relancer(force){
+    if (!voile.hidden && (FINI || feuille.classList.contains('sy-large') || document.getElementById('vh'))) { FINI = false; fermerFiche(); }
+    if (LECTURE || !voile.hidden) return;
+    if (force !== true && Date.now() - DERNIERE < 3000) return;
     DERNIERE = Date.now(); analyser(); if (!vHist.hidden) historique();
   }
+  // La fenêtre ANCRÉE dans la fenêtre principale ne reçoit pas « focus » : la coquille appelle szRevenir (main.js).
+  window.szRevenir = function(){ relancer(true); };
   window.addEventListener('focus', relancer);
   document.addEventListener('visibilitychange', function(){ if (!document.hidden) relancer(); });
   analyser();

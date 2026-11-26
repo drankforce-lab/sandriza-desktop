@@ -426,6 +426,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps');
 
   var D = null;              // les donnees du site (tableau:lire)
+  // La derniere lecture reussie, gardee sur le poste pour l ouverture suivante (voir plus bas, au demarrage).
+  function garderTableau(r){
+    if (PERIODE !== 'jour') return;
+    try { var t = JSON.stringify({ le: Date.now(), periode: PERIODE, r: r }); if (t.length < 1500000) localStorage.setItem('sz-tb-dernier', t); } catch (e) {}
+  }
   var PERIODE = 'jour';      // jour | 7j | mois — la courbe et ses chiffres
   var ZEROS = false;         // la pastille des zeros est ouverte
   var VUS = null;            // les commandes deja montrees dans le fil (pour signaler les neuves)
@@ -1246,6 +1251,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (VUS) fil.forEach(function(c){ if (c.oid && !VUS[c.oid]) NEUVES[c.oid] = true; });
       VUS = {}; fil.forEach(function(c){ if (c.oid) VUS[c.oid] = true; });
       D = r;
+      garderTableau(r);
       dessiner();
       bilanDuSoir();
       chargerSauvegarde();
@@ -1401,6 +1407,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // La date vit dans l en-tete : la barre garde sa ligne pour les puces.
   var sous = document.getElementById('sous');
   if (sous) sous.textContent = new Date().toLocaleDateString('${LIEU()}', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+  /* (2026-11-25, sa capture : « quand le chargement de démarrage se termine, je n'ai pas ce genre de loading encore… ce n'est
+     pas professionnel ») LE TABLEAU S'OUVRE SUR SES DERNIERS CHIFFRES : la dernière lecture réussie est gardée sur le poste
+     (comme les soldes) et dessinée AUSSITÔT ; la lecture du serveur la remplace dès qu'elle arrive (12 s plus tard au
+     plus, d'ordinaire moins d'une). Le squelette ne paraît plus qu'au tout premier démarrage d'un poste. Rien de vieux de
+     plus de 7 jours n'est montré ; la période doit être la même. */
+  try {
+    var _dern = JSON.parse(localStorage.getItem('sz-tb-dernier') || 'null');
+    if (_dern && _dern.r && _dern.r.ok && _dern.periode === PERIODE && Date.now() - (_dern.le || 0) < 7 * 86400000) { D = _dern.r; dessiner(); }
+  } catch (e) {}
   window.szPret = charger();
   demarrerVerrous();
   demarrerDirect();
