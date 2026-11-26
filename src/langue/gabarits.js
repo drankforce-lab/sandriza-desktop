@@ -137,9 +137,9 @@ module.exports = {
     'The « Logo Sz » template comes with the application: it cannot be deleted.',
   'en-tête : logo Sz': 'header: Sz logo',
   // Un exemple de chaque courriel (2026-11-26)
-  'Chaque courriel envoyé aux clientes, rédigé par le vrai code, part à votre adresse avec le mot « [Exemple] » : rien n’est marqué, les vrais courriels partiront toujours.': 'Every email sent to customers, written by the real code, goes to your address marked “[Example]”: nothing is recorded, the real emails will still go out.',
+  'Chaque courriel envoyé aux clients, rédigé par le vrai code, part à votre adresse avec le mot « [Exemple] » : rien n’est marqué, les vrais courriels partiront toujours.': 'Every email sent to customers, written by the real code, goes to your address marked “[Example]”: nothing is recorded, the real emails will still go out.',
   'Recevoir un exemple de chaque courriel': 'Receive an example of every email',
-  'Une dizaine de courriels vont partir à votre adresse, chacun marqué « [Exemple] ». Ils utilisent votre dernière commande, votre dernier retour et des cartes-cadeaux fictives : aucune cliente ne reçoit rien, et rien n’est marqué comme envoyé.': 'About ten emails will be sent to your address, each marked “[Example]”. They use your latest order, your latest return and fictitious gift cards: no customer receives anything, and nothing is recorded as sent.',
+  'Une dizaine de courriels vont partir à votre adresse, chacun marqué « [Exemple] ». Ils utilisent votre dernière commande, votre dernier retour et des cartes-cadeaux fictives : aucun client ne reçoit rien, et rien n’est marqué comme envoyé.': 'About ten emails will be sent to your address, each marked “[Example]”. They use your latest order, your latest return and fictitious gift cards: no customer receives anything, and nothing is recorded as sent.',
   'Envoyer les exemples': 'Send the examples',
   'Envoi des exemples… (environ une minute)': 'Sending the examples… (about a minute)',
   'Les exemples n’ont pas pu partir.': 'The examples could not be sent.',

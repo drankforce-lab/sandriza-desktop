@@ -127,7 +127,7 @@ function pageGabarits(ouverture) {
   return `${TETE()}
 <title>${T("Gabarits courriel — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.gabarit}</span><h1>${T("Gabarits courriel")}</h1><span class="droite"><button class="b" id="b-exemples" style="margin-right:.5rem" title="${T("Chaque courriel envoyé aux clientes, rédigé par le vrai code, part à votre adresse avec le mot « [Exemple] » : rien n’est marqué, les vrais courriels partiront toujours.")}">${T("Recevoir un exemple de chaque courriel")}</button><button class="prim" id="b-nouveau" style="display:none">${T("+ Nouveau gabarit")}</button></span></div>
+<div class="tete"><span class="ico">${ICO.gabarit}</span><h1>${T("Gabarits courriel")}</h1><span class="droite"><button class="b" id="b-exemples" style="margin-right:.5rem" title="${T("Chaque courriel envoyé aux clients, rédigé par le vrai code, part à votre adresse avec le mot « [Exemple] » : rien n’est marqué, les vrais courriels partiront toujours.")}">${T("Recevoir un exemple de chaque courriel")}</button><button class="prim" id="b-nouveau" style="display:none">${T("+ Nouveau gabarit")}</button></span></div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
 <div class="corps"><div class="zone" id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -154,7 +154,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
   var bexemples = document.getElementById('b-exemples');
   if (bexemples) bexemples.onclick = function(){
     szConfirmer({ titre: '${T("Recevoir un exemple de chaque courriel")}',
-      texte: '${T("Une dizaine de courriels vont partir à votre adresse, chacun marqué « [Exemple] ». Ils utilisent votre dernière commande, votre dernier retour et des cartes-cadeaux fictives : aucune cliente ne reçoit rien, et rien n’est marqué comme envoyé.")}',
+      texte: '${T("Une dizaine de courriels vont partir à votre adresse, chacun marqué « [Exemple] ». Ils utilisent votre dernière commande, votre dernier retour et des cartes-cadeaux fictives : aucun client ne reçoit rien, et rien n’est marqué comme envoyé.")}',
       oui: '${T("Envoyer les exemples")}', non: '${T("Annuler")}' }).then(function(ok){
       if (!ok) return;
       bexemples.disabled = true; dire('${T("Envoi des exemples… (environ une minute)")}', 'info');
