@@ -22,7 +22,7 @@
  *   ni le français ni l'anglais n'y portent d'apostrophe droite ni de guillemet droit (src/langue/synchro.js).
  */
 
-const { JS_ACTIVITE, JS_DIRE, CSS_JOUR, TETE } = require('./socle.js');
+const { JS_ACTIVITE, JS_DIRE, JS_MESURES, CSS_JOUR, TETE } = require('./socle.js');
 const T = require('../langue').tr('synchro');
 /* (2026-11-25) Sa remarque : « c'est pas beau ça, je ne veux pas voir de code » (le détail montrait le JSON de
    l'entretien). Les valeurs se LISENT désormais : consignes en mots, listes en pastilles, objets en lignes
@@ -195,6 +195,31 @@ html.jour .sy-pl-i{color:#2a5794}
 .sy-pl-x{flex:1 1 auto;min-width:0}
 .sy-pl-x .q{font-size:.86rem;font-weight:600}
 .sy-pl-x .w{font-size:.74rem;color:var(--tx3)}
+.sy-hd{padding:.1rem 1rem .9rem}
+.sy-ctx{display:flex;flex-wrap:wrap;gap:.25rem .9rem;margin-top:.45rem;padding-top:.45rem;border-top:1px dashed var(--v08);font-size:.74rem;color:var(--tx2)}
+.sy-ctx em{font-style:normal;color:var(--tx3)}
+.sy-ctx b{color:var(--tx);font-weight:600}
+.sy-tuile.sy-ctxw{grid-column:span 2}
+@media (max-width:760px){.sy-tuile.sy-ctxw{grid-column:1 / -1}}
+.sy-plus{display:flex;justify-content:flex-start;margin-top:.2rem}
+.sy-plus .btn{display:inline-flex;align-items:center;gap:.45rem;font-size:.76rem;padding:.4rem .8rem}
+.sy-corps .sy-plus{margin-top:-.2rem}
+.feuille.sy-large{width:min(60rem,94vw)}
+.sy-fc-t .sy-quand{margin-top:.7rem}
+.sy-fc{flex:1 1 auto;min-height:0;overflow-y:auto;padding:0 1.4rem 1rem;border-top:1px solid var(--v06)}
+.sy-fc-l{display:grid;grid-template-columns:minmax(8rem,.7fr) minmax(0,1fr) minmax(0,1fr);gap:1rem;padding:.6rem 0;border-bottom:1px solid var(--v04);font-size:.8rem;align-items:start}
+.sy-fc-l .n{font-size:.72rem;font-weight:650;color:var(--tx3);text-transform:uppercase;letter-spacing:.05em}
+.sy-fc-l .n i{font-style:normal;text-transform:none;letter-spacing:0;font-weight:500;color:var(--tx3);border:1px solid var(--v10);border-radius:99px;padding:0 .4rem;margin-left:.3rem}
+.sy-fc-l .a{color:var(--tx2);min-width:0;word-break:break-word;white-space:pre-wrap}
+.sy-fc-l .b{color:var(--tx);min-width:0;word-break:break-word;white-space:pre-wrap}
+.sy-fc-l.ch{background:rgba(var(--or-rgb),.06);margin:0 -.6rem;padding-left:.6rem;padding-right:.6rem;border-radius:8px}
+.sy-fc-l.ch .n{color:var(--tx-or,var(--or))}
+.sy-fc-l.ch .b{font-weight:600}
+.sy-fc-h{position:sticky;top:0;background:var(--f-carte);z-index:1;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx3);font-weight:650}
+.sy-fc-l .pas,.sy-fc-l .kvs,.sy-fc-l .obs,.sy-fc-l .sy-pas{white-space:normal}
+.sy-hd .sy-tuiles{grid-template-columns:repeat(auto-fill,minmax(13rem,1fr))}
+.sy-hd-att{font-size:.76rem;color:var(--tx3)}
+.lot .el.annule + .sy-hd{opacity:.55}
 /* Détail */
 .detail{overflow-y:auto;padding:1.4rem 1.8rem 2rem}
 .dt{display:flex;gap:1rem;align-items:center;margin-bottom:1.3rem}
@@ -324,14 +349,14 @@ function pageSynchro() {
 (function(){
   'use strict';
   var P = window.szPont;
-${JS_ACTIVITE()}${JS_DIRE()}
+${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
   var vPub = document.getElementById('v-pub'), vHist = document.getElementById('v-hist');
   var R = null, ERR = null, LECTURE = false, T0 = 0, MINUT = null;
   var SEL = {}, CHOIX = {}, ACTIF = null, FILTRE = 'tout', RECH = '', HI = null, OUVERTS = {}, DEPLIE = {};
   /* (2026-11-25) Sa demande : l'option A de la maquette (« A est parfait ») + « un affichage liste plus compacte »
      + « une recherche intégrée dans les changements ». AFF : 'cartes' (une carte par élément, l'avant → après de chaque
      champ) ou 'liste' (une ligne par élément, qui se déplie). Le choix est retenu sur ce poste. */
-  var AFF = 'cartes', FOC = null, PL = null, NOMS = {};
+  var AFF = 'cartes', FOC = null, PL = null, NOMS = {}, DET = {};
   try { if (localStorage.getItem('sz-synchro-aff') === 'liste') AFF = 'liste'; } catch (e) {}
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -408,7 +433,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!r || !r.ok) { ERR = motif(r); R = null; dessiner(); return; }
       if (!Array.isArray(r.elements)) r.elements = [];
       R = r;
-      var garde = {}; SEL = {}; r.elements.forEach(function(e){ if (aPublier(e)) SEL[cle(e)] = e.sens !== 'conflit'; garde[cle(e)] = true; });
+      var garde = {}, avant = SEL; SEL = {};
+      r.elements.forEach(function(e){ var k = cle(e); if (aPublier(e)) SEL[k] = Object.prototype.hasOwnProperty.call(avant, k) ? avant[k] : e.sens !== 'conflit'; garde[k] = true; });
       Object.keys(CHOIX).forEach(function(k){ if (!garde[k]) delete CHOIX[k]; });
       if (!ACTIF || !garde[ACTIF]) ACTIF = visibles()[0] ? cle(visibles()[0]) : null;
       dessiner();
@@ -447,6 +473,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   /* ── Le dessin ── */
   var SVG_OK = '<svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
   var SVG_REG = '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg>';
+  var SVG_FICHE = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>';
   var SVG_CARTES = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="7" rx="2"/><rect x="3" y="14" width="18" height="7" rx="2"/></svg>';
   var SVG_LISTE = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>';
   var SVG_CHEV = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>';
@@ -561,6 +588,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   function valeur(v, autre, cote){ return rendre(lire(v), lire(autre), cote); }
   /* ── L'avant → après d'un champ, lisible (option A) ── */
+  /* (2026-11-25) L'ARGENT se lit en dollars (« 67,50 $ », pas « 67.5 ») ; le rabais et la marge se calculent du contexte. */
+  var ARGENT = /^(price|salePrice|compareAtPrice|cost|acquisitionCost|prix|solde|cout)$/;
+  // la mise en forme du socle (szArgent, JS_MESURES) : le symbole suit la langue de la page
+  function argent(v){ if (v === null || v === '' || v === undefined || !isFinite(Number(v))) return v; return szArgent(v); }
+  function pct(n){ return Math.round(n) + ' %'; }
+  function prixCtx(x){
+    if (!x || !(x.prix > 0)) return null;
+    var so = x.solde > 0 && x.solde < x.prix ? x.solde : 0, eff = so || x.prix, m = x.cout > 0 ? eff - x.cout : null;
+    return { rabais: so ? (1 - so / x.prix) * 100 : 0, marge: m, margePct: m != null && eff > 0 ? m / eff * 100 : null, prix: x.prix };
+  }
+  function ligneCtx(e, champ){
+    if (!e.ctx || !/^(price|salePrice|cost|acquisitionCost)$/.test(champ)) return '';
+    var a = prixCtx(e.ctx.prod), b = prixCtx(e.ctx.test); if (!a && !b) return '';
+    var dl = function(lib, x, y){ return x === y ? '' : '<span><em>' + lib + '</em> ' + (x == null ? '—' : x) + ' <span class="sy-fl">→</span> <b>' + (y == null ? '—' : y) + '</b></span>'; };
+    var h = dl('${T("Rabais")}', a ? (a.rabais ? '−' + pct(a.rabais) : '${T("aucun")}') : null, b ? (b.rabais ? '−' + pct(b.rabais) : '${T("aucun")}') : null)
+      + dl('${T("Marge")}', a && a.marge != null ? esc(argent(a.marge)) + ' (' + pct(a.margePct) + ')' : null, b && b.marge != null ? esc(argent(b.marge)) + ' (' + pct(b.margePct) + ')' : null);
+    if (champ === 'salePrice' && b && b.prix) h += '<span><em>' + '${T("sur un prix de vente de")}' + '</em> ' + esc(argent(b.prix)) + '</span>';
+    return h ? '<div class="sy-ctx">' + h + '</div>' : '';
+  }
   function court(x){ x = lire(x); if (x == null || x === '') return '—'; if (x === true) return '${T("Oui")}'; if (x === false) return '${T("Non")}'; var s0 = String(x); return ENT[s0] || s0; }
   function motsDiff(x, y){
     var A = x.split(' '), B = y.split(' '), n = A.length, m = B.length, i, j;
@@ -616,9 +662,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function tuile(e, c, trouves){
     var nom = CHAMPS[c.champ] || c.champ, v;
     if (e.tbl === 'products' && PHOTO.test(c.champ) && e.photos && ((e.photos.test || []).length || (e.photos.prod || []).length)) v = photosDelta(e.photos.prod || [], e.photos.test || []);
+    else if (ARGENT.test(c.champ)) v = deltaVal(argent(lire(c.prod)), argent(lire(c.test)));
     else v = deltaVal(lire(c.prod), lire(c.test));
+    var lc = ligneCtx(e, c.champ); v += lc;
     var large = v.length > 420 || /class="(sy-long|kvs|obs|photos)"/.test(v);
-    return '<div class="sy-tuile' + (large ? ' sy-large' : '') + (c.sens === 'conflit' ? ' sy-tconf' : '') + (trouves.indexOf(c.champ) >= 0 ? ' sy-trouve' : '') + '">'
+    return '<div class="sy-tuile' + (large ? ' sy-large' : (lc ? ' sy-ctxw' : '')) + (c.sens === 'conflit' ? ' sy-tconf' : '') + (trouves.indexOf(c.champ) >= 0 ? ' sy-trouve' : '') + '">'
       + '<span class="n">' + esc(nom) + (c.sens === 'conflit' ? '<span class="et conflit">' + '${T("Conflit")}' + '</span>' : '') + '</span><div class="v">' + v + '</div></div>';
   }
   function sousCarte(e){
@@ -635,7 +683,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return (e.champs || []).map(function(c){
       var nom = '<b>' + esc(CHAMPS[c.champ] || c.champ) + '</b>', a = lire(c.prod), b = lire(c.test);
       if (estPrim(a) && estPrim(b)) {
-        var ca = court(a), cb = court(b);
+        var ca = ARGENT.test(c.champ) ? String(argent(a) == null ? '—' : argent(a)) : court(a), cb = ARGENT.test(c.champ) ? String(argent(b) == null ? '—' : argent(b)) : court(b);
         if (ca.length <= 24 && cb.length <= 24) return nom + ' <span class="sy-mut">' + esc(ca) + ' →</span> ' + esc(cb);
         return nom;
       }
@@ -684,6 +732,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     } else {
       h += '<div class="actions-d"><button type="button" class="lien" data-ab="' + esc(k) + '">' + '${T("Abandonner ce changement")}' + '</button></div>';
     }
+    if (e.type !== 'ajout_prod' && e.type !== 'suppression_prod') h += '<div class="sy-plus"><button type="button" class="btn" data-fc="' + esc(k) + '">' + SVG_FICHE + ' ' + '${T("Afficher la fiche complète")}' + '</button></div>';
     return h + '</div>';
   }
   function carteHtml(e){
@@ -715,7 +764,48 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }; });
     vPub.querySelectorAll('[data-rp]').forEach(function(b){ b.onclick = function(){ unSeul(b.getAttribute('data-rp'), 'prod', '${T("Repris dans la boutique préparée.")}'); }; });
     var pb = document.getElementById('publier'); if (pb) pb.onclick = confirmer;
+    vPub.querySelectorAll('[data-fc]').forEach(function(b){ b.onclick = function(){
+      var k = b.getAttribute('data-fc'), e = R.elements.filter(function(x){ return cle(x) === k; })[0]; if (!e) return;
+      ficheComplete(nomCle(e), '${T("En ligne")}', '${T("Préparée")}', null);
+      appeler('config:bt:sync', ['fiche', { tbl: e.tbl, cle: e.cle }]).then(function(r){
+        if (!r || !r.ok) { ficheComplete(nomCle(e), '', '', { err: motif(r) }); return; }
+        ficheComplete(nomCle(e), '${T("En ligne")}', '${T("Préparée")}', { a: r.prod, b: r.test, vivants: r.vivants || [] });
+      });
+    }; });
   }
+  /* (2026-11-25, sa demande : « un bouton du style afficher les détails complets des changements ») LA FICHE COMPLÈTE :
+     chaque champ de la fiche, les deux versions côte à côte ; ce qui change est mis en avant, le reste se replie
+     (« Seulement les changements » / « Tout »). Le stock est marqué « vivant » : il ne part jamais. */
+  var FC_TOUT = false, FC_DERN = null;
+  function ficheComplete(titre, libA, libB, d){
+    FC_DERN = [titre, libA, libB, d];
+    var h = '<div class="fh sy-fc-t"><h3>' + esc(titre) + '</h3>';
+    if (!d) { feuille.innerHTML = h + '<p>' + '${T("Lecture de la fiche…")}' + '</p></div><div class="squel"><i></i><i></i><i></i></div>'; feuille.classList.add('sy-large'); voile.hidden = false; return; }
+    if (d.err) { feuille.innerHTML = h + '<p>' + esc(d.err) + '</p></div><div class="ff"><button type="button" class="btn pri" id="fcok">' + '${T("Fermer")}' + '</button></div>'; document.getElementById('fcok').onclick = fermerFiche; return; }
+    var A = lire(d.a), Bv = lire(d.b), oa = (A && typeof A === 'object' && !Array.isArray(A)) ? A : { '(valeur)': A }, ob = (Bv && typeof Bv === 'object' && !Array.isArray(Bv)) ? Bv : { '(valeur)': Bv };
+    if (A == null) oa = {}; if (Bv == null) ob = {};
+    var cles = Object.keys(ob); Object.keys(oa).forEach(function(k){ if (cles.indexOf(k) < 0) cles.push(k); });
+    var conn = Object.keys(CHAMPS);
+    cles.sort(function(x, y){ var i = conn.indexOf(x), j = conn.indexOf(y); return (i < 0 ? 999 : i) - (j < 0 ? 999 : j) || (x < y ? -1 : 1); });
+    var lignes = cles.map(function(k){
+      var va = oa[k], vb = ob[k], ch = !egal(va, vb), viv = (d.vivants || []).indexOf(k) >= 0;
+      return { k: k, ch: ch && !viv, viv: viv, va: va, vb: vb };
+    }).filter(function(l){ return !(estVide(l.va) && estVide(l.vb)); });
+    var n = lignes.filter(function(l){ return l.ch; }).length;
+    var aff = function(v, k){ if (ARGENT.test(k) && estPrim(v)) return esc(argent(v) == null ? '' : argent(v)) || VIDE; if (PHOTO.test(k)) return photosDelta([], [].concat(v || []).filter(function(u){ return typeof u === 'string'; })); return rendre(lire(v), undefined, 'ap'); };
+    h += '<p>' + n + ' ' + (n > 1 ? '${T("champs modifiés")}' : '${T("champ modifié")}') + ' ' + '${T("sur")}' + ' ' + lignes.length + '</p>'
+      + '<div class="sy-quand" role="group"><button type="button" data-fct="0" class="' + (FC_TOUT ? '' : 'on') + '">' + '${T("Seulement les changements")}' + '</button><button type="button" data-fct="1" class="' + (FC_TOUT ? 'on' : '') + '">' + '${T("Toute la fiche")}' + '</button></div></div>'
+      + '<div class="sy-fc"><div class="sy-fc-l sy-fc-h"><span></span><span>' + esc(libA) + '</span><span>' + esc(libB) + '</span></div>'
+      + lignes.filter(function(l){ return FC_TOUT || l.ch; }).map(function(l){
+        return '<div class="sy-fc-l' + (l.ch ? ' ch' : '') + '"><span class="n">' + esc(CHAMPS[l.k] || motCle(l.k)) + (l.viv ? ' <i>' + '${T("vivant")}' + '</i>' : '') + '</span>'
+          + '<span class="a">' + (estVide(l.va) ? VIDE : aff(l.va, l.k)) + '</span><span class="b">' + (estVide(l.vb) ? VIDE : aff(l.vb, l.k)) + '</span></div>';
+      }).join('') + '</div>'
+      + '<div class="ff"><button type="button" class="btn pri" id="fcok">' + '${T("Fermer")}' + '</button></div>';
+    feuille.innerHTML = h; feuille.classList.add('sy-large'); voile.hidden = false;
+    document.getElementById('fcok').onclick = fermerFiche;
+    feuille.querySelectorAll('[data-fct]').forEach(function(b){ b.onclick = function(){ FC_TOUT = b.getAttribute('data-fct') === '1'; ficheComplete.apply(null, FC_DERN); }; });
+  }
+  function fermerFiche(){ voile.hidden = true; feuille.classList.remove('sy-large'); }
   function unSeul(k, choix, ok){
     var e = R.elements.filter(function(x){ return cle(x) === k; })[0]; if (!e) return;
     szDire('${T("Un instant…")}', 'att');
@@ -730,6 +820,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function dateLocale(d){ var z = function(n){ return (n < 10 ? '0' : '') + n; }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + 'T' + z(d.getHours()) + ':' + z(d.getMinutes()); }
   function confirmer(){
     var l = selection(); if (!l.length) return;
+    feuille.classList.remove('sy-large');
     var nP = l.filter(function(e){ return e.tbl === 'products'; }).length, nR = l.length - nP;
     var al = l.filter(function(e){ return alertes(e).length; });
     var demain = new Date(Date.now() + 86400000); demain.setMinutes(0, 0, 0);
@@ -866,11 +957,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<div class="li">' + g.el.map(function(x){
           return '<div class="el' + (x.annule ? ' annule' : '') + '"><span class="t">' + esc(x.tbl === 'products' ? (x.titre || x.cle) : (CLES[x.cle] || x.titre || x.cle)) + '</span>'
             + '<span class="x">' + (x.creation ? '${T("créé")}' : x.suppression ? '${T("retiré")}' : '${T("modifié")}') + '</span>'
-            + (x.annule ? '<span class="x">' + '${T("annulé")}' + '</span>' : '<button type="button" class="mini" data-a="' + x.id + '">' + '${T("Annuler l’envoi")}' + '</button>') + '</div>';
+            + (x.annule ? '<span class="x">' + '${T("annulé")}' + '</span>' : '<button type="button" class="mini" data-a="' + x.id + '">' + '${T("Annuler l’envoi")}' + '</button>') + '</div>'
+            + (OUVERTS[g.k] ? detailEnvoi(x) : '');
         }).join('') + (actifs > 1 ? '<div class="bas"><button type="button" class="mini" data-al="' + esc(g.k) + '">' + '${T("Annuler toute la publication")}' + '</button></div>' : '') + '</div></div>';
     }).join('') + '</div>';
-    brancherPl();
-    vHist.querySelectorAll('.lot .lt').forEach(function(t){ t.onclick = function(){ var k = t.parentNode.getAttribute('data-l'); OUVERTS[k] = !OUVERTS[k]; t.parentNode.classList.toggle('ouvert'); }; });
+    brancherPl(); brancherFc();
+    vHist.querySelectorAll('.lot .lt').forEach(function(t){ t.onclick = function(){ var k = t.parentNode.getAttribute('data-l'); OUVERTS[k] = !OUVERTS[k]; if (OUVERTS[k]) chargerDetails(k); dessinerHist(); }; });
     vHist.querySelectorAll('[data-a]').forEach(function(b){ b.onclick = function(){
       var id = +b.getAttribute('data-a'), x = (HI || []).filter(function(y){ return y.id === id; })[0]; if (!x) return;
       szConfirmer({ danger: true, titre: '${T("Annuler l’envoi")}', texte: '« ' + (x.tbl === 'products' ? (x.titre || x.cle) : (CLES[x.cle] || x.titre || x.cle)) + ' » — ' + '${T("La boutique en ligne retrouvera sa version d’avant. Le stock du moment est gardé.")}', oui: '${T("Annuler l’envoi")}' })
@@ -881,6 +973,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var ids = g.el.filter(function(x){ return !x.annule; }).map(function(x){ return x.id; });
       szConfirmer({ danger: true, titre: '${T("Annuler toute la publication")}', texte: ids.length + ' ' + '${T("changement(s) : la boutique en ligne retrouvera leur version d’avant. Le stock du moment est gardé.")}', oui: '${T("Annuler toute la publication")}' })
         .then(function(ok){ if (ok) annuler(ids, b); });
+    }; });
+  }
+  /* (2026-11-25) Le détail d'un envoi : les mêmes tuiles « avant → après » que la Publication, lues à l'ouverture du lot. */
+  function detailEnvoi(x){
+    var d = DET[x.id];
+    if (!d) return '<div class="sy-hd"><span class="sy-hd-att">' + '${T("Lecture du détail…")}' + '</span></div>';
+    if (!d.ok) return '<div class="sy-hd"><span class="sy-hd-att">' + esc(motif(d)) + '</span></div>';
+    if (!d.champs.length) return '<div class="sy-hd"><span class="sy-hd-att">' + '${T("Aucun champ visible n’a changé (stock ou horodatage seulement).")}' + '</span></div>';
+    var e = { tbl: x.tbl, photos: d.photos ? { prod: d.photos.avant || [], test: d.photos.apres || [] } : null, ctx: d.ctx || null };
+    return '<div class="sy-hd"><div class="sy-tuiles">' + d.champs.map(function(c){ return tuile(e, { champ: c.champ, prod: c.avant, test: c.apres }, []); }).join('') + '</div>'
+      + '<div class="sy-plus"><button type="button" class="btn" data-hfc="' + x.id + '">' + SVG_FICHE + ' ' + '${T("Afficher la fiche complète")}' + '</button></div></div>';
+  }
+  function chargerDetails(k){
+    var g = lots().filter(function(y){ return y.k === k; })[0]; if (!g) return;
+    g.el.filter(function(x){ return !DET[x.id]; }).slice(0, 25).forEach(function(x){
+      DET[x.id] = null;
+      appeler('config:bt:sync', ['detail', { id: x.id }]).then(function(r){ DET[x.id] = r && r.ok ? r : (r || { ok: false, motif: 'echec' }); dessinerHist(); });
+    });
+  }
+  function brancherFc(){
+    vHist.querySelectorAll('[data-hfc]').forEach(function(b){ b.onclick = function(){
+      var id = +b.getAttribute('data-hfc'), d = DET[id], x = (HI || []).filter(function(y){ return y.id === id; })[0]; if (!d || !x) return;
+      ficheComplete(x.tbl === 'products' ? (x.titre || x.cle) : (CLES[x.cle] || x.titre || x.cle), '${T("Avant")}', '${T("Après")}', { a: d.avant, b: d.apres, vivants: x.tbl === 'products' ? ['stock', 'warehouseLocations', 'stockReserve', 'reserved'] : [] });
     }; });
   }
   function brancherPl(){
@@ -910,7 +1025,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   document.querySelectorAll('.seg button').forEach(function(b){ b.onclick = function(){ vue(b.getAttribute('data-vue')); }; });
   document.getElementById('rafr').onclick = function(){ if (!LECTURE) { analyser(); if (!vHist.hidden) historique(); } };
-  document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && !voile.hidden && !document.getElementById('pf')) voile.hidden = true; });
+  document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && !voile.hidden && !document.getElementById('pf')) fermerFiche(); });
   /* (2026-11-25, sa demande) LES RACCOURCIS — vue « À publier », hors d'un champ de saisie et hors d'une feuille ouverte :
      ↑ ↓ (ou J K) passent d'un changement à l'autre ; Espace l'inclut ou l'exclut ; Entrée le déplie (liste compacte) ;
      / cherche ; Échap vide la recherche ; V change d'affichage ; Ctrl + Entrée publie. */
@@ -935,6 +1050,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     FOC = cle(v[i]); dessinerPub();
     var el = vPub.querySelector('.sy-foc'); if (el) try { el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }); } catch (e) { el.scrollIntoView(); }
   }
+  /* (2026-11-25, sa capture : « on clique Publier, il n'y avait rien ; on fait un changement, on reclique : ça ne se recharge
+     pas ») La fenêtre déjà ouverte revenait au premier plan avec l'analyse d'avant. Elle se RELANCE maintenant chaque fois
+     qu'elle revient devant (clic sur « Publier », Alt+Tab…) — sauf pendant une lecture ou une publication, et pas plus
+     d'une fois toutes les 3 secondes. Les cases cochées et les conflits tranchés sont gardés (voir analyser). */
+  var DERNIERE = Date.now();
+  function relancer(){
+    if (LECTURE || !voile.hidden || Date.now() - DERNIERE < 3000) return;
+    DERNIERE = Date.now(); analyser(); if (!vHist.hidden) historique();
+  }
+  window.addEventListener('focus', relancer);
+  document.addEventListener('visibilitychange', function(){ if (!document.hidden) relancer(); });
   analyser();
 })();
 </script></body></html>`;
