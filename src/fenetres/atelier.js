@@ -1252,7 +1252,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (k === 'ais') {
       return '<p class="st-note">${T("Ajoutées au tour du corps, en cm.")}</p><div class="st-form">'
         + ['poitrine', 'taille', 'hanches'].map(function(q){
-            return '<label>' + esc(LMES[q]) + '<input type="text" inputmode="decimal" maxlength="4" id="a-' + q + '" value="' + esc(String((M.aisances || {})[q] != null ? M.aisances[q] : '').replace('.', '${SEP_DEC()}')) + '"></label>';
+            return '<label>' + esc(LMES[q]) + '<input type="text" inputmode="decimal" data-negatif maxlength="4" id="a-' + q + '" value="' + esc(String((M.aisances || {})[q] != null ? M.aisances[q] : '').replace('.', '${SEP_DEC()}')) + '"></label>';
           }).join('') + '</div>';
     }
     return '<div id="m-ctrl"><p class="st-note">${T("Calcul en cours…")}</p></div>';
@@ -2041,7 +2041,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           if (tl === tb) return '<tr><td>' + esc(tl) + ' · ${T("base")}</td><td>0</td><td>0</td></tr>';
           var g = (n.g && n.g[tl]) || [0, 0];
           return '<tr><td>' + esc(tl) + '</td>' + [0, 1].map(function(c){
-            return '<td><input type="text" inputmode="decimal" maxlength="7" data-gt="' + esc(tl) + '" data-gc="' + c + '" aria-label="' + esc((c ? 'Δy ' : 'Δx ') + tl) + '" value="' + esc(enUnite(g[c] || 0)) + '"></td>';
+            return '<td><input type="text" inputmode="decimal" data-negatif maxlength="7" data-gt="' + esc(tl) + '" data-gc="' + c + '" aria-label="' + esc((c ? 'Δy ' : 'Δx ') + tl) + '" value="' + esc(enUnite(g[c] || 0)) + '"></td>';
           }).join('') + '</tr>';
         }).join('') + '</tbody></table>'
       + '<div class="ed-gestes"><button type="button" class="mini" id="e-g-copier">${T("Copier la règle")}</button>'
@@ -7104,8 +7104,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (mo.mode === 'place') g += '<label class="large">${T("Pièce")}<select id="mo-piece">' + (m.pieces || []).map(function(p){ return '<option value="' + esc(p.id) + '"' + (mo.piece === p.id ? ' selected' : '') + '>' + esc(nomPiece(p)) + '</option>'; }).join('') + '</select></label>';
     g += '<label>' + (mo.mode === 'raccord' ? '${T("Module · L (cm)")}' : '${T("Zone · L (cm)")}') + '<input type="text" id="mo-zl" inputmode="decimal" maxlength="5" value="' + esc(String(mo.zone.l).replace('.', '${SEP_DEC()}')) + '"></label>'
       + '<label>' + (mo.mode === 'raccord' ? '${T("Module · H (cm)")}' : '${T("Zone · H (cm)")}') + '<input type="text" id="mo-zh" inputmode="decimal" maxlength="5" value="' + esc(String(mo.zone.h).replace('.', '${SEP_DEC()}')) + '"></label></div>';
-    if (mo.mode === 'place') g += '<div class="at-champs"><label>${T("Zone · X (cm)")}<input type="text" id="mo-zx" inputmode="decimal" maxlength="6" value="' + esc(String(mo.zone.x).replace('.', '${SEP_DEC()}')) + '"></label>'
-      + '<label>${T("Zone · Y (cm)")}<input type="text" id="mo-zy" inputmode="decimal" maxlength="6" value="' + esc(String(mo.zone.y).replace('.', '${SEP_DEC()}')) + '"></label></div>'
+    if (mo.mode === 'place') g += '<div class="at-champs"><label>${T("Zone · X (cm)")}<input type="text" id="mo-zx" inputmode="decimal" data-negatif maxlength="6" value="' + esc(String(mo.zone.x).replace('.', '${SEP_DEC()}')) + '"></label>'
+      + '<label>${T("Zone · Y (cm)")}<input type="text" id="mo-zy" inputmode="decimal" data-negatif maxlength="6" value="' + esc(String(mo.zone.y).replace('.', '${SEP_DEC()}')) + '"></label></div>'
       + '<div class="ed-gestes"><button type="button" class="mini" id="mo-centrer">${T("Centrer la zone sur la pièce")}</button></div>'
       + '<div class="ed-note">${T("Cliquez dans la zone pour la saisir : glissez-la, tirez ses poignées.")}</div>';
     g += '<div class="cx-sep"></div><h2>${T("Calques")}</h2>'
@@ -7155,9 +7155,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + (c.forme === 'etoile' ? '<label>${T("Branches")}<input type="text" id="mo-c-branches" inputmode="numeric" maxlength="2" value="' + (c.branches || 5) + '"></label>' : '');
         }
         var FU = { normal: '${T("Normal")}', multiply: '${T("Produit")}', overlay: '${T("Superposition")}', screen: '${T("Écran")}', darken: '${T("Obscurcir")}', lighten: '${T("Éclaircir")}' };
-        h += '<label>X (cm)<input type="text" id="mo-c-x" inputmode="decimal" maxlength="6" value="' + cm(c.x) + '"></label><label>Y (cm)<input type="text" id="mo-c-y" inputmode="decimal" maxlength="6" value="' + cm(c.y) + '"></label>'
+        h += '<label>X (cm)<input type="text" id="mo-c-x" inputmode="decimal" data-negatif maxlength="6" value="' + cm(c.x) + '"></label><label>Y (cm)<input type="text" id="mo-c-y" inputmode="decimal" data-negatif maxlength="6" value="' + cm(c.y) + '"></label>'
           + '<label>${T("Largeur (cm)")}<input type="text" id="mo-c-l" inputmode="decimal" maxlength="6" value="' + cm(c.l) + '"></label><label>${T("Hauteur (cm)")}<input type="text" id="mo-c-h" inputmode="decimal" maxlength="6" value="' + cm(c.h) + '"></label>'
-          + '<label>${T("Rotation (°)")}<input type="text" id="mo-c-rot" inputmode="decimal" maxlength="5" value="' + cm(c.rot) + '"></label><label>${T("Opacité (%)")}<input type="text" id="mo-c-op" inputmode="numeric" maxlength="3" value="' + Math.round((c.opacite == null ? 1 : c.opacite) * 100) + '"></label>'
+          + '<label>${T("Rotation (°)")}<input type="text" id="mo-c-rot" inputmode="decimal" data-negatif maxlength="5" value="' + cm(c.rot) + '"></label><label>${T("Opacité (%)")}<input type="text" id="mo-c-op" inputmode="numeric" maxlength="3" value="' + Math.round((c.opacite == null ? 1 : c.opacite) * 100) + '"></label>'
           + '<label class="large">${T("Mode de fusion")}<select id="mo-c-fusion">' + Object.keys(FU).map(function(k){ return '<option value="' + k + '"' + ((c.fusion || 'normal') === k ? ' selected' : '') + '>' + FU[k] + '</option>'; }).join('') + '</select></label>'
           + '<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="mo-c-visible"' + (c.visible !== false ? ' checked' : '') + '>${T("Visible")}</label>'
           + '<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="mo-c-verrou"' + (c.verrou ? ' checked' : '') + '>${T("Verrouillé")}</label></div>';
@@ -7172,7 +7172,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
             + '<label>${T("Luminosité (%)")}<input type="text" id="mo-f-lum" inputmode="numeric" maxlength="3" value="' + (f.lum == null ? 100 : f.lum) + '"></label>'
             + '<label>${T("Contraste (%)")}<input type="text" id="mo-f-con" inputmode="numeric" maxlength="3" value="' + (f.con == null ? 100 : f.con) + '"></label>'
             + '<label>${T("Saturation (%)")}<input type="text" id="mo-f-sat" inputmode="numeric" maxlength="3" value="' + (f.sat == null ? 100 : f.sat) + '"></label>'
-            + '<label>${T("Teinte (°)")}<input type="text" id="mo-f-teinte" inputmode="numeric" maxlength="4" value="' + (f.teinte || 0) + '"></label>'
+            + '<label>${T("Teinte (°)")}<input type="text" id="mo-f-teinte" inputmode="numeric" data-negatif maxlength="4" value="' + (f.teinte || 0) + '"></label>'
             + '<label style="flex-direction:row;align-items:center;gap:.4rem"><input type="checkbox" id="mo-f-gris"' + (f.gris ? ' checked' : '') + '>${T("Noir et blanc")}</label></div>'
             + '<div class="ed-gestes"><button type="button" class="mini" id="mo-f-zero">${T("Réinitialiser les réglages")}</button></div>'
             + '<div class="cx-sep"></div><h2>${T("Retirer le fond")}</h2><div class="at-champs"><label>${T("Tolérance")}<select id="mo-dt-tol"><option value="20">${T("Faible")}</option><option value="36" selected>${T("Moyenne")}</option><option value="60">${T("Forte")}</option></select></label></div>'

@@ -243,7 +243,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<input class="m" data-pm="' + i + '" inputmode="decimal" value="' + esc(x.montant) + '" placeholder="0,00" aria-label="${T("Montant")}"></div>';
     }).join('');
     return '<form class="reg" onsubmit="return false"><h2>${T("Réglages de la trésorerie")}</h2>'
-      + '<div class="ligne"><div class="ch"><label for="g-solde">${T("Solde du compte")}</label><input id="g-solde" inputmode="decimal" value="' + esc(r.solde) + '"></div>'
+      + '<div class="ligne"><div class="ch"><label for="g-solde">${T("Solde du compte")}</label><input id="g-solde" inputmode="decimal" data-negatif value="' + esc(r.solde) + '"></div>'
       + '<div class="ch"><label for="g-le">${T("Au")}</label><input id="g-le" type="date" value="' + esc(r.soldeLe) + '"></div>'
       + '<div class="ch"><label for="g-plancher">${T("Seuil d’alerte")}</label><input id="g-plancher" inputmode="decimal" value="' + esc(r.plancher) + '"></div></div>'
       + '<div class="listes"><div class="liste"><h3>${T("Charges fixes (chaque mois)")}</h3>' + fixes + '</div>'

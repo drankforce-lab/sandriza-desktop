@@ -270,6 +270,12 @@ function fenetres() {
       + '<div class="r"><input id="t-haut" aria-label="Haut" style="height:40px;width:120px"><input id="t-bas" aria-label="Bas" style="height:24px;width:120px"></div>'
       + '<div class="r" id="t-propre"><input aria-label="Propre A" maxlength="40" style="width:200px;height:32px"><input aria-label="Propre B" maxlength="40" style="width:200px;height:32px">'
       + '<button style="height:32px">Propre</button></div>'
+      /* (2026-11-26) le controle des champs : un filtre d'une sorte inconnue du garde (il laisse tout passer), un prix
+         en texte libre, et un prix PROPRE (filtre) qui ne doit etre accuse de rien. */
+      + '<div class="r"><input id="t-filtre" data-sz-filtre="inconnu" aria-label="Filtre" maxlength="10" style="width:120px"></div>'
+      + '<div class="r"><label for="t-sansfiltre">Prix ($)</label><input id="t-sansfiltre" maxlength="10" style="width:120px"></div>'
+      + '<div class="r"><label for="t-prixpropre">Propre prix ($)</label><input id="t-prixpropre" inputmode="decimal" maxlength="10" style="width:120px"></div>'
+      + '<script>' + SOCLE.JS_CHAMPS() + '<' + '/script>'
       + '</body></html>' });
   }
   if (M_OPT) {
@@ -693,7 +699,7 @@ function rapportOptions(res, pages, rates, lotsMorts, duree, nomsFen) {
    « fenêtre | sorte | signature » (pas par le scénario : le même champ revient
    dans dix scénarios). La DETTE (champs-dette.json) liste ceux qu'on a vus et
    JUGÉS acceptables, chacun avec sa raison ; le banc échoue sur tout autre. */
-const SORTES_CH = ['ERREUR_SAISIE', 'DEPASSE_LIMITE', 'CHEVAUCHE', 'DEBORDE', 'TEXTE_COUPE', 'ECRASE', 'S_ETIRE', 'POUSSE_HORS', 'PAGE_ELARGIE',
+const SORTES_CH = ['ERREUR_SAISIE', 'FILTRE_INOPERANT', 'NOMBRE_SANS_FILTRE', 'DEPASSE_LIMITE', 'CHEVAUCHE', 'DEBORDE', 'TEXTE_COUPE', 'ECRASE', 'S_ETIRE', 'POUSSE_HORS', 'PAGE_ELARGIE',
   'PAGE_ALLONGEE', 'CHOIX_TRONQUE', 'INDICATION_TRONQUEE', 'HAUTEURS', 'COLLE'];
 function rapportChamps(res, pages, rates, lotsMorts, duree, nomsFen) {
   const parFic = {};
@@ -713,6 +719,10 @@ function rapportChamps(res, pages, rates, lotsMorts, duree, nomsFen) {
     for (const e of (s.exSansBorne || [])) if (W.exSansBorne.length < 4 && !W.exSansBorne.includes(e)) W.exSansBorne.push(e);
     W.sansBorneListe = W.sansBorneListe || [];
     for (const e of (s.liste || [])) if (!W.sansBorneListe.includes(e)) W.sansBorneListe.push(e);
+    const fi = s.filtres || {};
+    W.eprouves = Math.max(W.eprouves || 0, fi.eprouves || 0);
+    W.larges = W.larges || [];
+    for (const e of (fi.larges || [])) if (W.larges.length < 6 && !W.larges.includes(e)) W.larges.push(e);
     for (const e of (x.errCharge || [])) W.errCharge.push(p.scen + ' : ' + e);
     for (const t of (x.trouve || [])) {
       const cle = p.nom + '|' + t.type + '|' + t.sig;
@@ -728,7 +738,8 @@ function rapportChamps(res, pages, rates, lotsMorts, duree, nomsFen) {
   if (T) {
     const d = Object.values(T.defauts);
     const att = [['ECRASE', 't-ecrase'], ['TEXTE_COUPE', 't-coupe'], ['CHOIX_TRONQUE', 't-tronque'], ['CHEVAUCHE', 't-dessous'],
-      ['COLLE', 't-colle1'], ['S_ETIRE', 't-etire'], ['HAUTEURS', 't-haut'], ['DEPASSE_LIMITE', 't-limite']];
+      ['COLLE', 't-colle1'], ['S_ETIRE', 't-etire'], ['HAUTEURS', 't-haut'], ['DEPASSE_LIMITE', 't-limite'],
+      ['FILTRE_INOPERANT', 't-filtre'], ['NOMBRE_SANS_FILTRE', 't-sansfiltre']];
     const rates2 = att.filter(([k, id]) => !d.some((x) => x.type === k && x.sig.includes('#' + id)));
     const fauxPos = d.filter((x) => x.sig.includes('#t-propre') || /Propre/.test(x.nom));
     temoinOk = !rates2.length && !fauxPos.length;
@@ -762,6 +773,10 @@ function rapportChamps(res, pages, rates, lotsMorts, duree, nomsFen) {
   L('== POUR INFORMATION : SAISIES SANS BORNE (n’échoue pas) ==  ' + sb.reduce((s, [, W]) => s + W.sansBorne, 0) + ' texte(s) sans maxlength · '
     + sb.reduce((s, [, W]) => s + W.nombresSansBorne, 0) + ' nombre(s) sans min/max, dans ' + sb.length + ' fenêtre(s)');
   for (const [n, W] of sb.slice(0, 12)) L('  · ' + n.padEnd(20) + W.sansBorne + ' texte · ' + W.nombresSansBorne + ' nombre  (' + W.exSansBorne.join(', ') + ')');
+  const lg = Object.entries(F).filter(([, W]) => (W.larges || []).length);
+  L('');
+  L('== POUR INFORMATION : CHAMPS NUMÉRIQUES DE PLUS DE 360 px (n’échoue pas) ==  ' + Object.values(F).reduce((s, W) => s + (W.eprouves || 0), 0) + ' champ(s) filtré(s) éprouvé(s)');
+  for (const [n, W] of lg) L('  · ' + n.padEnd(20) + W.larges.join(' ; '));
   const nbSc = Object.values(F).reduce((s, W) => s + W.scenarios, 0);
   L('');
   L('== RÉSUMÉ ==  ' + Object.keys(F).length + ' fenêtres · ' + nbSc + ' scénarios · ' + Object.values(F).reduce((s, W) => s + W.remplis, 0) + ' champs remplis sous charge · '

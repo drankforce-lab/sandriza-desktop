@@ -153,9 +153,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'fc-tagline':120,'fc-address':200,'fc-a
             .catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
   }
 
-  function champ(id, lib, val, pt, type){
+  function champ(id, lib, val, pt, type, filtre){
     return '<div class="ch"><label for="' + id + '">' + esc(lib) + (pt ? ' <span class="pt">' + esc(pt) + '</span>' : '')
       + '</label><input id="' + id + '" type="' + (type || 'text') + '" value="' + esc(val || '') + '"'
+      + (filtre ? ' data-sz-filtre="' + filtre + '" maxlength="30"' : '')
       + (RO ? ' disabled' : '') + '></div>';
   }
 
@@ -172,8 +173,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'fc-tagline':120,'fc-address':200,'fc-a
       + champ('fc-phone', '${T("Téléphone")}', c.phone) + '</div>');
     h.push('</div>');
     h.push('<div class="carte"><h2>${T("Copyright et numéros de taxes")}</h2>');
-    h.push('<div class="deux">' + champ('fc-tps', '${T("Numéro TPS")}', c.tps, '${T("ex. 123456789 RT0001")}')
-      + champ('fc-tvq', '${T("Numéro TVQ")}', c.tvq, '${T("ex. 9876543210 TQ0001")}') + '</div>');
+    h.push('<div class="deux">' + champ('fc-tps', '${T("Numéro TPS")}', c.tps, '${T("ex. 123456789 RT0001")}', '', 'code')
+      + champ('fc-tvq', '${T("Numéro TVQ")}', c.tvq, '${T("ex. 9876543210 TQ0001")}', '', 'code') + '</div>');
     h.push('<div class="apercu" id="apercu"></div></div>');
     corps.innerHTML = h.join('');
     // Aperçu du copyright, mis à jour à la frappe.

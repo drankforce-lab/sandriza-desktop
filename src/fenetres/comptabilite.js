@@ -709,7 +709,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('comptabilite')}
     var h = '<tr><td>' + esc(nomPoste(p))
       + (p.sens === 'revenu' ? ' <span class="rf-pill bleu">${T("revenu")}</span>' : '')
       + '</td>'
-      + '<td class="n"><input data-an="' + esc(p.cle) + '" value="' + (annuel ? szArgentNombre(annuel, 2) : '')
+      + '<td class="n"><input data-an="' + esc(p.cle) + '" inputmode="decimal" maxlength="14" value="' + (annuel ? szArgentNombre(annuel, 2) : '')
       + '" placeholder="0${SEP_DEC()}00" aria-label="' + esc(nomPoste(p)) + ' — ${T("budget annuel")}"'
       + (RO ? ' disabled' : '') + ' style="width:6.2rem"></td>'
       + '<td class="n gris">' + (l ? argent(l.prevu) : '—') + '</td>'

@@ -61,7 +61,7 @@ button.prim{background:var(--or);border-color:var(--or);color:#1a1208;font-weigh
 .coup input{width:100%;text-align:right;padding:.22rem .4rem}
 .lig{display:flex;gap:.45rem;align-items:center}
 .lig label{font-size:.78rem;color:var(--tx2);min-width:9.5rem}
-.lig input{flex:1;min-width:0;text-align:right}
+.lig input{flex:0 1 11rem;min-width:0;margin-left:auto;text-align:right}   /* (2026-11-26) un montant n'a pas a couvrir toute la ligne */
 .sort{display:flex;gap:.4rem}
 .sort input:first-child{flex:1;min-width:0}
 .sort input:last-child{width:6.5rem;text-align:right}

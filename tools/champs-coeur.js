@@ -88,6 +88,9 @@
     if (r.width < 2 || r.height < 2) return false;
     var cs = getComputedStyle(el);
     if (cs.display === 'none' || cs.visibility === 'hidden' || Number(cs.opacity) === 0) return false;
+    /* (2026-11-26) Le contenu d'un <details> FERME garde une boite (Chrome le cache par content-visibility) : la Caisse
+       voyait son adresse de facturation repliee « chevaucher » la ligne du rabais. checkVisibility le sait. */
+    if (el.checkVisibility && !el.checkVisibility({ contentVisibilityAuto: true })) return false;
     return !!rectVu(el);
   }
   /* Au-dessus : UN des cinq points (centre, et pres des quatre bords) designe
@@ -252,7 +255,59 @@
         if (gv >= -2 && gv < 3 && !soudes(v1, v2, 'v') && aBoite(v1) && aBoite(v2) && !enGroupe(v1, v2)) noter('COLLE', v1, 'ecart de ' + Math.round(gv) + ' px dans la colonne', v2);
       }
     }
+    filtres(champs, stat);
     return stat;
+  }
+
+  /* ── LE CONTROLE DES CHAMPS (2026-11-26, sa demande : « un champ ou il ne doit y avoir que des chiffres ne doit pas
+     permettre des lettres ») — le garde est _szChampsGarde, dans socle.js. Ici on l'EPROUVE dans la vraie page :
+       FILTRE_INOPERANT   un champ numerique (number, inputmode numeric/decimal, tel, data-sz-filtre) accepte une lettre ;
+       NOMBRE_SANS_FILTRE un champ texte dont le LIBELLE annonce un nombre (« ($) », « (%) », « (cm) », Prix, Montant,
+                          Quantite, Code postal, Telephone…) et que rien ne filtre ;
+       (info) TROP_LARGE  un champ de quelques chiffres etire au-dela de 360 px. */
+  function libelleDe(el) {
+    var t = el.getAttribute('aria-label') || '';
+    if (!t && el.id) { try { var lb = document.querySelector('label[for="' + el.id + '"]'); if (lb) t = lb.textContent; } catch (e) {} }
+    if (!t) { var p = el.closest('label'); if (p) t = p.textContent; }
+    if (!t && el.parentElement) { var l2 = el.parentElement.querySelector('label'); if (l2 && !l2.contains(el)) t = l2.textContent; }
+    return String(t || '').replace(/\s+/g, ' ').trim();
+  }
+  function filtre(el) {
+    var f = (el.getAttribute('data-sz-filtre') || '').toLowerCase();
+    if (f) return f;
+    var ty = (el.getAttribute('type') || 'text').toLowerCase(), im = (el.getAttribute('inputmode') || '').toLowerCase();
+    var nom = (el.id || '') + ' ' + (el.name || '');
+    if (ty === 'number') return 'nombre';
+    if (ty === 'tel' || im === 'tel') return 'tel';
+    if (ty !== 'text') return 'autre';
+    if (im === 'decimal') return 'decimal';
+    if (im === 'numeric') return 'chiffres';
+    if (/(^|[-_ ])(postal|zip|code-?postal|cp)([-_ ]|$)|postal/i.test(nom)) return 'postal';
+    if (/(^|[-_ ])(tel|phone|telephone)([-_ ]|$)/i.test(nom)) return 'tel';
+    return '';
+  }
+  var ANNONCE_NOMBRE = /\((\$|%|cm|mm|m|kg|g|lb|oz|jours?|j|h|heures?|min|minutes|s|sec|secondes|px|km|°|ans?|mois)\)|\$\s*$|^\s*(prix|montant|co[uû]t|quantit[eé]|qt[eé]|taux|pourcentage|poids|nombre de|seuil|plafond|solde|salaire|code postal|t[eé]l[eé]phone|no de t[eé]l|fond|odom[eè]tre|kilom[eè]tres?|jour du mois)|budget annuel|montant|solde|prix/i;
+  function filtres(champs, stat) {
+    stat.filtres = { eprouves: 0, larges: [] };
+    champs.forEach(function (el) {
+      if (el.tagName !== 'INPUT' || el.readOnly || el.disabled) return;
+      var f = filtre(el), lib = libelleDe(el);
+      if (!f && ANNONCE_NOMBRE.test(lib)) noter('NOMBRE_SANS_FILTRE', el, '« ' + lib.slice(0, 60) + ' » : un champ texte sans filtre');
+      if (!f || f === 'autre' || f === 'aucun') return;
+      var w = el.getBoundingClientRect().width;
+      if (/^(nombre|chiffres|decimal)$/.test(f) && w > 360 && stat.filtres.larges.length < 6) stat.filtres.larges.push(signature(el) + ' ' + Math.round(w) + ' px');
+      var v0 = el.value, ev;
+      try {
+        el.focus();
+        try { el.setSelectionRange(v0.length, v0.length); } catch (e) {}
+        ev = new InputEvent('beforeinput', { inputType: 'insertText', data: 'x', bubbles: true, cancelable: true });
+        el.dispatchEvent(ev);
+        stat.filtres.eprouves++;
+        if (!ev.defaultPrevented) noter('FILTRE_INOPERANT', el, 'la lettre « x » passe dans un champ ' + f);
+        el.blur();
+      } catch (e) {}
+      if (el.value !== v0) el.value = v0;
+    });
   }
 
   function sousCharge(fin) {

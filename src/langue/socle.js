@@ -359,4 +359,9 @@ module.exports = {
   "Corriger": "Fix it",
   // Gestes groupés (2026-10-29)
   "Cochez des lignes pour agir sur plusieurs à la fois — Maj+clic coche une plage.": "Tick rows to act on several at once — Shift+click ticks a range.",
+  // Contrôle des champs (2026-11-26)
+  "Chiffres seulement.": "Digits only.",
+  "Un nombre : chiffres et une virgule.": "A number: digits and one decimal point.",
+  "Un numéro : chiffres, espaces, + ( ) -.": "A number: digits, spaces, + ( ) -.",
+  "Lettres et chiffres seulement.": "Letters and digits only.",
 };

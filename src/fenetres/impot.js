@@ -435,7 +435,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
     return '<label class="chp' + (o.large ? ' large' : '') + '" for="' + id + '"><span class="chp-l"><span>' + esc(lbl)
       + (o.obligatoire && !o.statut ? ' <span class="req">*</span>' : '') + '</span>' + etat + '</span>'
       + '<input class="t' + (o.mono ? ' mono' : '') + '" id="' + id + '" value="' + esc(val || '') + '"'
-      + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + (o.max ? ' maxlength="' + o.max + '"' : '') + (RO ? ' disabled' : '') + '>'
+      + (o.ph ? ' placeholder="' + esc(o.ph) + '"' : '') + (o.max ? ' maxlength="' + o.max + '"' : '')
+      + (o.filtre ? ' data-sz-filtre="' + o.filtre + '"' + (o.filtre === 'chiffres' ? ' inputmode="numeric"' : '') : '') + (RO ? ' disabled' : '') + '>'
       + (aide ? '<span class="chp-a">' + esc(aide) + '</span>' : '') + '</label>';
   }
   function section(ic, titre, desc, corpsS){
@@ -467,13 +468,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('impot')}
       + ((PROFIL && PROFIL.types) || []).map(function(t){
           return '<option value="' + esc(t.v) + '"' + (p.type === t.v ? ' selected' : '') + '>' + esc(t.l) + '</option>'; }).join('')
       + '</select></label>'
-      + champE('e-neq', '${T("NEQ (Québec)")}', p.neq, '${T("10 chiffres · Registraire des entreprises")}', { mono: true, obligatoire: true, statut: true, max: 20 })
-      + champE('e-ne', '${T("Numéro d’entreprise (NE)")}', p.sinBn, '${T("9 chiffres · Agence du revenu du Canada")}', { mono: true, statut: true, max: 20 })
+      + champE('e-neq', '${T("NEQ (Québec)")}', p.neq, '${T("10 chiffres · Registraire des entreprises")}', { mono: true, obligatoire: true, statut: true, max: 10, filtre: 'chiffres' })
+      + champE('e-ne', '${T("Numéro d’entreprise (NE)")}', p.sinBn, '${T("9 chiffres · Agence du revenu du Canada")}', { mono: true, statut: true, max: 20, filtre: 'code' })
       + '</div>');
     h += section(IC_E.taxe, '${T("Numéros de taxes")}', '${T("Imprimés sur vos factures et vos remises TPS / TVQ.")}',
       '<div class="chps">'
-      + champE('e-tps', 'TPS / TVH', p.tpsNo, '${T("123456789 RT0001 · ARC")}', { mono: true, obligatoire: true, statut: true, max: 30 })
-      + champE('e-tvq', 'TVQ', p.tvqNo, '${T("1234567890 TQ0001 · Revenu Québec")}', { mono: true, obligatoire: true, statut: true, max: 30 })
+      + champE('e-tps', 'TPS / TVH', p.tpsNo, '${T("123456789 RT0001 · ARC")}', { mono: true, obligatoire: true, statut: true, max: 30, filtre: 'code' })
+      + champE('e-tvq', 'TVQ', p.tvqNo, '${T("1234567890 TQ0001 · Revenu Québec")}', { mono: true, obligatoire: true, statut: true, max: 30, filtre: 'code' })
       + '</div>');
     h += '</div><div class="ent-col">';
     h += section(IC_E.etiq, '${T("Étiquettes de vêtements")}', '${T("Le numéro CA du Bureau de la concurrence, imprimé sur les étiquettes de composition.")}',

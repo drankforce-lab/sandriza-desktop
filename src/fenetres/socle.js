@@ -417,6 +417,20 @@ function szBulleFermer(){
   clearTimeout(_szBulleT); b.classList.remove('on');
   setTimeout(function(){ if (!b.classList.contains('on')) b.hidden = true; }, 220);
 }
+/* (2026-11-26) La bulle ne se pose JAMAIS sur un contrôle : si, en bas, elle couvre un bouton ou un champ visible (le pied
+   d'une boîte de dialogue), elle monte en haut de la fenêtre. */
+function _szBulleLibre(b){
+  try {
+    var r = b.getBoundingClientRect();
+    var l = document.querySelectorAll('button,input:not([type=hidden]),select,textarea,a[href],[role=button]');
+    for (var i = 0; i < l.length; i++) {
+      var e = l[i]; if (b.contains(e) || !_szVisible(e)) continue;
+      var q = e.getBoundingClientRect();
+      if (q.width < 2 || q.height < 2) continue;
+      if (q.left < r.right - 2 && q.right > r.left + 2 && q.top < r.bottom + 4 && q.bottom > r.top - 4) { b.classList.add('haut'); return; }
+    }
+  } catch (x) {}
+}
 function szBulle(t, cible){
   var b = document.getElementById('sz-bulle');
   if (!b) {
@@ -434,7 +448,8 @@ function szBulle(t, cible){
   var bc = b.querySelector('.sz-bc');
   bc.hidden = !a;
   bc.onclick = function(){ szBulleFermer(); _szAller(a); };
-  b.hidden = false; void b.offsetWidth; b.classList.add('on');
+  b.hidden = false; b.classList.remove('haut'); void b.offsetWidth; b.classList.add('on');
+  _szBulleLibre(b);
   clearTimeout(_szBulleT); _szBulleT = setTimeout(szBulleFermer, 9000);
 }
 function szDire(texte, genre, cible){
@@ -2607,6 +2622,115 @@ function szLotDerouler(o){
 }
 `;
 
+/* LE CONTRÔLE DES CHAMPS (2026-11-26, sa demande : « un champ où il ne doit y avoir que des chiffres ne doit pas permettre des
+   lettres… pas de caractères spéciaux dans les champs financiers ou de prix »). `inputmode` ne filtre RIEN sur un ordinateur
+   (il ne choisit qu'un clavier de téléphone), et `type=number` laisse passer e, E, + et -. Un seul garde, posé ici pour
+   toutes les fenêtres, filtre ce qui ENTRE (frappe, collage, dépôt) — jamais la valeur déjà là :
+     · type=number ............ chiffres + UN séparateur (, ou .) ; « - » en tête seulement si min < 0 ou absent ;
+     · inputmode=decimal ...... chiffres + UN séparateur ; « - » en tête seulement avec data-negatif ;
+     · inputmode=numeric ...... chiffres seulement (« - » avec data-negatif) ;
+     · téléphone (type/inputmode tel, ou id/nom tel|phone) : chiffres, espace, + ( ) - . ;
+     · code postal (id/nom postal|zip) : lettres et chiffres, espace, -, en MAJUSCULES ;
+     · data-sz-filtre="chiffres|decimal|tel|postal|code|alnum" l'impose ailleurs
+       (« code » : lettres, chiffres, espace, - — un no de TPS « 123456789 RT0001 ») ; data-sz-filtre="aucun" l'écarte.
+   Un caractère refusé ne passe pas : le champ clignote et une bulle dit pourquoi ; un collage est nettoyé, la part valable
+   entre. Banc : tools/banc-champs.js. */
+function _szChampsGarde(M){
+  if (typeof document === 'undefined' || window.__szChamps) return; window.__szChamps = true;
+  function _czSorte(e){
+    if (!e || e.tagName !== 'INPUT' || e.readOnly || e.disabled) return null;
+    var f = (e.getAttribute('data-sz-filtre') || '').toLowerCase();
+    if (f === 'aucun') return null;
+    if (f) return f;
+    var ty = (e.getAttribute('type') || 'text').toLowerCase(), im = (e.getAttribute('inputmode') || '').toLowerCase();
+    var nom = (e.id || '') + ' ' + (e.name || '');
+    if (ty === 'number') return 'nombre';
+    if (ty === 'tel' || im === 'tel') return 'tel';
+    if (ty !== 'text' && ty !== '') return null;
+    if (im === 'decimal') return 'decimal';
+    if (im === 'numeric') return 'chiffres';
+    if (/(^|[-_ ])(postal|zip|code-?postal|cp)([-_ ]|$)|postal/i.test(nom)) return 'postal';
+    if (/(^|[-_ ])(tel|phone|telephone|tél)([-_ ]|$)/i.test(nom)) return 'tel';
+    return null;
+  }
+  function _czNegatif(e, s){
+    if (e.hasAttribute('data-negatif')) return true;
+    if (s !== 'nombre') return false;
+    var mn = e.getAttribute('min');
+    return mn == null || mn === '' || Number(mn) < 0;
+  }
+  var PERMIS = { chiffres: /[0-9]/, decimal: /[0-9.,]/, nombre: /[0-9.,]/, tel: /[0-9 +().\-]/, postal: /[A-Za-z0-9 \-]/, code: /[A-Za-z0-9 \-]/, alnum: /[A-Za-z0-9]/ };
+  function _czFiltrer(e, s, txt){
+    var p = PERMIS[s]; if (!p) return { ok: txt, refus: false };
+    var v = e.value || '', a = 0, b = v.length;
+    try { if (typeof e.selectionStart === 'number') { a = e.selectionStart; b = e.selectionEnd; } } catch (x) { a = v.length; b = v.length; }
+    var reste = v.slice(0, a) + v.slice(b), sep = /[.,]/.test(reste), out = '', refus = false;
+    for (var i = 0; i < txt.length; i++) {
+      var c = txt.charAt(i);
+      if (c === ' ' || c === ' ') c = ' ';
+      if (c === '-' && (s === 'decimal' || s === 'nombre' || s === 'chiffres')) {
+        if (_czNegatif(e, s) && a === 0 && out === '' && reste.indexOf('-') < 0) { out += c; continue; }
+        refus = true; continue;
+      }
+      if (c === ' ' && (s === 'decimal' || s === 'nombre' || s === 'chiffres')) { if (i > 0 && i < txt.length - 1) refus = true; continue; }
+      if (!p.test(c)) { refus = true; continue; }
+      if ((s === 'decimal' || s === 'nombre') && (c === '.' || c === ',')) { if (sep) { refus = true; continue; } sep = true; }
+      out += (s === 'postal' || s === 'code') ? c.toUpperCase() : c;
+    }
+    return { ok: out, refus: refus };
+  }
+  var bulle = null, minu = null;
+  function _czSignaler(e, s){
+    e.classList.remove('sz-refus'); void e.offsetWidth; e.classList.add('sz-refus');
+    if (!bulle) { bulle = document.createElement('div'); bulle.className = 'sz-champ-bulle'; bulle.setAttribute('role', 'status'); document.body.appendChild(bulle); }
+    bulle.textContent = M[s] || M.chiffres;
+    var r = e.getBoundingClientRect();
+    bulle.style.left = Math.max(6, Math.min(r.left, window.innerWidth - 240)) + 'px';
+    bulle.style.top = (r.bottom + 6 + 28 > window.innerHeight ? r.top - 32 : r.bottom + 6) + 'px';
+    bulle.classList.add('vu');
+    clearTimeout(minu); minu = setTimeout(function(){ bulle.classList.remove('vu'); e.classList.remove('sz-refus'); }, 1600);
+  }
+  function _czInserer(e, t){
+    try { if (document.execCommand('insertText', false, t)) return; } catch (x) {}
+    try { e.setRangeText(t, e.selectionStart, e.selectionEnd, 'end'); } catch (x) { e.value += t; }
+    e.dispatchEvent(new Event('input', { bubbles: true }));
+  }
+  document.addEventListener('beforeinput', function(ev){
+    var e = ev.target, s = _czSorte(e); if (!s) return;
+    var ty = ev.inputType || '';
+    if (ty.indexOf('insert') !== 0 || ty === 'insertLineBreak' || ty === 'insertParagraph') return;
+    var txt = ev.data;
+    if (txt == null && ev.dataTransfer) { try { txt = ev.dataTransfer.getData('text/plain'); } catch (x) {} }
+    if (txt == null || txt === '') return;
+    var f = _czFiltrer(e, s, txt);
+    if (f.ok === txt) return;
+    ev.preventDefault();
+    if (f.ok) _czInserer(e, f.ok);
+    if (f.refus) _czSignaler(e, s);
+  }, true);
+  /* type=number : Chromium avale « e » et « + » AVANT beforeinput (ils sont légaux pour lui) — on les arrête à la touche. */
+  document.addEventListener('keydown', function(ev){
+    var e = ev.target; if (!e || e.tagName !== 'INPUT' || (e.getAttribute('type') || '').toLowerCase() !== 'number') return;
+    if (ev.ctrlKey || ev.metaKey || ev.altKey || !ev.key || ev.key.length !== 1) return;
+    if (/[eE+]/.test(ev.key) || (ev.key === '-' && !_czNegatif(e, 'nombre'))) { ev.preventDefault(); _czSignaler(e, 'nombre'); }
+  }, true);
+}
+/* La feuille du contrôle des champs (le clignement d'un refus, la bulle qui dit pourquoi) : avec celles des fenêtres,
+   aux couleurs de la bulle d'erreur (#sz-bulle). */
+const CSS_CHAMPS = `
+@keyframes szRefus{0%,100%{transform:none}25%{transform:translateX(-3px)}75%{transform:translateX(3px)}}
+input.sz-refus{animation:szRefus .18s ease 2;border-color:rgba(248,113,113,.75)!important;box-shadow:0 0 0 3px rgba(248,113,113,.22)!important}
+.sz-champ-bulle{position:fixed;z-index:2147483000;max-width:240px;padding:.3rem .6rem;border-radius:8px;font-size:.74rem;font-weight:600;line-height:1.3;
+  background:var(--f-carte);color:var(--tx);border:1px solid rgba(248,113,113,.38);box-shadow:0 6px 18px rgba(0,0,0,.35);
+  opacity:0;transform:translateY(-3px);transition:opacity .15s,transform .15s;pointer-events:none}
+.sz-champ-bulle.vu{opacity:1;transform:none}
+html.jour .sz-champ-bulle{background:#ffffff;color:#1d2433;border-color:rgba(185,28,28,.35);box-shadow:0 6px 18px rgba(15,23,42,.18)}
+`;
+const JS_CHAMPS = () => '\n(' + _szChampsGarde.toString() + ')(' + JSON.stringify({
+  chiffres: T('Chiffres seulement.'), nombre: T('Un nombre : chiffres et une virgule.'),
+  decimal: T('Un nombre : chiffres et une virgule.'), tel: T('Un numéro : chiffres, espaces, + ( ) -.'),
+  postal: T('Lettres et chiffres seulement.'), code: T('Lettres et chiffres seulement.'), alnum: T('Lettres et chiffres seulement.') }).replace(/</g, '\\u003c') + ');\n';
+
 /* ⚠⚠ (2026-11-19, sa capture des Dépenses : « je t'ai demandé un contrôle de qualité… clairement c'est pas fait ») LE TABLEAU
    NE DÉPASSE JAMAIS SA CARTE. Une ligne par cellule (Épuré) : sur une fenêtre ancrée étroite, ou avec de vrais libellés plus
    longs que ceux des essais, un tableau devenait plus large que sa carte, qui coupait les dernières colonnes SANS RIEN DIRE
@@ -2783,7 +2907,7 @@ const JS_VIVANT = () => `
 `;
 const JS_DIRE = () => JS_DIRE_BASE() + JS_PLEIN() + JS_PLEIN_AUTO() + JS_FENPLEIN()
   + JS_VERROUS() + JS_LOTS() + JS_AUTOPAGE() + JS_PAGES() + JS_COMPTE() + JS_MESURES()
-  + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX() + JS_CONFIRMER() + JS_COCHES() + JS_CEDER() + JS_VIVANT();
+  + JS_DATES() + JS_FINITIONS() + JS_JUMEAUX + JS_CTX() + JS_CONFIRMER() + JS_COCHES() + JS_CEDER() + JS_VIVANT() + JS_CHAMPS();
 
 const JS_SOCLE = () => `
 var P = window.szPont;
@@ -3549,6 +3673,8 @@ html.jour .sz-btnfen:hover{background:#efece4}
   opacity:0;transform:translate(-50%,10px) scale(.98);transition:opacity .2s ease,transform .2s ease}
 #sz-bulle.on{opacity:1;transform:translate(-50%,0) scale(1)}
 #sz-bulle[hidden]{display:none}
+/* (2026-11-26) Elle couvrait le bouton « Annuler » d'une boîte (Véhicules) : posée sur un contrôle, elle monte en haut. */
+#sz-bulle.haut{bottom:auto;top:1rem}
 #sz-bulle .sz-bi{flex:0 0 auto;width:26px;height:26px;border-radius:50%;display:grid;place-items:center;font-weight:800;font-size:.9rem;
   background:rgba(248,113,113,.16);color:var(--tx-err)}
 #sz-bulle .sz-bt{flex:1 1 auto;min-width:0}
@@ -5910,12 +6036,15 @@ html[data-sz-theme="epure"] .ls-rang .gestes button.danger,html[data-sz-theme="e
 const CSS_TEINTES = require('../teintes').css();
 module.exports = { CSS_SOCLE: CSS_SOCLE + CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE + CSS_TEINTES,
   CSS_JOUR: CSS_JOUR + CSS_PLEIN + CSS_VERROUS + CSS_LOTS + CSS_THEMES + CSS_JOUR_TEXTES + CSS_ETATS + CSS_TUILES + CSS_FINITIONS + CSS_PIED + CSS_HAUTEUR + CSS_TRANSITIONS + CSS_REFONTE + CSS_AIR + CSS_RESPIRE + CSS_COMPTA + CSS_CARBONE + CSS_CTX + CSS_COCHES + CSS_EPURE + CSS_DENSE + CSS_TEINTES,
-  JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_MESURES, JS_BROUILLON, JS_TUILES, JS_BORNER, CSS_THEMES, CSS_FICHE, ICO,
+  JS_SOCLE, JS_ACTIVITE, JS_DIRE, JS_CHAMPS, JS_MESURES, JS_BROUILLON, JS_TUILES, JS_BORNER, CSS_THEMES, CSS_FICHE, ICO,
   /* La page, pas son texte : voir l en-tete de ce fichier. */
   TETE, LIEU, SEP_DEC, CSS_SUIVI, fournirThemeDepart, themeDepart: () => { try { return _themeDepart ? _themeDepart() : null; } catch (e) { return null; } } };
 /* Le garde des tableaux (JS_CEDER) : sa feuille en DERNIER dans les deux feuilles que chargent les fenêtres. */
 module.exports.CSS_SOCLE += CSS_CEDER;
 module.exports.CSS_JOUR += CSS_CEDER;
+/* Le contrôle des champs (2026-11-26). */
+module.exports.CSS_SOCLE += CSS_CHAMPS;
+module.exports.CSS_JOUR += CSS_CHAMPS;
 /* Le look « vivant » (2026-11-20) : tout en dernier, après les thèmes. */
 module.exports.CSS_SOCLE += CSS_VIVANT;
 module.exports.CSS_JOUR += CSS_VIVANT;
