@@ -77,7 +77,7 @@ button{font:inherit;color:inherit}
 .puce{border:1px solid var(--v08);background:transparent;border-radius:99px;padding:.3rem .75rem;font-size:.76rem;color:var(--tx2);cursor:pointer;display:inline-flex;gap:.4rem;align-items:center}
 .puce:hover{background:var(--v04)}
 .puce.on{background:var(--tx);color:var(--f-page);border-color:var(--tx)}
-.puce b{font-weight:600;opacity:.7}
+.puce b{font-weight:700}   /* (2026-11-26) plus d opacite .7 : 4,01 de contraste la nuit (banc contrastes) */
 .puce .pt{width:6px;height:6px;border-radius:50%;background:var(--tx-err)}
 .tout{margin-left:auto;font-size:.76rem;color:var(--tx2);display:inline-flex;align-items:center;gap:.45rem;cursor:pointer;user-select:none}
 /* Liste + détail */
