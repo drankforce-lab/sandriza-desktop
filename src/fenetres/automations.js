@@ -75,6 +75,8 @@ button.prim:hover:not(:disabled){background:var(--or-clair)}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 .vide{padding:1rem;text-align:center;color:var(--tx2);font-size:.82rem}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* (2026-11-26) Épuré : le mot suffit. */
+html[data-sz-theme="epure"] :is(button[data-copier],.metriques .t) > .ic{display:none}
 `;
 
 function pageAutomations() {

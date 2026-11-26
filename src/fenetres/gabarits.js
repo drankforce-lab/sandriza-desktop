@@ -87,6 +87,8 @@ body{background:var(--f-page);color:var(--tx);
 .gifwrap{max-width:420px;margin:0 0 .8rem}
 .ic-lg{vertical-align:-3px}
 .ic-lg svg{width:15px;height:15px}
+/* (2026-11-26) Épuré : le mot suffit sur les boutons des gabarits. */
+html[data-sz-theme="epure"] :is(button.b,button.prim) > .ic{display:none}
 .gifwrap .lg{font-size:.73rem;color:var(--tx2);margin-bottom:.3rem;display:flex;align-items:center;gap:.5rem}
 .gifwrap img{display:block;width:100%;border-radius:8px;border:1px solid var(--v12);background:var(--f-champ);min-height:60px}
 @keyframes szshine{0%{background-position:0% 50%}100%{background-position:220% 50%}}
@@ -302,7 +304,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'g-name':60,'g-sub':160,'g-hfrom-t':7,'
         + (RO ? ' disabled' : '') + '>';
       for (var k = 0; k < opts.length; k++) sel += '<option value="' + esc(opts[k].id) + '"' + (cur === opts[k].id ? ' selected' : '') + '>' + esc(opts[k].name) + '</option>';
       sel += '</select>';
-      h += '<tr><td class="mod">' + esc(szTd(f.module)) + '</td><td>' + esc(szTd(f.label)) + '</td><td>' + sel + '</td></tr>';
+      h += '<tr><td class="mod">' + esc(szTd(f.module)) + '</td><td>' + esc(String(szTd(f.label)).replace(/^[\\p{Extended_Pictographic}\\uFE0F\\u200D]+\\s*/u, '')) + '</td><td>' + sel + '</td></tr>';
     }
     h += '</tbody></table></div>';
     if (!RO) h += '<div style="margin-top:.8rem"><button class="prim" id="g-assign-save"><span class="ic">💾</span>${T(" Enregistrer les attributions")}</button></div>';

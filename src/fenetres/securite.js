@@ -130,6 +130,8 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 html[data-sz-theme="epure"] .pill.on,html[data-sz-theme="epure"] .pill.off,html[data-sz-theme="epure"] .pill.mfa,html[data-sz-theme="epure"] .pill.moi,html[data-sz-theme="epure"] .pill.role{background:var(--ep-neutre-f);color:var(--ep-neutre-t)}
 html[data-sz-theme="epure"] .pill.warn{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
 html[data-sz-theme="epure"] .fiche{background:var(--f-carte);border-color:var(--v08);border-radius:16px}
+/* (2026-11-26) Les boutons des fiches et le titre des boîtes MFA : le mot suffit. */
+html[data-sz-theme="epure"] :is(button.b,.boite .tt h3) > .ic{display:none}
 
 /* ── LES COMPTES EN FICHES ────────────────────────────────────────────────
    Le tableau dense convenait à des transactions ; ici chaque ligne est une

@@ -5800,11 +5800,12 @@ html[data-sz-theme="epure"] :is(.onglets,.tr-ong,.st-onglets,body>.ong,.ed-seg:n
      un seul doré par écran — celui du pied, l'action de la fenêtre. */
 html[data-sz-theme="epure"] :is(.stitre,.carte>h2,.carte>h3,.carte .t,.metriques .t,.reco,.th,
   .onglets button,.tr-ong button,body>.ong button,.prim,.pied .prim) > :is(.ic,.em){display:none!important}
+html[data-sz-theme="epure"] .carte>h2:not(:empty):not(:has(+ :is(.sous,.desc,.aide,p,small))){margin-bottom:.75rem}
 html[data-sz-theme="epure"] :is(.info,.info>b,.entete h3,.entete h2,.aide) > .ic,html[data-sz-theme="epure"] .prot .em{display:none!important}
-html[data-sz-theme="epure"] .carte button.prim:not(.pied *){background:var(--v05)!important;border:1px solid var(--v12)!important;color:var(--tx)!important;
+html[data-sz-theme="epure"] .carte button.prim:not(.pied *):not(:is(.voile,dialog,[role="dialog"]) *){background:var(--v05)!important;border:1px solid var(--v12)!important;color:var(--tx)!important;
   box-shadow:none!important;font-weight:600}
-html[data-sz-theme="epure"] .carte button.prim:not(.pied *):hover:not(:disabled){background:var(--v10)!important}
-html[data-sz-theme="epure"].jour .carte button.prim:not(.pied *){background:#ffffff!important;border-color:#d4d8e0!important;color:#1d2433!important}
+html[data-sz-theme="epure"] .carte button.prim:not(.pied *):not(:is(.voile,dialog,[role="dialog"]) *):hover:not(:disabled){background:var(--v10)!important}
+html[data-sz-theme="epure"].jour .carte button.prim:not(.pied *):not(:is(.voile,dialog,[role="dialog"]) *){background:#ffffff!important;border-color:#d4d8e0!important;color:#1d2433!important}
 `;
 
 const CSS_VIVANT = `

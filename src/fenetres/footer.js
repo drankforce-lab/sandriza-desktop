@@ -37,7 +37,7 @@ body{background:var(--f-page);color:var(--tx);
    fenetre ANCREE. On repartit en colonnes qui se replient seules. */
 .corps{flex:1 1 auto;min-height:0;padding:.9rem 1.05rem;overflow-y:auto;
   display:grid;grid-template-columns:repeat(auto-fit,minmax(28rem,1fr));
-  gap:1rem;align-content:start}
+  gap:1rem;align-content:start;align-items:start}
 .corps::-webkit-scrollbar{width:8px}
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;

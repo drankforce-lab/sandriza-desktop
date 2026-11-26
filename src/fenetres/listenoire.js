@@ -91,6 +91,8 @@ code{font-family:Consolas,monospace;font-size:.82rem;background:var(--v05);paddi
 .msg{font-size:.79rem;color:var(--tx2);flex:1 1 auto;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .msg.err{color:var(--tx-err)}.msg.bon{color:var(--tx-ok)}.msg.att{color:var(--tx-jaune)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+/* (2026-11-26) Épuré : le mot suffit. */
+html[data-sz-theme="epure"] #ln-exporter > .ic{display:none}
 `;
 
 function pageListeNoire(ouverture) {

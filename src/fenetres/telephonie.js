@@ -51,6 +51,9 @@ body{background:var(--f-page);color:var(--tx);
 .tete button.mini:hover:not(:disabled){background:var(--v10)}
 .tete a.credit{font:inherit;font-size:.74rem;padding:.16rem .55rem;border-radius:7px;
   background:var(--or);border:1px solid var(--or);color:#1a1208;font-weight:700;text-decoration:none;flex:0 0 auto}
+html[data-sz-theme="epure"] .tete a.credit{background:var(--v05);border-color:var(--v12);color:var(--tx);font-weight:600}
+html[data-sz-theme="epure"] .tete a.credit:hover{background:var(--v10)}
+html[data-sz-theme="epure"].jour .tete a.credit{background:#ffffff;border-color:#d4d8e0;color:#1d2433}
 .ro{flex:0 0 auto;margin:.45rem 1.05rem 0;border:1px solid rgba(240,180,80,.35);
   background:rgba(200,140,40,.1);color:var(--tx-or2);border-radius:9px;padding:.28rem .7rem;font-size:.76rem}
 .onglets{flex:0 0 auto;display:flex;gap:.1rem;flex-wrap:wrap;overflow-x:auto;

@@ -45,6 +45,9 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .entete{display:flex;justify-content:space-between;align-items:center;gap:1rem;margin-bottom:1rem;flex-wrap:wrap}
 .hint{font-size:.78rem;color:var(--tx2);margin:0 0 .9rem;line-height:1.5}
 .grpH{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--tx2);margin:0 0 .55rem}
+/* (2026-11-26) Épuré : un vrai titre de groupe, au-dessus des libellés (plus fort qu'eux, et séparé d'un filet). */
+html[data-sz-theme="epure"] .grpH{font-size:.86rem!important;font-weight:750!important;color:var(--tx)!important;text-transform:none!important;
+  letter-spacing:0!important;padding:0 0 .45rem;margin:0 0 .75rem!important;border-bottom:1px solid var(--v08)}
 .cols3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:1.25rem}
 .cols2{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:1.1rem}
 @media(max-width:760px){.cols3,.cols2{grid-template-columns:minmax(0,1fr)}}
