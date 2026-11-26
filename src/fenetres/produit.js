@@ -653,6 +653,55 @@ html.jour .lgstk.enstock .c1,html.jour .lgstk.enstock .c2{color:#166534}
 .pf-outils .pv-fibre .cadre-fibre{width:58px!important;height:58px;flex:0 0 58px;border-radius:10px;font-size:.68rem}
 .pf-outils .pv-fibre .pv-fibre-l{gap:.85rem}
 .pf-outils .pv-fibre-g{flex-direction:row!important;align-items:center!important;flex-wrap:wrap}
+
+/* ══ LA PASSE DE PROPRETÉ (2026-11-25, ses captures : « tout est déformé, on perd du texte, des zones déplacent des cadres » ;
+   « je ne veux pas d'auto-ajustement à chaque ouverture ») ══════════════════════════════════════════════════════════ */
+/* — Photos : des tailles FIXES, calculées par le CSS seul (plus de calcul après l'ouverture, donc plus de saut). La
+     principale garde le format 3:4 ; sa colonne prend la plus petite de deux limites : 44 % de la largeur, ou ce que la
+     hauteur de la fenêtre permet. */
+.ligne-photos{grid-template-columns:min(44%,calc((100vh - 29rem) * .75)) minmax(0,1fr)!important}
+.pf-gauche .vue-principale .vign{width:100%!important;height:auto!important;aspect-ratio:3 / 4}
+.pf-outils .pf-med-l button,.pf-outils .pv-fibre-g button{white-space:nowrap;max-width:100%;overflow:hidden;text-overflow:ellipsis}
+/* L'aperçu 3D : une rangée de boutons, l'état en pastille dans le titre, le texte seulement quand il faut agir. */
+#p-3d-carte{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem}
+#p-3d-carte>.outil-t,#p-3d-carte>ol,#p-3d-carte>#p-3d-attente{flex:1 1 100%}
+#p-3d-carte>.outil-t{margin-bottom:.1rem}
+#p-3dg-l,#p-3d-l{display:contents}
+#p-3d-carte .pf-med-l button{margin:0}
+#p-3d-vues{display:none}
+#p-3dg-etat,#p-3d-etat{flex:1 1 100%;order:9;font-size:.76rem;margin:0}
+#p-3dg-etat:empty,#p-3d-etat:empty{display:none}
+.pf3-puce{margin-left:auto;font-size:.7rem;font-weight:700;padding:.12rem .6rem;border-radius:99px;background:var(--v06);color:var(--tx2);white-space:nowrap}
+.pf3-puce:empty{display:none}
+.pf3-puce.ok{background:rgba(74,222,128,.14);color:var(--tx-ok)}
+html.jour .pf3-puce.ok{color:#1f6b3d}
+/* — Identité : Classement sur deux colonnes (les menus ne se coupent plus), le Prix à la même hauteur ; les libellés
+     des pastilles (Genre, Groupe d'âge) alignés sur elles ; les rabais passent à la ligne au lieu de sortir. */
+.cote.pf-bas{grid-template-columns:minmax(0,1fr) minmax(0,1fr)!important}
+.pf-cl{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+.etape .ch.a-puces>label:first-child{left:.15rem!important;right:auto!important;top:.15rem!important}
+.ch.a-puces .pf-puces{flex-wrap:nowrap}
+.prixgrille{grid-template-columns:repeat(auto-fit,minmax(7.5rem,1fr))!important}
+.rabais{flex-wrap:wrap!important;gap:.3rem!important}
+.rabais button{padding:.18rem .45rem!important}
+/* — Couleurs : l'état vide dit quoi faire, au centre, avec le bouton. */
+.pc-vide{grid-column:1 / -1;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;gap:.6rem;
+  padding:2.5rem 1rem;color:var(--tx2);font-size:.86rem;line-height:1.5}
+.pc-vide b{color:var(--tx);font-size:.95rem}
+.pc-vide .pastille-c{display:inline-block;width:.8rem;height:.8rem;border-radius:50%;vertical-align:-1px;margin-right:.3rem;border:1px solid var(--v16)}
+/* — Mesurer sur la photo : la boîte TIENT dans la fenêtre (elle dépassait en haut et en bas). */
+.voile:has(.mv-boite){padding:1rem;box-sizing:border-box}
+.mv-boite{max-height:calc(100vh - 2rem);display:flex;flex-direction:column;overflow:hidden;box-sizing:border-box}
+.mv-boite>*{flex:0 0 auto}
+.mv-boite .mv-zone{flex:1 1 auto;min-height:8rem;max-height:none}
+.mv-boite .mv-zone canvas{max-height:100%;width:auto;max-width:100%;object-fit:contain}
+.mv-q{font-weight:500!important;font-size:.8rem;color:var(--tx2)!important;margin:.1rem 0 .5rem}
+.mv-barre label{display:flex;flex-direction:column;gap:.2rem;font-size:.72rem;color:var(--tx2)}
+.mv-barre{align-items:flex-end}
+.mv-boite .pied2{flex-wrap:wrap}
+/* — Composition : le raccourci « fibres mixtes ». */
+.pf-compo-l{display:flex;gap:.4rem;align-items:center;margin-top:.4rem;flex-wrap:wrap}
+.pf-compo-l button{font-size:.76rem;padding:.25rem .7rem;border-radius:99px}
 `;
 
 /** Page complète de l'assistant. `id` vide = création. */
@@ -880,7 +929,7 @@ function pageProduit(id, importId) {
       /* LA CABINE D ESSAYAGE (2026-10-30, ses décisions) : obligatoire pour les vêtements et les accessoires de tête ;
          le coût affiché PENDANT la création est celui du serveur (cabine:etat). Dessinée par dessinerCabine. */
       + '<div class="pf-3d" id="p-3d-carte">'
-      + '<div class="outil-t"><span class="outil-ic" style="--oc:var(--vv-2,#7cb4f5)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"></path><path d="M3 7.5 12 12l9-4.5M12 12v9"></path></svg></span><b>${T("Aperçu 3D")}</b></div>'
+      + '<div class="outil-t"><span class="outil-ic" style="--oc:var(--vv-2,#7cb4f5)"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 7.5 12 3l9 4.5v9L12 21l-9-4.5z"></path><path d="M3 7.5 12 12l9-4.5M12 12v9"></path></svg></span><b>${T("Aperçu 3D")}</b><span class="pf3-puce" id="p-3d-puce"></span></div>'
       + '<div class="pf-med-l" id="p-3dg-l">'
       + '<button type="button" id="p-3d-gen"><span class="ic">🧊</span> ${T("Générer l’aperçu 3D")}</button>'
       + '<span id="p-3d-vues"></span>'
@@ -892,7 +941,7 @@ function pageProduit(id, importId) {
       + '<div class="pf-med-l" id="p-3d-l" style="display:none">'
       + '<span class="aide" id="p-3d-etat"></span>'
       + '<button type="button" id="p-3d-refaire" >${T("Refaire le rendu")}</button>'
-      + '<button type="button" id="p-3d-retirer">${T("Retirer l’aperçu 3D")}</button></div>'
+      + '<button type="button" id="p-3d-retirer">${T("Retirer")}</button></div>'
       + '</div>'
       /* LA VIDÉO PAR L'IA (2026-11-22, sa demande : « SUR DEMANDE SEULEMENT, coût affiché dans la fiche ») : la photo
          principale → 5 secondes animées (Kling, par fal.ai). Le prix est montré AVANT le clic ; la génération continue
@@ -1000,11 +1049,11 @@ function pageProduit(id, importId) {
       + '</div></div>'
       + '<div class="carte sans-solde" id="p-prix-carte"><h2>${T("Prix")}</h2>'
       + '<div class="prixgrille">'
-      + ch('p-prix', '${T("Prix de vente ($)")}', { requis: true, argent: true })
-      + '<div class="ch"><label for="p-solde">${T("Prix soldé ($)")}'
+      + ch('p-prix', '${T("Prix de vente")}', { requis: true, argent: true })
+      + '<div class="ch"><label for="p-solde">${T("Prix soldé")}'
       + '<span id="p-pastille" class="pastille"></span></label>'
       + '<input id="p-solde" type="text" inputmode="decimal" class="argent" placeholder="${T("aucun")}"></div>'
-      + ch('p-cout', '${T("Coût d’achat ($)")}', { requis: true, argent: true })
+      + ch('p-cout', '${T("Coût d’achat")}', { requis: true, argent: true })
       + '</div>'
       // Les rabais rapides sous TOUTE la carte (2026-09-30) : sous le seul champ
       // du prix solde, la carte plus etroite les coupait au cinquieme.
@@ -1082,6 +1131,9 @@ function pageProduit(id, importId) {
       /* (2026-11-04, sa demande) FACULTATIVE, sauf quand le nom ou la description nomme une fibre (majCompo). */
       + '<div class="ent-haut"><div class="ch"><label for="p-compo">${T("Composition")} <span id="p-compo-etat">${T("(facultative)")}</span></label>'
       + '<input id="p-compo" maxlength="200" placeholder="${T("Ex : 95 % polyester, 5 % élasthanne")}">'
+      /* (2026-11-25, sa demande) Le raccourci « 100 % Fibres Mixtes » : la valeur est une DONNÉE (écrite telle quelle
+         dans la fiche, comme le fait l'analyse des fibres), le libellé du bouton est traduit. */
+      + '<div class="pf-compo-l"><button type="button" id="p-compo-mixte">${T("Fibres mixtes (100 %)")}</button></div>'
       + '<div class="aide" id="p-compo-avis" aria-live="polite"></div></div>'
       + '<div class="ch"><label for="p-ent-autre">${T("Autre consigne (facultatif)")}</label>'
       + '<textarea id="p-ent-autre" rows="1" maxlength="400"></textarea></div></div>'
@@ -1465,6 +1517,16 @@ function pageProduit(id, importId) {
         : tete(enCours ? '${T("⏳ en préparation")}' : '${T("à préparer")}', enCours ? 'att' : 'a');
       // Les photos : UNE ligne, seulement s'il y a un problème.
       var rec = function(x){ return !!(x && x.reconnue); };
+      /* (2026-11-25, sa question : « pourquoi ce message, la photo de dos et de face sont déjà générées ? ») La cabine ne
+         part que de photos « sans mannequin » RECONNUES par le serveur (empreinte des octets, inscrite quand le Studio les
+         rend). Celles d'une fiche faite avant la cabine, ou retouchées hors de l'application, ne le sont pas — elles
+         existent bien (l'aperçu 3D les voit), mais la cabine ne peut pas s'en servir. Une fiche existante dont rien
+         d'essentiel ne change n'exige rien (cabInchangee) : on le dit en une ligne, sans bouton grisé ni croix. */
+      if (!t.pret && cabInchangee() && (t.photosManquantes || !rec(t.face) || !rec(t.dos))) {
+        h = tete('${T("facultative")}', '') + '<div class="cab-l">${T("Ces photos ne viennent pas du Studio « sans mannequin » : la cabine ne peut pas s’en servir. Rien n’est exigé tant que la photo, le dos, le nom et la catégorie restent les mêmes.")}</div>';
+        if (z.getAttribute('data-h') !== h) { z.setAttribute('data-h', h); z.innerHTML = h; }
+        return;
+      }
       if (t.photosManquantes) h += '<div class="cab-l cab-pb">${T("Il manque la face ou le dos : photos « sans mannequin » du Studio.")}</div>';
       else if (!rec(t.face) || !rec(t.dos)) h += '<div class="cab-l cab-pb">${T("Face")} ' + (rec(t.face) ? '✓' : '✗') + ' · ${T("Dos")} ' + (rec(t.dos) ? '✓' : '✗')
         + ' — ${T("à refaire « sans mannequin » au Studio")}</div>';
@@ -1688,6 +1750,13 @@ function pageProduit(id, importId) {
       majMarge();
     };
     pucer('p-genre'); pucer('p-age');
+    var cmx = document.getElementById('p-compo-mixte');
+    if (cmx) cmx.onclick = function(){
+      // ⚠ une DONNÉE (la fiche est écrite en français, comme l'analyse des fibres) : jamais traduite, d'où l'assemblage
+      poser('p-compo', ['100', '%', 'Fibres', 'Mixtes'].join(' '));
+      var cc = document.getElementById('p-compo'); if (cc) cc.dispatchEvent(new Event('input', { bubbles: true }));
+      majCompo();
+    };
     var pDir = document.getElementById('p-direct'), pAnt = document.getElementById('p-anticipe');
     var majDirect = function(){
       if (!pDir || !pAnt) return;
@@ -3318,8 +3387,13 @@ function pageProduit(id, importId) {
       return;
     }
     if (!variantes.length) {
-      p.innerHTML = '<div class="aide">${T("Ajoutez au moins une couleur de plus — «")} ' + esc(cs[0])
-        + ' ${T("» est la couleur principale, ses photos sont celles du produit.")}</div>';
+      // (2026-11-25, sa capture : « on ne sait pas trop ce que c'est ») Une seule couleur : rien à faire ici, et on le dit.
+      if (titre) titre.textContent = '${T("Photo par couleur")}';
+      p.innerHTML = '<div class="pc-vide"><b>${T("Une seule couleur : rien à faire ici")}</b>'
+        + '<span><span class="pastille-c" style="background:' + esc(teinte(cs[0])) + '"></span>' + esc(cs[0]) + ' — ${T("ses photos sont celles du produit.")}</span>'
+        + '<span>${T("Une photo par couleur n’est demandée que pour les couleurs ajoutées.")}</span>'
+        + '<button type="button" id="p-pc-ajout">${T("Ajouter une couleur")}</button></div>';
+      var pa = document.getElementById('p-pc-ajout'); if (pa) pa.onclick = function(){ Assist.aller(2); };
       return;
     }
     p.innerHTML = variantes.map(function(c){
@@ -3790,7 +3864,7 @@ function pageProduit(id, importId) {
     var lp = document.querySelector('.carte.pf-photos .ligne-photos');
     if (!lp || !lp.offsetParent) return;
     var carte = lp.closest('.carte') || lp;
-    carte.classList.toggle('pf-serre', niv >= 1); carte.classList.toggle('pf-serre2', niv >= 2);
+
     if (!carte.__pvSuivi && typeof ResizeObserver !== 'undefined') {
       carte.__pvSuivi = true;
       var dernier = 0;
@@ -3798,9 +3872,13 @@ function pageProduit(id, importId) {
     }
     var rc = carte.getBoundingClientRect(), rl = lp.getBoundingClientRect();
     var H = Math.floor(rc.bottom - rl.top - (parseFloat(getComputedStyle(carte).paddingBottom) || 0) - 6), W = lp.clientWidth;
-    if (!(H > 150 && W > 300)) return;
     var n = Math.max(1, document.querySelectorAll('#p-vues .vue').length);
     lp.style.setProperty('--pv-n', n);
+    /* (2026-11-25, sa demande : « je ne veux pas d'auto-ajustement à chaque ouverture ») Les tailles sont FIXÉES par le CSS
+       (passe de propreté) : plus rien ne se recalcule ni ne saute après l'ouverture. Seul le nombre de cases se pose. */
+    carte.classList.remove('pf-serre', 'pf-serre2');
+    if (n || !n) return;
+    if (!(H > 150 && W > 300)) return;
     var g = lp.querySelector('.pf-gestes'), gh = (g ? g.offsetHeight : 40) + 10;
     var t = lp.querySelector('#p-vues .pv-t'), th = (t ? t.offsetHeight : 18) + 8;
     var lg = 20, ec = 8 * (n - 1);
@@ -4166,8 +4244,11 @@ function pageProduit(id, importId) {
     b.disabled = G3D.enCours || !!raison;
     b.innerHTML = G3D.enCours ? '<span class="ic">⏳</span> ${T("Génération en cours…")}'
       : (G3D.forcer ? '<span class="ic">⚠</span> ${T("Regénérer quand même")}'
-        : '<span class="ic">🧊</span> ' + (MOD3D ? '${T("Regénérer l’aperçu 3D")}' : '${T("Générer l’aperçu 3D")}'))
-        + ' (${T("par The New Black")}, ' + prix3d() + ')';
+        : '<span class="ic">🧊</span> ' + (MOD3D ? '${T("Regénérer")}' : '${T("Générer")}'))
+        + ' · ' + prix3d();
+    b.title = '${T("Aperçu 3D par The New Black")}';
+    var pu = document.getElementById('p-3d-puce');
+    if (pu) { pu.textContent = G3D.enCours ? '${T("en cours")}' : (MOD3D ? '${T("en ligne")}' : ''); pu.className = 'pf3-puce' + (MOD3D && !G3D.enCours ? ' ok' : ''); }
     // Ce qui sert, dit en clair : le devant part chez The New Black, le dos est projeté au poste.
     if (pv) pv.textContent = '${T("Devant")} ' + (IMAGE ? '✓' : '—') + ' · ${T("Dos")} ' + (photoDos() ? '✓' : '—');
     if (e && !G3D.enCours && !G3D.attente) e.textContent = raison;
@@ -4183,7 +4264,7 @@ function pageProduit(id, importId) {
     // le modèle posé : en ligne, retirable
     var l3 = document.getElementById('p-3d-l'), e3 = document.getElementById('p-3d-etat'), rt = document.getElementById('p-3d-retirer');
     if (l3) l3.style.display = MOD3D ? '' : 'none';
-    if (e3) e3.textContent = MOD3D ? '${T("Aperçu 3D en ligne sur la fiche — le client le tourne de gauche à droite.")}' : '';
+    if (e3) e3.textContent = '';   // (2026-11-25) l'état est dans la pastille du titre ; le texte ne revient que pour une raison d'agir
     if (rt) rt.onclick = function(){ MOD3D = ''; dessiner3d(); dire('${T("Aperçu 3D retiré — enregistrez pour l’enlever de la boutique.")}', 'att'); };
     var rf = document.getElementById('p-3d-refaire');
     if (rf) {
@@ -4200,7 +4281,7 @@ function pageProduit(id, importId) {
       var rr = raisonRefaire3d();
       rf.disabled = G3D.enCours || !!G3D.attente || !ID || !BRUT3D || !!rr;
       rf.title = rr || (BRUT3D && BRUT3D.expireLe ? '${T("Retraite l’aperçu au poste depuis l’original de The New Black — sans nouvel appel payant. Original conservé jusqu’au")} ' + dateCourte3d(BRUT3D.expireLe) + '.' : '');
-      if (e3 && MOD3D && rr) e3.textContent = rr;
+      // (2026-11-25) la raison reste au survol du bouton grisé : plus de phrase coupée sous la rangée
       rf.onclick = refaireCouleur3d;
     }
   }
