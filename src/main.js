@@ -9622,7 +9622,7 @@ const dessinerMenus = () => { buildMenu(); appliquerModeMenu(); };
    ICI. ⚠ Liste BLANCHE : un lien venu de l'extérieur ne peut ouvrir que ce qui est
    nommé ci-dessous — jamais une action arbitraire de `actionApp` (quitter, recharger…). */
 // (2026-11-22) + tableau (« Ta semaine en 5 points ») et fiabilite (courriel de la santé des données) : leurs boutons ne faisaient rien.
-const LIENS_OUVRABLES = new Set(['config-taxes', 'rappels', 'journaux', 'securite', 'config-automations', 'chat-config', 'sauvegarde', 'incidents', 'config-telephonie', 'tableau', 'fiabilite']);
+const LIENS_OUVRABLES = new Set(['config-taxes', 'rappels', 'journaux', 'securite', 'config-automations', 'chat-config', 'sauvegarde', 'incidents', 'config-telephonie', 'tableau', 'fiabilite', 'gardien']);   // (2026-11-26) + gardien : les alertes de sécurité
 /* Les liens des notifications de rappel (voir `_toastRappel`) : `fait` et `demain` agissent SANS
    montrer la fenêtre (on répond à la notification, on ne change pas d'écran) ; `ouvrir` montre le
    module du rappel. Un geste refusé (session fermée, droit) le dit par une notification. */
