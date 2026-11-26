@@ -41,6 +41,7 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .corps::-webkit-scrollbar-thumb{background:var(--v12);border-radius:8px}
 /* ⚠ ANCRÉE = PLEINE PAGE : cartes en colonnes pour remplir la largeur. */
 .zone{columns:32rem;column-gap:1.1rem}
+.zone{columns:auto;max-width:54rem}
 .carte{background:var(--f-carte);border:1px solid var(--v07);border-radius:11px;padding:1rem 1.1rem;
   margin:0 0 1.1rem;break-inside:avoid;-webkit-column-break-inside:avoid}
 .info{background:rgba(80,120,190,.1);border:1px solid rgba(120,160,220,.28);color:#bcd2f0;
@@ -154,7 +155,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<textarea id="a-sa" rows="5" placeholder="' + (C.hasServiceAccount ? '${T("inchangée (laisser vide pour conserver la clé existante)")}' : '${T("Collez ici tout le contenu du fichier JSON téléchargé de Google Cloud")}') + '"' + dis + '></textarea>'
       + badge(!!C.hasServiceAccount)
       + '<div class="aide">${T("La clé est stockée côté serveur et n’est jamais renvoyée à l’écran.")}</div></div>';
-    h += '</div><div class="carte"><div class="info" style="margin:0"><span class="ic">📈</span>${T(" Le <b>tableau de bord</b> (visiteurs, pages vues, sources…) s’ouvre dans la fenêtre <b>Statistiques</b> (menu Marketing).")}</div></div>';
+    // (2026-11-25) la phrase du tableau de bord rejoint la carte : une seconde carte pour une phrase laissait un grand vide
+    h += '<div class="aide" style="margin-top:.6rem">${T(" Le <b>tableau de bord</b> (visiteurs, pages vues, sources…) s’ouvre dans la fenêtre <b>Statistiques</b> (menu Marketing).")}</div></div>';
     corps.innerHTML = h;
     bsave.disabled = RO || OCCUPE;
   }

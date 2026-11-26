@@ -105,6 +105,7 @@ module.exports = {
 
   /* ══ COMMENT LE BOUTON FONCTIONNE — ET CE QUI DURE ═════════════════════════ */
   'ℹ Comment fonctionne le bouton.': 'ℹ How the button works.',
+  'Comment fonctionne le bouton.': 'How the button works.',
   'ℹ Comment fonctionne le bouton. Il crée ou supprime un fichier':
     'ℹ How the button works. It creates or removes a',
   ' Il crée ou supprime un fichier ': ' It creates or removes a ',

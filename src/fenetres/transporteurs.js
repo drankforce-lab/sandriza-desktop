@@ -434,7 +434,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      avec Postes Canada, lue par tous) et l autocomplétion d adresse à la caisse. */
   function carteGeneraleHtml(){
     var pc = (D.carriers || {})['postes-canada'] || {};
-    var h = '<div class="szr-tete"><h2>${T("Général")}</h2></div><div class="szr-sections">';
+    var h = '<div class="szr-sections">';   // (2026-11-25) plus de titre « Général » : l'onglet le dit déjà
     h += '<section class="szr-sec"><h3>${T("Adresse expéditeur (entrepôt / boutique)")}</h3><p class="szr-sous">${T("Le point de départ des colis : il sert à la cotation de tous les transporteurs.")}</p>'
       + '<div class="szr-duo">' + texteHtml('cp-oname', '${T("Nom / Boutique")}', pc.originName, 'SANDRIZA', false)
       + texteHtml('cp-ophone', '${T("Téléphone (sans tirets)")}', pc.originPhone, '5140000000', false) + '</div>'

@@ -35,6 +35,12 @@ body{background:var(--f-page);color:var(--tx);font:14px/1.5 system-ui,-apple-sys
 .deux-col{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1.3fr);gap:1.1rem;align-items:start}
 .deux-col>.vip{margin:0}
 .deux-col .prot{margin-bottom:.9rem}
+/* (2026-11-25) La colonne de gauche flottait sans cadre à côté de la carte VIP : elle devient une carte. */
+.deux-col>.gauche{background:var(--v02);border:1px solid var(--v07);border-radius:16px;padding:1.15rem 1.25rem}
+.deux-col>.gauche>.h4{font-size:.95rem;font-weight:650;letter-spacing:0;text-transform:none;color:var(--tx);margin:0 0 .8rem}
+.deux-col>.gauche>.info{margin:0}
+.deux-col>.vip>.h4{font-size:.95rem;font-weight:650;letter-spacing:0;text-transform:none;color:var(--tx);margin:0 0 .8rem}
+.deux-col>.vip{border-radius:16px;padding:1.15rem 1.25rem}
 .etat{border-radius:12px;padding:1.25rem 1.4rem;margin:0 0 1.2rem;border:2px solid}
 .etat .lg{font-size:1.05rem;font-weight:700;margin:0 0 .2rem}
 .etat .ds{font-size:.82rem;color:var(--tx2)}
@@ -83,7 +89,11 @@ button.bsc:disabled{opacity:.5;cursor:default}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* « Épuré » : le lancement au public et l'enregistrement de la liste VIP prennent le bouton principal brun (pas de vert, pas de marine) ;
    « Repasser en pré-lancement » garde son rouge (geste qui retire le site). */
-html[data-sz-theme="epure"] #b-bascule[style*="15803d"],html[data-sz-theme="epure"] #v-ecrire{background:var(--sz-btn-prim)!important;color:var(--sz-btn-prim-txt)!important}
+html[data-sz-theme="epure"] #b-bascule[style*="15803d"]{background:var(--sz-btn-prim)!important;color:var(--sz-btn-prim-txt)!important}
+/* (2026-11-26) « Enregistrer » de la Liste VIP : bouton secondaire — le seul doré de l'écran est « Lancer le site au public ». */
+html[data-sz-theme="epure"] #v-ecrire{background:var(--v05)!important;border:1px solid var(--v12)!important;color:var(--tx)!important;box-shadow:none!important}
+html[data-sz-theme="epure"] #v-ecrire:hover:not(:disabled){background:var(--v10)!important}
+html[data-sz-theme="epure"].jour #v-ecrire{background:#ffffff!important;border-color:#d4d8e0!important;color:#1d2433!important}
 `;
 
 function pageLancement() {
@@ -170,7 +180,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + protLigne('${T("Fichiers sensibles")}', '${T(".env, Dockerfile, CLAUDE.md inaccessibles (toujours actif)")}')
       + '</div>';
 
-    h += '<div class="info"><b>${T("ℹ Comment fonctionne le bouton.")}</b>${T(" Il crée ou supprime un fichier ")}'
+    h += '<div class="info"><b><span class="ic">ℹ</span> ${T("Comment fonctionne le bouton.")}</b>${T(" Il crée ou supprime un fichier ")}'
       + '${T("<code>launch.flag</code> sur le serveur, qui pilote l’en-tête <code>X-Robots-Tag</code> et la balise ")}'
       + '${T("<code>meta robots</code> — effet immédiat, sans redéploiement. <b>Mais l’état durable, c’est la variable ")}'
       + '${T("Render <code>ELG_LAUNCHED</code></b> : chaque déploiement reconstruit le serveur et repose le drapeau selon ")}'

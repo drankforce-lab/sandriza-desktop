@@ -155,4 +155,5 @@ module.exports = {
   "Nom": "Name",
   "Support": "Support",
   "Enregistrement en cours — réessayez dans un instant.": "Saving in progress — try again in a moment.",
+  'Widget': 'Widget',
 };

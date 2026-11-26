@@ -132,7 +132,7 @@ function pageChatConfig(onglet) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.chat}</span><h1>${T("Configuration du chat en ligne")}</h1></div>
 <div class="ong">
-  <button type="button" id="o-widget" data-onglet="widget">${T("⚙ Widget")}</button>
+  <button type="button" id="o-widget" data-onglet="widget"><span class="ic">⚙</span> ${T("Widget")}</button>
   <button type="button" id="o-ia" data-onglet="ia"><span class="ic">🤖</span> ${T("Assistant IA")}</button>
 </div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter ces réglages, pas les modifier.")}</div>

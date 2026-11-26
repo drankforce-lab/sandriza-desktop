@@ -5793,6 +5793,18 @@ html[data-sz-theme="epure"] :is(.onglets,.tr-ong,.st-onglets,body>.ong,.ed-seg:n
 html[data-sz-theme="epure"].jour :is(.onglets,.tr-ong,.st-onglets,body>.ong,.ed-seg:not([role="group"]),.vue-bascule) button:is(.on,.actif,[aria-selected="true"]){
   background:#ffffff!important;color:#1d2433!important;box-shadow:0 1px 2px rgba(15,23,42,.14)!important}
 html[data-sz-theme="epure"] :is(.onglets,.tr-ong,.st-onglets,body>.ong,.ed-seg:not([role="group"]),.vue-bascule) button:is(.on,.actif,[aria-selected="true"]) *{color:inherit!important}
+/* ══ LA PASSE DES ÉCRANS DE CONFIGURATION (2026-11-25, sa demande : « tout bien épuré, bien placé et super beau ») ══════════
+   · Les ÉMOJIS DÉCORATIFS (.ic, .em) tombent là où un mot dit déjà tout : titres de carte et de section, onglets, bouton
+     principal, encadrés de conseil. Les boutons qui ne portent QU'UNE icône les gardent (ils n'ont pas d'autre texte).
+   · Les boutons dorés DANS une carte (« Enregistrer les métriques », « Planifier… ») deviennent des boutons secondaires :
+     un seul doré par écran — celui du pied, l'action de la fenêtre. */
+html[data-sz-theme="epure"] :is(.stitre,.carte>h2,.carte>h3,.carte .t,.metriques .t,.reco,.th,
+  .onglets button,.tr-ong button,body>.ong button,.prim,.pied .prim) > :is(.ic,.em){display:none!important}
+html[data-sz-theme="epure"] :is(.info,.info>b,.entete h3,.entete h2,.aide) > .ic,html[data-sz-theme="epure"] .prot .em{display:none!important}
+html[data-sz-theme="epure"] .carte button.prim:not(.pied *){background:var(--v05)!important;border:1px solid var(--v12)!important;color:var(--tx)!important;
+  box-shadow:none!important;font-weight:600}
+html[data-sz-theme="epure"] .carte button.prim:not(.pied *):hover:not(:disabled){background:var(--v10)!important}
+html[data-sz-theme="epure"].jour .carte button.prim:not(.pied *){background:#ffffff!important;border-color:#d4d8e0!important;color:#1d2433!important}
 `;
 
 const CSS_VIVANT = `

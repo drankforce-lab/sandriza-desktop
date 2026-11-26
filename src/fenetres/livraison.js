@@ -117,7 +117,10 @@ table.pays input[type=checkbox]{width:1rem;height:1rem;accent-color:var(--or);cu
 .pfiltre:focus{outline:none;border-color:var(--or)}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
 /* Relooking 2026 (2026-10-04) : tarifs cote a cote, resume en une phrase. */
-.tarifs{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:.7rem}
+.tarifs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.9rem 1.1rem}
+.tarifs .ch{display:flex;flex-direction:column;gap:.3rem}
+.carte>h2+.tarifs{margin-top:.85rem}
+.corps{align-items:start}
 .tarifs .ch{margin:0}
 .resume-liv{margin-top:.8rem;padding:.6rem .8rem;border-radius:10px;background:var(--v04);border:1px solid var(--v08);
   font-size:.82rem;color:var(--tx2);line-height:1.5}
