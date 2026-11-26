@@ -4181,7 +4181,7 @@ const LIMITES_PONT = {
   // Groq a 6 s de delai cote site : 10 s couvre l aller-retour.
   'langue:traduire': 10000,
   // Neuf courriels rédigés et envoyés l'un après l'autre (Resend ~2 par seconde, une commande relue chaque fois).
-  'courriels:exemples': 120000,
+  'courriels:exemples': 300000,   // (2026-11-26) + les quatre réveils du serveur
   /* ⚠⚠ LA CONNEXION A UN PLAFOND LARGE, ET C EST LE CAS OU UN DELAI COUTE LE
      PLUS CHER (#57). `connexion:entrer` fait un aller-retour au serveur pour
      verifier le mot de passe, PUIS lit la fiche complete du compte, PUIS ouvre
