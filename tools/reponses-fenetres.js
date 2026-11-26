@@ -10040,4 +10040,44 @@ for (const c of CAS_REPRISE) {
   cloner('newsletter.js', 'réglages seuls (Configuration › Modules › Infolettre)', function(c){ return c.reponses && c.reponses['newsletter:cfgDonnees']; });
 })();
 
+/* (2026-11-26, 9.2.44) LES DEUX FENÊTRES QUI N'ÉTAIENT PAS ÉPROUVÉES : Publier (synchro) et les NIP. La fenêtre Publier
+   pose UNE opération (config:bt:sync) avec une sous-action en argument ; le faux pont du navigateur rend la MÊME réponse
+   à toutes : elle porte donc à la fois l'analyse (elements), l'historique (envois, noms) et les planifiées (planifs).
+   Les heures sont relatives à maintenant : la planifiée est toujours « à venir ». */
+(function(){
+  const maintenant = Math.floor(Date.now() / 1000);
+  const SYNC = (planifs) => ({ ok: true,
+    elements: [
+      { tbl: 'products', cle: 'v5bvahbb2nx3', titre: 'Chemise Walla', sens: 'test', jeton: 'j1', controles: [],
+        champs: [{ champ: 'price', prod: 135, test: 150 }, { champ: 'salePrice', prod: 67.5, test: 75 }] },
+      { tbl: 'products', cle: 'p-franklin', titre: 'T-shirt Franklin', sens: 'conflit', jeton: 'j2', controles: [],
+        champs: [{ champ: 'description', prod: 'Coton bio, coupe droite.', test: 'Coton biologique, coupe droite et col rond.' }] },
+      { tbl: 'config', cle: 'shop_maint', sens: 'prod', jeton: 'j3', controles: [],
+        champs: [{ champ: 'message', prod: 'Retour lundi', test: '' }] },
+    ],
+    envois: [
+      { id: 'e1', lot: 'L1', le: maintenant - 3600, par: 'Administrateur Principal', tbl: 'products', cle: 'v5bvahbb2nx3', titre: 'Chemise Walla' },
+      { id: 'e2', lot: 'L1', le: maintenant - 3600, par: 'Administrateur Principal', tbl: 'config', cle: 'livraison' },
+    ],
+    noms: { L1: 'Essai planifié' },
+    planifs,
+  });
+  JEU['synchro.js'] = [
+    { nom: 'à publier, un conflit, une planifiée en attente', id: '', reponses: { 'config:bt:sync': SYNC([
+      { id: 'p1', nom: 'Collection hiver', quand: maintenant + 7200, etat: 'attente', par: 'Administrateur Principal',
+        elements: [{ tbl: 'products', cle: 'v5bvahbb2nx3', titre: 'Chemise Walla' }] }]) } },
+    { nom: 'rien de planifié', id: '', reponses: { 'config:bt:sync': SYNC([]) } },
+    { nom: 'analyse refusée', id: '', reponses: { 'config:bt:sync': { ok: false, motif: 'refus' } } },
+  ];
+  JEU['nips.js'] = [
+    { nom: 'deux NIP posés, un non', id: '', reponses: { 'nip:etat': { ok: true,
+      caisse: { defini: true, pose: maintenant - 86400 * 12, par: 'Administrateur Principal', bloqueMinutes: 0 },
+      photos: { defini: true, pose: maintenant - 86400 * 3, par: 'Brigitte Brousseau', bloqueMinutes: 4 },
+      frais: { defini: false },
+      atelier: {}, urgence: {} } } },
+    { nom: 'aucun NIP', id: '', reponses: { 'nip:etat': { ok: true, caisse: { defini: false }, photos: { defini: false }, frais: { defini: false } } } },
+    { nom: 'refus (droits)', id: '', reponses: { 'nip:etat': { ok: false, motif: 'forbidden' } } },
+  ];
+})();
+
 module.exports = JEU;

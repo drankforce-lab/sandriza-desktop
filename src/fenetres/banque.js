@@ -721,7 +721,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('banque')}${JS_BROUILLON()}
     h.push('</div><div class="cx-col">');
 
     h.push('<div class="cx-carte"><h2>${T("Notes de conciliation")}</h2>'
-      + '<textarea id="r-notes" aria-label="${T("Notes du rapprochement")}"' + (D.verrouille || !D.peutEcrire ? ' readonly' : '') + '>' + esc(r.notes || '') + '</textarea>'
+      + '<textarea id="r-notes" maxlength="2000" aria-label="${T("Notes du rapprochement")}"' + (D.verrouille || !D.peutEcrire ? ' readonly' : '') + '>' + esc(r.notes || '') + '</textarea>'
       + (D.verrouille || !D.peutEcrire ? ''
           : '<div class="barreoutils"><button id="r-notes-ok">${T("Enregistrer les notes")}</button></div>')
       + '</div>');

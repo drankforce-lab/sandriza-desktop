@@ -82,6 +82,12 @@ const CSS_PROPRE = `
 .ch.a-puces>select{display:none}
 .ch.a-puces>label:first-child{position:absolute;top:.2rem;left:.1rem;font-size:.68rem;font-weight:600;color:var(--tx2)}
 .pf-sw{margin-top:.8rem;padding-top:.75rem;border-top:1px solid var(--v08)}
+/* (2026-11-26) Le prix a changé : garder le % ou le montant soldé. */
+.pf-garde{display:flex;flex-wrap:wrap;align-items:center;gap:.45rem .6rem;margin-top:.7rem;padding:.6rem .75rem;border-radius:10px;background:var(--v05);border:1px solid var(--v12);font-size:.8rem;color:var(--tx)}
+.pf-garde[hidden]{display:none}
+.pf-garde span{flex:1 1 14rem;min-width:0}
+.pf-garde button{font:inherit;font-size:.76rem;font-weight:600;padding:.28rem .65rem;border-radius:8px;border:1px solid var(--v12);background:var(--f-carte);color:var(--tx);cursor:pointer}
+.pf-garde button:hover{background:var(--v10)}
 .sans-solde .prixgrille .ch:has(#p-solde),.sans-solde #p-rabais{display:none!important}
 .sans-solde .prixgrille{grid-template-columns:repeat(2,minmax(0,1fr))!important}
 .pf-marge-barre{height:.45rem;border-radius:99px;background:var(--v10);overflow:hidden;margin-top:.4rem}
@@ -1058,6 +1064,7 @@ function pageProduit(id, importId) {
       // Les rabais rapides sous TOUTE la carte (2026-09-30) : sous le seul champ
       // du prix solde, la carte plus etroite les coupait au cinquieme.
       + '<div id="p-rabais" class="rabais"></div>'
+      + '<div id="p-garde" class="pf-garde" role="status" hidden></div>'
       + '<div class="aide" id="p-marge" style="margin-top:.7rem"></div><div class="pf-marge-barre" id="p-marge-barre" hidden><i></i></div>'
       + '<div class="pf-sw">' + szInter('p-solde-on', '${T("Mettre en solde")}', '', false) + '</div>'
       + '<div id="p-alerte" style="display:none;color:var(--tx-err);font-size:.78rem;margin-top:.4rem"></div></div>'
@@ -1746,6 +1753,32 @@ function pageProduit(id, importId) {
       e.onblur  = function(){ argentBlur(this); this.classList.remove('manque'); };
       e.oninput = majMarge;
     });
+    /* (2026-11-26, l'essai de la Chemise Walla : 135 $ -> 150 $, le solde resté à 67,50 $ faisait passer le rabais de
+       50 % à 55 % sans qu'on le veuille.) Quand le PRIX change et qu'un prix soldé existe, on propose de garder le
+       POURCENTAGE ou le MONTANT soldé. Rien n'est changé sans un clic. */
+    (function(){
+      var ep = document.getElementById('p-prix'), zg = document.getElementById('p-garde');
+      if (!ep || !zg) return;
+      var avant = null;
+      ep.addEventListener('focus', function(){ avant = argentNombre(val('p-prix')) || 0; zg.hidden = true; });
+      ep.addEventListener('blur', function(){
+        var p0 = avant, p1 = argentNombre(val('p-prix')) || 0, s = argentNombre(val('p-solde')) || 0;
+        avant = null;
+        if (!p0 || !p1 || !s || p0 === p1 || s >= p0) { zg.hidden = true; return; }
+        var pc0 = Math.round((1 - s / p0) * 100), pc1 = Math.round((1 - s / p1) * 100);
+        if (pc0 === pc1) { zg.hidden = true; return; }
+        var s1 = +(p1 * (1 - pc0 / 100)).toFixed(2);
+        zg.innerHTML = '<span>' + '${T("Le rabais passe de {0} % à {1} %.")}'.split('{0}').join(pc0).split('{1}').join(pc1) + '</span>'
+          + '<button type="button" data-garde="pct">' + '${T("Garder {0} %")}'.split('{0}').join(pc0) + ' (' + esc(szArgent(s1)) + ')</button>'
+          + '<button type="button" data-garde="mnt">' + '${T("Garder {0}")}'.split('{0}').join(esc(szArgent(s))) + '</button>';
+        zg.hidden = false;
+        zg.onclick = function(ev){
+          var b = ev.target.closest && ev.target.closest('[data-garde]'); if (!b) return;
+          if (b.getAttribute('data-garde') === 'pct') poser('p-solde', szArgentChamp(s1));
+          zg.hidden = true; majMarge();
+        };
+      });
+    })();
     ['p-nom', 'p-cat', 'p-poids'].forEach(function(i){
       var e = document.getElementById(i);
       if (e) e.oninput = e.onchange = function(){ this.classList.remove('manque'); Assist.fil(); majNom(); };

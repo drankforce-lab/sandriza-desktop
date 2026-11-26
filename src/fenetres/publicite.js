@@ -420,7 +420,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       + '</div></section>'
       + '</div><div class="sz-fiche-col">'
       + '<section class="sz-sect"><h4>${T("Message")}</h4>'
-      + '<div class="champ"><label for="cf-msg">${T("Message *")}</label><textarea id="cf-msg" rows="4" placeholder="${T("Découvrez nos offres exclusives !")}"></textarea></div>'
+      + '<div class="champ"><label for="cf-msg">${T("Message *")}</label><textarea id="cf-msg" maxlength="2000" rows="4" placeholder="${T("Découvrez nos offres exclusives !")}"></textarea></div>'
       + '</section>'
       + '<section class="sz-sect"><h4>${T("Canaux de diffusion")}</h4>'
       +   canal('facebook', '${T("Facebook")}', '${T("Publication sur la page de la boutique.")}', true)

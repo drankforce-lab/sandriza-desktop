@@ -80,7 +80,7 @@ function pageRecherchePartout(menu) {
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="pal" role="dialog" aria-label="${T("Rechercher partout")}">
   <label class="ch"><span class="ic">${ICO.loupe}</span>
-    <input id="rp-q" type="search" autocomplete="off" spellcheck="false" aria-label="${T("Rechercher partout")}"
+    <input id="rp-q" maxlength="200" type="search" autocomplete="off" spellcheck="false" aria-label="${T("Rechercher partout")}"
       placeholder="${T("Commande, client, produit, SKU, facture ou fonction…")}"><kbd>${T("Échap")}</kbd></label>
   <div class="res" id="rp-res" role="listbox"></div>
   <div class="pied"><span><kbd>↑</kbd><kbd>↓</kbd>${T("choisir")}</span><span><kbd>${T("Entrée")}</kbd>${T("ouvrir")}</span><span><kbd>${T("Échap")}</kbd>${T("fermer")}</span><span class="msg" id="msg" role="status"></span></div>

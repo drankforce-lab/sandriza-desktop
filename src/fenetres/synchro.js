@@ -515,7 +515,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
     var vis = visibles();
     var pubVis = vis.filter(aPublier), tousSel = pubVis.length && pubVis.every(function(e){ return SEL[cle(e)]; }), certains = pubVis.some(function(e){ return SEL[cle(e)]; });
     var h = '<div class="outils"><label class="rech"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>'
-      + '<input id="rech" type="search" placeholder="' + esc('${T("Rechercher dans les changements")}') + '" aria-label="' + esc('${T("Rechercher dans les changements")}') + '" value="' + esc(RECH) + '"></label>'
+      + '<input id="rech" type="search" placeholder="' + esc('${T("Rechercher")}') + '" aria-label="' + esc('${T("Rechercher dans les changements")}') + '" value="' + esc(RECH) + '"></label>'
       + puce('tout', '${T("Tout")}') + puce('produits', '${T("Produits")}') + puce('reglages', '${T("Réglages")}') + puce('conflits', '${T("Conflits")}', true) + puce('enligne', '${T("Changés en ligne")}')
       + '<div class="sy-aff" role="group" aria-label="' + esc('${T("Affichage")}') + '">'
       + '<button type="button" data-aff="cartes" class="' + (AFF === 'cartes' ? 'on' : '') + '" title="' + esc('${T("Cartes")}') + '" aria-label="' + esc('${T("Cartes")}') + '" aria-pressed="' + (AFF === 'cartes') + '">' + SVG_CARTES + '</button>'
@@ -843,8 +843,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
       oui.textContent = QUAND === 'plus' ? '${T("Planifier")}' : (al.length ? '${T("Publier quand même")}' : '${T("Publier")}');
       feuille.querySelectorAll('[data-q]').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-q') === QUAND); });
       pq.hidden = QUAND !== 'plus'; document.getElementById('pq-aide').hidden = QUAND !== 'plus';
+      var tq = new Date(pq.value).getTime();
+      if (tq > 0) document.getElementById('pq-aide').textContent = '${T("Elle partira {0} (plus tôt si l’application est ouverte), dans la version préparée à ce moment-là.")}'.split('{0}').join(fenetre(Math.floor(tq / 1000)));
     };
     feuille.querySelectorAll('[data-q]').forEach(function(b){ b.onclick = function(){ QUAND = b.getAttribute('data-q'); peindre(); if (QUAND === 'plus') pq.focus(); }; });
+    pq.addEventListener('input', peindre); pq.addEventListener('change', peindre);
     peindre(); document.getElementById('pnom').focus();
     document.getElementById('non').onclick = function(){ voile.hidden = true; };
     oui.onclick = function(){
@@ -860,7 +863,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
     appeler('config:bt:sync', ['planifier', { quand: quand, nom: nom, elements: l.map(function(e){ return { tbl: e.tbl, cle: e.cle, choix: choixDe(e), titre: nomCle(e) }; }) }]).then(function(r){
       if (!r || !r.ok) { oui.disabled = false; szDire(motif(r), 'err'); return; }
       feuille.innerHTML = '<div class="fh"><div class="sy-fin ok">' + SVG_OK + '</div><h3>' + '${T("Publication planifiée")}' + '</h3><p>'
-        + (nom ? '« ' + esc(nom) + ' » · ' : '') + l.length + ' ' + '${T("changement(s)")}' + ' · ' + esc(quand_(quand)) + '</p><p>' + '${T("Vous pouvez l’annuler depuis l’historique tant qu’elle n’est pas partie.")}' + '</p></div>'
+        + (nom ? '« ' + esc(nom) + ' » · ' : '') + l.length + ' ' + '${T("changement(s)")}' + ' · ' + esc(quand_(quand)) + '</p><p>' + '${T("Elle partira {0}, même si l’application est fermée.")}'.split('{0}').join(esc(fenetre(quand))) + ' ' + '${T("Vous pouvez l’annuler depuis l’historique tant qu’elle n’est pas partie.")}' + '</p></div>'
         + '<div class="ff"><button type="button" class="btn" id="vh">' + '${T("Voir l’historique")}' + '</button><button type="button" class="btn pri" id="ok">' + '${T("Terminé")}' + '</button></div>';
       document.getElementById('ok').onclick = function(){ voile.hidden = true; };
       document.getElementById('vh').onclick = function(){ voile.hidden = true; vue('hist'); };
@@ -921,6 +924,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
     appeler('config:bt:sync', ['planifs']).then(function(r){ PL = r && r.ok ? (r.planifs || []) : []; dessinerHist(); });
   }
   function quand_(t){ return quand(t); }
+  /* (2026-11-26, l'essai de la Chemise Walla) LA FENÊTRE DE DÉPART : le réveil du serveur passe toutes les 10 minutes,
+     donc une publication planifiée part entre l'heure dite et 10 minutes plus tard (plus tôt si l'application est
+     ouverte : son compteur la fait partir à la minute). On le DIT au lieu de laisser deviner. */
+  function hm(s){ var d = new Date(s * 1000); try { return d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' }); } catch (e) { return d.toTimeString().slice(0, 5); } }
+  function fenetre(s){ return '${T("entre {0} et {1}")}'.split('{0}').join(hm(s)).split('{1}').join(hm(s + 600)); }
   function lots(){
     var out = [], par = {};
     (HI || []).forEach(function(x){
@@ -941,7 +949,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
     /* (2026-11-25) Les publications PLANIFIÉES, en tête : celles qui attendent (annulables), et celles parties avec des échecs. */
     var pl = (PL || []).filter(function(p){ return p.etat === 'attente' || p.etat === 'cours' || (p.etat === 'fait' && p.bilan && p.bilan.erreurs && p.bilan.erreurs.length); });
     var hp = pl.length ? '<div class="sy-pl-t">' + '${T("Planifiées")}' + '</div>' + pl.map(function(p){
-      var et = p.etat === 'attente' ? '${T("en attente")}' : (p.etat === 'cours' ? '${T("en cours")}' : (p.bilan.ok + ' ' + '${T("en ligne")}' + ', ' + p.bilan.erreurs.length + ' ' + '${T("en échec")}'));
+      var et = p.etat === 'attente' ? '${T("partira {0}")}'.split('{0}').join(fenetre(p.quand)) : (p.etat === 'cours' ? '${T("en cours")}' : (p.bilan.ok + ' ' + '${T("en ligne")}' + ', ' + p.bilan.erreurs.length + ' ' + '${T("en échec")}'));
       return '<div class="sy-pl"><div class="sy-pl-i"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div>'
         + '<div class="sy-pl-x"><div class="q">' + (p.nom ? '« ' + esc(p.nom) + ' » · ' : '') + esc(quand(p.quand)) + '</div><div class="w">' + p.elements.length + ' ' + '${T("changement(s)")}' + (p.par ? ' · ' + '${T("par")}' + ' ' + esc(p.par) : '') + ' · ' + esc(et) + '</div>'
         + (p.etat === 'fait' ? '<div class="w">' + p.bilan.erreurs.slice(0, 4).map(function(x){ return esc((x.titre || x.cle) + ' — ' + motif({ motif: x.motif })); }).join('<br>') + '</div>' : '') + '</div>'

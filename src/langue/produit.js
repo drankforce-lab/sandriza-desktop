@@ -1156,4 +1156,8 @@ module.exports = {
   'Un instant…': 'One moment…',
   'Photos reconnues : la cabine peut maintenant s’en servir.': 'Photos recognised: the fitting room can now use them.',
   'Seul un super-administrateur peut reconnaître des photos.': 'Only a super administrator can recognise photos.',
+  // Garder le solde quand le prix change (2026-11-26)
+  'Le rabais passe de {0} % à {1} %.': 'The discount goes from {0}% to {1}%.',
+  'Garder {0} %': 'Keep {0}%',
+  'Garder {0}': 'Keep {0}',
 };

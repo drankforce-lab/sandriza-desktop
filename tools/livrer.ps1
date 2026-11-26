@@ -54,6 +54,7 @@ param(
   [switch]$SansRendu,
   [switch]$SansControles,
   [switch]$SansEnLigne,
+  [switch]$SansBoutique,   # saute la mesure des champs de la boutique (etape 3b : un Chrome)
   [string]$Site
 )
 
@@ -64,7 +65,24 @@ if (-not $Site) { $Site = Join-Path (Split-Path -Parent $racine) 'Sandriza' }
 function Etape($t)   { Write-Host "`n=== $t" -ForegroundColor Cyan }
 function Bon($t)     { Write-Host "  OK    $t" -ForegroundColor Green }
 function Note($t)    { Write-Host "  --    $t" -ForegroundColor DarkGray }
-function Mauvais($t) { Write-Host "  ECHEC $t" -ForegroundColor Red; exit 1 }
+function Mauvais($t) { Write-Host "  ECHEC $t" -ForegroundColor Red; Fermer-ChromeSansTete; exit 1 }
+<# LES CHROME QUE LES CONTRÔLES LAISSENT DERRIÈRE EUX (2026-11-26, sa demande répétée : aucun Chrome lancé sans son
+   accord ne doit rester). On ne touche QU'aux Chrome sans tête ou pilotés (--headless, --remote-debugging-port) dont le
+   profil est dans le dossier temporaire : jamais à son Chrome à lui. On les COMPTE, on les ferme, et on le DIT. #>
+function Fermer-ChromeSansTete {
+  try {
+    $tmp = [IO.Path]::GetTempPath().TrimEnd('\')
+    $l = @(Get-CimInstance Win32_Process -Filter "Name='chrome.exe'" | Where-Object {
+      $c = [string]$_.CommandLine
+      ($c -match '--headless|--remote-debugging-port') -and ($c -like "*$tmp*")
+    })
+    if ($l.Count -eq 0) { Note "Chrome laisses par les controles : 0"; return }
+    $l | ForEach-Object { Stop-Process -Id $_.ProcessId -Force -ErrorAction SilentlyContinue }
+    Start-Sleep -Milliseconds 600
+    $reste = @(Get-CimInstance Win32_Process -Filter "Name='chrome.exe'" | Where-Object { $_.CommandLine -match '--headless|--remote-debugging-port' -and $_.CommandLine -like "*$tmp*" }).Count
+    Write-Host ("  !!    {0} Chrome sans tete laisses par les controles : fermes ({1} restant)" -f $l.Count, $reste) -ForegroundColor Yellow
+  } catch { Write-Host "  !!    compte des Chrome impossible : $($_.Exception.Message)" -ForegroundColor Yellow }
+}
 
 if ($Version -notmatch '^\d+\.\d+\.\d+$') { Mauvais "-Version doit etre X.Y.Z (recu : $Version)" }
 if (-not (Test-Path $Site)) { Mauvais "depot du site introuvable : $Site  (passer -Site <chemin>)" }
@@ -192,6 +210,17 @@ if ($SansControles) {
   } finally { Pop-Location }
   Bon "le controle avant deploiement passe"
   if ($SansRendu) { Note "-SansRendu : les contrastes au rendu n'ont PAS ete mesures ici. C'est l'etape 4 qui les lira." }
+
+  # 3b. (2026-11-26, avec son accord) Les champs de la BOUTIQUE au rendu : 13 parcours x 2 largeurs, fichiers locaux,
+  # donnees en ligne. UN Chrome, ferme par son profil (le banc affiche combien). -SansBoutique / -SansRendu le sautent.
+  if ($SansBoutique -or $SansRendu) {
+    Note "champs de la boutique NON mesures (-SansBoutique / -SansRendu)"
+  } else {
+    Etape "3b. Les champs de la boutique (un Chrome)"
+    & node (Join-Path $Site 'tools\check\banc-champs-boutique.js')
+    if ($LASTEXITCODE -ne 0) { Mauvais "la boutique a un champ deforme ou qui deborde — voir les lignes ci-dessus" }
+    Bon "champs de la boutique : aucun defaut"
+  }
 }
 
 # ── 4. CONSTRUIRE, PUIS LIRE CHAQUE TRAVAIL ─────────────────────────────────
@@ -287,6 +316,9 @@ if ($SansEnLigne) {
   if ($LASTEXITCODE -ne 0) { Mauvais "le site en ligne n'est pas conforme" }
   Bon "site en ligne conforme"
 }
+
+Etape "7. Les Chrome des controles"
+Fermer-ChromeSansTete
 
 Write-Host ""
 Write-Host "==== $Version LIVREE — construite, publiee, deposee dans R2 ====" -ForegroundColor Green

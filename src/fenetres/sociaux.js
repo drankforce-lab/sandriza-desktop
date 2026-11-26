@@ -737,7 +737,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('sociaux')}
       + (F.titre ? epChamp('titre', '${T("Titre de l’épingle")}', F.titre, false) : '')
       + (F.lienCliquable ? epChamp('lien', '${T("Lien de destination")}', 0, false) : '')
       + epChamp('description', F.cle === 'pinterest' ? '${T("Description (elle sert à être trouvée)")}' : '${T("Texte de la publication")}', F.description, true)
-      + epChamp('alt', '${T("Texte de remplacement de l’image")}', 0, true)
+      + epChamp('alt', '${T("Texte de remplacement de l’image")}', 500, true)
       + '</div>';
     if (!F.lienCliquable) h += '<div class="ep-note">${T("Ce réseau ne rend pas les liens cliquables : mettez l’adresse dans la bio du compte.")}</div>';
 

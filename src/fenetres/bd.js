@@ -257,7 +257,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="bt-moi">${T("Votre adresse :")} <code>' + esc(moi.ip || '?') + '</code> ${T("pays :")} <code>' + esc(moi.pays || '?') + '</code>'
       + '<button class="b" type="button" id="bt-moi">${T("Ajouter mon adresse")}</button></div>'
       + '<label class="bt-ch">${T("Adresses IP autorisées (une par ligne ; un bloc comme 203.0.113.0/24 est accepté)")}'
-      + '<textarea id="bt-ips" spellcheck="false" aria-label="${T("Adresses IP autorisées")}">' + esc((a.ips || []).join('\\n')) + '</textarea></label>'
+      + '<textarea id="bt-ips" maxlength="4000" spellcheck="false" aria-label="${T("Adresses IP autorisées")}">' + esc((a.ips || []).join('\\n')) + '</textarea></label>'
       + '<label class="bt-ch">${T("Pays autorisés (codes à deux lettres, séparés par des virgules ; vide = tous)")}'
       + '<input id="bt-pays" spellcheck="false" aria-label="${T("Pays autorisés")}" value="' + esc((a.pays || []).join(', ')) + '"></label>'
       + '<label class="bt-ch">${T("Courriels du test envoyés à (tous, quel que soit le destinataire ; vide = aucun courriel)")}'

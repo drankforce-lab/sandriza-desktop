@@ -152,7 +152,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="ch"><label for="a-pid">${T("ID de propriété GA4 (numérique)")}</label><input id="a-pid" value="' + esc(C.propertyId||'') + '" placeholder="123456789"' + dis + '></div>'
       + '</div>';
     h += '<div class="ch"><label for="a-sa">${T("Clé du compte de service (JSON)")}</label>'
-      + '<textarea id="a-sa" rows="5" placeholder="' + (C.hasServiceAccount ? '${T("inchangée (laisser vide pour conserver la clé existante)")}' : '${T("Collez ici tout le contenu du fichier JSON téléchargé de Google Cloud")}') + '"' + dis + '></textarea>'
+      + '<textarea id="a-sa" maxlength="10000" rows="5" placeholder="' + (C.hasServiceAccount ? '${T("inchangée (laisser vide pour conserver la clé existante)")}' : '${T("Collez ici tout le contenu du fichier JSON téléchargé de Google Cloud")}') + '"' + dis + '></textarea>'
       + badge(!!C.hasServiceAccount)
       + '<div class="aide">${T("La clé est stockée côté serveur et n’est jamais renvoyée à l’écran.")}</div></div>';
     // (2026-11-25) la phrase du tableau de bord rejoint la carte : une seconde carte pour une phrase laissait un grand vide

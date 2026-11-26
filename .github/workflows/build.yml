@@ -172,6 +172,18 @@ jobs:
         # ⚠ UNE SEULE LIGNE, voir juste au-dessus : `tools/bancs.js` lit la liste
         # des bancs dans ce fichier avec le motif `^\s*node tools/`.
         run: node tools/banc-contraste-rendu.js ${{ inputs.avec_themes && '--themes' || '' }} ${{ inputs.regenerer_reste && '--reste' || '' }}
+
+
+  # (2026-11-26) LES AUTRES BANCS DE RENDU, SUR LEUR PROPRE MACHINE : ils suivaient les contrastes dans le meme
+  # travail (6 min + 5 min a la file). En parallele, la livraison attend ~6 min au lieu de ~11 min 30. Memes bancs,
+  # meme Linux, meme Node : seul le decoupage change. livrer.ps1 lit CHAQUE travail, celui-ci compris.
+  rendu-fenetres:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
       # 🔴 SA REGLE DU 2026-10-12 : << aucun scroll bar dans l'application >>, et << les ajouts de donnees
       # sous controle de pagination >>. Le banc rend les 108 fenetres a 1400 x 833 et ECHOUE sur une seule
       # zone qui defile (ou un controle hors d'atteinte). Ici, sur Linux, et PAS dans la rafale locale :
@@ -187,6 +199,12 @@ jobs:
       # son compteur annonce). Un temoin pose un defaut de chaque sorte. Dette : tools/champs-dette.json.
       - name: Champs et espacements — 108 fenetres, au repos et sous charge
         run: node tools/banc-champs.js
+      # Les deux gardes des champs (2026-11-26) : celui du socle et assets/js/champs.js du site rendent le meme
+      # resultat sur les memes saisies. Ici le depot du site est absent : le banc le dit et passe ; il compare
+      # pour de vrai sur le poste (bancs.js, livrer.ps1), ou les deux depots sont cote a cote.
+      - name: Garde des champs — les deux exemplaires concordent
+        run: |
+          node tools/banc-champs-jumeaux.js
       # Le clic droit (2026-10-13) : chaque fenetre rendue, trois lignes essayees, aucune exception, aucune
       # entree sans libelle, et un TEMOIN qui doit ouvrir son menu. Meme montage (lots sequentiels, un Chrome).
       - name: Clic droit — 108 fenetres essayees au rendu

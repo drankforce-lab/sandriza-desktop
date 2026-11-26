@@ -450,6 +450,10 @@ function szBulle(t, cible){
   bc.onclick = function(){ szBulleFermer(); _szAller(a); };
   b.hidden = false; b.classList.remove('haut'); void b.offsetWidth; b.classList.add('on');
   _szBulleLibre(b);
+  /* Une boîte qui se dessine APRÈS l'erreur (Véhicules : la liste NHTSA échoue pendant l'ouverture) n'avait pas
+     encore ses boutons : on regarde encore une fois, puis une dernière. */
+  setTimeout(function(){ if (b.classList.contains('on') && !b.classList.contains('haut')) _szBulleLibre(b); }, 80);
+  setTimeout(function(){ if (b.classList.contains('on') && !b.classList.contains('haut')) _szBulleLibre(b); }, 400);
   clearTimeout(_szBulleT); _szBulleT = setTimeout(szBulleFermer, 9000);
 }
 function szDire(texte, genre, cible){
@@ -2695,6 +2699,20 @@ function _szChampsGarde(M){
     try { e.setRangeText(t, e.selectionStart, e.selectionEnd, 'end'); } catch (x) { e.value += t; }
     e.dispatchEvent(new Event('input', { bubbles: true }));
   }
+  /* (2026-11-26, O7) UNE BORNE PAR DÉFAUT : un champ texte sans maxlength en reçoit une — 1000 caractères (2048 pour
+     une adresse), assez pour coller une clé d'API ou un jeton entier, assez court pour qu'un collage accidentel ne
+     déforme rien. Les zones de texte (gabarits HTML) et les champs qui déclarent déjà leur borne ne sont pas touchés ;
+     data-sz-nb l'écarte. Reposée à chaque redessin (MutationObserver), comme JS_BORNER. */
+  function _czBorner(){
+    var l = document.querySelectorAll('input:not([maxlength]):not([data-sz-nb])');
+    for (var i = 0; i < l.length; i++) {
+      var e = l[i], ty = (e.getAttribute('type') || 'text').toLowerCase();
+      if (!/^(text|search|email|tel|url|password)$/.test(ty)) continue;
+      e.maxLength = ty === 'url' ? 2048 : 1000;
+    }
+  }
+  function _czBornerDes(){ _czBorner(); try { new MutationObserver(_czBorner).observe(document.body, { childList: true, subtree: true }); } catch (x) {} }
+  if (document.body) _czBornerDes(); else document.addEventListener('DOMContentLoaded', _czBornerDes);
   document.addEventListener('beforeinput', function(ev){
     var e = ev.target, s = _czSorte(e); if (!s) return;
     var ty = ev.inputType || '';

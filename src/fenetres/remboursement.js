@@ -291,7 +291,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     h += '<div class="carte"><h2>${T("Motif")} <span class="note">${T("— obligatoire")}</span></h2>'
       // rows="3" (2026-08-21) : motif OBLIGATOIRE d'un remboursement — de l'argent
       // au bout, et c'est la piece qu'on relit si la cliente conteste.
-      + '<textarea id="m-motif" aria-label="${T("Motif du remboursement")}" rows="3" placeholder="${T("Ex : article défectueux, mauvaise taille reçue, retour volontaire…")}"></textarea>'
+      + '<textarea id="m-motif" maxlength="1000" aria-label="${T("Motif du remboursement")}" rows="3" placeholder="${T("Ex : article défectueux, mauvaise taille reçue, retour volontaire…")}"></textarea>'
       + '</div>';
 
     h += '</div><div>'
