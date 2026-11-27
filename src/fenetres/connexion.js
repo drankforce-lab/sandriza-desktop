@@ -46,6 +46,7 @@
 
 const { JS_DIRE, TETE } = require('./socle.js');
 const POLICE_EPURE = require('../police-epure.js');
+const LOGO_ANIME = require('../logo-anime.js');   // (2026-11-26) le reflet, le halo qui respire, la poussière d'or
 
 let SZ_VERSION = '';
 try { SZ_VERSION = String(require('../../package.json').version || ''); }
@@ -426,7 +427,7 @@ function pageConnexion(depart) {
   var _dep = String(depart || '').replace(/[^a-zA-Z]/g, '');
   return `${TETE()}
 <title>Connexion</title>
-<style>${CSS_WEB}${CSS_FEN}${POLICE_EPURE}${CSS_EPURE_CNX}${CSS_TEINTES_CNX}</style></head><body>
+<style>${CSS_WEB}${CSS_FEN}${POLICE_EPURE}${CSS_EPURE_CNX}${CSS_TEINTES_CNX}${LOGO_ANIME.css('.admlogin-logo-plate', '.admlogin-brand')}</style></head><body>
 <div id="corps"></div>
 <script>
 (function(){
@@ -685,8 +686,10 @@ ${JS_DIRE()}
   function marquePanneau(){
     var m = CTX.marque, t = CTX.theme;
     var logo = m.logo
-      ? '<div class="admlogin-logo-plate"><img src="' + esc(m.logo) + '" alt="' + esc(m.nom)
-        + '" class="admlogin-logo-img" style="width:min(480px,calc(46vw - 7rem),80vw);height:auto"></div>'
+      ? '<div class="admlogin-logo-plate"><span class="sz-logo"><img src="' + esc(m.logo) + '" alt="' + esc(m.nom)
+        + '" class="admlogin-logo-img" style="width:min(480px,calc(46vw - 7rem),80vw);height:auto">'
+        /* (2026-11-26) le reflet doré du portail RH, MASQUÉ PAR LE LOGO : il ne colore que les lettres (src/logo-anime.js) */
+        + '<span class="sz-reflet" style="-webkit-mask-image:url(&quot;' + esc(m.logo) + '&quot;);mask-image:url(&quot;' + esc(m.logo) + '&quot;)"></span></span></div>'
       : '<div class="admlogin-logo-badge" style="background:linear-gradient(135deg,'
         + t.logoFrom + ',' + t.logoTo + ')">' + esc(m.lettre) + '</div>';
     var nom = m.logo ? '' : '<h1>' + esc(m.nom) + '</h1>';
@@ -696,6 +699,7 @@ ${JS_DIRE()}
     return '<aside class="admlogin-brand">'
       + '<span class="admlogin-orb o1"></span><span class="admlogin-orb o2"></span>'
       + '<span class="admlogin-orb o3"></span>'
+      + '${LOGO_ANIME.POUSSIERE}'
       + '<div class="admlogin-brand-inner">' + logo + nom
       + '<div class="admlogin-eyebrow"><span class="al-line"></span><span>'
       /* Le sous-titre par DEFAUT du site se traduit ; un sous-titre personnalise

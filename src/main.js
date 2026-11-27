@@ -2711,6 +2711,7 @@ const _porteEpure = (p) => {
     + '.brand{background:' + fond + '!important;border-right:1px solid ' + filet + ';color:' + tx + '!important}'
     + '.badge{background:' + brun + '!important;border-radius:14px!important;box-shadow:none!important;font-family:' + F + '!important;color:' + (j ? '#fff' : '#1a1208') + '!important}'
     + '.plate{animation:none}'
+    + '.brand{--cx-a-rgb:' + rgbA + '}'
     + '.bname,.h1,.dl-pct{font-family:' + F + '!important;letter-spacing:-.02em!important;color:' + tx + '!important}'
     + '.eyebrow,.sub,.kicker,.ver,.dl-mo,.dl-vit,.dl-fin{color:' + tx2 + '!important}'
     + '.eyebrow .line{background:' + brun + '!important}'
@@ -2739,7 +2740,9 @@ const portePage = (titre, message, progression) => {
     '<div class="pg"><div class="pg-in" style="width:' + Math.max(0, Math.min(100, progression)) + '%"></div></div>';
 
   const logo = b.logo
-    ? '<div class="plate"><img src="' + b.logo + '" alt="" class="plate-img"></div>'
+    ? '<div class="plate"><span class="sz-logo"><img src="' + b.logo + '" alt="" class="plate-img">'
+      // (2026-11-26) le reflet doré du portail RH, masqué par le logo lui-même (src/logo-anime.js)
+      + '<span class="sz-reflet" style="-webkit-mask-image:url(&quot;' + b.logo + '&quot;);mask-image:url(&quot;' + b.logo + '&quot;)"></span></span></div>'
     : '<div class="badge" style="background:' + b.logoG + '">' + b.lettre + '</div>';
   const nom = b.logo ? '' : '<h1 class="bname">' + b.nom + '</h1>';
 
@@ -2760,6 +2763,7 @@ const portePage = (titre, message, progression) => {
     // ⚠ (2026-11-17, sa demande : « fidèle à la page de connexion ») Mêmes mesures que connexion.js depuis
     // son agrandissement du 2026-11-02 : colonne 560 px, plaque serrée, logo jusqu à 480 px. Changer l un
     // sans l autre refait l écart : le logo rapetisse en passant de la connexion à la mise à jour.
+    + '.brand{--cx-a-rgb:' + (p ? p.rgb : '196,154,108') + '}'   // la poussière d'or prend l'accent du thème (logo-anime.js)
     + '.binner{position:relative;z-index:2;max-width:560px}'
     + '.badge{width:74px;height:74px;border-radius:19px;display:inline-flex;align-items:center;justify-content:center;'
     +   'font:800 2rem/1 Georgia,serif;color:#fff;margin:0 0 1.5rem;box-shadow:0 14px 34px rgba(0,0,0,.34)}'
@@ -2838,15 +2842,17 @@ const portePage = (titre, message, progression) => {
 
   const html = ''
     + '<!doctype html><html lang="' + require('./langue').langueCourante() + '"><head><meta charset="utf-8"><title>' + b.nom + '</title>'
-    + '<style>' + css + _porteEpure(p) + '</style></head><body><div class="split">'
+    + '<style>' + css + _porteEpure(p) + require('./logo-anime').css('.plate', '.brand') + '</style></head><body><div class="split">'
     + '<aside class="brand">'
     +   '<span class="orb o1"></span><span class="orb o2"></span><span class="orb o3"></span>'
+    +   require('./logo-anime').POUSSIERE
     // ⚠ PAS DE LISTE DE PROTECTIONS ICI (retirée à la demande de l'utilisateur,
     // 2026-08-06). L'écran de connexion l'affiche, c'est son rôle : rassurer
     // quelqu'un qui s'apprête à taper un mot de passe. Un écran de mise à jour
     // n'a personne à rassurer — le logo et le message suffisent.
+    /* (2026-11-26, sa capture : « lors des mises à jour tu peux retirer le panneau d'administration ») Plus de
+       sous-titre ici : le logo suffit. La connexion, elle, le garde. */
     +   '<div class="binner">' + logo + nom
-    +     '<div class="eyebrow"><span class="line"></span><span>' + b.sousTitre + '</span></div>'
     +   '</div></aside>'
     + '<main class="panel"><div class="wrap">'
     +   '<span class="kicker">' + TP('Mise à jour') + '</span>'
