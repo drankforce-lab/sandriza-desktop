@@ -2409,7 +2409,8 @@ function szBoite(nom, args, local, titre){
   if (window.__szBoite || !(window.szPont && typeof window.szPont.boite === 'function')) return Promise.resolve(ici());
   return Promise.resolve(window.szPont.boite({ nom: String(nom || ''), args: args === undefined ? null : args, titre: titre || document.title }))
     .then(function(r){
-      if (r === undefined || (r && r.introuvable)) return ici();
+      /* Une reponse qui n est pas un objet (pont d essai qui rend null, pont ancien) = pas de fenetre native : on ouvre ici. */
+      if (!r || typeof r !== 'object' || r.introuvable) return ici();
       /* Seulement un VRAI message (genre connu) : un « type » maison sert a rendre un choix (Studio), pas a parler. */
       if (r && r.message && /^(|bon|ok|err|att|info)$/.test(String(r.type || '')) && typeof szDire === 'function') { try { szDire(r.message, r.type || 'bon'); } catch (e) {} }
       return r || { fini: true };

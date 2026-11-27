@@ -1847,7 +1847,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
       /* ⚠ Ouverture directe sur l editeur (id d ouverture) : le banc
          n a aucun moyen de cliquer, et c est justement l editeur qui
          manquait. */
-      if (${JSON.stringify(editeur)} && !EDIT && !window.__szBoite) ouvrirEditeur('');
+      /* (2026-11-27) UNE SEULE FOIS : la fermeture de la fenetre fille recharge la liste (charger) ; sans ce drapeau,
+         l ouverture directe rouvrait l editeur a chaque fermeture — une boucle (banc rendu-fenetres, lot muet). */
+      if (${JSON.stringify(editeur)} && !EDIT && !window.__szBoite && !window.__fiEditeurOuvert) { window.__fiEditeurOuvert = true; ouvrirEditeur(''); }
     });
   }
 
