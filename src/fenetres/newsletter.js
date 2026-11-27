@@ -491,10 +491,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
     }
     return c;
   }
+  /* (2026-11-27, phase 2) L apercu s ouvre dans une VRAIE FENETRE (szBoite) : on lui passe la saisie en
+     cours (pas la version enregistree), et rien n est a recharger a sa fermeture. */
   function ouvrirApercu(){
+    var c = offreSaisie();
+    szBoite('apercu', c, function(){ ouvrirApercuIci(c); });
+  }
+  function ouvrirApercuIci(c){
     fermerApercu();
     APERCU = true;
-    corps.insertAdjacentHTML('beforeend', '<div class="voile" id="ap-voile">' + popHtml(offreSaisie(), false) + '</div>');
+    corps.insertAdjacentHTML('beforeend', '<div class="voile" id="ap-voile">' + popHtml(c || offreSaisie(), false) + '</div>');
   }
   function fermerApercu(){
     APERCU = false;
@@ -641,7 +647,16 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'nl-from-n':60,'nl-trans-from-n':60,'nl
   charger().then(function(ok){
     if (!ok) return;
     dessiner();
-    ${ouvreApercu ? 'APERCU = true; dessiner();' : ''}
+    ${ouvreApercu ? "szBoite('apercu', D.cfg || {}, function(){ APERCU = true; dessiner(); });" : ''}
+    // En fenetre fille (szBoite) : l apercu demande, seul a l ecran, avec la saisie transmise.
+    szBoiteSiDemandee({
+      apercu: function(c){
+        var montrer = function(){ dessiner(); ouvrirApercuIci(c && typeof c === 'object' ? c : null); };
+        if (TAB === 'offer') { montrer(); return; }
+        TAB = 'offer';
+        charger().then(function(ok2){ if (ok2) montrer(); });
+      }
+    });
   });
 })();
 </script></body></html>`;

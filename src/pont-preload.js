@@ -201,6 +201,13 @@ contextBridge.exposeInMainWorld('szPont', {
   dialogue: (o) => ipcRenderer.invoke('dialogue:demander', o || {}).catch(() => undefined),
   dialogueReponse: (r) => ipcRenderer.send('dialogue:reponse', r == null ? null : r),
   dialogueTaille: (h) => ipcRenderer.send('dialogue:taille', parseInt(h, 10) || 0),
+  /* ══ LES BOÎTES-FORMULAIRES EN VRAIES FENÊTRES (2026-11-27, phase 2) — src/boite-native.js ══
+     boite({ nom, args, titre }) : la coquille rouvre la page en mode « boîte seule » dans une fenêtre modale
+     fille et rend { fini, message, type } à sa fermeture — UNDEFINED si c'est impossible (la mère ouvre alors
+     sa boîte chez elle). boiteTaille / boiteFin : dits par la page fille. */
+  boite: (o) => ipcRenderer.invoke('boite:ouvrir', o || {}).catch(() => undefined),
+  boiteTaille: (l, h) => ipcRenderer.send('boite:taille', parseInt(l, 10) || 0, parseInt(h, 10) || 0),
+  boiteFin: (info) => ipcRenderer.send('boite:fin', info || {}),
   /* Le code à 6 chiffres avant une exportation (fenetres/code-export.js) : le code tapé, ou
      null pour « annuler ». C'est le principal qui le fait vérifier par le serveur. */
   codeExportReponse: (code) => ipcRenderer.send('codeexport:reponse', code == null ? null : String(code)),

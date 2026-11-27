@@ -235,7 +235,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
      serait oublié à chaque ouverture, c est-à-dire inutile. */
   var COL_REPLI = false;
   var BUSY = false;          // application en cours
-  var CONFIRM = false;       // surcouche de confirmation ouverte
+  var CONFIRM = false;       // confirmation « Appliquer l import » en attente de reponse
 
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){
     return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
@@ -609,10 +609,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
       + '</div>';
   }
 
-  /* ══ SURCOUCHE DE CONFIRMATION ═══════════════════════════════════════════════
-     Le dernier écran avant une écriture qui touche des centaines de fiches. */
-  function vueConfirmer(){
-    if (!IMP) return '';
+  /* ══ LA CONFIRMATION ═════════════════════════════════════════════════════════
+     Le dernier écran avant une écriture qui touche des centaines de fiches.
+     (2026-11-27, phase 2) Ce n est plus une surcouche dessinee dans la page : c est szConfirmer, une
+     VRAIE FENETRE de l application. Pas de szBoite ici : apres « Appliquer », la PAGE poursuit le
+     travail (ecriture par lots, suivi de l avance) — une fenetre fille qui se fermerait le couperait.
+     Les puces gardent leurs textes ; le gras est retire (la boite ecrit du texte, pas du HTML). */
+  function optionsConfirmer(){
+    if (!IMP) return null;
     var c = IMP.compte, inv = IMP.feuille === 'inventaire', parts = [];
     // (2026-10-25, audit) Chaque puce est une phrase entiere, au singulier ou au pluriel (nb).
     if (c.creation) parts.push('<li>' + nb(c.creation, '${T("<strong>{0}</strong> produit <strong>créé</strong> — hors vente, à relire et publier ensuite")}',
@@ -624,17 +628,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
       '${T("<strong>{0}</strong> photos <strong>téléchargées</strong> depuis des sites externes et copiées dans votre stockage")}') + '</li>');
     if (c.inchange) parts.push('<li>' + nb(c.inchange, '${T("{0} ligne identique : rien ne sera écrit")}', '${T("{0} lignes identiques : rien ne sera écrit")}') + '</li>');
     if (c.erreur) parts.push('<li>' + nb(c.erreur, '${T("{0} ligne en erreur : <strong>ignorée</strong>")}', '${T("{0} lignes en erreur : <strong>ignorées</strong>")}') + '</li>');
-    return '<div class="voile" id="conf-voile"><div class="boite">'
-      + '<h3>${T("Appliquer l’import")}</h3>'
-      + '<p style="margin:0 0 .6rem;font-size:.86rem">${T("Fichier")} <strong>' + esc(IMP.fichier) + '</strong> ${T("— feuille")} ' + esc(nomFeuille(IMP.feuille)) + '.</p>'
-      + '<ul>' + parts.join('') + '</ul>'
-      + '<div class="gare">${T("Aucun produit absent du fichier n’est touché, et rien n’est supprimé. Une fiche")} '
-      +   '${T("qu’un collègue est en train de modifier sera refusée et listée à la fin.")}</div>'
-      + '<div class="pied-boite">'
-      +   '<button class="gauche" data-conf="annuler">${T("Annuler")}</button>'
-      +   '<button class="prim" data-conf="appliquer">${T("Appliquer")}</button>'
-      + '</div>'
-      + '</div></div>';
+    var brut = function(x){ return String(x || '').replace(/<[^>]*>/g, ''); };
+    return { prudent: true, titre: '${T("Appliquer l’import")}',
+      texte: '${T("Fichier")} ' + String(IMP.fichier || '') + ' ${T("— feuille")} ' + nomFeuille(IMP.feuille) + '.',
+      liste: parts.map(brut),
+      note: '${T("Aucun produit absent du fichier n’est touché, et rien n’est supprimé. Une fiche")} '
+        + '${T("qu’un collègue est en train de modifier sera refusée et listée à la fin.")}',
+      oui: '${T("Appliquer")}' };
   }
 
   /* ══ DESSIN ══════════════════════════════════════════════════════════════════ */
@@ -659,7 +659,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
     } else {
       h = vueExport();
     }
-    if (CONFIRM) h += vueConfirmer();
     corps.innerHTML = h;
     brancherFichier();
   }
@@ -830,7 +829,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
   function ouvrirConfirmer(){
     if (!IMP) return;
     if (!(IMP.compte.creation + IMP.compte.maj)) { dire('${T("Rien à appliquer.")}', 'att'); return; }
-    CONFIRM = true; dessiner();
+    if (CONFIRM || BUSY) return;
+    var o = optionsConfirmer(); if (!o) return;
+    CONFIRM = true;
+    szConfirmer(o).then(function(oui){ CONFIRM = false; if (oui && IMP) appliquer(); });
   }
   /* (lot VOLUME 2) L IMPORT PAR LOTS ATTENDUS. { attendre: false } : le coeur lance l ecriture (par lots de
      500, chacun attendu avant le suivant) et repond tout de suite ; la fenetre suit catalogio:etat
@@ -916,12 +918,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
   document.addEventListener('click', function(e){
     var t = e.target; if (!t || !t.closest) return;
     var b = t.closest('button'); if (!b) return;
-    // Surcouche de confirmation
-    if (CONFIRM) {
-      if (b.getAttribute('data-conf') === 'annuler') { CONFIRM = false; dessiner(); return; }
-      if (b.getAttribute('data-conf') === 'appliquer') { appliquer(); return; }
-      return;
-    }
+    // La confirmation est ouverte (szConfirmer) : la page attend sa reponse.
+    if (CONFIRM) return;
     var tab = b.getAttribute('data-tab');
     if (tab) { TAB = tab; dessiner(); return; }
     var act = b.getAttribute('data-act');
@@ -959,7 +957,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
     if (e.key !== 'Escape') return;
     // (2026-10-25, audit) Pendant l ecriture, Echap ne ferme pas : l ecran dit « ne fermez pas cette fenetre ».
     if (BUSY) { e.preventDefault(); dire('${T("Import en cours — ne fermez pas cette fenêtre.")}', 'att'); return; }
-    if (CONFIRM) { CONFIRM = false; dessiner(); return; }
+    if (CONFIRM) return;   // szConfirmer gere sa propre touche Echap
     if (COL_BOITE) { COL_BOITE = false; dessiner(); return; }
     if (P && P.fermer) P.fermer();
   });
@@ -977,9 +975,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
      boite est fermee a chaque ouverture de la fenetre (le repli du profil, lu
      plus bas, ne decide plus d aucun dessin). */
   var COL_BOITE = false;
+  /* (2026-11-27, phase 2) Le detail s ouvre dans une VRAIE FENETRE (szBoite) : une simple visionneuse, rien a
+     recharger a sa fermeture. La fenetre fille relit l etat avec la meme feuille et les memes options. */
   function basculerColonnes(){
-    COL_BOITE = !COL_BOITE;
-    dessiner();
+    if (COL_BOITE) { COL_BOITE = false; dessiner(); return; }
+    szBoite('colonnes', { sheet: SHEET, hv: !!INCL_HV, cout: !!INCL_COUT }, function(){ COL_BOITE = true; dessiner(); });
+  }
+  function boiteDemandee(){
+    szBoiteSiDemandee({
+      colonnes: function(a){
+        a = a || {};
+        var meme = (a.sheet || SHEET) === SHEET && !!a.hv === !!INCL_HV && !!a.cout === !!INCL_COUT;
+        if (a.sheet) SHEET = a.sheet;
+        INCL_HV = !!a.hv; INCL_COUT = !!a.cout; TAB = 'export';
+        if (meme) { COL_BOITE = true; dessiner(); return; }
+        chargerEtat().then(function(ok){ if (ok) { COL_BOITE = true; dessiner(); } });
+      }
+    });
   }
 
   chargerEtat().then(function(ok){
@@ -998,6 +1010,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('catalogio')}
        bloc-là, le clignotement ferait douter du réglage qu on vient poser. */
     }).then(relireDossier).then(function(){
       ${ouvImport || ouvApercu || ouvConfirmer || ouvRapport ? "TAB = 'import';" : ''}
+      if (window.__szBoite) { dessiner(); boiteDemandee(); return; }
       if (RAP) { dessiner(); return; }
       if (IMP) { return chargerLignes().then(function(){ ${ouvConfirmer ? 'ouvrirConfirmer();' : ''} }); }
       dessiner();

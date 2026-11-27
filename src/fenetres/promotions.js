@@ -908,7 +908,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     var q = document.getElementById('pr-q');
     if (q) q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
     var bn = document.getElementById('pr-nouveau');
-    if (bn) bn.onclick = function(){ FORM = {}; PALIERS = []; CHOISIS = []; QPROD = ''; dessiner(); szBrouillonProposer(); };
+    /* (2026-11-27, phase 2) La fiche (offre ou annonce) s ouvre dans une VRAIE FENETRE (szBoite) ; la liste
+       se recharge a sa fermeture. */
+    if (bn) bn.onclick = function(){ szBoite('nouveau', { onglet: ONGLET }, ouvrirNouveau).then(function(r){ if (r) charger(); }); };
     var ba = document.getElementById('pr-annuler');
     /* ⚠ TROIS CHEMINS FERMENT CETTE BOITE (Annuler, le clic a cote, Echap) : les
        trois ecrivent MAINTENANT, avec les valeurs prises avant qu'elle ne
@@ -1083,14 +1085,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       var pile = ONGLET === 'offres' ? D.offres : D.annonces;
       var x = pile.filter(function(y){ return y.id === idM; })[0];
       if (x) {
-        FORM = x;
-        PALIERS = (x.paliers || []).map(function(p){ return { qty: p.qty, percent: p.percent }; });
-        CHOISIS = (x.produitsChoisis || []).slice();
-        QPROD = ''; SUPPR_ARME = '';
-        dessiner();
-        /* Le brouillon d une offre EXISTANTE (of:<id>) etait ecrit a la fermeture
-           mais jamais propose : Modifier ne le demandait pas (2026-10-07). */
-        szBrouillonProposer();
+        SUPPR_ARME = '';
+        szBoite('modifier', { id: x.id, onglet: ONGLET }, function(){ ouvrirModif(x); }).then(function(r){ if (r) charger(); });
       }
       return;
     }
@@ -1130,12 +1126,41 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     if (SUPPR_ARME) { SUPPR_ARME = ''; dessiner(); }
   });
 
+  function ouvrirNouveau(){ FORM = {}; PALIERS = []; CHOISIS = []; QPROD = ''; dessiner(); szBrouillonProposer(); }
+  function ouvrirModif(x){
+    FORM = x;
+    PALIERS = (x.paliers || []).map(function(p){ return { qty: p.qty, percent: p.percent }; });
+    CHOISIS = (x.produitsChoisis || []).slice();
+    QPROD = ''; SUPPR_ARME = '';
+    dessiner();
+    /* Le brouillon d une offre EXISTANTE (of:<id>) etait ecrit a la fermeture
+       mais jamais propose : Modifier ne le demandait pas (2026-10-07). */
+    szBrouillonProposer();
+  }
+  /* En fenetre fille : la fiche demandee peut etre sur l AUTRE onglet ; on le charge d abord. */
+  var APRES_CHARGE = null;
+  function ouvrirDans(a, f){
+    if (a && a.onglet && a.onglet !== ONGLET) { ONGLET = a.onglet; APRES_CHARGE = f; charger(); }
+    else f();
+  }
   function charger(){
     appeler(ONGLET === 'offres' ? 'offres:liste' : 'annonces:liste', [{ sansCatalogue: true }]).then(function(r){
       if (!r || !r.ok) { vide('${T("Promotions indisponibles")}', expliquer(r)); return; }
       D = r;
       if (sous) sous.textContent = D.peutModifier ? '' : '${T("consultation seulement")}';
       dessiner();
+      if (APRES_CHARGE) { var g = APRES_CHARGE; APRES_CHARGE = null; g(); }
+      // En fenetre fille (szBoite) : on rouvre la fiche demandee, seule a l ecran.
+      szBoiteSiDemandee({
+        nouveau: function(a){ ouvrirDans(a, ouvrirNouveau); },
+        modifier: function(a){
+          if (!a || !a.id) return;
+          ouvrirDans(a, function(){
+            var x = ((ONGLET === 'offres' ? D.offres : D.annonces) || []).filter(function(y){ return y.id === a.id; })[0];
+            if (x) ouvrirModif(x);
+          });
+        }
+      });
     });
   }
 

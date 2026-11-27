@@ -61,6 +61,8 @@ li::before{content:"";flex:0 0 auto;width:6px;height:6px;border-radius:50%;backg
 .note svg{flex:0 0 auto;width:17px;height:17px;margin-top:.15rem;color:var(--tx-or2)}
 .danger .note{color:var(--tx-err)}
 .danger .note svg{color:var(--tx-err)}
+.case{display:flex;gap:.6rem;align-items:flex-start;font-size:.95rem;color:var(--tx);cursor:pointer}
+.case input{width:18px;height:18px;margin:.15rem 0 0;accent-color:var(--or)}
 .champ{display:flex;flex-direction:column;gap:.35rem}
 .champ span{font-size:.85rem;color:var(--tx2)}
 .champ input{font:inherit;font-size:1.15rem;letter-spacing:.3em;text-align:center;height:2.8rem;border-radius:10px;
@@ -110,6 +112,8 @@ const nettoyer = (o) => {
     max: Math.max(1, Math.min(12, parseInt(o.max, 10) || 8)),
     boutons: Array.isArray(o.boutons) ? o.boutons.slice(0, 4).map((b) => ({ id: s(b && b.id, 40), lib: s(b && b.lib, 80), prim: !!(b && b.prim), rouge: !!(b && b.rouge) })) : [],
     echap: s(o.echap, 40),
+    caseLib: s(o.caseLib, 200),
+    caseValeur: !!o.caseValeur,
   };
 };
 
@@ -143,6 +147,7 @@ ${JS_DIRE()}
   if (D.details.length) h += '<dl>' + D.details.map(function(d){ return '<dt>' + esc(d[0]) + '</dt><dd>' + esc(d[1]) + '</dd>'; }).join('') + '</dl>';
   if (D.liste.length) h += (D.listeTitre ? '<p class="lt">' + esc(D.listeTitre) + '</p>' : '') + '<ul>' + D.liste.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>';
   if (D.note) h += '<p class="note">' + ICO_ATTENTION + '<span>' + esc(D.note) + '</span></p>';
+  if (D.caseLib) h += '<label class="case"><input type="checkbox" id="d-case"' + (D.caseValeur ? ' checked' : '') + '><span>' + esc(D.caseLib) + '</span></label>';
   if (D.genre === 'nip') h += '<label class="champ"><span>${T("NIP")}</span><input id="d-nip" type="password" inputmode="numeric" autocomplete="off" maxlength="' + D.max + '"></label>'
     + '<div class="err" id="d-err" role="alert">' + esc(D.erreur) + '</div>';
   h += '</div><div class="dl-pied">';
@@ -170,7 +175,7 @@ ${JS_DIRE()}
   };
   var nip = document.getElementById('d-nip');
   var valider = function(){
-    if (D.genre !== 'nip') { repondre('oui'); return; }
+    if (D.genre !== 'nip') { var cc = document.getElementById('d-case'); repondre(cc ? { oui: true, coche: !!cc.checked } : 'oui'); return; }
     var n = nip.value;
     if (!/^[0-9]+$/.test(n) || n.length < D.min || n.length > D.max) {
       document.getElementById('d-err').textContent = '${T("Un NIP de")} ' + D.min + ' ${T("à")} ' + D.max + ' ${T("chiffres.")}';

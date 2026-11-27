@@ -448,7 +448,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (li) ouvrirDetail(li.getAttribute('data-id'));
   };
 
+  /* (2026-11-27, phase 2) La fiche d une demande s ouvre dans une VRAIE FENETRE (szBoite) ; la liste
+     se recharge a sa fermeture (une reponse envoyee, une demande supprimee). */
   function ouvrirDetail(id){
+    szBoite('detail', { id: id }, function(){ ouvrirDetailIci(id); }).then(function(r){ if (r) charger(); });
+  }
+  function ouvrirDetailIci(id){
     dire('${T("Lecture…")}');
     appeler('messagerie:lire', [id]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -473,6 +478,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       dire('');
       dessiner();
       majRetention();
+      // En fenetre fille (szBoite) : on rouvre la demande demandee, seule a l ecran.
+      szBoiteSiDemandee({ detail: function(a){ if (a && a.id) ouvrirDetailIci(a.id); } });
     });
   }
 

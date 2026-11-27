@@ -653,7 +653,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   // ══ IMPRESSION ET APERCU ══════════════════════════════════════════════════
   function imprimer(){
     dire('${T("Impression de l’étiquette et du bordereau…")}');
-    appeler('expedition:imprimer', [CMD.commande.id, PDF]).then(function(r){
+    return appeler('expedition:imprimer', [CMD.commande.id, PDF]).then(function(r){
       dire(r.ok ? '${T("Étiquette et bordereau envoyés à l’impression.")}' : expliquer(r), r.ok ? 'bon' : 'err');
     });
   }
@@ -662,13 +662,25 @@ ${JS_ACTIVITE()}${JS_DIRE()}
      dans R2, qui ne repond pas aux requetes de cette fenetre (aucun CORS) : un
      appel direct echouerait, et un await non rattrape dans un onclick fait un
      bouton MORT, sans message. Le site relaie et rend le PDF en base64. */
+  /* (2026-11-27, phase 2) L apercu s ouvre dans une VRAIE FENETRE (szBoite) : la fille lit l etiquette
+     et l affiche seule. Rien a recharger a sa fermeture (une simple visionneuse). */
   function apercu(){
+    szBoite('apercu', null, apercuIci).then(function(){});
+  }
+  function apercuIci(){
     var b = document.getElementById('btn-apercu');
     if (b) b.disabled = true;
     dire('${T("Lecture de l’étiquette…")}');
     appeler('expedition:pdf', [CMD.commande.id]).then(function(r){
       if (b) b.disabled = false;
-      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      if (!r.ok) {
+        dire(expliquer(r), 'err');
+        /* En fenetre fille, l echec se dit dans la fenetre elle-meme (sinon elle resterait vide). */
+        if (window.__szBoite) voile('<h3><span class="ic">👁</span> ${T("Étiquette — ")}' + esc(CMD.commande.numero) + '</h3>'
+          + '<p>' + esc(expliquer(r)) + '</p><div class="fin2"><button id="v-non">${T("Fermer")}</button></div>',
+          function(fermer){ document.getElementById('v-non').onclick = fermer; });
+        return;
+      }
       PDF = r.pdf;
       dire('');
       voile('<h3><span class="ic">👁</span> ${T("Étiquette — ")}' + esc(CMD.commande.numero) + '</h3>'
@@ -679,7 +691,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<button class="prim" id="v-oui"><span class="ic">🖨</span> ${T("Imprimer")}</button></div>',
         function(fermer){
           document.getElementById('v-non').onclick = fermer;
-          document.getElementById('v-oui').onclick = function(){ fermer(); imprimer(); };
+          /* En fenetre fille, on attend la reponse de l impression avant de fermer : la fenetre partie,
+             la reponse ne serait plus lue. */
+          document.getElementById('v-oui').onclick = function(){
+            if (window.__szBoite) { this.disabled = true; imprimer().then(fermer, fermer); return; }
+            fermer(); imprimer();
+          };
         });
     });
   }
@@ -742,6 +759,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         if (r.commande.transporteur) TRANSPORTEUR = r.commande.transporteur;
         document.getElementById('titre').textContent = '${T("Expédier ")}' + r.commande.numero;
         dessiner();
+        /* En fenetre fille (szBoite) : ni cotation ni verrou (la fenetre mere les tient) ; on rouvre la boite demandee. */
+        if (window.__szBoite) { szBoiteSiDemandee({ apercu: function(){ apercuIci(); } }); return; }
         comparer();
         prendreVerrou(depart);
       });

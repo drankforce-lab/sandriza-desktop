@@ -766,12 +766,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
     var pb = document.getElementById('publier'); if (pb) pb.onclick = confirmer;
     vPub.querySelectorAll('[data-fc]').forEach(function(b){ b.onclick = function(){
       var k = b.getAttribute('data-fc'), e = R.elements.filter(function(x){ return cle(x) === k; })[0]; if (!e) return;
-      ficheComplete(nomCle(e), '${T("En ligne")}', '${T("Préparée")}', null);
-      appeler('config:bt:sync', ['fiche', { tbl: e.tbl, cle: e.cle }]).then(function(r){
-        if (!r || !r.ok) { ficheComplete(nomCle(e), '', '', { err: motif(r) }); return; }
-        ficheComplete(nomCle(e), '${T("En ligne")}', '${T("Préparée")}', { a: r.prod, b: r.test, vivants: r.vivants || [] });
-      });
+      var a = { tbl: e.tbl, cle: e.cle, titre: nomCle(e) };
+      szBoite('fiche', a, function(){ ficheEnLigne(a); });
     }; });
+  }
+  /* (2026-11-27, phase 2) LA FICHE COMPLETE S OUVRE DANS UNE VRAIE FENETRE (szBoite) : une visionneuse, rien a
+     relire a sa fermeture. La fenetre fille lit la fiche elle-meme ; sans pont, la feuille d avant, ici. */
+  function ficheEnLigne(a){
+    ficheComplete(a.titre, '${T("En ligne")}', '${T("Préparée")}', null);
+    appeler('config:bt:sync', ['fiche', { tbl: a.tbl, cle: a.cle }]).then(function(r){
+      if (!r || !r.ok) { ficheComplete(a.titre, '', '', { err: motif(r) }); return; }
+      ficheComplete(a.titre, '${T("En ligne")}', '${T("Préparée")}', { a: r.prod, b: r.test, vivants: r.vivants || [] });
+    });
   }
   /* (2026-11-25, sa demande : « un bouton du style afficher les détails complets des changements ») LA FICHE COMPLÈTE :
      chaque champ de la fiche, les deux versions côte à côte ; ce qui change est mis en avant, le reste se replie
@@ -818,11 +824,37 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
   var voile = document.getElementById('voile'), feuille = document.getElementById('feuille');
   var QUAND = 'maintenant';
   function dateLocale(d){ var z = function(n){ return (n < 10 ? '0' : '') + n; }; return d.getFullYear() + '-' + z(d.getMonth() + 1) + '-' + z(d.getDate()) + 'T' + z(d.getHours()) + ':' + z(d.getMinutes()); }
+  /* (2026-11-27, phase 2) LA PUBLICATION S OUVRE DANS UNE VRAIE FENETRE (szBoite 'publier') : formulaire, progression
+     et ecran de fin tournent dans la fenetre fille, qui fait elle-meme les appels au pont. Elle recoit des elements
+     PLATS (JSON) : tbl, cle, jeton, choix, nom et les libelles d alerte deja traduits (al). Les gestes de l ecran de
+     fin qui touchent la page mere (Voir l historique, Annuler cette publication) lui sont RENDUS (szBoiteRendre) :
+     c est la mere qui change de vue ou annule, sinon la fenetre fille se fermerait au milieu de l annulation.
+     Sans pont, la feuille d avant, ici, sur les memes elements plats. */
+  function nomDe(e){ return e.nom != null ? e.nom : nomCle(e); }
+  function choixEl(e){ return e.choix != null ? e.choix : choixDe(e); }
+  function alDe(e){ return Array.isArray(e.al) ? e.al : alertes(e).map(function(a){ return CTRL[a] || a; }); }
   function confirmer(){
     var l = selection(); if (!l.length) return;
+    var plats = l.map(function(e){ return { tbl: e.tbl, cle: e.cle, jeton: e.jeton, choix: choixDe(e), nom: nomCle(e), al: alertes(e).map(function(a){ return CTRL[a] || a; }) }; });
+    szBoite('publier', { l: plats }, function(){ ouvrirPublier(plats); }).then(function(r){
+      if (!r) return;
+      var v = (r && r.valeur) || {};
+      if (v.vue === 'hist') vue('hist');
+      analyser(); historique();
+      if (Array.isArray(v.annuler) && v.annuler.length) annuler(v.annuler, null);
+    });
+  }
+  /* Rend a la page mere le geste de l ecran de fin (en fenetre fille), ou le fait ici (sans pont). */
+  function geste(v){
+    if (window.__szBoite) { szBoiteRendre(v); FINI = false; voile.hidden = true; return; }
+    FINI = false; voile.hidden = true;
+    if (v.vue) vue(v.vue);
+  }
+  function ouvrirPublier(l){
+    if (!l || !l.length) return;
     feuille.classList.remove('sy-large');
     var nP = l.filter(function(e){ return e.tbl === 'products'; }).length, nR = l.length - nP;
-    var al = l.filter(function(e){ return alertes(e).length; });
+    var al = l.filter(function(e){ return alDe(e).length; });
     var demain = new Date(Date.now() + 86400000); demain.setMinutes(0, 0, 0);
     feuille.innerHTML = '<div class="fh"><h3>' + '${T("Publier dans la boutique en ligne ?")}' + '</h3><p>'
       + (nP ? nP + ' ' + '${T("produit(s)")}' : '') + (nP && nR ? ' · ' : '') + (nR ? nR + ' ' + '${T("réglage(s)")}' : '')
@@ -834,7 +866,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
       + '<input type="datetime-local" id="pquand" value="' + dateLocale(demain) + '"' + (QUAND === 'plus' ? '' : ' hidden') + '></div>'
       + '<small id="pq-aide"' + (QUAND === 'plus' ? '' : ' hidden') + '>' + '${T("À l’heure dite, la version préparée DU MOMENT part (à 10 minutes près).")}' + '</small></div>'
       + (al.length ? '<div class="sy-ctl"><b>' + al.length + ' ' + '${T("élément(s) à vérifier avant le départ")}' + '</b>'
-        + al.slice(0, 6).map(function(e){ return '<div><span>' + esc(nomCle(e)) + '</span><em>' + esc(alertes(e).map(function(a){ return CTRL[a] || a; }).join(' · ')) + '</em></div>'; }).join('')
+        + al.slice(0, 6).map(function(e){ return '<div><span>' + esc(nomDe(e)) + '</span><em>' + esc(alDe(e).join(' · ')) + '</em></div>'; }).join('')
         + (al.length > 6 ? '<div><em>+ ' + (al.length - 6) + '</em></div>' : '') + '</div>' : '<div class="sy-ok">' + SVG_OK + ' ' + '${T("Contrôle avant départ : rien à signaler.")}' + '</div>')
       + '</div><div class="ff"><button type="button" class="btn" id="non">' + '${T("Annuler")}' + '</button><button type="button" class="btn pri" id="oui"></button></div>';
     voile.hidden = false;
@@ -860,20 +892,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
   }
   function planifier(l, nom, quand){
     var oui = document.getElementById('oui'); oui.disabled = true;
-    appeler('config:bt:sync', ['planifier', { quand: quand, nom: nom, elements: l.map(function(e){ return { tbl: e.tbl, cle: e.cle, choix: choixDe(e), titre: nomCle(e) }; }) }]).then(function(r){
+    appeler('config:bt:sync', ['planifier', { quand: quand, nom: nom, elements: l.map(function(e){ return { tbl: e.tbl, cle: e.cle, choix: choixEl(e), titre: nomDe(e) }; }) }]).then(function(r){
       if (!r || !r.ok) { oui.disabled = false; szDire(motif(r), 'err'); return; }
       feuille.innerHTML = '<div class="fh"><div class="sy-fin ok">' + SVG_OK + '</div><h3>' + '${T("Publication planifiée")}' + '</h3><p>'
         + (nom ? '« ' + esc(nom) + ' » · ' : '') + l.length + ' ' + '${T("changement(s)")}' + ' · ' + esc(quand_(quand)) + '</p><p>' + '${T("Elle partira {0}, même si l’application est fermée.")}'.split('{0}').join(esc(fenetre(quand))) + ' ' + '${T("Vous pouvez l’annuler depuis l’historique tant qu’elle n’est pas partie.")}' + '</p></div>'
         + '<div class="ff"><button type="button" class="btn" id="vh">' + '${T("Voir l’historique")}' + '</button><button type="button" class="btn pri" id="ok">' + '${T("Terminé")}' + '</button></div>';
       document.getElementById('ok').onclick = function(){ voile.hidden = true; };
-      document.getElementById('vh').onclick = function(){ voile.hidden = true; vue('hist'); };
-      historique();
+      document.getElementById('vh').onclick = function(){ geste({ vue: 'hist' }); };
+      if (!window.__szBoite) historique();   // en fenetre fille : la mere relit a la fermeture
     });
   }
   function publier(l, nom){
     var lot = 'p' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2, 8), i = 0, err = 0, faits = [];
     feuille.innerHTML = '<div class="fh"><h3 id="ph">' + '${T("Publication en cours…")}' + '</h3><p id="pc">0 / ' + l.length + '</p><div class="prog"><i id="pg"></i></div></div>'
-      + '<div class="suivi" id="suivi">' + l.map(function(e, j){ return '<div id="s' + j + '"><span class="st"></span><span>' + esc(nomCle(e)) + '</span></div>'; }).join('') + '</div>'
+      + '<div class="suivi" id="suivi">' + l.map(function(e, j){ return '<div id="s' + j + '"><span class="st"></span><span>' + esc(nomDe(e)) + '</span></div>'; }).join('') + '</div>'
       + '<div class="ff" id="pf" hidden></div>';
     appeler('config:bt:sync', ['debut', { n: l.length, lot: lot, nom: nom || '' }]).then(suivant);
     function suivant(){
@@ -881,9 +913,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
       var e = l[i], ligne = document.getElementById('s' + i);
       ligne.className = 'en'; ligne.firstChild.innerHTML = '<i></i>';
       try { ligne.scrollIntoView({ block: 'nearest' }); } catch (x) {}
-      appeler('config:bt:sync', ['appliquer', { tbl: e.tbl, cle: e.cle, choix: choixDe(e), jeton: e.jeton, lot: lot }]).then(function(r){
+      appeler('config:bt:sync', ['appliquer', { tbl: e.tbl, cle: e.cle, choix: choixEl(e), jeton: e.jeton, lot: lot }]).then(function(r){
         if (r && r.ok) { ligne.className = 'ok'; ligne.firstChild.innerHTML = SVG_OK; faits.push(e); }
-        else { err++; ligne.className = 'ko'; ligne.firstChild.innerHTML = '✕'; ligne.lastChild.textContent = nomCle(e) + ' — ' + motif(r).replace(/<[^>]+>/g, ''); }
+        else { err++; ligne.className = 'ko'; ligne.firstChild.innerHTML = '✕'; ligne.lastChild.textContent = nomDe(e) + ' — ' + motif(r).replace(/<[^>]+>/g, ''); }
         i++;
         document.getElementById('pg').style.width = Math.round(i * 100 / l.length) + '%';
         document.getElementById('pc').textContent = i + ' / ' + l.length;
@@ -909,12 +941,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
             appeler('config:bt:sync', ['historique']).then(function(h){
               var ids = (h && h.ok ? (h.envois || []) : []).filter(function(x){ return x.lot === lot && !x.annule; }).map(function(x){ return x.id; });
               if (!ids.length) { szDire('${T("Rien à annuler pour cette publication.")}', 'att'); return; }
+              if (window.__szBoite) { geste({ annuler: ids }); return; }
               voile.hidden = true; annuler(ids, an);
             });
           });
       };
-      document.getElementById('vh').onclick = function(){ voile.hidden = true; vue('hist'); };
-      analyser(); historique();
+      document.getElementById('vh').onclick = function(){ geste({ vue: 'hist' }); };
+      if (!window.__szBoite) { analyser(); historique(); }   // en fenetre fille : la mere relit a la fermeture
     }
   }
 
@@ -1004,7 +1037,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
   function brancherFc(){
     vHist.querySelectorAll('[data-hfc]').forEach(function(b){ b.onclick = function(){
       var id = +b.getAttribute('data-hfc'), d = DET[id], x = (HI || []).filter(function(y){ return y.id === id; })[0]; if (!d || !x) return;
-      ficheComplete(x.tbl === 'products' ? (x.titre || x.cle) : (CLES[x.cle] || x.titre || x.cle), '${T("Avant")}', '${T("Après")}', { a: d.avant, b: d.apres, vivants: x.tbl === 'products' ? ['stock', 'warehouseLocations', 'stockReserve', 'reserved'] : [] });
+      var aH = { titre: x.tbl === 'products' ? (x.titre || x.cle) : (CLES[x.cle] || x.titre || x.cle), d: { a: d.avant, b: d.apres, vivants: x.tbl === 'products' ? ['stock', 'warehouseLocations', 'stockReserve', 'reserved'] : [] } };
+      szBoite('ficheHist', aH, function(){ ficheComplete(aH.titre, '${T("Avant")}', '${T("Après")}', aH.d); });
     }; });
   }
   function brancherPl(){
@@ -1016,7 +1050,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
     }; });
   }
   function annuler(ids, bouton){
-    bouton.disabled = true; var i = 0, err = 0, dernier = null;
+    if (bouton) bouton.disabled = true;   // null : annulation rendue par la fenetre fille de la publication
+    var i = 0, err = 0, dernier = null;
     (function suivant(){
       if (i >= ids.length) {
         szDire(err ? (err + ' ' + '${T("annulation(s) impossible(s) :")}' + ' ' + dernier) : '${T("Annulé : la boutique en ligne a retrouvé sa version d’avant.")}', err ? 'err' : 'bon');
@@ -1068,6 +1103,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
      était encore là) Un retour sur la fenêtre FERME ce qui appartient au passé — l'écran de fin, la fiche complète, la
      planification confirmée — puis relit. Seule une publication EN COURS (ou une confirmation pas encore répondue) reste. */
   function relancer(force){
+    if (window.__szBoite) return;   // la fenetre fille (szBoite) ne montre que sa fiche : rien a relire ni a fermer
     if (!voile.hidden && (FINI || feuille.classList.contains('sy-large') || document.getElementById('vh'))) { FINI = false; fermerFiche(); }
     if (LECTURE || !voile.hidden) return;
     if (force !== true && Date.now() - DERNIERE < 3000) return;
@@ -1077,7 +1113,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
   window.szRevenir = function(){ relancer(true); };
   window.addEventListener('focus', relancer);
   document.addEventListener('visibilitychange', function(){ if (!document.hidden) relancer(); });
-  analyser();
+  /* (2026-11-27, phase 2) En fenetre fille (szBoite) : la fiche demandee, seule a l ecran — sans relancer
+     l analyse entiere de la boutique, dont elle n a pas besoin. */
+  if (!szBoiteSiDemandee({
+    fiche: function(a){ if (a && a.tbl) ficheEnLigne(a); },
+    ficheHist: function(a){ if (a && a.d) ficheComplete(a.titre, '${T("Avant")}', '${T("Après")}', a.d); },
+    publier: function(a){ if (a && Array.isArray(a.l) && a.l.length) ouvrirPublier(a.l); }
+  })) analyser();
 })();
 </script></body></html>`;
 }

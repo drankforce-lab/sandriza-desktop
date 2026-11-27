@@ -365,9 +365,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
     var q = document.getElementById('ab-q');
     if (q) q.oninput = function(){ Q = q.value; redessinerSansPerdreLaSaisie(); };
     var bn = document.getElementById('ab-nouveau');
-    if (bn) bn.onclick = function(){ BOITE = 'ajout'; SUPPR_ARME = ''; dessiner(); };
+    /* (2026-11-27, phase 2) Les deux boites s ouvrent dans une VRAIE FENETRE (szBoite) ; la liste se recharge a leur fermeture. */
+    if (bn) bn.onclick = function(){ SUPPR_ARME = ''; szBoite('ajout', null, function(){ BOITE = 'ajout'; dessiner(); }).then(function(r){ if (r) charger(); }); };
     var bi = document.getElementById('ab-import');
-    if (bi) bi.onclick = function(){ BOITE = 'import'; SUPPR_ARME = ''; dessiner(); szBrouillonProposer(); };
+    if (bi) bi.onclick = function(){ SUPPR_ARME = ''; szBoite('import', null, function(){ BOITE = 'import'; dessiner(); szBrouillonProposer(); }).then(function(r){ if (r) charger(); }); };
     /* == LE BROUILLON DE L'IMPORT EN VRAC ===================================
        ⚠ ON NE GARDE PAS LE FORMULAIRE << Ajouter >> : deux champs, dont un courriel
        qu'on a sous les yeux au moment de le taper. Un brouillon y serait de la
@@ -504,6 +505,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('abonnes')}
       if (!r || !r.ok) { vide('${T("Abonnés indisponibles")}', expliquer(r)); return; }
       D = r;
       dessiner();
+      // En fenetre fille (szBoite) : on rouvre la boite demandee, seule a l ecran.
+      szBoiteSiDemandee({
+        ajout: function(){ BOITE = 'ajout'; dessiner(); },
+        'import': function(){ BOITE = 'import'; dessiner(); szBrouillonProposer(); }
+      });
     });
   }
 

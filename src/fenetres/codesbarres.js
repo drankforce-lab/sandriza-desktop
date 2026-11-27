@@ -502,29 +502,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
         redessinerFile();
         return;
       }
-      PICKER = r;
-      dessiner();
+      /* (2026-11-27, phase 2) Le choix des variantes s ouvre dans une VRAIE FENETRE ; elle rend les lignes
+         choisies (szBoiteRendre) et c est ICI, dans la file de cette fenetre, qu elles sont ajoutees. */
+      szBoite('variantes', r, function(){ PICKER = r; dessiner(); }).then(function(res){
+        if (res && res.valeur && res.valeur.choix) appliquerChoix(res.valeur.choix);
+      });
     });
+  }
+
+  // Les lignes choisies rejoignent la file d impression (la meme quantite remplace l ancienne).
+  function appliquerChoix(choix){
+    var ajouts = 0;
+    (choix || []).forEach(function(c){
+      var deja = null;
+      FILE.forEach(function(it){ if (it.sku === c.sku) deja = it; });
+      if (deja) deja.qty = c.qty;
+      else FILE.push({ pid: c.pid, sku: c.sku, name: c.name, size: c.size, color: c.color, qty: c.qty });
+      ajouts++;
+    });
+    dessiner();
+    if (!ajouts) dire('${T("Aucune variante cochée avec une quantité au-dessus de zéro.")}', 'err');
   }
 
   function ajouterDuPicker(){
     if (!PICKER) return;
-    var ajouts = 0;
+    var choix = [];
     PICKER.variantes.forEach(function(v, i){
       var cb = document.querySelector('[data-vcoche="' + i + '"]');
       if (!cb || !cb.checked) return;
       var qi = document.querySelector('[data-vqte="' + i + '"]');
       var qte = parseInt(qi && qi.value, 10) || 0;
       if (qte <= 0) return;
-      var deja = null;
-      FILE.forEach(function(it){ if (it.sku === v.sku) deja = it; });
-      if (deja) deja.qty = qte;
-      else FILE.push({ pid: PICKER.id, sku: v.sku, name: PICKER.nom, size: v.taille, color: v.couleur, qty: qte });
-      ajouts++;
+      choix.push({ pid: PICKER.id, sku: v.sku, name: PICKER.nom, size: v.taille, color: v.couleur, qty: qte });
     });
     PICKER = null;
-    dessiner();
-    if (!ajouts) dire('${T("Aucune variante cochée avec une quantité au-dessus de zéro.")}', 'err');
+    // En fenetre fille : on rend le choix a la mere (la fenetre se ferme avec la boite).
+    if (window.__szBoite) { szBoiteRendre({ choix: choix }); dessiner(); return; }
+    appliquerChoix(choix);
   }
 
   /* Une surcouche jetable, posee dans le corps du document. La surcouche du
@@ -628,6 +642,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
       dire('');
       if (garderSaisie) redessinerSansPerdreLaSaisie();
       else dessiner();
+      szBoiteSiDemandee({ variantes: function(r){ if (r && r.variantes) { PICKER = r; dessiner(); } } });
     });
   }
 

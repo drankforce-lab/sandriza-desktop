@@ -590,9 +590,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       b.onclick = function(){ STATUT = b.getAttribute('data-ccst') || ''; refiltrer(); };
     });
     var bn = document.getElementById('cc-nouvelle');
-    if (bn) bn.onclick = function(){ BOITE = 'creer'; THEME = 'noir'; dessiner(); szBrouillonProposer(); };
+    /* (2026-11-27, phase 2) Les boites s ouvrent dans une VRAIE FENETRE (szBoite) ; la liste se recharge a leur fermeture. */
+    if (bn) bn.onclick = function(){ szBoite('creer', null, function(){ BOITE = 'creer'; THEME = 'noir'; dessiner(); szBrouillonProposer(); }).then(function(r){ if (r) charger(); }); };
     var br = document.getElementById('cc-recompense');
-    if (br) br.onclick = function(){ BOITE = 'recompense'; dessiner(); };
+    if (br) br.onclick = function(){ szBoite('recompense', null, function(){ BOITE = 'recompense'; dessiner(); }).then(function(r){ if (r) charger(); }); };
     var ba = document.getElementById('cc-annuler');
     if (ba) ba.onclick = fermerBoite;
     var vo = document.getElementById('cc-voile');
@@ -731,6 +732,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
   }
 
   var SUPPR_ARME = false;
+  /* (2026-11-27, phase 2) La fiche d une carte s ouvre dans une VRAIE FENETRE (szBoite) ; ouvrirCarte reste
+     l ouverture locale (repli, et ce qui tourne dans la fenetre fille). */
+  function ouvrirFiche(id, armer){
+    if (!id) return;
+    szBoite('fiche', { id: id, armer: !!armer }, function(){ ouvrirCarte(id, armer); }).then(function(r){ if (r) charger(); });
+  }
   function ouvrirCarte(id, armer){
     appeler('cartescadeaux:lire', [id]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -747,7 +754,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     if (CK.clic(ev)) { lotSurligner(); return; }   // une case, << tout cocher >> ou la barre d actions
     var tr = t.closest('.cc-rang[data-id]');
     if (!tr) return;
-    ouvrirCarte(tr.getAttribute('data-id'), false);
+    ouvrirFiche(tr.getAttribute('data-id'), false);
   });
 
   /* (2026-10-25, audit) COPIER SANS SE TAIRE. La page est chargee en data: (origine opaque) :
@@ -776,14 +783,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
     var id = ligne.getAttribute('data-id');
     var c = (D.cartes || []).filter(function(x){ return x.id === id; })[0];
     if (!c) return null;
-    var l = [{ lib: '${T("Ouvrir la carte")}', fn: function(){ ouvrirCarte(id, false); } },
+    var l = [{ lib: '${T("Ouvrir la carte")}', fn: function(){ ouvrirFiche(id, false); } },
       { lib: '${T("Copier le code")}', fn: function(){ copierCode(c.code); } }];
     if (c.statut === 'pending' && D.peutModifier) l.push({ lib: '${T("Activer à la main")}', fn: function(){
       appeler('cartescadeaux:activer', [id]).then(function(r){
         if (!r.ok) { dire(expliquer(r), 'err'); return; }
         dire('${T("Carte ")}' + (r.code || '') + '${T(" activée.")}', 'bon'); charger();
       }); } });
-    if (D.peutSupprimer) { l.push({ trait: true }); l.push({ lib: '${T("Supprimer la carte…")}', dgr: true, fn: function(){ ouvrirCarte(id, true); } }); }
+    if (D.peutSupprimer) { l.push({ trait: true }); l.push({ lib: '${T("Supprimer la carte…")}', dgr: true, fn: function(){ ouvrirFiche(id, true); } }); }
     return l;
   };
 
@@ -795,6 +802,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('cartescadeaux')}
       if (sous) sous.textContent = D.peutModifier ? '' : '${T("consultation seulement")}';
       var qa = document.getElementById('cc-q');
       if (qa && document.activeElement === qa) redessinerSansPerdreLaSaisie(); else dessiner();
+      // En fenetre fille (szBoite) : on rouvre la boite demandee, seule a l ecran.
+      szBoiteSiDemandee({
+        creer: function(){ BOITE = 'creer'; THEME = 'noir'; dessiner(); szBrouillonProposer(); },
+        recompense: function(){ BOITE = 'recompense'; dessiner(); },
+        fiche: function(a){ if (a && a.id) ouvrirCarte(a.id, !!a.armer); }
+      });
     });
   }
   // (lot VOLUME 2) Le pied du socle demande la page voisine au coeur.

@@ -2393,13 +2393,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (PROD && PROD.dos) c.push({ src: PROD.dos, lib: '${T("le dos de {p}")}'.replace('{p}', PROD.nom) });
     (PANIER || []).forEach(function(p){ var u = PLEIN[p.id] || p.apercu || VIGN[p.id] || ''; if (u) c.push({ src: u, lib: p.code || p.nom || p.id }); });
     if (!c.length) { dire('${T("Aucune photo à proposer : choisissez d’abord une photo dans l’explorateur.")}', 'att'); return; }
+    c = c.slice(0, 12);
+    var retenir = function(i){ REF_CHOIX = c[i] || c[0]; TEINTE = null; dessiner(); verifierTeinte(); };
+    /* (2026-11-27, phase 2) LA GRILLE S OUVRE DANS UNE VRAIE FENETRE (szBoite). Les photos sont dans la memoire
+       de CETTE page (panier, photo source) : la fenetre fille recoit les images a montrer (une image trop lourde
+       pour voyager reste sans vignette, son nom suffit) et ne fait que CHOISIR. Elle renvoie le rang choisi
+       dans le message de fin (type « refN ») ; la comparaison de teinte, elle, se fait ici. */
+    var vus = c.map(function(x){ return { src: String(x.src || '').length < 400000 ? x.src : '', lib: x.lib }; });
+    szBoite('reference', { c: vus }, function(){ grilleReference(vus, retenir); }).then(function(r){
+      var ty = String((r && r.type) || '');
+      if (ty.indexOf('ref') === 0) retenir(parseInt(ty.slice(3), 10) || 0);
+    });
+  }
+  // La grille elle-meme : ici (repli) elle retient le choix ; en fenetre fille, elle le renvoie a la mere.
+  function grilleReference(c, choisi){
     var h = '<h3>${T("Harmoniser la couleur avec…")}</h3><p>${T("La teinte du résultat sera comparée à celle de la photo choisie, et ramenée sur elle si vous le demandez.")}</p>'
-      + '<div class="refg">' + c.slice(0, 12).map(function(x, i){ return '<button type="button" data-ref="' + i + '"><img src="' + esc(x.src) + '" alt=""><span>' + esc(x.lib) + '</span></button>'; }).join('')
+      + '<div class="refg">' + c.map(function(x, i){ return '<button type="button" data-ref="' + i + '">' + (x.src ? '<img src="' + esc(x.src) + '" alt="">' : '') + '<span>' + esc(x.lib) + '</span></button>'; }).join('')
       + '</div><div class="fin2"><button id="ref-non">${T("Annuler")}</button></div>';
     voile(h, function(fermer){
       document.getElementById('ref-non').onclick = fermer;
       document.querySelectorAll('[data-ref]').forEach(function(b){
-        b.onclick = function(){ REF_CHOIX = c[parseInt(b.getAttribute('data-ref'), 10) || 0]; fermer(); TEINTE = null; dessiner(); verifierTeinte(); };
+        b.onclick = function(){ var i = parseInt(b.getAttribute('data-ref'), 10) || 0; fermer(); choisi(i); };
       });
     });
   }
@@ -2428,17 +2442,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     return h;
   }
   /* La teinte s écarte : on le DIT avant de ranger ou de placer, avec trois sorties. */
+  /* (2026-11-27, phase 2) UNE VRAIE FENETRE DE L APPLICATION (szChoisir), pas une fenetre fille : la page
+     CONTINUE apres la reponse (harmoniser, ranger, placer) — une fenetre fille fermee couperait ce travail. */
   function gardeTeinte(suite){
     if (!teinteAlerte()) { suite(); return; }
-    var h = '<h3><span class="ic">⚠</span> ${T("La teinte s’écarte de la référence")}</h3>'
-      + '<p>' + '${T("Comparé à {r}, le vêtement a un écart de ΔE {e}.")}'.replace('{r}', '<strong>' + esc(TEINTE.lib) + '</strong>').replace('{e}', szNombre(TEINTE.deltaE, 1))
-      + (!TEINTE.meme ? ' ${T("Sa teinte diffère de {t}° : vérifiez qu’il s’agit bien du même vêtement.")}'.replace('{t}', String(TEINTE.teinte)) : '') + '</p>'
-      + '<div class="fin2"><button id="tg-non">${T("Annuler")}</button><button id="tg-garder">${T("Garder tel quel")}</button>'
-      + '<button class="conf" id="tg-harm">${T("Harmoniser, puis continuer")}</button></div>';
-    voile(h, function(fermer){
-      document.getElementById('tg-non').onclick = function(){ fermer(); dire('${T("Rien n’a été enregistré.")}', 'att'); };
-      document.getElementById('tg-garder').onclick = function(){ fermer(); TEINTE.accepte = true; suite(); };
-      document.getElementById('tg-harm').onclick = function(){ fermer(); harmoniser(suite); };
+    var t0 = TEINTE;
+    szChoisir({
+      titre: '${T("La teinte s’écarte de la référence")}',
+      texte: '${T("Comparé à {r}, le vêtement a un écart de ΔE {e}.")}'.replace('{r}', t0.lib).replace('{e}', szNombre(t0.deltaE, 1))
+        + (!t0.meme ? ' ${T("Sa teinte diffère de {t}° : vérifiez qu’il s’agit bien du même vêtement.")}'.replace('{t}', String(t0.teinte)) : ''),
+      boutons: [{ id: 'non', lib: '${T("Annuler")}' }, { id: 'garder', lib: '${T("Garder tel quel")}' },
+                { id: 'harm', lib: '${T("Harmoniser, puis continuer")}', prim: true }],
+      echap: 'non'
+    }).then(function(ch){
+      if (ch === 'garder') { if (TEINTE) TEINTE.accepte = true; suite(); return; }
+      if (ch === 'harm') { harmoniser(suite); return; }
+      dire('${T("Rien n’a été enregistré.")}', 'att');
     });
   }
   function harmoniser(suite){
@@ -2724,15 +2743,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      defaut. Mais un ecrasement qu on ne voit pas venir est une perte, et les
      recettes ne se reconstituent pas — elles portent des reglages accordes a
      l oeil sur des dizaines de rendus payes. */
+  /* (2026-11-27, phase 2) LE NOM DU PROFIL SE DEMANDE DANS UNE VRAIE FENETRE (szBoite). Les reglages a
+     enregistrer sont ceux de CETTE page : la fenetre fille ne fait que demander le nom et le renvoie dans le
+     message de fin (type « profil ») ; l enregistrement se fait ici. Sans pont : la boite d avant, ici. */
   function ouvrirRecetteVoile(){
     if (RO) return;
     var x = recetteChoisie();
+    var a = { nom: x ? x.nom : '', noms: RECETTES.map(function(o){ return String(o.nom); }) };
+    szBoite('profil', a, function(){ recetteVoile(a, function(nom, fermer){ enregistrerRecette(nom, fermer); }); })
+      .then(function(r){ if (r && r.type === 'profil' && r.message) enregistrerRecette(String(r.message), null); });
+  }
+  function recetteVoile(a, lancerNom){
     voile('<h3><span class="ic">💾</span> ${T("Enregistrer le profil")}</h3>'
       + ''
       + ''
       + '<p><input type="text" id="rc-nom" aria-label="${T("Nom de la recette")}" maxlength="60" placeholder="${T("Ex. : Collection automne — plage dorée")}" '
-      + 'value="' + esc(x ? x.nom : '') + '"></p>'
-      + '<p class="rcav" id="rc-av">' + (x
+      + 'value="' + esc(a.nom || '') + '"></p>'
+      + '<p class="rcav" id="rc-av">' + (a.nom
           ? '${T("Ce nom est celui du profil choisi : il sera <strong>remplacé</strong>.")}'
           : '') + '</p>'
       + '<div class="fin2"><button id="rc-non">${T("Annuler")}</button>'
@@ -2748,7 +2775,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         var majAv = function(){
           if (!av) return;
           var v = String((n && n.value) || '').trim().toLowerCase();
-          var d = RECETTES.filter(function(o){ return String(o.nom).trim().toLowerCase() === v; })[0];
+          var d = (a.noms || []).filter(function(o){ return String(o).trim().toLowerCase() === v; })[0];
           av.innerHTML = (v && d)
             ? '${T("Un profil porte déjà ce nom : il sera <strong>remplacé</strong>.")}'
             : '';
@@ -2759,7 +2786,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           var nom = String((n && n.value) || '').trim();
           if (!nom) { if (av) av.innerHTML = '${T("Donnez-lui un nom.")}'; if (n) n.focus(); return; }
           if (oui) oui.disabled = true;
-          enregistrerRecette(nom, fermer);
+          lancerNom(nom, fermer);
         };
         if (oui) oui.onclick = lancer;
         if (n) n.onkeydown = function(ev){ if (ev.key === 'Enter') { ev.preventDefault(); lancer(); } };
@@ -3730,31 +3757,131 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '${T("sans ambiance ni pose imposée.")}</span>' + sup + '</span></label>';
   }
 
-  function ouvrirLotVoile(){
-    var ids = Object.keys(SEL);
-    /* ⚠ UNE SEULE PHOTO EST UN LOT VALIDE. Le garde etait << moins de 2 >>,
-       alors que le panier propose << Traiter cette photo en lot... >> des UNE
-       photo : le bouton existait et ne faisait rien. Un lot d une photo garde
-       tout son sens — il part en arriere-plan et se suit comme les autres. */
-    if (!ids.length) return;
-    var nP = ids.length;
-    /* ⚠ CETTE LISTE ETAIT UN REPLI, ELLE EST DEVENUE LA SEULE (#30, 2026-09-19).
-       Elle se lisait PH_META.traitements sinon ceci — mais PH_META n etait
-       rempli QUE par la grille du selecteur interne. Le chemin qui survit (le
-       panier venu de l explorateur) prenait donc DEJA ce repli : rien ne change
-       pour lui, et plus personne ne lit une variable qui restait vide. */
-    var opts = [
+  /* ⚠ CETTE LISTE ETAIT UN REPLI, ELLE EST DEVENUE LA SEULE (#30, 2026-09-19).
+     Elle se lisait PH_META.traitements sinon ceci — mais PH_META n etait
+     rempli QUE par la grille du selecteur interne. Le chemin qui survit (le
+     panier venu de l explorateur) prenait donc DEJA ce repli : rien ne change
+     pour lui, et plus personne ne lit une variable qui restait vide. */
+  function traitementsLot(){
+    return [
       { cle: 'detourage', nom: '${T("Détourage")}' }, { cle: 'fantome', nom: '${T("Vêtement sans mannequin")}' },
       { cle: 'humain', nom: '${T("Porté par un mannequin")}' },
       /* ⚠ LE FILIGRANE MANQUAIT A LA LISTE (2026-09-25) : le site l accepte, et
          tout le code qui le traite plus bas (estimation gratuite, logo) etait
          donc inatteignable. */
       { cle: 'filigrane', nom: '${T("Filigrane / logo")}' }];
+  }
+
+  /* ══ LE LOT S OUVRE DANS UNE VRAIE FENETRE (2026-11-27, phase 2) ══════════
+     ⚠⚠ LA FENETRE FILLE NE CALCULE RIEN, ELLE MONTRE CE QUE LA MERE A CALCULE.
+     Elle est une page neuve : ni la voie, ni l ambiance, ni les reglages
+     avances, ni le logo, ni la selection de cet ecran n y existent. Plutot que
+     de recopier une a une la vingtaine de variables que lisent optionsLot,
+     reglagesPour et reglagesLotHtml (et d en oublier une le jour ou une
+     vingt-et-unieme apparait), la mere fait tourner ICI CES MEMES FONCTIONS pour
+     chaque traitement de la liste, et n envoie que leurs RESULTATS :
+       par[quoi].reg     ce que l estimation envoie a studio:estimer ;
+       par[quoi].options ce que lots:creer recoit si la case est cochee ;
+       par[quoi].h1/h0   le bloc des reglages, case cochee / decochee.
+     L estimation affichee dans la fille et les options qu elle rend sont donc,
+     a l octet pres, celles que la page aurait calculees. Et la mere est figee
+     pendant ce temps (fenetre MODALE) : rien ne peut changer derriere.
+     ⚠ LE LOGO (filigrane) NE FAIT PAS LE VOYAGE : ses pixels depasseraient la
+     borne de la valeur rendue (200 000 caracteres), et la valeur serait jetee
+     en silence — un lot lance qui ne part pas. Il voyage sous une MARQUE, que
+     la mere remplace au lancement par les pixels qu elle a gardes. */
+  var LOT_LOGO = '@instantane:logo';
+  function instantaneLot(){
+    var opts = traitementsLot();
     /* ⚠ ON PRÉSÉLECTIONNE LA VOIE DE L ÉCRAN quand le lot sait la faire : le
        voile s ouvrait toujours sur le premier traitement de la liste, si bien
        qu on venait de régler un fantôme et qu on lançait un détourage. */
     var voieDef = opts.filter(function(t){ return t.cle === VOIE; }).length
       ? VOIE : String((opts[0] || {}).cle || '');
+    var par = {};
+    opts.forEach(function(t){
+      var o = optionsLot(t.cle, true);
+      if (o && o.logo) { o = JSON.parse(JSON.stringify(o)); o.logo = LOT_LOGO; }
+      par[t.cle] = { reg: reglagesPour(voiePourQuoi(t.cle)), options: o,
+        h1: reglagesLotHtml(t.cle, true), h0: reglagesLotHtml(t.cle, false) };
+    });
+    return { ids: Object.keys(SEL), voie: VOIE, voieDef: voieDef, rc: RC_SEL,
+      recettes: RECETTES.map(function(o){ return { id: String(o.id), nom: String(o.nom) }; }),
+      par: JSON.parse(JSON.stringify(par)) };
+  }
+
+  function ouvrirLotVoile(){
+    /* ⚠ UNE SEULE PHOTO EST UN LOT VALIDE. Le garde etait << moins de 2 >>,
+       alors que le panier propose << Traiter cette photo en lot... >> des UNE
+       photo : le bouton existait et ne faisait rien. Un lot d une photo garde
+       tout son sens — il part en arriere-plan et se suit comme les autres. */
+    if (!Object.keys(SEL).length) return;
+    var inst = instantaneLot();
+    var lg = logoChoisi();
+    var lgImg = lg ? lg.image : '';
+    /* Sans pont (ou si la fenetre fille echoue) : la boite d avant, ici, qui lance elle-meme. */
+    var ici = function(){
+      voileLot(inst, {
+        lancer: function(l, bouton, fermer){
+          bouton.disabled = true;
+          // Le meme cercle que les boutons de rendu : le voile se ferme a la reponse.
+          bouton.classList.add('attente');
+          bouton.innerHTML = '<span class="sz-spin" aria-hidden="true"></span><span>${T("Lancement du lot…")}</span>';
+          lancerLot(l, lgImg, fermer);
+        },
+        profil: function(v, fermer){ fermer(); appliquerRecette(v); ouvrirLotVoile(); }
+      });
+    };
+    szBoite('lot', inst, ici).then(function(r){
+      var v = r && r.valeur;
+      if (!v || typeof v !== 'object') return;   // Annuler, Échap, fenetre fermee : rien ne part
+      /* Choisir un profil s APPLIQUAIT TOUT DE SUITE a l ecran, puis rouvrait la boite (meme si l on annulait
+         ensuite) : on garde ce geste, ici, avec un instantane refait sur les nouveaux reglages. */
+      if (typeof v.profil === 'string') { appliquerRecette(v.profil); ouvrirLotVoile(); return; }
+      if (v.lancer && typeof v.lancer === 'object') {
+        dire('${T("Lancement du lot…")}');
+        lancerLot(v.lancer, lgImg, null);
+      }
+    });
+  }
+
+  /* Le lancement, le meme qu avant, ou que la boite ait ete montree (ici ou dans la fenetre fille). */
+  function lancerLot(l, lgImg, fermer){
+    var o = (l && l.options && typeof l.options === 'object') ? JSON.parse(JSON.stringify(l.options)) : {};
+    if (o.logo === LOT_LOGO) {
+      if (!lgImg) { if (fermer) fermer(); dire('${T("Aucun logo choisi.")}', 'err'); return; }
+      o.logo = lgImg;
+    }
+    var ids = (l && l.ids) || [];
+    appeler('lots:creer', [{ ids: ids, quoi: l.quoi, nom: l.nom,
+      priorite: l.priorite ? 1 : 0, refaire: !!l.refaire, options: o }]).then(function(r){
+      if (fermer) fermer();
+      if (!r.ok) {
+        dire(r.motif === 'toutes_deja_faites'
+          ? '${T("Ces {0} photos ont déjà ce traitement. Cochez « Refaire » pour les repasser.")}'.split('{0}').join(String(r.deja || ids.length))
+          : expliquer(r), 'err');
+        return;
+      }
+      SEL = {};
+      dire(r.nom + ' — ' + r.total + ' '
+        + (r.total > 1 ? '${T("photos en traitement")}' : '${T("photo en traitement")}')
+        + (r.ignorees ? ' (' + r.ignorees + ' '
+            + (r.ignorees > 1 ? '${T("déjà faites, écartées")}' : '${T("déjà faite, écartée")}') + ')' : '')
+        + '${T(". Suivez-le en bas de n’importe quel écran.")}', 'bon');
+      LOTS_VUE = true;
+      chargerLots();
+    });
+  }
+
+  /* La boite elle-meme. ⚠ ELLE NE LIT QUE << inst >> (et << act >> pour agir) : jamais l etat de l ecran —
+     c est ce qui permet de la dessiner a l identique dans la fenetre fille. */
+  function voileLot(inst, act){
+    var ids = inst.ids || [];
+    var nP = ids.length;
+    var PAR = inst.par || {};
+    var opts = traitementsLot();
+    var voieDef = inst.voieDef;
+    var parDe = function(q){ return PAR[q] || { reg: {}, options: {}, h1: '', h0: '' }; };
     /* ⚠ LA RECETTE EST PROPOSEE ICI, EN TETE, ET C EST LA DEMANDE : << pour
        traiter une photo ou des lots complets on doit me proposer si je desire
        utiliser un preset >>. La choisir remplit la mise en scene ENTIERE que le
@@ -3764,11 +3891,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
        ⚠ Elle change AUSSI le traitement du lot, puisque la voie en fait partie :
        laisser le menu du dessus sur l ancienne voie enverrait cinq cents photos
        dans une mise en scene que la recette ne decrit pas. */
-    var rcListe = RECETTES.length
+    var rcs = inst.recettes || [];
+    var rcListe = rcs.length
       ? ('<div class="ch"><label for="lot-rc">${T("Profil (facultatif)")}</label>'
         + '<select id="lot-rc"><option value="">${T("— Garder les réglages de l’écran —")}</option>'
-        + RECETTES.map(function(o){
-            return '<option value="' + esc(o.id) + '"' + (RC_SEL === o.id ? ' selected' : '')
+        + rcs.map(function(o){
+            return '<option value="' + esc(o.id) + '"' + (inst.rc === o.id ? ' selected' : '')
               + '>' + esc(o.nom) + '</option>'; }).join('')
         + '</select><div class="aidep">${T("Il pose d’un coup la voie, l’ambiance, le mannequin, la")} '
         + '${T("pose, les réglages avancés et le filigrane de ce lot.")}</div></div>')
@@ -3780,7 +3908,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
          traitements de lot (photos.js, _TRAITEMENTS). Le voile retombait alors
          sur le premier de la liste SANS LE DIRE — on venait de regler un produit
          a plat et l on lancait un detourage. On le dit, en tete, avant le choix. */
-      + (VOIE === 'plat'
+      + (inst.voie === 'plat'
           ? '<div class="aidep att" style="margin:0 0 .6rem"><span class="ic">⚠</span> ${T("« Produit à plat » ne se traite pas en lot : choisissez ci-dessous le traitement à appliquer.")}</div>'
           : '')
       + '<div class="ch"><label for="lot-quoi">${T("Traitement à appliquer")}</label>'
@@ -3790,7 +3918,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       + '</select></div>'
       + '<div class="ch"><label for="lot-nom">${T("Nom du lot (pour le retrouver dans le suivi)")}</label>'
       + '<input id="lot-nom" placeholder="${T("Collection automne — détourage")}"></div>'
-      + '<div id="lot-reg">' + reglagesLotHtml(voieDef) + '</div>'
+      + '<div id="lot-reg">' + parDe(voieDef).h1 + '</div>'
       + '<label class="rc"><input type="checkbox" id="lot-prio"> '
       + '<span><strong>${T("Priorité haute")}</strong> ${T("— ce lot passe devant ceux qui attendent.")}</span></label>'
       + '<label class="rc"><input type="checkbox" id="lot-refaire"> '
@@ -3814,12 +3942,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
            l estimation sont alors tous d accord entre eux, sans avoir a
            reproduire ici la logique de chacun. */
         var srcRc = document.getElementById('lot-rc');
-        if (srcRc) srcRc.onchange = function(){
-          var v = srcRc.value;
-          fermer();
-          appliquerRecette(v);
-          ouvrirLotVoile();
-        };
+        if (srcRc) srcRc.onchange = function(){ act.profil(String(srcRc.value || ''), fermer); };
         var c = function(i){ var e = document.getElementById(i); return !!(e && e.checked); };
         /* Changer de traitement change ce qui s applique : on redit la vérité,
            en gardant le choix déjà fait sur la case. */
@@ -3853,7 +3976,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           var quoi = g('lot-quoi');
           var voie = voiePourQuoi(quoi);
           var reg = (document.getElementById('lot-reglages') ? c('lot-reglages') : true)
-            ? reglagesPour(voie) : {};
+            ? parDe(quoi).reg : {};
           /* ⚠ LE FILIGRANE NE SE DEMANDE PAS AU RELAIS : il ne passe par aucun
              service, donc il n a pas de prix a estimer. Poser la question ferait
              afficher << coût non estimé >> sur un traitement qui est GRATUIT —
@@ -3935,7 +4058,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           var z = document.getElementById('lot-reg');
           if (!z) return;
           var avait = document.getElementById('lot-reglages') ? c('lot-reglages') : true;
-          z.innerHTML = reglagesLotHtml(sq.value, avait);
+          z.innerHTML = avait ? parDe(sq.value).h1 : parDe(sq.value).h0;
           brancherCase();
           /* ⚠ CHANGER DE TRAITEMENT CHANGE LE PRIX, et pas d un peu : un fantôme
              avec décor coûte deux appels Photoroom, un détourage un appel chez un
@@ -3958,29 +4081,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         brancherCase();
         majEstimation();
         document.getElementById('v-oui').onclick = function(){
-          this.disabled = true;
-          // Le meme cercle que les boutons de rendu : le voile se ferme a la reponse.
-          this.classList.add('attente');
-          this.innerHTML = '<span class="sz-spin" aria-hidden="true"></span><span>${T("Lancement du lot…")}</span>';
-          appeler('lots:creer', [{ ids: ids, quoi: g('lot-quoi'), nom: g('lot-nom'),
+          if (this.disabled) return;
+          /* Les options sont celles que la mere a calculees pour CE traitement (instantane), et rien
+             d autre : case cochee = par[quoi].options, decochee (ou absente) = {} — exactement
+             optionsLot(quoi, case) d avant. */
+          var q = g('lot-quoi');
+          var l = { ids: ids.slice(), quoi: q, nom: g('lot-nom'),
             priorite: c('lot-prio') ? 1 : 0, refaire: c('lot-refaire'),
-            options: optionsLot(g('lot-quoi'), c('lot-reglages')) }]).then(function(r){
-            fermer();
-            if (!r.ok) {
-              dire(r.motif === 'toutes_deja_faites'
-                ? '${T("Ces {0} photos ont déjà ce traitement. Cochez « Refaire » pour les repasser.")}'.split('{0}').join(String(r.deja || ids.length))
-                : expliquer(r), 'err');
-              return;
-            }
-            SEL = {};
-            dire(r.nom + ' — ' + r.total + ' '
-              + (r.total > 1 ? '${T("photos en traitement")}' : '${T("photo en traitement")}')
-              + (r.ignorees ? ' (' + r.ignorees + ' '
-                  + (r.ignorees > 1 ? '${T("déjà faites, écartées")}' : '${T("déjà faite, écartée")}') + ')' : '')
-              + '${T(". Suivez-le en bas de n’importe quel écran.")}', 'bon');
-            LOTS_VUE = true;
-            chargerLots();
-          });
+            options: c('lot-reglages') ? JSON.parse(JSON.stringify(parDe(q).options || {})) : {} };
+          act.lancer(l, this, fermer);
         };
       }, true);   // la boite du lot garde son << Plein ecran >>
   }
@@ -4304,6 +4413,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function charger(){
     dire('${T("Chargement des ambiances…")}');
     appeler('studio:presets').then(function(r){
+      /* (2026-11-27, phase 2) En fenetre fille (szBoite) : la boite demandee, seule a l ecran. Elles ne portent
+         que ce qu elles recoivent : rien a attendre des ambiances. Le CHOIX repart a la mere par le message de
+         fin — c est elle qui a les photos et les reglages. */
+      szBoiteSiDemandee({
+        reference: function(a){
+          if (!a || !a.c || !a.c.length) return;
+          grilleReference(a.c, function(i){ try { P.boiteFin({ message: '', type: 'ref' + i }); } catch (e) {} });
+        },
+        profil: function(a){
+          recetteVoile(a || {}, function(nom, fermer){ try { P.boiteFin({ message: nom, type: 'profil' }); } catch (e) {} fermer(); });
+        },
+        /* Le lot : la fille montre l instantane de la mere et lui REND le choix ; c est la mere qui lance
+           (lots:creer) ou applique le profil. Rien n est lance ici. */
+        lot: function(a){
+          if (!a || !a.ids || !a.ids.length || !a.par) return;
+          voileLot(a, {
+            lancer: function(l, bouton, fermer){ szBoiteRendre({ lancer: l }); fermer(); },
+            profil: function(v, fermer){ szBoiteRendre({ profil: v }); fermer(); }
+          });
+        }
+      });
       if (!r || !r.ok) {
         corps.className = 'corps plein';
         corps.innerHTML = '<div class="carte"><div class="vide m-' + ((r && r.motif) || 'echec') + '">' + expliquer(r) + '</div></div>';
@@ -4428,7 +4558,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     libelle: '${T("Un projet du Studio")}',
     ttlMin: 1440,
     cle: function(){ return 'projet'; },
-    actif: function(){ return !RO; },
+    // (2026-11-27) Pas en fenetre fille (szBoite) : son projet vide ecraserait le brouillon de la mere.
+    actif: function(){ return !RO && !window.__szBoite; },
     rempli: function(){ return aUnePhoto() && !ENREG; },
     valeurs: function(){
       return { v: 1, VOIE: VOIE, VOIE_CHOISIE: VOIE_CHOISIE, PRESET: PRESET, FIL: FIL,

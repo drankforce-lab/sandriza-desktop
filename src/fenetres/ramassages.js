@@ -351,13 +351,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
          2026-08-09). */
       /* (2026-11-22) La planification a SA fenêtre ; une coquille sans le verbe garde la boîte d avant. */
       if (P && typeof P.ouvrirRamassagePlan === 'function') { P.ouvrirRamassagePlan(); return; }
-      dire('${T("Lecture des colis prêts…")}');
-      appeler('ramassages:preparer', []).then(function(r){
-        if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        dire('');
-        PLAN = r;
-        dessiner();
-      });
+      /* (2026-11-27, phase 2) Sinon, la boite d avant s ouvre dans une VRAIE FENETRE (szBoite) ; la liste se
+         recharge a sa fermeture. */
+      szBoite('planifier', null, ouvrirPlanIci).then(function(r){ if (r) charger(); });
       return;
     }
     if (t.closest('#rm-p-annuler')) { PLAN = null; dessiner(); return; }
@@ -410,6 +406,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   /* (2026-10-25, audit) LA REPONSE EST RANGEE SELON L ONGLET DEMANDE, pas celui de l arrivee : un clic
      sur « Rapport transporteurs » pendant la lecture des ramassages rangeait la liste dans RAP. Si
      l onglet a change entre-temps, on relit celui qui est affiche. */
+  function ouvrirPlanIci(){
+    dire('${T("Lecture des colis prêts…")}');
+    appeler('ramassages:preparer', []).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      dire('');
+      PLAN = r;
+      dessiner();
+    });
+  }
   var enCours = false, RELIRE = false;
   function charger(){
     if (enCours) { RELIRE = true; return; }
@@ -424,6 +429,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       else RAM = r.lignes || [];
       dire('');
       dessiner();
+      // En fenetre fille (szBoite) : la planification, seule a l ecran.
+      szBoiteSiDemandee({ planifier: function(){ ouvrirPlanIci(); } });
     });
   }
 

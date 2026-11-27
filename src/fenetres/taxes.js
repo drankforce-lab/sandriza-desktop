@@ -426,7 +426,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var ec = (D && D.ecarts) || [];
     /* ⚠ Le singulier et le pluriel, chacun entier. */
     if (ec.length) {
-      ECARTS = true; dessiner();
+      ouvrirEcarts();
       dire(ec.length + (ec.length > 1 ? '${T(" écarts")}' : '${T(" écart")}')
         + '${T(" avec la référence.")}', 'att');
       return;
@@ -435,6 +435,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     occuper(true); dire('${T("Marquage de la révision…")}');
     appeler('config:taxes:revision').then(function(r){ verdict(r, '${T("Vos taux correspondent à la référence. Date de révision actualisée.")}'); });
   };
+  /* (2026-11-27, phase 2) La comparaison s ouvre dans une VRAIE FENETRE (szBoite) ; « Appliquer la reference »
+     s y fait, et la grille se relit a sa fermeture. Sans pont : la boite d avant, ici. */
+  function ouvrirEcarts(){
+    szBoite('ecarts', null, function(){ ECARTS = true; dessiner(); }).then(function(r){ if (r) charger(); });
+  }
   function charger(){
     dire('${T("Lecture…")}');
     appeler('config:taxes:donnees').then(function(r){
@@ -447,6 +452,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       RO = !r.peutModifier;
       dessiner();
       dire('');
+      // En fenetre fille (szBoite) : la comparaison, seule a l ecran.
+      szBoiteSiDemandee({ ecarts: function(){ ECARTS = true; dessiner(); } });
     });
   }
 

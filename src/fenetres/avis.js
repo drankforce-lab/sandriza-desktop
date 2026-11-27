@@ -612,8 +612,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     if (vo) return;   // le voile ne ferme plus (2026-10-07) : seulement Fermer
     if (t.closest('button') || t.closest('input') || t.closest('select')) return;
     var tr = t.closest('tr[data-id]');
-    if (tr) ouvrirDetail(tr.getAttribute('data-id'));
+    if (tr) ouvrirAvis(tr.getAttribute('data-id'));
   };
+
+  /* (2026-11-27, phase 2) La fiche d un avis s ouvre dans une VRAIE FENETRE (szBoite) ; la liste se recharge
+     a sa fermeture. ouvrirDetail reste l ouverture locale : repli, et ce qui tourne dans la fenetre fille. */
+  function ouvrirAvis(id){
+    if (!id) return;
+    szBoite('fiche', { id: id }, function(){ ouvrirDetail(id); }).then(function(r){ if (r) charger(); });
+  }
 
   function ouvrirDetail(id){
     dire('${T("Lecture…")}');
@@ -639,7 +646,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       if (garderSaisie) redessinerSansPerdreLaSaisie();
       else dessiner();
       /* Ouverture directe sur un avis (id d ouverture) : une seule fois. */
-      if (OUVERTURE && !DETAIL) { var o = OUVERTURE; OUVERTURE = ''; ouvrirDetail(o); }
+      if (OUVERTURE && !DETAIL && !window.__szBoite) { var o = OUVERTURE; OUVERTURE = ''; ouvrirAvis(o); }
+      // En fenetre fille (szBoite) : on rouvre la fiche demandee, seule a l ecran.
+      szBoiteSiDemandee({ fiche: function(a){ if (a && a.id) ouvrirDetail(a.id); } });
     });
   }
 

@@ -723,7 +723,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
     ecrire('invmeta:codeSave', { name: nm, code: el ? el.value : '' }, function(r){ return '${T("Code «")} ' + r.code + ' ${T("» enregistré pour «")} ' + r.nom + ' ».'; });
   }
   function saveEditColor(){
-    ecrire('invmeta:colorEdit', { original: EDITCOLOR.nom, name: val('ec-name'), hex: val('ec-hex') }, function(){ EDITCOLOR = null; return '${T("Couleur mise à jour.")}'; });
+    /* (2026-11-27) On redessine APRES avoir retire EDITCOLOR : relire() a deja redessine, boite comprise,
+       et sans ce second dessin elle restait ouverte apres l enregistrement (la fenetre fille ne se fermait pas). */
+    ecrire('invmeta:colorEdit', { original: EDITCOLOR.nom, name: val('ec-name'), hex: val('ec-hex') }, function(){ EDITCOLOR = null; dessiner(); return '${T("Couleur mise à jour.")}'; });
   }
   function saveCat(id){
     ecrire('invmeta:catSave', {
@@ -767,7 +769,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
     if (g('data-act') === 'colorsearch') { searchColor(); return; }
     if (g('data-act') === 'codesassign') { ecrire('invmeta:codesAssign', {}, function(r){ return phrase(r.n, '${T("{0} code enregistré.")}', '${T("{0} codes enregistrés.")}'); }); return; }
     if (g('data-codesave')) { saveCode(g('data-codesave')); return; }
-    if (g('data-coloredit')) { var cp = g('data-coloredit').split('|'); EDITCOLOR = { nom: cp[0], hex: cp[1] }; dessiner(); return; }
+    /* (2026-11-27, phase 2) La boite s ouvre dans une VRAIE FENETRE (szBoite) ; les donnees se relisent a sa fermeture. */
+    if (g('data-coloredit')) { var cp = g('data-coloredit').split('|'); var ec = { nom: cp[0], hex: cp[1] };
+      szBoite('couleur', ec, function(){ EDITCOLOR = ec; dessiner(); }).then(function(r){ if (r) relire(); }); return; }
     if (g('data-colorrm')) { var coR = g('data-colorrm');
       confirmerRetrait('${T("Supprimer la couleur")}', '${T("La couleur")} « ' + coR + ' » ${T("sera supprimée de la liste des couleurs.")}', '${T("Supprimer la couleur")}',
         function(){ ecrire('invmeta:colorRemove', { name: coR }, function(){ return '${T("Couleur supprimée.")}'; }); }); return; }
@@ -832,6 +836,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BORNER({'inv-color-name':30,'inv-color-hex':7,'
     ${ouvreAttr ? "ADDING = 'genres';" : ''}
     ${ouvreCat ? "CATEDIT = '__new__';" : ''}
     dessiner();
+    // En fenetre fille (szBoite) : on rouvre la boite demandee, seule a l ecran.
+    szBoiteSiDemandee({ couleur: function(a){ if (a && a.nom) { EDITCOLOR = { nom: String(a.nom), hex: String(a.hex || '') }; dessiner(); } } });
   });
 })();
 </script></body></html>`;

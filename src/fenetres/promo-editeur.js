@@ -1124,10 +1124,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (r.total > r.plafond) etat += ' · ' + r.total + ' ${T("au total, les")} ' + r.plafond + ' ${T("plus récentes sont montrées")}';
     document.getElementById('choix-etat').textContent = etat;
   }
+  /* (2026-11-27, phase 2) Le selecteur s ouvre dans une VRAIE FENETRE ; elle rend le logo choisi
+     (szBoiteRendre) et c est ICI, dans le modele de cette page, qu il est pose. */
+  function choisirImage(quoi, titre){
+    var apres = quoi === 'fond' ? poserImageFond : poserImageElement;
+    szBoite('logo', { quoi: quoi, titre: titre }, function(){ ouvrirChoix(apres, titre); }).then(function(r){
+      if (r && r.valeur && r.valeur.logo) apres(r.valeur.logo);
+    });
+  }
   function choisirLogo(id){
     var l = null;
     if (LOGOS) for (var i = 0; i < LOGOS.logos.length; i++) if (LOGOS.logos[i].id === id) l = LOGOS.logos[i];
     if (!l || !CHOIX) return;
+    if (window.__szBoite) { szBoiteRendre({ logo: l }); fermerChoix(); return; }
     var f = CHOIX;
     fermerChoix();
     f(l);
@@ -1342,8 +1351,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       return;
     }
     if ((b = ev.target.closest('[data-choisir]'))) {
-      if (b.getAttribute('data-choisir') === 'fond') ouvrirChoix(poserImageFond, '${T("Choisir une image de fond")}');
-      else ouvrirChoix(poserImageElement, '${T("Choisir une image")}');
+      if (b.getAttribute('data-choisir') === 'fond') choisirImage('fond', '${T("Choisir une image de fond")}');
+      else choisirImage('element', '${T("Choisir une image")}');
       return;
     }
     if (ev.target.closest('[data-fond-retirer]')) {
@@ -1386,6 +1395,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     if (b) choisirLogo(b.getAttribute('data-logo'));
   });
   document.getElementById('b-fermer-choix').addEventListener('click', fermerChoix);
+  // En fenetre fille (szBoite) : seul le selecteur s ouvre ; le choix repart vers la mere.
+  szBoiteSiDemandee({ logo: function(a){ ouvrirChoix(function(){}, (a && a.titre) || '${T("Choisir une image")}'); } });
   document.getElementById('b-relire').addEventListener('click', function(){ LOGOS = null; lireLogos(); });
   /* ⚠ L IMPORT N EST PAS ICI : il a sa fenetre, avec son assistant de recadrage.
      Deux portes d import auraient donne deux recadrages pour le meme fichier.

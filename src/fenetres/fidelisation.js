@@ -1528,7 +1528,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     });
   }
 
+  /* (2026-11-27, phase 2) L editeur s ouvre dans une VRAIE FENETRE (szBoite) ; la liste se recharge a sa fermeture. */
   function ouvrirEditeur(id){
+    szBoite('editeur', { id: id || '' }, function(){ ouvrirEditeurIci(id); }).then(function(r){ if (r) charger(); });
+  }
+  function ouvrirEditeurIci(id){
     var apres = function(){
       EDIT = (FORM && FORM.sondage) || { id: '', nom: '', declencheur: 'delivered', intro: '',
         actif: true, questions: [], recompense: { active: false, type: 'percent', valeur: 10, jours: 30, message: '' } };
@@ -1795,13 +1799,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     }
 
     var tr = t.closest('[data-sondage]');
-    if (tr) {
-      appeler('fidelisation:sondage', [tr.getAttribute('data-sondage')]).then(function(r){
-        if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        DETAIL = r.sondage; ARME = ''; dessiner();
-      });
-      return;
-    }
+    if (tr) { ouvrirDetail(tr.getAttribute('data-sondage')); return; }
 
     /* ⚠⚠ UN CLIC SUR UN BOUTON NE DOIT PAS DÉSARMER CE QU'IL VIENT D'ARMER.
        Les boutons branches par la fonction de branchement posent l armement,
@@ -1825,15 +1823,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('fidelisation')}
     }
   });
 
+  /* (2026-11-27, phase 2) Le depouillement d un sondage s ouvre dans une VRAIE FENETRE (szBoite). */
+  function ouvrirDetail(id){
+    szBoite('detail', { id: id }, function(){ ouvrirDetailIci(id); }).then(function(r){ if (r) charger(); });
+  }
+  function ouvrirDetailIci(id){
+    appeler('fidelisation:sondage', [id]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      DETAIL = r.sondage; ARME = ''; dessiner();
+    });
+  }
+
   function charger(){
     appeler('fidelisation:liste', []).then(function(r){
       if (!r || !r.ok) { vide('${T("Fidélisation indisponible")}', expliquer(r)); return; }
       D = r;
       dessiner();
+      // En fenetre fille (szBoite) : on rouvre la boite demandee, seule a l ecran.
+      if (szBoiteSiDemandee({
+        editeur: function(a){ ouvrirEditeurIci((a && a.id) || ''); },
+        detail: function(a){ if (a && a.id) ouvrirDetailIci(a.id); }
+      })) return;
       /* ⚠ Ouverture directe sur l editeur (id d ouverture) : le banc
          n a aucun moyen de cliquer, et c est justement l editeur qui
          manquait. */
-      if (${JSON.stringify(editeur)} && !EDIT) ouvrirEditeur('');
+      if (${JSON.stringify(editeur)} && !EDIT && !window.__szBoite) ouvrirEditeur('');
     });
   }
 

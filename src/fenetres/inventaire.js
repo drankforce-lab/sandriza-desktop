@@ -1599,36 +1599,34 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     // question de les retirer aussi se pose ICI — et elle reste VOLONTAIRE, la
     // case part decochee (regle du 2026-08-08). Un apercu qui echoue n empeche
     // pas la suppression : on pose la question sans la partie phototheque.
+    /* (2026-11-27, phase 2) LA QUESTION EST UNE VRAIE FENETRE (szConfirmerCase) et non plus un voile :
+       la page fait la suppression APRES la reponse, une fenetre fille la couperait. La case de la
+       phototheque n est posee que si la fiche en emploie, et part toujours decochee. */
     appeler('stock:supprimerApercu', [pid]).then(function(a){
       var photos = (a && a.ok && a.phototheque) || [];
-      var q = photos.length
-        ? '<label style="display:flex;align-items:flex-start;gap:.5rem;margin-top:.6rem;'
-          + 'font-size:.83rem;cursor:pointer;text-align:left">'
-          + '<input type="checkbox" id="v-ph" style="width:auto;margin-top:.2rem">'
-          + '<span>${T("Retirer aussi")} ' + (photos.length > 1 ? '${T("ses")} ' + photos.length + ' ${T("photos")}' : '${T("sa photo")}')
-          + ' ${T("de la photothèque (")}' + photos.map(function(x){ return esc(x.code); }).join(', ') + '). '
+      var o = { danger: true, titre: '${T("Supprimer de l’inventaire")}',
+        texte: '${T("Supprimer définitivement")} ' + nom + ' ${T("de l’inventaire ?")} ${T("Cette action est irréversible.")}',
+        oui: '${T("Supprimer")}', non: '${T("Annuler")}' };
+      var question;
+      if (photos.length) {
+        o.caseLib = '${T("Retirer aussi")} ' + (photos.length > 1 ? '${T("ses")} ' + photos.length + ' ${T("photos")}' : '${T("sa photo")}')
+          + ' ${T("de la photothèque (")}' + photos.map(function(x){ return x.code; }).join(', ') + '). '
           + '${T("Sans cette case,")} ' + (photos.length > 1 ? '${T("elles y restent")}' : '${T("elle y reste")}')
-          + ' ${T("pour servir à d’autres fiches.")}</span></label>'
-        : '';
-      voile('<h3>${T("Supprimer de l’inventaire")}</h3>'
-        + '<p>${T("Supprimer définitivement")} <strong>' + esc(nom) + '</strong> ${T("de l’inventaire ?")} '
-        + '${T("Cette action est <strong>irréversible</strong>.")}</p>' + q
-        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-        + '<button class="rouge" id="v-oui">${T("Supprimer")}</button></div>',
-        function(fermer){
-          document.getElementById('v-non').onclick = fermer;
-          document.getElementById('v-oui').onclick = function(){
-            this.disabled = true;
-            var coche = document.getElementById('v-ph');
-            appeler('stock:supprimer', [pid, !!(coche && coche.checked)]).then(function(r){
-              fermer();
-              dire(r.ok ? ('${T("Produit supprimé")}' + (r.photosRetirees
-                  ? ' — ' + r.photosRetirees + ' ' + szPl(r.photosRetirees, '${T("photo retirée de la photothèque")}', '${T("photos retirées de la photothèque")}') : '') + '.')
-                : expliquer(r), r.ok ? 'bon' : 'err');
-              if (r.ok) chargerOnglet();
-            });
-          };
+          + ' ${T("pour servir à d’autres fiches.")}';
+        o.caseValeur = false;
+        question = szConfirmerCase(o);
+      } else {
+        question = szConfirmer(o).then(function(oui){ return { oui: !!oui, coche: false }; });
+      }
+      question.then(function(rep){
+        if (!rep || !rep.oui) return;
+        appeler('stock:supprimer', [pid, !!rep.coche]).then(function(r){
+          dire(r.ok ? ('${T("Produit supprimé")}' + (r.photosRetirees
+              ? ' — ' + r.photosRetirees + ' ' + szPl(r.photosRetirees, '${T("photo retirée de la photothèque")}', '${T("photos retirées de la photothèque")}') : '') + '.')
+            : expliquer(r), r.ok ? 'bon' : 'err');
+          if (r.ok) chargerOnglet();
         });
+      });
     });
   }
 
@@ -2282,6 +2280,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       if (!c || !c.ok) { vide('${T("Inventaire indisponible")}', expliquer(c)); return; }
       CTX = c;
       sous.textContent = c.peutEcrire ? '' : '${T("Lecture seule")}';
+      /* En fenetre fille (szBoite) : ni voeu (lu une fois, par la mere) ; on rouvre la boite demandee. */
+      if (window.__szBoite) {
+        chargerOnglet();
+        szBoiteSiDemandee({ etiquettes: function(a){ boiteEtiquettes(a); } });
+        return;
+      }
       lireVoeu().then(function(){ chargerOnglet(); });
     });
   }
@@ -2450,10 +2454,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   }
 
   // ══ ETIQUETTES ════════════════════════════════════════════════════════════
+  /* (2026-11-27, phase 2) La boite s ouvre dans une VRAIE FENETRE (szBoite) : elle ne porte que la
+     variante (JSON simple). En fenetre fille, l IMPRESSION SE FAIT DANS LA FILLE, qui attend la reponse
+     avant de se fermer (et reste ouverte sur un echec, qui s y lit) : rien ne continue dans la page apres. */
   function etiquettesVariante(i){
     var v = VARS[i];
     if (!v || !v.sku) return;
-    var defaut = Math.max(1, parseInt(v.qte, 10) || 1);
+    var e = { sku: v.sku, nom: PROD.nom, taille: v.taille, couleur: v.couleur,
+      defaut: Math.max(1, parseInt(v.qte, 10) || 1) };
+    szBoite('etiquettes', e, function(){ boiteEtiquettes(e); }).then(function(){});
+  }
+  function boiteEtiquettes(v){
+    if (!v || !v.sku) return;
+    var defaut = Math.max(1, parseInt(v.defaut, 10) || 1);
     voile('<h3><span class="ic">🏷</span> ${T("Imprimer des étiquettes")}</h3>'
       + '<p><span class="code">' + esc(v.sku) + '</span> — ' + esc(v.taille) + ' / ' + esc(v.couleur) + '</p>'
       + '<p><label>${T("Nombre d’étiquettes")}<input type="number" min="1" id="v-qte" value="' + defaut + '"></label></p>'
@@ -2466,8 +2479,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
         document.getElementById('v-oui').onclick = function(){
           var n = parseInt(champ.value, 10);
           if (!(n > 0)) { dire('${T("Quantité invalide.")}', 'err'); return; }
+          var item = { sku: v.sku, name: v.nom, size: v.taille, color: v.couleur, qty: n };
+          if (window.__szBoite) {
+            var bo = this; bo.disabled = true;
+            imprimer([item]).then(function(z){ if (z && z.ok) fermer(); else bo.disabled = false; });
+            return;
+          }
           fermer();
-          imprimer([{ sku: v.sku, name: PROD.nom, size: v.taille, color: v.couleur, qty: n }]);
+          imprimer([item]);
         };
       });
   }
@@ -2496,9 +2515,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
 
   function imprimer(items){
     dire('${T("Impression…")}');
-    appeler('stock:etiquettes', [items]).then(function(z){
+    return appeler('stock:etiquettes', [items]).then(function(z){
       dire(z.ok ? (z.envoyees + ' ' + szPl(z.envoyees, '${T("étiquette envoyée à «")}', '${T("étiquettes envoyées à «")}') + ' ' + z.imprimante + ' ».')
                 : expliquer(z), z.ok ? 'bon' : 'err');
+      return z;
     });
   }
 
@@ -2595,7 +2615,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   }
   dessiner();
   charger();
-  if (DEPART) ouvrirProduit(DEPART);
+  // En fenetre fille, pas de grille ni de verrou : la mere les tient (le rendre ici le lui retirerait).
+  if (DEPART && !window.__szBoite) ouvrirProduit(DEPART);
 })();
 </script>
 </body></html>`;

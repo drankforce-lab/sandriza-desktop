@@ -307,7 +307,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      redessine a chaque etape du fil. On propose donc apres le dessin de la
      premiere etape, et une seule fois — sinon la question reviendrait a chaque
      aller-retour dans le fil, ce qui est plus agacant que la perte qu'on evite. */
-  var BR_PROPOSE = false;
+  /* (2026-11-27) En fenetre fille (szBoite), pas de reprise de brouillon : la saisie appartient a la mere. */
+  var BR_PROPOSE = !!window.__szBoite;
   function dessiner(){
     fil();
     if (ETAPE === 0) dessinerDemande();
@@ -817,10 +818,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       function(fermer){ document.getElementById('v-non').onclick = fermer; });
   }
 
-  function apercu(){
+  /* (2026-11-27, phase 2) L ETIQUETTE S OUVRE DANS UNE VRAIE FENETRE (szBoite) : la fenetre fille relit le
+     PDF elle-meme (retour:pdf ne rend que l etiquette deja enregistree, rien n est commande ni facture), et
+     ici on le lit d abord pour que l erreur se dise dans cette fenetre. Sans pont : la visionneuse d avant. */
+  function montrerEtiquette(pdf){
+    szBoite('etiquette', null, function(){ voilePdf(pdf); });
+  }
+  function apercuIci(){
     appeler('retour:pdf', [ID]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
       voilePdf(r.pdf);
+    });
+  }
+  function apercu(){
+    appeler('retour:pdf', [ID]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      montrerEtiquette(r.pdf);
     });
   }
 
@@ -841,7 +854,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       // recharger redessine les boutons (« Étiquette » apparaît), le voile est
       // posé sur le body et survit au redessin.
       recharger();
-      voilePdf(r.pdf);
+      montrerEtiquette(r.pdf);
     });
   }
 
@@ -942,6 +955,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       pill.textContent = STATUTS[r.demande.statut] || r.demande.statut;
       if (!r.peutEcrire) sous.textContent = r.archive ? '${T("Archivée")}' : '${T("Lecture seule")}';
       dessiner();
+      // En fenetre fille (szBoite) : l etiquette demandee, seule a l ecran.
+      szBoiteSiDemandee({ etiquette: function(){ apercuIci(); } });
     });
   }
 
@@ -1030,7 +1045,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     P.fermer();
   });
 
-  recharger().then(function(){ if (R) prendreVerrou(); });
+  /* (2026-11-27) La fenetre fille (szBoite) ne prend PAS le verrou : en le rendant a sa fermeture, elle
+     rendrait celui de la mere. */
+  recharger().then(function(){ if (R && !window.__szBoite) prendreVerrou(); });
 })();
 </script>
 </body></html>`;

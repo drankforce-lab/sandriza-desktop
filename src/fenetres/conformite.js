@@ -475,7 +475,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     Array.prototype.forEach.call(corps.querySelectorAll('[data-ouvrir]'), function(b){
       b.addEventListener('click', function(){
         var cc = b.getAttribute('data-ouvrir');
-        OUVERT = (OUVERT === cc) ? '' : cc;
+        /* (2026-11-27, phase 2) Le dossier s ouvre dans une VRAIE FENETRE (szBoite) ; le registre se relit a sa
+           fermeture. L ouverture d avant reste le repli (et c est elle qui tourne dans la fenetre fille). */
+        if (OUVERT !== cc) {
+          szBoite('dossier', { cc: cc }, function(){ OUVERT = cc; lireIdentite(); dessiner(); }).then(function(r){ if (r) charger(); });
+          return;
+        }
+        OUVERT = '';
         lireIdentite(); dessiner();
       });
     });
@@ -489,16 +495,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     });
     /* Fermer garde la saisie (elle part avec << Enregistrer le registre >>) ;
        le clic a cote et Echap font de meme. */
-    var fermerDossier = function(){ lireIdentite(); OUVERT = ''; dessiner(); };
+    var fermerDossier = function(){ fermerGarde(function(){ lireIdentite(); OUVERT = ''; dessiner(); }); };
     var bf = document.getElementById('cf-fermer'); if (bf) bf.onclick = fermerDossier;
     var be = document.getElementById('cf-enr'); if (be) be.onclick = function(){ lireIdentite(); bsave.click(); };
     var vo = document.getElementById('cf-voile');
-    if (!window.__cfEchap) { window.__cfEchap = 1; document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && (OUVERT || IDENT)) { lireIdentite(); OUVERT = ''; IDENT = false; dessiner(); } }); }
+    if (!window.__cfEchap) { window.__cfEchap = 1; document.addEventListener('keydown', function(ev){ if (ev.key === 'Escape' && (OUVERT || IDENT)) { fermerGarde(function(){ lireIdentite(); OUVERT = ''; IDENT = false; dessiner(); }); } }); }
     var bi = document.getElementById('b-ident');
-    if (bi) bi.onclick = function(){ lireIdentite(); IDENT = true; dessiner(); var c = document.getElementById('r-nom'); if (c) c.focus(); };
-    var fermerIdent = function(){ lireIdentite(); IDENT = false; dessiner(); };
+    /* (2026-11-27, phase 2) L identite s ouvre dans une VRAIE FENETRE (szBoite) ; le registre se relit a sa fermeture. */
+    if (bi) bi.onclick = function(){ szBoite('identite', null, ouvrirIdentite).then(function(r){ if (r) charger(); }); };
+    var fermerIdent = function(){ fermerGarde(function(){ lireIdentite(); IDENT = false; dessiner(); }); };
     var bif = document.getElementById('id-fermer'); if (bif) bif.onclick = fermerIdent;
-    var bie = document.getElementById('id-enr'); if (bie) bie.onclick = function(){ lireIdentite(); IDENT = false; bsave.click(); };
+    var bie = document.getElementById('id-enr'); if (bie) bie.onclick = function(){ lireIdentite(); IDENT = false; FERMER_APRES = false; bsave.click(); };
     var bm = document.getElementById('b-mandat');
     if (bm) bm.addEventListener('click', function(){
       if (RO) return;
@@ -506,6 +513,35 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       p.mandats.push({ flux: 'emballages', organisme: '', numero: '', valideJusqu: '' });
       lireIdentite(); dessiner();
     });
+  }
+
+  function ouvrirIdentite(){ lireIdentite(); IDENT = true; dessiner(); var c = document.getElementById('r-nom'); if (c) c.focus(); }
+
+  /* ══ LA FENETRE FILLE (2026-11-27, phase 2) ═════════════════════════════════
+     Avant, « Fermer » gardait la saisie dans la copie de travail de la page, et elle partait plus tard avec
+     « Enregistrer le registre ». Dans une fenetre fille, cette copie disparait avec la fenetre : fermer sans
+     enregistrer PERDRAIT la saisie sans un mot. On compare donc le registre a celui de l ouverture et, s il a
+     change, on DEMANDE : continuer, abandonner, ou enregistrer (puis fermer). Hors fenetre fille, rien ne change. */
+  var INSTANT = '', FERMER_APRES = false;
+  function photographier(){
+    INSTANT = '';
+    if (!window.__szBoite || !D || !D.registre) return;
+    lireIdentite();   // la saisie lue comme a la fermeture (un taux lu du champ est du texte) : pas de faux « modifie »
+    INSTANT = JSON.stringify(D.registre);
+  }
+  function fermerGarde(fermer){
+    if (!window.__szBoite || !INSTANT || !D) { fermer(); return; }
+    lireIdentite();
+    if (JSON.stringify(D.registre) === INSTANT || RO) { fermer(); return; }
+    szChoisir({ titre: '${T("Modifications non enregistrées")}',
+      texte: '${T("Les changements faits dans cette fenêtre ne sont pas encore enregistrés dans le registre. Fermer sans enregistrer les abandonne.")}',
+      boutons: [{ id: 'garder', lib: '${T("Continuer la saisie")}' },
+                { id: 'jeter', lib: '${T("Abandonner les changements")}', rouge: true },
+                { id: 'enr', lib: '${T("Enregistrer le registre")}', prim: true }],
+      echap: 'garder' }).then(function(id){
+        if (id === 'jeter') { INSTANT = ''; fermer(); return; }
+        if (id === 'enr') { FERMER_APRES = true; bsave.click(); }
+      });
   }
 
   /* Ramasse la saisie dans la copie de travail. ⚠ APPELE AVANT CHAQUE REDESSIN :
@@ -550,6 +586,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (!r.ok) { corps.innerHTML = '<div class="carte"><div class="vide">' + esc(expliquer(r)) + '</div></div>';
                    bsave.disabled = true; dire(expliquer(r), 'err'); return; }
       D = r; dessiner(); dire('');
+      // En fenetre fille (szBoite) : on rouvre la boite demandee, seule a l ecran.
+      szBoiteSiDemandee({
+        identite: function(){ ouvrirIdentite(); photographier(); },
+        dossier: function(a){ if (a && a.cc) { OUVERT = a.cc; lireIdentite(); dessiner(); photographier(); } }
+      });
     });
   }
 
@@ -559,7 +600,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     OCCUPE = true; bsave.disabled = true; dire('${T("Enregistrement…")}', 'att');
     appeler('config:conformite:ecrire', [D.registre]).then(function(r){
       OCCUPE = false;
-      if (r.ok) { D = r; dessiner(); dire('${T("Registre enregistré.")}', 'bon'); return; }
+      if (r.ok) {
+        D = r;
+        if (FERMER_APRES) { OUVERT = ''; IDENT = false; }
+        FERMER_APRES = false;
+        dessiner(); photographier();
+        dire('${T("Registre enregistré.")}', 'bon'); return;
+      }
+      FERMER_APRES = false;
       /* ⚠ SUR UNE COLLISION, LE COEUR RENVOIE LE REGISTRE COURANT : on redessine
          avec LUI. Annoncer un echec en gardant a l ecran ce qui n a pas ete
          ecrit ferait croire que la saisie tient. */

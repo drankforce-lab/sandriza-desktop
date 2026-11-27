@@ -480,7 +480,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
       else dire(expliquer(r), 'err');
     });
   }
+  /* (2026-11-27, phase 2) « Nouvelle campagne ciblée » s ouvre dans une VRAIE FENETRE (szBoite) ; a sa
+     fermeture, on montre les campagnes, relues (comme avant, l ouverture menait a cet onglet). */
   function ouvrirForm(seg){
+    szBoite('campagne', { seg: seg || 'all' }, function(){ ouvrirFormIci(seg); }).then(function(r){
+      if (!r) return;
+      TAB = 'campaigns'; relire();
+    });
+  }
+  function ouvrirFormIci(seg){
     appeler('analytics:campForm', { seg: seg || 'all' }).then(function(r){
       if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
       FORM = { seg0:r.seg0, audienceCount:r.audienceCount, promos:r.promos };
@@ -608,6 +616,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('publicite')}
   charger().then(function(ok){
     if (!ok) return;
     dessiner();
+    // En fenetre fille (szBoite) : la fiche de campagne demandee, seule a l ecran.
+    if (szBoiteSiDemandee({ campagne: function(a){ ouvrirFormIci((a && a.seg) || 'all'); } })) return;
     ${ouvreForm ? 'if (PEUT.edit) ouvrirForm("all");' : ''}
   });
 })();

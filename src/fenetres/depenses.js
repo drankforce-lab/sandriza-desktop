@@ -257,6 +257,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
   var ANN_RETIRE = '';       // id arme pour retrait
   var VERROU = null;         // { obtenu, parQui } — l annuaire est partage
   var OUVERTURE = '${depart}';
+  /* (2026-11-27, phase 2) En fenetre fille (szBoite), l ouverture directe ne rejoue pas : seule la boite demandee s ouvre. */
+  if (window.__szBoite) OUVERTURE = 'liste';
+  var FORM_ATTENTE = false;  // facture deposee sur la liste : lue ici, la fiche s ouvre ensuite dans sa fenetre
 
   /* ⚠ MÊME PLAFOND QUE L'ÉCRAN WEB : 8 Mo. Au-delà, le fichier traverse le pont
      pour finir refusé plus loin — autant le dire tout de suite, en le nommant. */
@@ -585,7 +588,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
         + '${T("l’écran Comptabilité de la fenêtre principale.")}</div>';
     h += '</div></div>';
 
-    if (FORM) h += boiteForm();
+    if (FORM) { if (!FORM_ATTENTE) h += boiteForm(); }
     else if (DETAIL) h += boiteDetail();
 
     corps.className = 'cx';
@@ -1066,15 +1069,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     if (file.size > MAX_OCTETS) { dire(MOTIFS.trop_lourd + ' (' + file.name + ')', 'att'); return; }
     if (OCCUPE) { dire('${T("Une lecture est déjà en cours.")}', 'att'); return; }
     OCCUPE = true;
+    /* (2026-11-27, phase 2) Deposee sur la LISTE (aucune fiche ouverte) : la lecture se fait ici, sans
+       boite par-dessus ; la fiche remplie s ouvre ensuite dans une VRAIE FENETRE (szBoite 'formulaire'). */
+    var depuisListe = !FORM && !window.__szBoite;
     if (!FORM) FORM = formVierge();
     else memoriserForm();
+    if (depuisListe) FORM_ATTENTE = true;
     dessiner();
     dire('${T("Lecture de la facture… (quelques secondes)")}');
+    var livrer = function(){
+      if (!depuisListe) { dessiner(); brouillonMaintenant(); return; }
+      var f = FORM; FORM = null; FORM_ATTENTE = false; dessiner();
+      szBoite('formulaire', f, function(){ FORM = f; dessiner(); brouillonMaintenant(); })
+        .then(function(rb){ if (rb) charger(); });
+    };
     lireFichier(file).then(function(data){
-      if (!data) { OCCUPE = false; dire(MOTIFS.fichier_illisible, 'err'); dessiner(); return; }
+      if (!data) {
+        OCCUPE = false; dire(MOTIFS.fichier_illisible, 'err');
+        if (depuisListe) { FORM = null; FORM_ATTENTE = false; }
+        dessiner(); return;
+      }
       appeler('depenses:facture', [file.name, data]).then(function(r){
         OCCUPE = false;
-        if (!r.ok) { dire(expliquer(r), 'err'); dessiner(); return; }
+        if (!r.ok) { dire(expliquer(r), 'err'); if (depuisListe) livrer(); else dessiner(); return; }
         FORM.recu = !!r.recu;
         if (r.lu && r.champs) {
           var c = r.champs;
@@ -1135,11 +1152,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
             ? '${T("Lecture refusée — elle ne correspondait pas au document.")}'
             : '${T("Reçu joint — saisie manuelle.")}', 'att');
         }
-        dessiner();
         /* ⚠ ECRITURE IMMEDIATE : la lecture remplit les champs PAR PROGRAMME,
            sans frappe — rien n aurait declenche l enregistrement differe, et
-           c est precisement ce qui se perdait a la fermeture. */
-        brouillonMaintenant();
+           c est precisement ce qui se perdait a la fermeture. (livrer : dessin puis brouillon, ici ou dans la fenetre fille.) */
+        livrer();
       });
     });
   }
@@ -1422,7 +1438,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
   /* ⚠ ON REPREND TOUJOURS CE QUI A ETE COMMENCE. Ouvrir un formulaire vierge
      par-dessus un brouillon effacerait en silence le travail de la derniere
      fois — exactement ce qu on cherche a empecher. */
+  /* (2026-11-27, phase 2) Le formulaire s ouvre dans une VRAIE FENETRE (szBoite) ; la liste se recharge a sa fermeture. */
   function ouvrirNouvelle(){
+    szBoite('nouvelle', null, ouvrirNouvelleIci).then(function(r){ if (r) charger(); });
+  }
+  function ouvrirNouvelleIci(){
     DETAIL = null;
     FORM = formVierge();
     BR_REPRIS = 0;
@@ -1514,7 +1534,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
     if (tr) ouvrirDetail(tr.getAttribute('data-id'));
   };
 
+  /* (2026-11-27, phase 2) La fiche s ouvre dans une VRAIE FENETRE (szBoite) ; la liste se recharge a sa fermeture. */
   function ouvrirDetail(id){
+    szBoite('fiche', { id: id }, function(){ ouvrirDetailIci(id); }).then(function(r){ if (r) charger(); });
+  }
+  function ouvrirDetailIci(id){
     dire('${T("Lecture…")}');
     appeler('depenses:lire', [id]).then(function(r){
       if (!r.ok) { dire(expliquer(r), 'err'); return; }
@@ -1599,7 +1623,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       if (!r || !r.ok) { vide('${T("Dépenses indisponibles")}', expliquer(r)); return; }
       D = r;
       /* (2026-11-19) Une dépense choisie dans la recherche partout (Ctrl K) : le pont l'a retenue, on ouvre sa fiche. */
-      appeler('depenses:aOuvrir', []).then(function(o){ if (o && o.ok && o.id) ouvrirDetail(o.id); }).catch(function(){});
+      if (!window.__szBoite) appeler('depenses:aOuvrir', []).then(function(o){ if (o && o.ok && o.id) ouvrirDetail(o.id); }).catch(function(){});
       ANNEE = D.annee; MOIS = D.mois; CAT = D.categorie;
       var s = document.getElementById('sous');
       if (s) s.textContent = D.periode + ' · ' + D.nombre + ' '
@@ -1618,7 +1642,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       var poserQuestion = (OUVERTURE === 'fermeture');
       if (ouvrirApres) OUVERTURE = 'liste';
       dessiner();
-      if (ouvrirApres) { ouvrirNouvelle(); if (poserQuestion) { FERMER_DEMANDE = true; dessiner(); } }
+      if (ouvrirApres) { if (poserQuestion) { ouvrirNouvelleIci(); FERMER_DEMANDE = true; dessiner(); } else ouvrirNouvelle(); }
+      // En fenetre fille (szBoite) : on rouvre la boite demandee, seule a l ecran.
+      szBoiteSiDemandee({
+        nouvelle: function(){ if (D.peutAjouter) ouvrirNouvelleIci(); },
+        fiche: function(a){ if (a && a.id) ouvrirDetailIci(a.id); },
+        formulaire: function(f){ if (f && f.id) { DETAIL = null; FORM = f; dessiner(); brouillonMaintenant(); } }
+      });
     });
   }
 
@@ -1661,6 +1691,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('depenses')}
       /* ⚠ On ne ferme pas la fenetre sous une saisie en cours : le formulaire
          se ferme d abord, et la personne voit ce qu elle perd. */
       if (FERMER_DEMANDE) { FERMER_DEMANDE = false; dessiner(); return; }
+      if (FORM_ATTENTE) return;   // facture en lecture : la fiche s ouvrira ensuite
       if (FORM) { demanderFermeture(); return; }
       if (DETAIL) { fermer(); return; }
       // (2026-10-25, audit) Le formulaire d un fournisseur se ferme avant la fenetre.

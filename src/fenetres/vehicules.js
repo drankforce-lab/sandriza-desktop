@@ -534,6 +534,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
       }
       ETAT = '';
       dessiner();
+      // En fenetre fille (szBoite) : la boite demandee, seule a l ecran.
+      szBoiteSiDemandee({
+        vehicule: function(a){ ouvrirVehiculeIci((a && a.id) || ''); },
+        dpa: function(a){ if (a && a.id && vehicule(a.id)) { ONGLET = 'vehicules'; ouvrirDpaIci(a.id); } }
+      });
     });
   }
 
@@ -1685,7 +1690,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
      deux deplacements (km d affaires doubles), deux changements ou deux vehicules —
      la voie du clavier ne consultait pas le bouton desactive. */
   var ENVOI = false;
+  /* (2026-11-27, phase 2) La fiche du vehicule s ouvre dans une VRAIE FENETRE (szBoite) ; le registre se relit
+     a sa fermeture. Sans pont (bancs) : la boite d avant, ici. */
   function ouvrirVehicule(id){
+    szBoite('vehicule', { id: id || '' }, function(){ ouvrirVehiculeIci(id); }).then(function(r){ if (r) charger(); });
+  }
+  function ouvrirDpa(id){
+    szBoite('dpa', { id: id }, function(){ ouvrirDpaIci(id); });
+  }
+  function ouvrirDpaIci(id){
+    DPATAB = id; DPAPG = 0; dessiner();
+    var bf = document.getElementById('dpa-fermer'); if (bf) bf.focus();
+  }
+  function ouvrirVehiculeIci(id){
     if (id) { var v = vehicule(id); if (!v) return; VFORM = poserAutres(depuisVehicule(v)); }
     else VFORM = vehiculeVierge();
     CATMSG = null;
@@ -1916,7 +1933,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('vehicules')}
     var mv = t.closest('[data-veh-mod]');
     if (mv) { ouvrirVehicule(mv.getAttribute('data-veh-mod')); return; }
     var dt = t.closest('[data-dpa-tab]');
-    if (dt) { DPATAB = dt.getAttribute('data-dpa-tab'); DPAPG = 0; dessiner(); var bf = document.getElementById('dpa-fermer'); if (bf) bf.focus(); return; }
+    if (dt) { ouvrirDpa(dt.getAttribute('data-dpa-tab')); return; }
     var de = t.closest('[data-dpa-enr]');
     if (de) { enregistrerDpa(de.getAttribute('data-dpa-enr'), false, de); return; }
     var dm = t.closest('[data-dpa-max]');

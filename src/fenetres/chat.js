@@ -680,19 +680,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('chat')}
     var bf = t.closest('[data-filtre]');
     if (bf) { FILTRE = bf.getAttribute('data-filtre'); dessiner(); return; }
     var li = t.closest('.ligne[data-id]');
-    if (li) {
-      appeler('chat:lire', [li.getAttribute('data-id')]).then(function(r){
-        if (!r.ok) { dire(expliquer(r), 'err'); return; }
-        DETAIL = r.conversation; SUPPR_ARME = false; dessiner();
-      });
-    }
+    if (li) ouvrirConversation(li.getAttribute('data-id'));
   });
+
+  /* (2026-11-27, phase 2) La conversation s ouvre dans une VRAIE FENETRE (szBoite) ; la liste se recharge a sa
+     fermeture. lireConversation reste l ouverture locale (repli, et ce qui tourne dans la fenetre fille). */
+  function lireConversation(id){
+    appeler('chat:lire', [id]).then(function(r){
+      if (!r.ok) { dire(expliquer(r), 'err'); return; }
+      DETAIL = r.conversation; SUPPR_ARME = false; dessiner();
+    });
+  }
+  function ouvrirConversation(id){
+    if (!id) return;
+    szBoite('fiche', { id: id }, function(){ lireConversation(id); }).then(function(r){ if (r) charger(); });
+  }
 
   function charger(){
     appeler('chat:liste', []).then(function(r){
       if (!r || !r.ok) { vide('${T("Chat indisponible")}', expliquer(r)); return; }
       D = r;
       dessiner();
+      // En fenetre fille (szBoite) : on rouvre la conversation demandee, seule a l ecran.
+      szBoiteSiDemandee({ fiche: function(a){ if (a && a.id) lireConversation(a.id); } });
     });
   }
 

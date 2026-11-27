@@ -192,4 +192,10 @@ module.exports = {
   'Taux de change : 1 $ CA = … €': 'Exchange rate: CA$1 = … €',
   /* ── L avis des echeances borne (2026-10-12) */
   "et {0} autres": "and {0} more",
+  /* ── La fenetre fille du dossier et de l identite (2026-11-27, phase 2) */
+  'Modifications non enregistrées': 'Unsaved changes',
+  'Les changements faits dans cette fenêtre ne sont pas encore enregistrés dans le registre. Fermer sans enregistrer les abandonne.':
+    'The changes made in this window are not saved to the register yet. Closing without saving discards them.',
+  'Continuer la saisie': 'Keep editing',
+  'Abandonner les changements': 'Discard changes',
 };

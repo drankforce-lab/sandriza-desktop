@@ -2896,7 +2896,19 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   }
   function gesteTraiter(id, quoi){ choisirSeule(id); lancerLot(quoi); }
   function gestePivoter(id){ choisirSeule(id); lancerPivot([id]); }
-  function gesteOuvrir(id){ var t = lignePar(id); if (t) { DETAIL = t; dessiner(); } }
+  function gesteOuvrir(id){ var t = lignePar(id); if (t) ouvrirInspecteur(t); }
+  /* (2026-11-27, phase 2) L INSPECTEUR s ouvre dans une VRAIE FENETRE (szBoite). On lui passe la photo et
+     la page de la liste (recherche, tri, taille, page, filtre) : la fenetre fille relit la meme page, et
+     precedente / suivante y marchent. La liste se recharge a sa fermeture (renommee, attachee, retiree). */
+  var INSP_ATTENDU = null, _inspT = null;
+  function ouvrirInspecteur(r){
+    if (!r) return;
+    szBoite('inspecteur', { id: r.id, q: Q, tri: TRI, taille: TAILLE, page: PAGE, attache: ATT, ligne: r },
+      function(){ ouvrirInspIci(r); }).then(function(x){ if (x) charger(); });
+  }
+  function ouvrirInspIci(r){
+    DETAIL = r; SUPPR_ARME = ''; SUPPR_ARME_INSP = false; ATTACHE = false; dessiner();
+  }
   /* ⚠ LA SUPPRESSION DEMANDE DANS UNE BOITE A PART (2026-10-15) : szConfirmer ;
      confirmee, on arme puis on rappelle le geste, qui agit comme avant. */
   /* ⚠ UNE PHOTO ATTACHÉE (2026-10-18, sa capture : « risque de les supprimer par erreur ») : le site refuse sans
@@ -3181,9 +3193,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
          s ouvre), et l element qui recevrait « dblclick » n existe plus. Le
          second clic, lui, ne refait PAS le simple clic : il n y a donc qu un
          seul dessin, et la visionneuse s ouvre par-dessus. */
+      clearTimeout(_inspT);
       if (ev.detail >= 2) { visioOuvrir(id); return; }
       var r = (D.lignes || []).filter(function(x){ return x.id === id; })[0];
-      if (r) { DETAIL = r; SUPPR_ARME = ''; SUPPR_ARME_INSP = false; ATTACHE = false; dessiner(); }
+      /* (2026-11-27) L inspecteur est une fenetre modale : ouverte au PREMIER clic, elle prendrait le
+         second, et le double-clic n ouvrirait plus la visionneuse. On attend donc l instant d un
+         double-clic avant de l ouvrir (seulement quand la vraie fenetre est disponible). */
+      if (r) {
+        if (window.szPont && typeof window.szPont.boite === 'function' && !window.__szBoite) {
+          _inspT = setTimeout(function(){ ouvrirInspecteur(r); }, 280);
+        } else ouvrirInspecteur(r);
+      }
     }
   };
 
@@ -3255,11 +3275,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         var maj = (D.lignes || []).filter(function(x){ return x.id === DETAIL.id; })[0];
         if (maj) DETAIL = maj;
       }
+      /* En fenetre fille : la page de la mere est relue, on y ouvre la photo demandee. */
+      if (INSP_ATTENDU) {
+        DETAIL = lignePar(INSP_ATTENDU.id) || INSP_ATTENDU.ligne || null;
+        INSP_ATTENDU = null;
+      }
       var s = document.getElementById('sous');
       if (s) s.textContent = D.total + ' ' + (D.total > 1 ? '${T("photos")}' : '${T("photo")}')
       + ' · ' + poids(D.poidsTotal);
       if (garderSaisie) redessinerSansPerdreLaSaisie();
       else dessiner();
+      // En fenetre fille (szBoite) : on rouvre l inspecteur de la photo demandee, seul a l ecran.
+      szBoiteSiDemandee({
+        inspecteur: function(a){
+          if (!a || !a.id) return;
+          var t = lignePar(a.id);
+          if (t) { ouvrirInspIci(t); return; }
+          if (a.q !== undefined) { Q = a.q || ''; TRI = a.tri || TRI; TAILLE = a.taille || TAILLE; PAGE = a.page || 0; ATT = a.attache || ATT; }
+          INSP_ATTENDU = a;
+          charger();
+        }
+      });
     });
   }
 

@@ -615,6 +615,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
       });
   }
 
+  /* (2026-11-27, phase 2) LES DEUX SURCOUCHES S OUVRENT DANS UNE VRAIE FENETRE (szBoite) : le lot (choix
+     puis resume, dans la meme fenetre) et « par categorie ». Les listes se relisent a leur fermeture. */
+  function rafraichir(r){ if (r) charger().then(function(ok){ if (ok) dessiner(); }); }
+  function ouvrirLotFenetre(){ szBoite('lot', null, ouvrirLot).then(rafraichir); }
+  function ouvrirCatFenetre(){ szBoite('categories', null, ouvrirCat).then(rafraichir); }
+
   /* ══ SURCOUCHE : PAR CATEGORIE ═════════════════════════════════════════════ */
   function ouvrirCat(){
     CAT = { q:'', regime:'', mode:(ONGLET === 'final' ? 'final' : 'liq_no'), pris:{}, data:null };
@@ -750,7 +756,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
       return;
     }
     if (b && b.hasAttribute('data-ouvrir')) {
-      if (b.getAttribute('data-ouvrir') === 'lot') ouvrirLot(); else ouvrirCat();
+      if (b.getAttribute('data-ouvrir') === 'lot') ouvrirLotFenetre(); else ouvrirCatFenetre();
       return;
     }
     if (b && b.hasAttribute('data-onglet')) {
@@ -879,9 +885,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('liquidation')}
   charger().then(function(ok){
     if (!ok) return;
     dessiner();
-    ${ouvreLot ? 'if (D.peut.ajout) ouvrirLot();' : ''}
+    // En fenetre fille (szBoite) : on rouvre la surcouche demandee, seule a l ecran (et rien d autre).
+    if (szBoiteSiDemandee({ lot: function(){ ouvrirLot(); }, categories: function(){ ouvrirCat(); } })) return;
+    if (window.__szBoite) return;
+    ${ouvreLot ? 'if (D.peut.ajout) ouvrirLotFenetre();' : ''}
     ${ouvreResume ? 'if (D.peut.ajout) ouvrirLot().then(function(pret){ if (!pret) return; toutCocherLot(); LOT.duree = "period"; LOT.du = "2026-09-01"; LOT.au = "2026-09-30"; LOT.mode = "liq_no"; LOT.etape = 2; dessiner(); });' : ''}
-    ${ouvreCat ? 'if (D.peut.ajout) ouvrirCat();' : ''}
+    ${ouvreCat ? 'if (D.peut.ajout) ouvrirCatFenetre();' : ''}
   });
 })();
 </script></body></html>`;

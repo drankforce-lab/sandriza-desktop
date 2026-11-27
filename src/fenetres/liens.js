@@ -191,11 +191,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
             .catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
   }
 
-  var VUE = (DEPART === 'journal') ? 'journal' : 'liens';
+  var VUE = (DEPART === 'journal' && !window.__szBoite) ? 'journal' : 'liens';
   // Pagination auto du journal (#30) : le nombre de lignes est MESURE.
   var JPAGE = 0, JPARPAGE = 20;
   var ETAT = { version: '', paquets: [], liens: [], comptes: [], journal: [],
-               conservation: 365, neuf: null, formulaire: (DEPART === 'nouveau') };
+               conservation: 365, neuf: null, formulaire: false };
+  /* (2026-11-27, phase 2) L ouverture directe « nouveau » passe par le meme chemin que le bouton (szBoite),
+     une fois la liste chargee. */
+  var OUVRIR_NOUVEAU = (DEPART === 'nouveau' && !window.__szBoite);
 
   var ETATS = { actif: '${T("Actif")}', revoque: '${T("Révoqué")}', expire: '${T("Expiré")}', epuise: '${T("Épuisé")}' };
   var GENRES = { manuel: '${T("Manuel")}', inscription: '${T("Inscription")}' };
@@ -334,7 +337,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     h.push('<div class="barreoutils"><span class="droite"><button id="b-recharger">${T("Recharger")}</button>'
       + '<button class="prim" id="b-nouveau">${T("+ Nouveau lien")}</button></span></div>');
 
-    if (ETAT.neuf) h.push(carteNeuf());
+    /* En fenetre fille, le lien fabrique (et son mot de passe, montre UNE SEULE FOIS) reste dans la
+       fenetre, dans sa boite : elle ne se ferme qu a « Fermer », jamais avant qu on l ait lu. */
+    if (ETAT.neuf) h.push(window.__szBoite ? '<div class="voile" id="n-voile"><div class="boite">' + carteNeuf() + '</div></div>' : carteNeuf());
     if (ETAT.formulaire) h.push(formulaire());
 
     // La liste en PAGES mesurees, jamais de glissiere (2026-10-12).
@@ -589,11 +594,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
     var bn = document.getElementById('b-nouveau');
     /* ⚠ C EST UNE BASCULE : le meme bouton ouvre ET replie. On ecrit donc
        MAINTENANT avant de replier, et l on propose apres avoir ouvert. */
+    /* (2026-11-27, phase 2) Le formulaire s ouvre dans une VRAIE FENETRE (szBoite) ; la liste se recharge
+       a sa fermeture. La bascule reste pour le repli (formulaire ouvert ici). */
     if (bn) bn.onclick = function(){
-      if (ETAT.formulaire) szBrouillonMaintenant();
-      ETAT.formulaire = !ETAT.formulaire;
-      dessinerLiens();
-      if (ETAT.formulaire) szBrouillonProposer();
+      if (ETAT.formulaire) { szBrouillonMaintenant(); ETAT.formulaire = false; dessinerLiens(); return; }
+      ouvrirNouveau();
     };
     var br = document.getElementById('b-recharger');
     if (br) br.onclick = function(){ charger(true); };
@@ -662,6 +667,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
         chargerJournal('', b.getAttribute('data-journal'));
       };
     });
+  }
+
+  function ouvrirNouveauIci(){ ETAT.formulaire = true; dessinerLiens(); szBrouillonProposer(); }
+  /* sansReprise : l ouverture directe ouvre le formulaire ici sans proposer de brouillon, comme avant. */
+  function ouvrirNouveau(sansReprise){
+    szBoite('nouveau', null, sansReprise ? function(){ ETAT.formulaire = true; dessinerLiens(); } : ouvrirNouveauIci)
+      .then(function(r){ if (r) charger(false); });
   }
 
   function creer(){
@@ -891,6 +903,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
         + actifs + ' ' + (actifs > 1 ? '${T("liens actifs")}' : '${T("lien actif")}');
       dessinerLiens();
       if (dire_le) dire('');
+      if (OUVRIR_NOUVEAU) { OUVRIR_NOUVEAU = false; ouvrirNouveau(true); }
+      // En fenetre fille (szBoite) : on rouvre la boite demandee, seule a l ecran.
+      szBoiteSiDemandee({ nouveau: ouvrirNouveauIci });
     });
   }
 

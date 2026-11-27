@@ -556,7 +556,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
       MINU_Q = setTimeout(function(){ PG = 0; charger(); }, 250);
     };
     var bn = document.getElementById('cp-nouveau');
-    if (bn) bn.onclick = function(){ FORM = {}; dessiner(); szBrouillonProposer(); };
+    /* (2026-11-27, phase 2) La fiche s ouvre dans une VRAIE FENETRE (szBoite) ; la liste se recharge a sa fermeture. */
+    if (bn) bn.onclick = function(){ szBoite('nouveau', null, function(){ FORM = {}; dessiner(); szBrouillonProposer(); }).then(function(r){ if (r) charger(); }); };
     var ba = document.getElementById('cp-annuler');
     /* ⚠ TROIS CHEMINS FERMENT CETTE BOITE : le bouton Annuler, le clic a cote,
        et la touche Echap. Les trois doivent ecrire le brouillon MAINTENANT, avec
@@ -659,7 +660,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
     if (bm) {
       var idM = bm.getAttribute('data-modifier');
       var c = (D.coupons || []).filter(function(x){ return x.id === idM; })[0];
-      if (c) { FORM = c; SUPPR_ARME = ''; dessiner(); szBrouillonProposer(); }
+      if (c) { SUPPR_ARME = ''; szBoite('modifier', c, function(){ FORM = c; dessiner(); szBrouillonProposer(); }).then(function(r){ if (r) charger(); }); }
       return;
     }
 
@@ -710,6 +711,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES()}
       // La recherche en cours garde son curseur (le rechargement vient de la frappe).
       var qa = document.getElementById('cp-q');
       if (qa && document.activeElement === qa) redessinerSansPerdreLaSaisie(); else dessiner();
+      // En fenetre fille (szBoite) : on rouvre la fiche demandee, seule a l ecran.
+      szBoiteSiDemandee({
+        nouveau: function(){ FORM = {}; dessiner(); szBrouillonProposer(); },
+        modifier: function(c){ if (c && c.id) { FORM = c; dessiner(); szBrouillonProposer(); } }
+      });
     });
   }
   // (lot VOLUME 2) Le pied du socle demande la page voisine au coeur.

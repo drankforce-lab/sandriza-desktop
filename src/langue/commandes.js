@@ -217,6 +217,9 @@ module.exports = {
     'allow the emails for this order to be sent again (the customer may receive them',
   'à nouveau). Sinon, la protection anti-doublon reste active.':
     'again). Otherwise the duplicate protection stays on.',
+  /* (2026-11-27, phase 2) La meme case, dans la vraie fenetre de confirmation (szConfirmerCase) : une phrase entiere. */
+  'Tests : réautoriser l’envoi des courriels de cette commande (le client pourra les recevoir à nouveau). Sinon, la protection anti-doublon reste active.':
+    'Tests: allow the emails for this order to be sent again (the customer may receive them again). Otherwise the duplicate protection stays on.',
 
   /* ── LE RATTACHEMENT A UN COMPTE ────────────────────────────────────────── */
   'actuellement liée à': 'currently linked to',

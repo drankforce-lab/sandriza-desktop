@@ -278,6 +278,7 @@ module.exports = {
      La seconde forme est celle que le COMPTEUR lit, une fois les balises tombees. */
   'Cette action est <strong>irréversible</strong>.': 'This action is <strong>irreversible</strong>.',
   'Cette action est irréversible .': 'This action is irreversible .',
+  'Cette action est irréversible.': 'This action cannot be undone.',
   'Produit supprimé': 'Product deleted',
   'photo(s) retirée(s) de la photothèque': 'photo(s) removed from the photo library',
 

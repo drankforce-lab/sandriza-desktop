@@ -1685,7 +1685,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       });
     };
     var li = document.getElementById('det-lier');
-    if (li) li.onclick = flowLier;
+    if (li) li.onclick = ouvrirLier;
     var fr = document.getElementById('det-frais');
     if (fr) fr.onclick = flowFrais;
     var rb = document.getElementById('det-remb');
@@ -1719,7 +1719,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       }
       dessiner();
       prendreVerrou(id);
-      if (LIER_DEPART) { LIER_DEPART = false; flowLier(); }
+      if (LIER_DEPART) { LIER_DEPART = false; ouvrirLier(); }
       if (SUPPR_DEPART) { SUPPR_DEPART = false; if (DET && DET.droits && DET.droits.supprimer) flowSupprimer(); else dire('${T("Votre rôle ne donne pas accès à cette opération.")}', 'err'); }
     });
   }
@@ -1844,38 +1844,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
           if (apresOK) apresOK(); else charger(true);
         });
       }
-      /* (2026-11-27) UNE VRAIE FENETRE DE L APPLICATION (szConfirmer) — sauf quand la case des tests
-         (reautoriser les courriels) est offerte : une case a cocher est un champ, la boite reste ici. */
+      /* (2026-11-27) UNE VRAIE FENETRE DE L APPLICATION (szConfirmer). (Phase 2) La case des tests
+         (reautoriser les courriels) passe aussi par une vraie fenetre : szConfirmerCase rend { oui, coche }
+         a la page, qui poursuit (ecriture, ou flux d expedition) — pas de fenetre fille, qui le couperait. */
+      var oStatut = {
+        titre: '${T("Changer le statut")}',
+        texte: '${T("Passer {0} de « {1} » à « {2} » ?")}'.split('{0}').join(ap.numero)
+          .split('{1}').join(szTd(ap.deLibelle)).split('{2}').join(szTd(ap.aLibelle)),
+        liste: ap.implications || [],
+        oui: '${T("Changer le statut")}'
+      };
       if (!ap.peutReinitCourriels) {
-        szConfirmer({
-          titre: '${T("Changer le statut")}',
-          texte: '${T("Passer {0} de « {1} » à « {2} » ?")}'.split('{0}').join(ap.numero)
-            .split('{1}').join(szTd(ap.deLibelle)).split('{2}').join(szTd(ap.aLibelle)),
-          liste: ap.implications || [],
-          oui: '${T("Changer le statut")}'
-        }).then(function(oui){ if (oui) executer(false, null); });
+        szConfirmer(oStatut).then(function(oui){ if (oui) executer(false, null); });
         return;
       }
-      var h = '<h3>${T("Changer le statut")}</h3>'
-        // Une phrase ENTIERE (2026-10-25, audit) : « de … à … » restait en francais dans la fenetre anglaise.
-        + '<p>' + '${T("Passer {0} de « {1} » à « {2} » ?")}'.split('{0}').join('<strong>' + esc(ap.numero) + '</strong>')
-            .split('{1}').join('<strong>' + esc(szTd(ap.deLibelle)) + '</strong>')
-            .split('{2}').join('<strong>' + esc(szTd(ap.aLibelle)) + '</strong>') + '</p>'
-        + ((ap.implications || []).length
-            ? '<ul>' + ap.implications.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '')
-        + (ap.peutReinitCourriels
-            ? '<label class="rc"><input type="checkbox" id="v-reinit"><span><span class="ic">🧪</span> <strong>Tests</strong> — '
-              + '${T("réautoriser l’envoi des courriels de cette commande (le client pourra les recevoir")} '
-              + '${T("à nouveau). Sinon, la protection anti-doublon reste active.")}</span></label>' : '')
-        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-        + '<button class="prim" id="v-oui">${T("Confirmer")}</button></div>';
-      voile(h, function(fermer){
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){
-          this.disabled = true;
-          executer(!!(document.getElementById('v-reinit') && document.getElementById('v-reinit').checked), fermer);
-        };
-      });
+      oStatut.caseLib = '${T("Tests : réautoriser l’envoi des courriels de cette commande (le client pourra les recevoir à nouveau). Sinon, la protection anti-doublon reste active.")}';
+      oStatut.caseValeur = false;
+      szConfirmerCase(oStatut).then(function(r){ if (r && r.oui) executer(!!r.coche, null); });
     });
   }
 
@@ -1914,6 +1899,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   // invitee apres coup. Trois ops : apercu (etat courant), recherche, ecriture.
   // ⚠ La recherche exige 3 caracteres — c est le coeur du site qui l impose,
   // la fenetre ne fait que l annoncer pour que le champ vide ne paraisse pas mort.
+  /* (2026-11-27, phase 2) La recherche s ouvre dans une VRAIE FENETRE (szBoite) ; le detail se relit a sa
+     fermeture. flowLier reste l ouverture locale (repli, et ce qui tourne dans la fenetre fille). */
+  function ouvrirLier(){
+    var id = DET_ID;
+    if (!id) return;
+    szBoite('lier', { id: id }, flowLier).then(function(r){ if (r) rechargerDetail(); });
+  }
   function flowLier(){
     appeler('commande:lierApercu', [DET_ID]).then(function(ap){
       if (!ap.ok) { dire(expliquer(ap), 'err'); return; }
@@ -2450,6 +2442,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       if (!c || !c.ok) { vide('${T("Commandes indisponibles")}', expliquer(c)); return; }
       CTX = c;
       sous.textContent = c.peutEditer ? '' : '${T("Lecture seule")}';
+      /* En fenetre fille (szBoite) : seule la boite demandee s ouvre — ni detail (il prendrait le verrou de la
+         commande, que la fenetre mere detient), ni liste. */
+      if (window.__szBoite && szBoiteSiDemandee({ lier: function(a){ if (a && a.id) { DET_ID = a.id; flowLier(); } } })) return;
       if (DET_DEPART) { ouvrirDetail(DET_DEPART); DET_DEPART = ''; return; }
       charger();
     });

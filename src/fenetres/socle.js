@@ -458,6 +458,8 @@ function szBulle(t, cible){
 }
 function szDire(texte, genre, cible){
   var t = texte == null ? '' : String(texte);
+  /* (2026-11-27) Le dernier message, retenu pour la fenetre mere quand cette page est une boite (szBoite). */
+  try { if (t) window.__szDernierDire = { message: t, type: String(genre || ''), t: Date.now() }; } catch (e) {}
   var bulle = genre === 'err' && !!t;
   if (bulle) szBulle(t, cible);
   else if (genre === 'bon') szBulleFermer();   // un succès efface l'erreur d'avant
@@ -549,7 +551,8 @@ function _szPoserBouton(v){
   var ici = b.querySelector('.sz-plein-ici');
   if (ici) {
     var premier = ici.querySelector('button');
-    if (premier) ici.insertBefore(btn, premier); else ici.appendChild(btn);
+    /* (2026-11-27) « premier » n est pas toujours un enfant DIRECT de « ici » (inspecteur de Photos) : on l insere chez son parent. */
+    if (premier && premier.parentNode) premier.parentNode.insertBefore(btn, premier); else ici.appendChild(btn);
   }
   else if (tt) {
     /* ⚠ AVANT LES BOUTONS DEJA LA, ET TOUS A DROITE (2026-10-04). Pose en
@@ -2368,6 +2371,62 @@ function szConfirmer(o){
       danger: !!o.danger, prudent: !!o.prudent, seul: !!o.seul }))
     .then(function(r){ _szConfOuverte = false; if (r === undefined) return _szConfirmerPage(o); return r === 'oui'; },
       function(){ _szConfOuverte = false; return _szConfirmerPage(o); });
+}
+/* ══ LES BOITES-FORMULAIRES EN VRAIES FENETRES (2026-11-27, phase 2) — src/boite-native.js ══
+   COTE MERE : szBoite(nom, args, local) ouvre la boite « nom » dans une fenetre MODALE FILLE (la meme page,
+   refabriquee en mode « boite seule ») et rend une promesse tenue a sa fermeture ({ fini, message, type }) :
+   la mere recharge alors ses donnees. Sans pont (bancs, site) ou sans recette, « local() » ouvre la boite ici,
+   comme avant, et la promesse rend null.
+   COTE FILLE : szBoiteSiDemandee({ nom: function(args){ ... } }) est appelee par l ecran une fois ses
+   donnees chargees ; en mode boite, elle ouvre la boite demandee (et rend true). « args » doit etre du JSON
+   simple : des identifiants, jamais des objets de la page. */
+/* (2026-11-27, phase 2) DEUX FORMES DE PLUS, quand la page CONTINUE son travail apres la reponse (une fenetre
+   fille qui se fermerait le couperait) :
+   · szConfirmerCase(o) : szConfirmer + une case ({ caseLib, caseValeur }) -> Promise<{ oui, coche }> ;
+   · szChoisir({ titre, texte, note, boutons: [{ id, lib, prim, rouge }], echap }) -> Promise<id|null>. */
+function szConfirmerCase(o){
+  o = o || {};
+  if (!_szNatif()) return _szConfirmerPage(o).then(function(oui){ return { oui: !!oui, coche: !!o.caseValeur }; });
+  return Promise.resolve(window.szPont.dialogue({ genre: 'confirmer', titre: o.titre, texte: o.texte, details: o.details,
+      liste: o.liste, listeTitre: o.listeTitre, note: o.note, oui: o.oui, non: o.non, danger: !!o.danger, prudent: !!o.prudent,
+      caseLib: o.caseLib, caseValeur: !!o.caseValeur }))
+    .then(function(r){
+      if (r === undefined) return _szConfirmerPage(o).then(function(oui){ return { oui: !!oui, coche: !!o.caseValeur }; });
+      if (r && typeof r === 'object') return { oui: !!r.oui, coche: !!r.coche };
+      return { oui: r === 'oui', coche: false };
+    });
+}
+function szChoisir(o){
+  o = o || {};
+  var b = o.boutons || [];
+  if (!_szNatif()) return _szConfirmerPage({ titre: o.titre, texte: o.texte, oui: (b[b.length - 1] || {}).lib }).then(function(oui){ return oui ? (b[b.length - 1] || {}).id : (o.echap || null); });
+  return Promise.resolve(window.szPont.dialogue({ genre: 'choix', titre: o.titre, texte: o.texte, note: o.note, details: o.details,
+      boutons: b, echap: o.echap || '' }))
+    .then(function(r){ return (r === undefined || r === null || r === '') ? (o.echap || null) : r; });
+}
+function szBoite(nom, args, local, titre){
+  var ici = function(){ try { if (typeof local === 'function') local(); } catch (e) {} return null; };
+  if (window.__szBoite || !(window.szPont && typeof window.szPont.boite === 'function')) return Promise.resolve(ici());
+  return Promise.resolve(window.szPont.boite({ nom: String(nom || ''), args: args === undefined ? null : args, titre: titre || document.title }))
+    .then(function(r){
+      if (r === undefined || (r && r.introuvable)) return ici();
+      /* Seulement un VRAI message (genre connu) : un « type » maison sert a rendre un choix (Studio), pas a parler. */
+      if (r && r.message && /^(|bon|ok|err|att|info)$/.test(String(r.type || '')) && typeof szDire === 'function') { try { szDire(r.message, r.type || 'bon'); } catch (e) {} }
+      return r || { fini: true };
+    }, function(){ return ici(); });
+}
+/* La fenetre fille RENDS une valeur a la mere (un choix, une selection) : elle la pose, puis ferme sa boite ;
+   la mere la recoit dans r.valeur. JSON simple, et pas plus de 200 000 caracteres. */
+function szBoiteRendre(v){ try { window.__szBoiteValeur = (v === undefined ? null : v); } catch (e) {} }
+function szBoiteSiDemandee(table){
+  var B = window.__szBoite;
+  if (!B) return false;
+  if (window.__szBoiteFaite) return true;
+  var f = table && table[B.nom];
+  if (typeof f !== 'function') return false;
+  window.__szBoiteFaite = true;
+  try { f(B.args); } catch (e) { try { window.szPont.boiteFin({ introuvable: true }); } catch (e2) {} }
+  return true;
 }
 function _szConfirmerPage(o){
   o = o || {};

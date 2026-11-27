@@ -450,7 +450,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
     szVerrousPeindre();   // reposer les cadenas connus sur la liste fraiche
 
     var be = document.getElementById('f-etat');
-    if (be) be.onclick = function(){ ETAT_OUVERT = true; dessiner(); };
+    /* (2026-11-27, phase 2) La boite s ouvre dans une VRAIE FENETRE (szBoite) ; rien a recharger (l etat part a l impression). */
+    if (be) be.onclick = function(){ szBoite('etat', null, function(){ ETAT_OUVERT = true; dessiner(); }).then(function(){}); };
     var bea = document.getElementById('f-etat-annuler');
     if (bea) bea.onclick = function(){ ETAT_OUVERT = false; dessiner(); };
     var beg = document.getElementById('f-etat-generer');
@@ -588,6 +589,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('factures')}
       }
       dire('');
       if (garderSaisie) redessinerSansPerdreLaSaisie(); else dessiner();
+      // En fenetre fille (szBoite) : on rouvre la boite demandee, seule a l ecran.
+      szBoiteSiDemandee({ etat: function(){ ETAT_OUVERT = true; dessiner(); } });
     });
   }
 

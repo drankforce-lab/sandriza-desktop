@@ -284,6 +284,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
       ANNEE = r.annee;
       OUVERT = null;
       dessiner();
+      // En fenetre fille (szBoite) : on rouvre les mouvements du compte demande, seuls a l ecran.
+      szBoiteSiDemandee({
+        mouvements: function(a){
+          if (!a || !a.code) return;
+          var ouvrir = function(){ ONGLET = 'grandlivre'; OUVERT = a.code; MPAGE = 0; MBUDGET = 0; dessiner(); };
+          if (a.annee && a.annee !== ANNEE) { ANNEE = a.annee; charger().then(ouvrir); } else ouvrir();
+        }
+      });
     });
   }
 
@@ -891,9 +899,12 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('livre')}
     Array.prototype.forEach.call(corps.querySelectorAll('button[data-ouvre]'), function(b){
       b.onclick = function(){
         var c = b.getAttribute('data-ouvre');
-        OUVERT = (OUVERT === c) ? null : c;
-        MPAGE = 0; MBUDGET = 0;
-        dessiner();
+        if (OUVERT === c) { OUVERT = null; MPAGE = 0; MBUDGET = 0; dessiner(); return; }
+        /* (2026-11-27, phase 2) Les mouvements s ouvrent dans une VRAIE FENETRE (szBoite) : simple
+           consultation, rien a recharger a sa fermeture. */
+        szBoite('mouvements', { code: c, annee: ANNEE }, function(){
+          OUVERT = c; MPAGE = 0; MBUDGET = 0; dessiner();
+        });
       };
     });
     Array.prototype.forEach.call(corps.querySelectorAll('button[data-mp]'), function(b){

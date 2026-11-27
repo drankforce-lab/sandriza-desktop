@@ -1521,6 +1521,102 @@ ipcMain.handle('dialogue:demander', (e, o) => new Promise((resolve) => {
 ipcMain.on('dialogue:taille', (e, h) => { const d = _dialogues.get(e.sender.id); if (d) d.taille(parseInt(h, 10) || 0); });
 ipcMain.on('dialogue:reponse', (e, r) => { const d = _dialogues.get(e.sender.id); if (d) d.finir(r == null ? null : r); });
 
+/* ══ LES BOÎTES-FORMULAIRES EN VRAIES FENÊTRES (2026-11-27, phase 2) — voir src/boite-native.js ══
+   La fenêtre (ou l'écran ancré) qui ouvrait une boîte dans sa page demande « boite:ouvrir » : on refabrique
+   SA page (sa recette) en mode « boîte seule », dans une fenêtre MODALE FILLE. Réponse à la mère quand la
+   boîte se ferme : { fini, message, type } — ou UNDEFINED si on ne peut pas (pas de recette) : la mère ouvre
+   alors la boîte chez elle, comme avant. ⚠ La fermeture par la croix vaut « fini » : la mère recharge. */
+const BOITE = require('./boite-native');
+const _boites = new Map();
+const _recettePour = (wc) => {
+  try {
+    for (const [, a] of ancrees) {
+      if (a && a.view && a.view.webContents === wc && typeof a.refaire === 'function') {
+        const f = (a.fenetre && !a.fenetre.isDestroyed()) ? a.fenetre : mainWindow;
+        return { refaire: a.refaire, parent: f };
+      }
+    }
+  } catch (er) {}
+  try {
+    for (const [, w] of fenetresNatives) {
+      if (w && !w.isDestroyed() && w.webContents === wc && typeof w._szRefaire === 'function') return { refaire: w._szRefaire, parent: w };
+    }
+  } catch (er) {}
+  return null;
+};
+ipcMain.handle('boite:ouvrir', (e, o) => new Promise((resolve) => {
+  const r = _recettePour(e.sender);
+  if (!r) { resolve(undefined); return; }
+  const opt = (o && typeof o === 'object') ? o : {};
+  const cfg = { nom: String(opt.nom || '').slice(0, 80), args: (opt.args === undefined ? null : opt.args) };
+  let html;
+  try { html = BOITE.pageEnBoite(r.refaire(), cfg); } catch (er) { resolve(undefined); return; }
+  const parent = (r.parent && !r.parent.isDestroyed()) ? r.parent : mainWindow;
+  if (!parent || parent.isDestroyed()) { resolve(undefined); return; }
+  // ⚠ { l, h } et non { width, height } : le controle de mise en page lit ce motif comme une ouverture de fenetre.
+  let wa = { l: 1400, h: 900 };
+  try { const z = require('electron').screen.getDisplayMatching(parent.getBounds()).workAreaSize; wa = { l: z.width, h: z.height }; } catch (er) {}
+  let win;
+  try {
+    win = new BrowserWindow({
+      width: Math.min(980, wa.l - 60), height: Math.min(700, wa.h - 60), parent, modal: true, show: false,
+      resizable: true, minimizable: false, maximizable: false, fullscreenable: false, skipTaskbar: true,
+      autoHideMenuBar: true, useContentSize: true, minWidth: 360, minHeight: 200,
+      title: String(opt.titre || 'Sandriza').slice(0, 120), backgroundColor: _fondTheme(),
+      webPreferences: { preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11, contextIsolation: true, nodeIntegration: false, sandbox: true, spellcheck: true },
+    });
+  } catch (er) { resolve(undefined); return; }
+  const id = win.webContents.id;
+  const etat = { fini: false, montree: false, l: 0, h: 0 };
+  const centrer = () => {
+    try {
+      const b = parent.getBounds(), wb = win.getBounds();
+      win.setPosition(Math.round(b.x + (b.width - wb.width) / 2), Math.round(b.y + Math.max(30, (b.height - wb.height) / 3)));
+    } catch (er) {}
+  };
+  etat.finir = (res) => {
+    if (etat.fini) return;
+    etat.fini = true;
+    _boites.delete(id);
+    resolve(res);
+    if (!win.isDestroyed()) { try { win.destroy(); } catch (er) {} }
+    try { if (!parent.isDestroyed()) parent.focus(); } catch (er) {}
+  };
+  etat.montrer = () => {
+    if (etat.montree || win.isDestroyed()) return;
+    etat.montree = true;
+    centrer();
+    try { win.show(); win.focus(); } catch (er) {}
+  };
+  etat.taille = (l, h) => {
+    if (win.isDestroyed()) return;
+    const L = Math.max(380, Math.min(wa.l - 60, (l || 0) || 720));
+    const H = Math.max(200, Math.min(Math.round(wa.h * 0.9), h || 0));
+    // On ne rétrécit pas une fenêtre déjà montrée (un formulaire qui se replie ne doit pas sauter) : on grandit seulement.
+    if (etat.montree && L <= etat.l && H <= etat.h) return;
+    etat.l = Math.max(etat.l, L); etat.h = Math.max(etat.h, H);
+    try { win.setContentSize(etat.montree ? etat.l : L, etat.montree ? etat.h : H); } catch (er) {}
+    if (!etat.montree) { etat.l = L; etat.h = H; etat.montrer(); } else centrer();
+  };
+  _boites.set(id, etat);
+  win.on('page-title-updated', (ev) => { ev.preventDefault(); });
+  win.on('closed', () => etat.finir({ fini: true, ferme: true }));
+  // Filet : une page qui ne dit jamais sa taille se montre quand même.
+  win.once('ready-to-show', () => { setTimeout(() => { if (!etat.montree && !etat.fini) etat.montrer(); }, 6000); });
+  try { appliquerTheme(win.webContents); } catch (er) {}
+  win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(html)).catch(() => {});
+}));
+ipcMain.on('boite:taille', (e, l, h) => { const d = _boites.get(e.sender.id); if (d) d.taille(parseInt(l, 10) || 0, parseInt(h, 10) || 0); });
+ipcMain.on('boite:fin', (e, info) => {
+  const d = _boites.get(e.sender.id);
+  if (!d) return;
+  const i = (info && typeof info === 'object') ? info : {};
+  const res = { fini: true, introuvable: !!i.introuvable, message: String(i.message || '').slice(0, 400), type: String(i.type || '').slice(0, 20) };
+  // La valeur rendue par la fille (szBoiteRendre) : du JSON simple, borné.
+  if (i.valeur !== undefined) { try { const t = JSON.stringify(i.valeur); if (t && t.length <= 200000) res.valeur = JSON.parse(t); } catch (er) {} }
+  d.finir(res);
+});
+
 ipcMain.on('deconnexion:reponse', (e, oui) => {
   if (!deconnexionWin || deconnexionWin.isDestroyed()) return;
   if (e.sender !== deconnexionWin.webContents) return;

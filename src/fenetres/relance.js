@@ -282,8 +282,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var ouvrir = ETAT === 'apercu' && prets()[0] ? prets()[0].id : '';
       ETAT = '';
       dessiner();
-      if (ouvrir) apercu(ouvrir);
+      /* (2026-11-27, phase 2) En fenetre fille (szBoite) : l apercu demande, seul a l ecran. */
+      var enBoite = szBoiteSiDemandee({ apercu: function(a){ if (a && a.id) apercu(a.id); } });
+      if (ouvrir && !enBoite) ouvrirApercu(ouvrir);
     });
+  }
+  /* (2026-11-27, phase 2) L apercu du courriel s ouvre dans une VRAIE FENETRE (szBoite) ; un envoi fait
+     depuis elle relit la liste a sa fermeture. */
+  function ouvrirApercu(id){
+    szBoite('apercu', { id: id }, function(){ apercu(id); }).then(function(r){ if (r) charger(); });
   }
   function apercu(id){
     appeler('relance:apercu', [id]).then(function(r){
@@ -343,7 +350,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.id === 'a-fermer') { APERCU = null; boite(); return; }
     if (t.id === 'a-envoyer' && APERCU) { envoyer([APERCU.id], t); return; }
     var x;
-    if ((x = t.getAttribute('data-apercu'))) { apercu(x); return; }
+    if ((x = t.getAttribute('data-apercu'))) { ouvrirApercu(x); return; }
     if ((x = t.getAttribute('data-onglet'))) { ONGLET = x; dessiner(); return; }
   });
   document.addEventListener('change', function(ev){
