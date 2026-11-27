@@ -473,6 +473,31 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return p.then(function(r){ return r || { ok: false, motif: 'echec' }; })
             .catch(function(e){ return { ok: false, motif: 'echec', detail: (e && e.message) || e }; });
   }
+  /* (2026-11-27, sa demande) SUPPRIMER UNE COMMANDE SANS OUVRIR SA FICHE : la question est une vraie fenetre
+     (szConfirmer), la cascade est annoncee avant le bouton — meme geste que la liste des commandes. */
+  function supprimerCommande(id){
+    appeler('commandes:supprimerApercu', [id]).then(function(ap){
+      if (!ap || !ap.ok) { dire(expliquer(ap), 'err'); return; }
+      var quand = ap.date ? new Date(ap.date).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
+      szConfirmer({
+        titre: '${T("Supprimer la commande")}',
+        texte: [ap.numero, ap.client].join(' — '),
+        details: [['${T("Date")}', quand || '—'], ['${T("Total")}', szArgent(ap.total)], ['${T("Statut")}', szTd(ap.statutLibelle)]],
+        listeTitre: '${T("Éléments qui seront supprimés :")}',
+        liste: (ap.elements || []).map(function(x){ return String(x).replace(/^[^0-9A-Za-zÀ-ÿ]+/, ''); }),
+        note: '${T("Cette action est irréversible.")}',
+        oui: '${T("Supprimer définitivement")}',
+        danger: true
+      }).then(function(oui){
+        if (!oui) return;
+        appeler('commandes:supprimerEcrire', [id]).then(function(r){
+          if (!r || !r.ok) { dire('${T("Suppression non confirmée par le serveur — réessayez.")}', 'err'); return; }
+          dire('${T("Commande supprimée — inventaire rétabli.")}', 'bon');
+          charger();
+        });
+      });
+    });
+  }
   function vide(titre, detail){
     corps.innerHTML = '<div class="vide"><strong>' + esc(titre)
       + '</strong><div style="margin-top:.4rem">' + esc(detail || '') + '</div></div>';
@@ -1170,7 +1195,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var ec = ligne.querySelector('button[data-prep]');
     if (ec && !ec.disabled) l.push({ lib: '${T("Traiter — lancer la préparation")}', fn: function(){ lancerPreparation(oid, ec); } });
     l.push({ lib: '${T("Changer le statut…")}', fn: function(){ ouvrirAvec(''); } });
-    if (D && D.peutSupprimer) { l.push({ trait: true }); l.push({ lib: '${T("Supprimer la commande…")}', dgr: true, fn: function(){ ouvrirAvec('@supprimer'); } }); }
+    if (D && D.peutSupprimer) { l.push({ trait: true }); l.push({ lib: '${T("Supprimer la commande…")}', dgr: true, fn: function(){ supprimerCommande(oid); } }); }
     return l;
   };
   var slotMx = document.getElementById('tb-mx-slot');

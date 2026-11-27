@@ -223,4 +223,6 @@ module.exports = {
   // La prime sur le crédit boutique (8.28.0)
   "Prime ({0} %)": "Bonus ({0}%)",
   "Crédit au client": "Credit to customer",
+  // (2026-11-27) La saisie du code d exemption passe par une vraie fenetre (szDemanderNip).
+  'Accorder l’exemption': 'Grant the exemption',
 };

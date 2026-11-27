@@ -562,4 +562,8 @@ module.exports = {
   'remise sur place': 'picked up in store',
   'suivi': 'tracking',
   'Détail de commande': 'Order details',
+  /* (2026-11-27) Le remboursement des frais passe par une vraie fenetre (szConfirmer). */
+  'Déjà remboursé': 'Already refunded',
+  'Total retenu': 'Total withheld',
+  'Les frais de service retenus seront remboursés au client via Square.': 'The withheld service fees will be refunded to the customer through Square.',
 };

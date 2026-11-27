@@ -276,4 +276,11 @@ module.exports = {
   '{0} photo n’a rien à annuler et ne bougera pas.': '{0} photo has nothing to undo and will not move.',
   'oui': 'yes',
   'non': 'no',
+  // Les boîtes devenues de vraies fenêtres (szConfirmer, 2026-11-27)
+  'Revenir à l’état précédent': 'Go back to the previous state',
+  'Aucun crédit n’est dépensé : l’image d’avant est déjà rangée, on ne fait que la remettre en place.': 'No credit is spent: the previous image is already stored, it is simply put back in place.',
+  'Le geste est réversible : le même bouton rétablira ce que vous venez d’annuler.': 'The action is reversible: the same button will restore what you just undid.',
+  'C’est ce que la boutique affichera : la photo du produit change pour de bon, en ligne.': 'That is what the storefront will show: the product photo changes for good, online.',
+  ' encore l’image d’avant le dernier traitement : c’est justement ce qu’on répare.': ' still the image from before the last processing: that is exactly what this fixes.',
+  'Une photo rattachée avant la version 3.49 dont la fiche porte plusieurs images sera laissée de côté : on ne peut pas savoir laquelle lui appartient, et remplacer la mauvaise mettrait un vêtement à la place d’un autre.': 'A photo linked before version 3.49 whose product has several images will be skipped: there is no way to know which one is its own, and replacing the wrong one would put one garment in place of another.',
 };

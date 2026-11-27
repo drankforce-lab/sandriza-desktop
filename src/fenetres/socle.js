@@ -1674,7 +1674,20 @@ function _brIlYa(min){
    d afficher et de rapporter le choix.
 
    Rend 0 = conserver, 1 = jeter, 2 = revenir. Ne rend jamais rien d autre. */
+/* (2026-11-27) La question est une VRAIE FENETRE quand le pont le permet ; la boite ci-dessous est le repli.
+   Rend 0 (conserver), 1 (jeter) ou 2 (revenir) — la croix et Echap reviennent au formulaire. */
 function szBrouillonDemander(){
+  if (window.szPont && typeof window.szPont.dialogue === 'function') {
+    return Promise.resolve(window.szPont.dialogue({ genre: 'choix', titre: '${T("Vous avez une saisie en cours")}',
+        texte: '${T("Conservée, elle vous sera proposée à la réouverture de cette fenêtre.")} ${T("Jetée, elle est perdue.")}',
+        boutons: [{ id: '1', lib: '${T("Jeter la saisie")}' }, { id: '2', lib: '${T("Revenir au formulaire")}' },
+          { id: '0', lib: '${T("Conserver le brouillon")}', prim: true }], echap: '2' }))
+      .then(function(r){ if (r === undefined) return _szBrouillonDemanderPage(); var n = parseInt(r, 10); return (n === 0 || n === 1) ? n : 2; },
+        function(){ return _szBrouillonDemanderPage(); });
+  }
+  return _szBrouillonDemanderPage();
+}
+function _szBrouillonDemanderPage(){
   return new Promise(function(resoudre){
     var v = document.createElement('div');
     v.className = 'szbr-voile';
@@ -2339,7 +2352,24 @@ const JS_CONFIRMER = () => `
    Echap et le voile annulent ; Entree ne valide QUE si l action n est pas dangereuse.
      · seul   : un seul bouton (un bilan a lire, rien a choisir — 2026-10-29). */
 var _szConfOuverte = false;
+/* (2026-11-27, sa demande : « la fenetre de suppression n est pas en natif et le devrait ») LA BOITE EST
+   UNE VRAIE FENETRE DE L APPLICATION des que le pont le permet (szPont.dialogue -> main.js
+   « dialogue:demander », page fenetres/dialogue.js) : modale, fille de la fenetre qui demande, au theme.
+   La boite dessinee dans la page ci-dessous ne sert plus que de repli (pont absent : bancs, site).
+   Options en plus : liste (les elements touches), listeTitre, note (l avertissement). */
+function _szNatif(){ return !!(window.szPont && typeof window.szPont.dialogue === 'function'); }
 function szConfirmer(o){
+  o = o || {};
+  if (_szConfOuverte) return Promise.resolve(false);
+  if (!_szNatif()) return _szConfirmerPage(o);
+  _szConfOuverte = true;
+  return Promise.resolve(window.szPont.dialogue({ genre: 'confirmer', titre: o.titre, texte: o.texte, details: o.details,
+      liste: o.liste, listeTitre: o.listeTitre, note: o.note, oui: o.oui, non: o.non,
+      danger: !!o.danger, prudent: !!o.prudent, seul: !!o.seul }))
+    .then(function(r){ _szConfOuverte = false; if (r === undefined) return _szConfirmerPage(o); return r === 'oui'; },
+      function(){ _szConfOuverte = false; return _szConfirmerPage(o); });
+}
+function _szConfirmerPage(o){
   o = o || {};
   if (_szConfOuverte) return Promise.resolve(false);
   _szConfOuverte = true;
@@ -2353,6 +2383,9 @@ function szConfirmer(o){
       + (o.texte ? '<p id="szc-x">' + esc(o.texte) + '</p>' : '<p id="szc-x"></p>')
       + ((o.details && o.details.length) ? '<dl class="szc-details">' + o.details.map(function(d){
           return '<dt>' + esc(d[0]) + '</dt><dd>' + esc(d[1]) + '</dd>'; }).join('') + '</dl>' : '')
+      + ((o.liste && o.liste.length) ? (o.listeTitre ? '<p class="szc-lt">' + esc(o.listeTitre) + '</p>' : '')
+          + '<ul class="szc-liste">' + o.liste.map(function(x){ return '<li>' + esc(x) + '</li>'; }).join('') + '</ul>' : '')
+      + (o.note ? '<p class="szc-note">' + esc(o.note) + '</p>' : '')
       + '<div class="szc-pied">'
       + (o.seul ? '' : '<button type="button" class="szc-non">' + esc(o.non || '${T("Annuler")}') + '</button>')
       + '<button type="button" class="szc-oui">' + esc(o.oui || '${T("Continuer")}') + '</button>'
@@ -2384,6 +2417,17 @@ function szConfirmer(o){
      · min/max : la longueur permise (4 a 8 par defaut) — une saisie hors bornes ne part pas. */
 var _szNipOuverte = false;
 function szDemanderNip(o){
+  o = o || {};
+  if (_szNipOuverte) return Promise.resolve(null);
+  if (!_szNatif()) return _szDemanderNipPage(o);
+  _szNipOuverte = true;
+  return Promise.resolve(window.szPont.dialogue({ genre: 'nip', titre: o.titre || '${T("NIP de sécurité")}', texte: o.texte,
+      oui: o.oui, erreur: o.erreur, min: o.min, max: o.max }))
+    .then(function(r){ _szNipOuverte = false; if (r === undefined) return _szDemanderNipPage(o);
+        return (r && typeof r === 'object' && r.valeur) ? String(r.valeur) : null; },
+      function(){ _szNipOuverte = false; return _szDemanderNipPage(o); });
+}
+function _szDemanderNipPage(o){
   o = o || {};
   if (_szNipOuverte) return Promise.resolve(null);
   _szNipOuverte = true;
@@ -5331,6 +5375,10 @@ const CSS_RESPIRE = `
   background:var(--f-champ);border:1px solid var(--sz-bord);font-size:.84rem}
 .szc-details dt{color:var(--tx2)}
 .szc-details dd{margin:0;color:var(--tx);font-weight:600;min-width:0;overflow-wrap:anywhere}
+.szc-boite .szc-lt{margin:1rem 0 .4rem;font-weight:600;color:var(--tx)}
+.szc-liste{margin:0;padding:0;list-style:none;display:flex;flex-direction:column;gap:.3rem}
+.szc-liste li{padding:.45rem .7rem;border-radius:8px;background:var(--v05);border:1px solid var(--v08);font-size:.86rem}
+.szc-boite .szc-note{margin-top:.9rem;color:var(--tx-err);font-weight:600}
 .szc-pied{display:flex;gap:.6rem;justify-content:flex-end;margin-top:1.4rem}
 .szc-pied button{height:2.4rem;padding:0 1.1rem;border-radius:10px;font-weight:600;font-size:.86rem}
 .szc-oui{background:var(--sz-btn-prim);border-color:var(--sz-btn-prim);color:var(--sz-btn-prim-txt);font-weight:700}

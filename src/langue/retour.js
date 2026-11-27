@@ -342,4 +342,15 @@ module.exports = {
   'Préréglé : le motif est un choix du client (taille, couleur, changement d’avis).': 'Preset: the reason is the customer’s choice (size, colour, change of mind).',
   'Aucune étiquette : le courriel d’approbation donne votre adresse de retour, et le client expédie à ses frais (il saisit son numéro de suivi dans son compte).': 'No label: the approval email gives your return address, and the customer ships at their own cost (they enter their tracking number in their account).',
   'Une étiquette Postes Canada payée existait : reprenez-la (« Reprendre chez Postes Canada ») pour être remboursé.': 'A paid Canada Post label existed: void it (“Void with Canada Post”) to be refunded.',
+  /* (2026-11-27) Le reglement et la suppression passent par une vraie fenetre (szConfirmer). */
+  'Rembourser et clore le dossier': 'Refund and close the file',
+  'Clore le dossier': 'Close the file',
+  'Le remboursement sera émis et le dossier clos. Les taxes s’ajoutent aux taux réels de la commande.':
+    'The refund will be issued and the file closed. Taxes are added at the order’s actual rates.',
+  'Livraison': 'Shipping',
+  'Méthode': 'Method',
+  'Commande': 'Order',
+  'La demande disparaît de la liste, et la photo envoyée par le client est effacée du stockage.':
+    'The request disappears from the list, and the photo sent by the customer is erased from storage.',
+  'La demande disparaît de la liste.': 'The request disappears from the list.',
 };

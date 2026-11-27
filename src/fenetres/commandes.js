@@ -1700,7 +1700,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       });
     };
     var sp = document.getElementById('det-suppr');
-    if (sp) sp.onclick = flowSupprimer;
+    if (sp) sp.onclick = function(){ flowSupprimer(); };
     corps.onclick = null;
     corps.oncontextmenu = null;
   }
@@ -1824,6 +1824,38 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         if (ap.motif !== 'inchange') dire(expliquer(ap), 'err');
         return;
       }
+      function executer(reinit, fermer){
+        if (ap.versExpedition) {
+          // Le passage a << En livraison >> se fait DANS le flux d expedition
+          // (transporteur + etiquette), jamais par une simple etiquette de statut.
+          if (fermer) fermer();
+          ouvrir('commandes:expedier', id, '${T("Expédition")}');
+          return;
+        }
+        appeler('commandes:statutEcrire', [id, ap.de, a, reinit]).then(function(r){
+          if (fermer) fermer();
+          if (!r.ok) {
+            dire(r.motif === 'conflit_statut'
+              ? '${T("Statut déjà changé ailleurs (actuel :")} ' + (r.actuelLibelle || '?') + ').'
+              : expliquer(r), 'err');
+          } else if (!r.inchange) {
+            dire('${T("Statut mis à jour.")}', 'bon');
+          }
+          if (apresOK) apresOK(); else charger(true);
+        });
+      }
+      /* (2026-11-27) UNE VRAIE FENETRE DE L APPLICATION (szConfirmer) — sauf quand la case des tests
+         (reautoriser les courriels) est offerte : une case a cocher est un champ, la boite reste ici. */
+      if (!ap.peutReinitCourriels) {
+        szConfirmer({
+          titre: '${T("Changer le statut")}',
+          texte: '${T("Passer {0} de « {1} » à « {2} » ?")}'.split('{0}').join(ap.numero)
+            .split('{1}').join(szTd(ap.deLibelle)).split('{2}').join(szTd(ap.aLibelle)),
+          liste: ap.implications || [],
+          oui: '${T("Changer le statut")}'
+        }).then(function(oui){ if (oui) executer(false, null); });
+        return;
+      }
       var h = '<h3>${T("Changer le statut")}</h3>'
         // Une phrase ENTIERE (2026-10-25, audit) : « de … à … » restait en francais dans la fenetre anglaise.
         + '<p>' + '${T("Passer {0} de « {1} » à « {2} » ?")}'.split('{0}').join('<strong>' + esc(ap.numero) + '</strong>')
@@ -1841,25 +1873,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         document.getElementById('v-non').onclick = fermer;
         document.getElementById('v-oui').onclick = function(){
           this.disabled = true;
-          if (ap.versExpedition) {
-            // Le passage a << En livraison >> se fait DANS le flux d expedition
-            // (transporteur + etiquette), jamais par une simple etiquette de statut.
-            fermer();
-            ouvrir('commandes:expedier', id, '${T("Expédition")}');
-            return;
-          }
-          var reinit = !!(document.getElementById('v-reinit') && document.getElementById('v-reinit').checked);
-          appeler('commandes:statutEcrire', [id, ap.de, a, reinit]).then(function(r){
-            fermer();
-            if (!r.ok) {
-              dire(r.motif === 'conflit_statut'
-                ? '${T("Statut déjà changé ailleurs (actuel :")} ' + (r.actuelLibelle || '?') + ').'
-                : expliquer(r), 'err');
-            } else if (!r.inchange) {
-              dire('${T("Statut mis à jour.")}', 'bon');
-            }
-            if (apresOK) apresOK(); else charger(true);
-          });
+          executer(!!(document.getElementById('v-reinit') && document.getElementById('v-reinit').checked), fermer);
         };
       });
     });
@@ -1869,30 +1883,29 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   function flowFrais(){
     appeler('commandes:fraisApercu', [DET_ID]).then(function(ap){
       if (!ap.ok) { dire(expliquer(ap), 'err'); return; }
-      voile('<h3>${T("Rembourser les frais de service")}</h3>'
-        + '<p>${T("Rembourser")} <strong>' + argent(ap.montant) + '</strong> ${T("de frais de service retenus")} '
-        + '${T("au client via Square ?")}'
-        + (ap.dejaRembourse > 0 ? '<br><span style="color:var(--tx2)">(' + argent(ap.dejaRembourse)
-            + ' ${T("déjà remboursés sur")} ' + argent(ap.totalRetenu) + ' ${T("retenus")})</span>' : '')
-        + ' <strong>${T("Cette opération est irréversible.")}</strong></p>'
-        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-        + '<button class="prim" id="v-oui">${T("Rembourser")}</button></div>',
-        function(fermer){
-          document.getElementById('v-non').onclick = fermer;
-          document.getElementById('v-oui').onclick = function(){
-            this.disabled = true; // anti double-clic : de l argent part
-            appeler('commandes:fraisEcrire', [DET_ID]).then(function(r){
-              fermer();
-              if (!r.ok) { dire(expliquer(r), 'err'); return; }
-              var sq = r.square || {};
-              if (sq.etat === 'initie') dire(r.numero + ' — ' + argent(r.montant) + ' ${T("de frais de service remboursés via Square.")}', 'bon');
-              else if (sq.etat === 'echec') dire('${T("Enregistrement local créé mais Square a échoué :")} ' + (sq.detail || '?'), 'err');
-              else if (sq.etat === 'reseau') dire('${T("Enregistrement local créé mais erreur réseau Square :")} ' + (sq.detail || '?'), 'err');
-              else dire(r.numero + ' ${T("— frais remboursés (aucun jeton Square configuré).")}', 'att');
-              rechargerDetail();
-            });
-          };
+      /* (2026-11-27) Une vraie fenetre de l application (szConfirmer). La fenetre est modale et se
+         referme au clic : le double clic (de l argent part) n a plus de bouton ou tomber. */
+      var dF = [['${T("Montant")}', argent(ap.montant)]];
+      if (ap.dejaRembourse > 0) dF.push(['${T("Déjà remboursé")}', argent(ap.dejaRembourse)], ['${T("Total retenu")}', argent(ap.totalRetenu)]);
+      szConfirmer({
+        titre: '${T("Rembourser les frais de service")}',
+        texte: '${T("Les frais de service retenus seront remboursés au client via Square.")}',
+        details: dF,
+        note: '${T("Cette opération est irréversible.")}',
+        oui: '${T("Rembourser")}',
+        prudent: true
+      }).then(function(oui){
+        if (!oui) return;
+        appeler('commandes:fraisEcrire', [DET_ID]).then(function(r){
+          if (!r.ok) { dire(expliquer(r), 'err'); return; }
+          var sq = r.square || {};
+          if (sq.etat === 'initie') dire(r.numero + ' — ' + argent(r.montant) + ' ${T("de frais de service remboursés via Square.")}', 'bon');
+          else if (sq.etat === 'echec') dire('${T("Enregistrement local créé mais Square a échoué :")} ' + (sq.detail || '?'), 'err');
+          else if (sq.etat === 'reseau') dire('${T("Enregistrement local créé mais erreur réseau Square :")} ' + (sq.detail || '?'), 'err');
+          else dire(r.numero + ' ${T("— frais remboursés (aucun jeton Square configuré).")}', 'att');
+          rechargerDetail();
         });
+      });
     });
   }
 
@@ -1968,68 +1981,64 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
   // commande : la facture suit, et les statistiques d achat des DEUX comptes
   // sont recalculees. On le dit avant, pas apres.
   function confirmerLien(fermerListe, ap, clientId, libelle){
-    voile('<h3>${T("Rattacher la commande")}</h3>'
-      + '<p>' + '${T("Lier {0} à {1} ?")}'.split('{0}').join('<strong>' + esc(ap.numero) + '</strong>')
-          .split('{1}').join('<strong>' + esc(libelle) + '</strong>') + '</p>'
-      + '<p style="color:var(--tx2)">${T("La facture associée sera mise à jour et les statistiques")} '
-      + '${T("d’achat des comptes concernés recalculées.")}</p>'
-      + '<div class="fin2"><button id="v2-non">${T("Annuler")}</button>'
-      + '<button class="prim" id="v2-oui">${T("Lier")}</button></div>',
-      function(fermer2){
-        document.getElementById('v2-non').onclick = fermer2;
-        document.getElementById('v2-oui').onclick = function(){
-          this.disabled = true;
-          appeler('commande:lierEcrire', [DET_ID, clientId]).then(function(r){
-            fermer2();
-            if (!r.ok) {
-              dire(r.motif === 'inchange' ? '${T("Cette commande est déjà rattachée à ce compte.")}'
-                                          : expliquer(r), r.motif === 'inchange' ? 'att' : 'err');
-              return;
-            }
-            fermerListe();
-            dire(r.invite ? '${T("Commande détachée — remise en mode invité.")}'
-                          : '${T("Commande rattachée à")} ' + r.nom + '.', 'bon');
-            rechargerDetail();
-          });
-        };
+    /* (2026-11-27) Une vraie fenetre de l application (szConfirmer), au-dessus de la recherche. */
+    szConfirmer({
+      titre: '${T("Rattacher la commande")}',
+      texte: '${T("Lier {0} à {1} ?")}'.split('{0}').join(ap.numero).split('{1}').join(libelle)
+        + ' ' + '${T("La facture associée sera mise à jour et les statistiques")}'
+        + ' ' + '${T("d’achat des comptes concernés recalculées.")}',
+      oui: '${T("Lier")}'
+    }).then(function(oui){
+      if (!oui) return;
+      appeler('commande:lierEcrire', [DET_ID, clientId]).then(function(r){
+        if (!r.ok) {
+          dire(r.motif === 'inchange' ? '${T("Cette commande est déjà rattachée à ce compte.")}'
+                                      : expliquer(r), r.motif === 'inchange' ? 'att' : 'err');
+          return;
+        }
+        fermerListe();
+        dire(r.invite ? '${T("Commande détachée — remise en mode invité.")}'
+                      : '${T("Commande rattachée à")} ' + r.nom + '.', 'bon');
+        rechargerDetail();
       });
+    });
   }
 
   // ══ SUPPRESSION — IRREVERSIBLE, cascade annoncee AVANT le bouton ════════
-  function flowSupprimer(){
-    appeler('commandes:supprimerApercu', [DET_ID]).then(function(ap){
+  /* (2026-11-27, sa demande, capture a l appui) LA QUESTION EST UNE VRAIE FENETRE (szConfirmer -> fenetre
+     modale de l application), plus une boite dessinee par-dessus la fiche. Et depuis la LISTE, on ne
+     passe plus par la fiche : « je ne veux pas voir une fenetre de detail ». « id » absent = la commande
+     de la fiche ouverte ; « depuisListe » = on recharge la liste au lieu de revenir a la liste. */
+  function flowSupprimer(id, depuisListe){
+    var cible = id || DET_ID;
+    appeler('commandes:supprimerApercu', [cible]).then(function(ap){
       if (!ap.ok) { dire(expliquer(ap), 'err'); return; }
-      voile('<h3 style="color:var(--tx-err)"><span class="ic">🗑</span> ${T("Supprimer la commande")}</h3>'
-        + '<p><strong>' + esc(ap.numero) + '</strong> — ' + esc(ap.client) + '<br>'
-        + '<span style="color:var(--tx2)">' + esc(dateCourte(ap.date)) + ' · ' + argent(ap.total)
-        + ' · ' + esc(szTd(ap.statutLibelle)) + '</span></p>'
-        + '<p style="font-weight:600;margin-top:.6rem">${T("Éléments qui seront supprimés :")}</p>'
-        + '<ul style="padding-left:0">' + (ap.elements || []).map(function(x){
-            return '<li class="item">' + esc(x) + '</li>'; }).join('') + '</ul>'
-        + '<p style="color:var(--tx-err);font-weight:600"><span class="ic">⚠</span> ${T("Cette action est irréversible.")}</p>'
-        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-        + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:var(--tx-blanc)">${T("Supprimer définitivement")}</button></div>',
-        function(fermer){
-          document.getElementById('v-non').onclick = fermer;
-          document.getElementById('v-oui').onclick = function(){
-            this.disabled = true; // anti double-clic : Square peut rembourser
-            appeler('commandes:supprimerEcrire', [DET_ID]).then(function(r){
-              fermer();
-              var sq = r.square || {};
-              var note = sq.etat === 'initie' ? ' ${T("Remboursement Square de")} ' + argent(sq.montant) + '${T(" initié.")}'
-                : sq.etat === 'deja' ? ' ${T("Déjà entièrement remboursée — rien de plus envoyé à Square.")}'
-                : sq.etat === 'echec' ? ' ${T("Remboursement Square échoué :")} ' + (sq.detail || '?')
-                : sq.etat === 'reseau' ? ' ${T("Erreur réseau Square :")} ' + (sq.detail || '?') : '';
-              if (!r.ok) {
-                dire('${T("Suppression non confirmée par le serveur (")}' + (r.detail || '${T("erreur inconnue")}') + '${T(") — réessayez.")}' + note, 'err');
-                rechargerDetail();
-                return;
-              }
-              dire('${T("Commande supprimée — inventaire rétabli.")}' + note, sq.etat === 'echec' || sq.etat === 'reseau' ? 'att' : 'bon');
-              retourListe();
-            });
-          };
+      szConfirmer({
+        titre: '${T("Supprimer la commande")}',
+        texte: [ap.numero, ap.client].join(' — '),
+        details: [['${T("Date")}', dateCourte(ap.date) || '—'], ['${T("Total")}', argent(ap.total)], ['${T("Statut")}', szTd(ap.statutLibelle)]],
+        listeTitre: '${T("Éléments qui seront supprimés :")}',
+        liste: (ap.elements || []).map(function(x){ return String(x).replace(/^[^0-9A-Za-zÀ-ÿ]+/, ''); }),
+        note: '${T("Cette action est irréversible.")}',
+        oui: '${T("Supprimer définitivement")}',
+        danger: true
+      }).then(function(oui){
+        if (!oui) return;
+        appeler('commandes:supprimerEcrire', [cible]).then(function(r){
+          var sq = r.square || {};
+          var note = sq.etat === 'initie' ? ' ${T("Remboursement Square de")} ' + argent(sq.montant) + '${T(" initié.")}'
+            : sq.etat === 'deja' ? ' ${T("Déjà entièrement remboursée — rien de plus envoyé à Square.")}'
+            : sq.etat === 'echec' ? ' ${T("Remboursement Square échoué :")} ' + (sq.detail || '?')
+            : sq.etat === 'reseau' ? ' ${T("Erreur réseau Square :")} ' + (sq.detail || '?') : '';
+          if (!r.ok) {
+            dire('${T("Suppression non confirmée par le serveur (")}' + (r.detail || '${T("erreur inconnue")}') + '${T(") — réessayez.")}' + note, 'err');
+            if (!depuisListe) rechargerDetail(); else charger();
+            return;
+          }
+          dire('${T("Commande supprimée — inventaire rétabli.")}' + note, sq.etat === 'echec' || sq.etat === 'reseau' ? 'att' : 'bon');
+          if (depuisListe) charger(); else retourListe();
         });
+      });
     });
   }
 
@@ -2054,8 +2063,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
     }
     if (CTX && CTX.peutSupprimer && !o.enTraitement) {
       l.push({ trait: true });
-      l.push({ lib: '${T("Supprimer la commande…")}', dgr: true, fn: function(){
-        ouvrir('commandes:ouvrirDetail', o.id + '@supprimer', '${T("Détail")}'); } });
+      l.push({ lib: '${T("Supprimer la commande…")}', dgr: true, fn: function(){ flowSupprimer(o.id, true); } });
     }
     szCtxMenu(ev.clientX, ev.clientY, o.numero || '', l);
   }

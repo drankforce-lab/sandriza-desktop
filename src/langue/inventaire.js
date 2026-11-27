@@ -669,4 +669,9 @@ module.exports = {
   "Mise en vente…": "Putting on sale…",
   "{0} produit est dans une catégorie sans code : aucun SKU possible.": "{0} product is in a category without a code: no SKU possible.",
   "{0} produits sont dans une catégorie sans code : aucun SKU possible.": "{0} products are in a category without a code: no SKU possible.",
+  // Les boîtes devenues de vraies fenêtres (szConfirmer, 2026-11-27)
+  "produit sera renuméroté.": "product will be renumbered.",
+  "produits seront renumérotés.": "products will be renumbered.",
+  "Exemple": "Example",
+  "Les étiquettes déjà imprimées ne correspondront plus au nouveau code : il faudra les réimprimer pour la marchandise concernée. Cette action est irréversible.": "Labels ALREADY printed will no longer match the new code: they must be reprinted for the affected merchandise. This action is irreversible.",
 };

@@ -864,52 +864,43 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var k = nAnnulables();
     var gestes = gesteAnnule();
     var quoi = (gestes.length === 1)
-      ? ('« <strong>' + esc(nomTraitement(gestes[0])) + '</strong> »')
-      : ('${T("leur ")}<strong>${T("dernier traitement")}</strong>');
-    voile('<h3>${T("↩ Revenir à l’état précédent")}</h3>'
-      + '<p>' + k + ' ' + (k > 1 ? '${T("photos")}' : '${T("photo")}') + '${T(" sur ")}' + ids.length
-      + ' ' + (ids.length > 1 ? '${T("choisies")}' : '${T("choisie")}')
-      + ' ' + (k > 1 ? '${T("retrouveront")}' : '${T("retrouvera")}')
-      + ' ${T("l’état d’avant")} ' + quoi + '.</p>'
-      + '<p><strong>${T("Aucun crédit n’est dépensé")}</strong>${T(" : l’image d’avant est déjà rangée, ")}'
-      + '${T("on ne fait que la remettre en place.")}</p>'
-      + '<p>${T("Le geste est ")}<strong>${T("réversible")}</strong>${T(" — le même bouton rétablira ce que ")}${T("vous")} '
-      + '${T("venez d’annuler.")}</p>'
+      ? ('« ' + nomTraitement(gestes[0]) + ' »')
+      : ('${T("leur ")}' + '${T("dernier traitement")}');
+    /* (2026-11-27) Une vraie fenetre de l application (szConfirmer), plus une surimpression. */
+    szConfirmer({
+      titre: '${T("Revenir à l’état précédent")}',
+      texte: k + ' ' + (k > 1 ? '${T("photos")}' : '${T("photo")}') + '${T(" sur ")}' + ids.length
+        + ' ' + (ids.length > 1 ? '${T("choisies")}' : '${T("choisie")}')
+        + ' ' + (k > 1 ? '${T("retrouveront")}' : '${T("retrouvera")}')
+        + ' ${T("l’état d’avant")} ' + quoi + '. '
+        + '${T("Aucun crédit n’est dépensé : l’image d’avant est déjà rangée, on ne fait que la remettre en place.")} '
+        + '${T("Le geste est réversible : le même bouton rétablira ce que vous venez d’annuler.")}',
       /* ⚠ CE QU ON NE PEUT PAS DEFAIRE EST DIT AVANT, pas apres coup : une photo
-         traitee deux fois n a gardé qu UN état, celui d avant le dernier geste. */
-      + '<p style="color:var(--tx2)">${T("Un seul pas en arrière est conservé par photo : une photo")} '
-      + '${T("passée par deux traitements ne remonte qu’au précédent, pas à l’originale.")}</p>'
-      + (k < ids.length
-          /* DEUX PHRASES ENTIERES (2026-10-25, audit) : le pluriel recolle a la main (« nt » ecrit en dur)
-             donnait en anglais « will not movent not ». */
-          ? ('<p style="color:var(--tx-or)"><span class="ic">⚠</span> '
-             + ((ids.length - k) > 1 ? '${T("{0} photos n’ont rien à annuler et ne bougeront pas.")}'
-                                    : '${T("{0} photo n’a rien à annuler et ne bougera pas.")}').split('{0}').join(ids.length - k)
-             + '</p>')
-          : '')
-      + '<div class="fin2"><button id="an-non">${T("Annuler")}</button>'
-      + '<button class="prim" id="an-oui">${T("Revenir en arrière")}</button></div>',
-      function(fermer){
-        var non = document.getElementById('an-non');
-        var oui = document.getElementById('an-oui');
-        if (non) non.onclick = fermer;
-        if (oui) oui.onclick = function(){
-          oui.disabled = true;
-          dire('${T("Retour en arrière…")}');
-          appeler('photos:annulerLot', [ids]).then(function(r){
-            fermer();
-            if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
-            var m = r.faites + ' '
-              + (r.faites > 1 ? '${T("photos revenues")}' : '${T("photo revenue")}')
-              + ' ${T("à l’état précédent.")}';
-            if (r.sansPrecedent) m += ' ' + r.sansPrecedent + ' '
-              + (r.sansPrecedent > 1 ? '${T("n’avaient rien à annuler.")}' : '${T("n’avait rien à annuler.")}');
-            if (r.echecs && r.echecs.length) m += ' ' + r.echecs.length + ' ${T("en échec.")}';
-            dire(m, (r.echecs && r.echecs.length) ? 'att' : 'bon');
-            charger();   // les vignettes ont changé : on relit
-          });
-        };
+         traitee deux fois n a gardé qu UN état, celui d avant le dernier geste.
+         DEUX PHRASES ENTIERES (2026-10-25, audit) : le pluriel recolle a la main (« nt » ecrit en dur)
+         donnait en anglais « will not movent not ». */
+      note: '${T("Un seul pas en arrière est conservé par photo : une photo")} '
+        + '${T("passée par deux traitements ne remonte qu’au précédent, pas à l’originale.")}'
+        + (k < ids.length
+            ? ' ' + ((ids.length - k) > 1 ? '${T("{0} photos n’ont rien à annuler et ne bougeront pas.")}'
+                                         : '${T("{0} photo n’a rien à annuler et ne bougera pas.")}').split('{0}').join(ids.length - k)
+            : ''),
+      oui: '${T("Revenir en arrière")}'
+    }).then(function(oui){
+      if (!oui) return;
+      dire('${T("Retour en arrière…")}');
+      appeler('photos:annulerLot', [ids]).then(function(r){
+        if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+        var m = r.faites + ' '
+          + (r.faites > 1 ? '${T("photos revenues")}' : '${T("photo revenue")}')
+          + ' ${T("à l’état précédent.")}';
+        if (r.sansPrecedent) m += ' ' + r.sansPrecedent + ' '
+          + (r.sansPrecedent > 1 ? '${T("n’avaient rien à annuler.")}' : '${T("n’avait rien à annuler.")}');
+        if (r.echecs && r.echecs.length) m += ' ' + r.echecs.length + ' ${T("en échec.")}';
+        dire(m, (r.echecs && r.echecs.length) ? 'att' : 'bon');
+        charger();   // les vignettes ont changé : on relit
       });
+    });
   }
 
   /* ══ PORTER LE RESULTAT DANS LA FICHE PRODUIT (lot 3f du #29) ══════════════
@@ -938,60 +929,51 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!ids.length) return;
     var k = nAppliquer();
     var r = nEnRetard();
-    voile('<h3><span class="ic">📦</span> ${T("Mettre à jour la fiche produit")}</h3>'
-      + '<p>${T("L’image courante de")} ' + k + ' ' + (k > 1 ? '${T("photos")}' : '${T("photo")}')
-      + ' ${T("sera portée dans la fiche de l’article auquel elle est rattachée.")}</p>'
-      /* ⚠ ON DIT QUE C EST LA VITRINE. Un compte rendu qui parlerait de
-         << fiches mises a jour >> laisserait croire a un rangement interne : ce
-         qui change ici, c est ce qu une cliente voit sur la boutique. */
-      + '<p><strong>${T("C’est ce que la boutique affichera")}</strong>${T(" — la photo du produit change ")}'
-      + '${T("pour de bon, en ligne.")}</p>'
-      /* ⚠ LE SINGULIER ET LE PLURIEL, CHACUN ENTIER. Decoupe en « fiche » + « s »
-         + « montre » + « nt », la phrase ne laissait au poseur que des morceaux
-         generiques, qui se posaient dans d autres phrases. */
-      + (r ? ('<p style="color:var(--tx-or)">' + r
-              + (r > 1 ? '${T(" fiches montrent")}' : '${T(" fiche montre")}')
-              + '${T(" encore l’image d’<strong>avant</strong> le dernier ")}'
-              + '${T("traitement — c’est justement ce qu’on répare.")}</p>')
-           : '<p style="color:var(--tx2)">${T("Aucune de ces fiches n’est en retard : elles montrent déjà")} '
-             + '${T("l’image courante. Rien ne changera visiblement.")}</p>')
-      /* ⚠ LE CAS AMBIGU EST ANNONCE AVANT, pas decouvert dans le compte rendu :
-         une fiche qui porte plusieurs images et dont on ignore laquelle vient de
-         cette photo est REFUSEE, jamais devinee. */
-      + '<p style="color:var(--tx2)">${T("Une photo rattachée avant la version 3.49 dont la fiche porte")} '
-      + '<strong>${T("plusieurs images")}</strong>${T(" sera laissée de côté : on ne peut pas savoir laquelle ")}'
-      + '${T("lui appartient, et remplacer la mauvaise mettrait un vêtement à la place d’un autre.")} '
-      + '${T("Rattachez-la de nouveau pour lever le doute.")}</p>'
-      + (k < ids.length
-          ? ('<p style="color:var(--tx-or)"><span class="ic">⚠</span> ' + (ids.length - k) + ' '
-             + ((ids.length - k) > 1
-                 ? '${T("photos ne sont rattachées à aucun article et ne bougeront pas.")}'
-                 : '${T("photo n’est rattachée à aucun article et ne bougera pas.")}') + '</p>')
-          : '')
-      + '<div class="fin2"><button id="ap-non">${T("Annuler")}</button>'
-      + '<button class="prim" id="ap-oui">${T("Mettre à jour la vitrine")}</button></div>',
-      function(fermer){
-        var non = document.getElementById('ap-non');
-        var oui = document.getElementById('ap-oui');
-        if (non) non.onclick = fermer;
-        if (oui) oui.onclick = function(){
-          oui.disabled = true;
-          dire('${T("Mise à jour des fiches…")}');
-          appeler('photos:appliquerLot', [ids]).then(function(res){
-            fermer();
-            if (!res || !res.ok) { dire(expliquer(res), 'err'); return; }
-            var m = res.faites + (res.faites > 1 ? '${T(" fiches mises à jour.")}' : '${T(" fiche mise à jour.")}');
-            if (res.nonLiees) m += ' ' + res.nonLiees + '${T(" photo")}'
-              + (res.nonLiees > 1 ? '${T("s non rattachées")}' : ' ${T("non rattachée")}') + '.';
-            if (res.incertaines) m += ' ' + res.incertaines + (res.incertaines > 1
-              ? '${T(" laissées de côté (plusieurs images, lien incertain).")}'
-              : '${T(" laissée de côté (plusieurs images, lien incertain).")}');
-            if (res.echecs && res.echecs.length) m += ' ' + res.echecs.length + ' ${T("en échec.")}';
-            dire(m, ((res.echecs && res.echecs.length) || res.incertaines) ? 'att' : 'bon');
-            charger();
-          });
-        };
+    /* (2026-11-27) Une vraie fenetre de l application (szConfirmer), plus une surimpression.
+       ⚠ ON DIT QUE C EST LA VITRINE. Un compte rendu qui parlerait de
+       << fiches mises a jour >> laisserait croire a un rangement interne : ce
+       qui change ici, c est ce qu une cliente voit sur la boutique.
+       ⚠ LE SINGULIER ET LE PLURIEL, CHACUN ENTIER. Decoupe en « fiche » + « s »
+       + « montre » + « nt », la phrase ne laissait au poseur que des morceaux
+       generiques, qui se posaient dans d autres phrases.
+       ⚠ LE CAS AMBIGU EST ANNONCE AVANT, pas decouvert dans le compte rendu :
+       une fiche qui porte plusieurs images et dont on ignore laquelle vient de
+       cette photo est REFUSEE, jamais devinee. */
+    szConfirmer({
+      titre: '${T("Mettre à jour la fiche produit")}',
+      texte: '${T("L’image courante de")} ' + k + ' ' + (k > 1 ? '${T("photos")}' : '${T("photo")}')
+        + ' ${T("sera portée dans la fiche de l’article auquel elle est rattachée.")} '
+        + '${T("C’est ce que la boutique affichera : la photo du produit change pour de bon, en ligne.")} '
+        + (r ? (r + (r > 1 ? '${T(" fiches montrent")}' : '${T(" fiche montre")}')
+                + '${T(" encore l’image d’avant le dernier traitement : c’est justement ce qu’on répare.")}')
+             : ('${T("Aucune de ces fiches n’est en retard : elles montrent déjà")} '
+                + '${T("l’image courante. Rien ne changera visiblement.")}')),
+      note: '${T("Une photo rattachée avant la version 3.49 dont la fiche porte plusieurs images sera laissée de côté : on ne peut pas savoir laquelle lui appartient, et remplacer la mauvaise mettrait un vêtement à la place d’un autre.")} '
+        + '${T("Rattachez-la de nouveau pour lever le doute.")}'
+        + (k < ids.length
+            ? ' ' + (ids.length - k) + ' '
+              + ((ids.length - k) > 1
+                  ? '${T("photos ne sont rattachées à aucun article et ne bougeront pas.")}'
+                  : '${T("photo n’est rattachée à aucun article et ne bougera pas.")}')
+            : ''),
+      oui: '${T("Mettre à jour la vitrine")}',
+      prudent: true
+    }).then(function(oui){
+      if (!oui) return;
+      dire('${T("Mise à jour des fiches…")}');
+      appeler('photos:appliquerLot', [ids]).then(function(res){
+        if (!res || !res.ok) { dire(expliquer(res), 'err'); return; }
+        var m = res.faites + (res.faites > 1 ? '${T(" fiches mises à jour.")}' : '${T(" fiche mise à jour.")}');
+        if (res.nonLiees) m += ' ' + res.nonLiees + '${T(" photo")}'
+          + (res.nonLiees > 1 ? '${T("s non rattachées")}' : ' ${T("non rattachée")}') + '.';
+        if (res.incertaines) m += ' ' + res.incertaines + (res.incertaines > 1
+          ? '${T(" laissées de côté (plusieurs images, lien incertain).")}'
+          : '${T(" laissée de côté (plusieurs images, lien incertain).")}');
+        if (res.echecs && res.echecs.length) m += ' ' + res.echecs.length + ' ${T("en échec.")}';
+        dire(m, ((res.echecs && res.echecs.length) || res.incertaines) ? 'att' : 'bon');
+        charger();
       });
+    });
   }
 
   function dessinerPied(){

@@ -193,4 +193,9 @@ module.exports = {
   "Fermer et perdre la file ?": "Close and lose the queue?",
   "La file d’impression n’existe que dans cette fenêtre : elle sera perdue.": "The print queue only exists in this window: it will be lost.",
   "Fermer et perdre la file": "Close and lose the queue",
+  // Les boîtes devenues de vraies fenêtres (szConfirmer, 2026-11-27)
+  "Sur une étiquette de {0} po à {1} ppp, {2} : la barre la plus fine tomberait à 1 point, sous le seuil de lecture des lecteurs.": "On a {0} in label at {1} dpi, {2}: the thinnest bar would fall to 1 dot, below what scanners can read.",
+  "Codes concernés :": "Affected codes:",
+  "Deux leviers : raccourcir le code couleur (Inventaire → Attributs → Couleurs) ou passer à une étiquette plus large. Une imprimante 300 ppp règle aussi le cas.": "Two options: shorten the color code (Inventory → Attributes → Colors) or switch to a wider label. A 300 dpi printer also solves it.",
+  "et {0} autres": "and {0} more",
 };

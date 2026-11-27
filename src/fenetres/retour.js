@@ -885,40 +885,42 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
 
     /* ⚠ CONFIRMATION AVANT L ARGENT, montants sous les yeux — taxes en sus,
        recalculees par le site aux taux reels de la commande. */
-    voile('<h3>' + (statutFinal === 'refunded' ? '<span class="ic">💳</span> ${T("Rembourser et clore ?")}' : '${T("Clore le dossier ?")}') + '</h3>'
-      + (statutFinal === 'refunded'
-          ? '<p>${T("Articles :")} <strong>' + argent(montants.reduce(function(s,v){ return s+(parseFloat(v)||0); }, 0)) + '</strong>'
-            + (livraison && R.remboursement ? ' + ${T("livraison")} <strong>' + argent(R.remboursement.livraisonBase) + '</strong>' : '')
-            + ' <span style="color:var(--tx2)">${T("(+ taxes aux taux réels)")}</span><br>'
-            + '${T("Méthode :")} <strong>' + (methode === 'original' ? '${T("moyen de paiement original (Square)")}' : '${T("crédit boutique")}') + '</strong></p>'
-            + '<p style="color:var(--tx-att)">${T("Un remboursement ne s’annule pas d’un clic.")}</p>'
-          : '<p>${T("Aucun remboursement ne sera émis ici — le règlement s’est fait autrement (échange, crédit déjà émis…).")}</p>')
-      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-      + '<button class="paie" id="v-oui">'
-      + (statutFinal === 'refunded' ? '${T("Rembourser")}' : '${T("Clore")}') + '</button></div>',
-      function(fermer){
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){
-          fermer();
-          enCours = true; dire('${T("Règlement en cours…")}', 'att');
-          appeler('retour:finaliser', [ID, {
-            decisions: decisions, statutFinal: statutFinal,
-            remboursement: { montants: montants, livraison: livraison, methode: methode },
-            note: val('g-note'),
-          }]).then(function(r){
-            enCours = false;
-            if (!r.ok) { dire(expliquer(r), 'err'); return; }
-            var t = '${T("Retour traité.")}';
-            if (r.credit) t += ' ${T("Crédit")} ' + r.credit.numero + ' (' + argent(r.credit.montant) + '${T(") émis.")}';
-            if (r.squareErreur) t += ' ${T("Square a échoué :")} ' + r.squareErreur;
-            if (r.nonRestockes && r.nonRestockes.length) t += ' ${T("Non remis en stock :")} ' + r.nonRestockes.join(' ; ');
-            if (r.courriel) t += r.courriel.envoye ? ' ${T("Courriel envoyé.")}' : '';
-            dire(t, (r.squareErreur || (r.nonRestockes || []).length) ? 'att' : 'bon');
-            ETAPE = 0;
-            recharger();
-          });
-        };
+    /* (2026-11-27) Une vraie fenetre de l application (szConfirmer), plus une boite dessinee sur la fiche. */
+    var rembourse = statutFinal === 'refunded';
+    var dF = [];
+    if (rembourse) {
+      dF.push(['${T("Articles")}', argent(montants.reduce(function(s,v){ return s+(parseFloat(v)||0); }, 0))]);
+      if (livraison && R.remboursement) dF.push(['${T("Livraison")}', argent(R.remboursement.livraisonBase)]);
+      dF.push(['${T("Méthode")}', methode === 'original' ? '${T("moyen de paiement original (Square)")}' : '${T("crédit boutique")}']);
+    }
+    szConfirmer({
+      titre: rembourse ? '${T("Rembourser et clore le dossier")}' : '${T("Clore le dossier")}',
+      texte: rembourse ? '${T("Le remboursement sera émis et le dossier clos. Les taxes s’ajoutent aux taux réels de la commande.")}'
+        : '${T("Aucun remboursement ne sera émis ici — le règlement s’est fait autrement (échange, crédit déjà émis…).")}',
+      details: dF,
+      note: rembourse ? '${T("Un remboursement ne s’annule pas d’un clic.")}' : '',
+      oui: rembourse ? '${T("Rembourser")}' : '${T("Clore")}',
+      prudent: rembourse
+    }).then(function(oui){
+      if (!oui) return;
+      enCours = true; dire('${T("Règlement en cours…")}', 'att');
+      appeler('retour:finaliser', [ID, {
+        decisions: decisions, statutFinal: statutFinal,
+        remboursement: { montants: montants, livraison: livraison, methode: methode },
+        note: val('g-note'),
+      }]).then(function(r){
+        enCours = false;
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        var t = '${T("Retour traité.")}';
+        if (r.credit) t += ' ${T("Crédit")} ' + r.credit.numero + ' (' + argent(r.credit.montant) + '${T(") émis.")}';
+        if (r.squareErreur) t += ' ${T("Square a échoué :")} ' + r.squareErreur;
+        if (r.nonRestockes && r.nonRestockes.length) t += ' ${T("Non remis en stock :")} ' + r.nonRestockes.join(' ; ');
+        if (r.courriel) t += r.courriel.envoye ? ' ${T("Courriel envoyé.")}' : '';
+        dire(t, (r.squareErreur || (r.nonRestockes || []).length) ? 'att' : 'bon');
+        ETAPE = 0;
+        recharger();
       });
+    });
   }
 
   // ══ CHARGEMENT ════════════════════════════════════════════════════════════
@@ -993,30 +995,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
           ? '${T("Seule une demande terminée peut être supprimée.")}' : expliquer(ap), 'err');
         return;
       }
-      voile('<h3 style="color:var(--tx-err)"><span class="ic">🗑</span> ${T("Supprimer la demande")}</h3>'
-        + '<p><strong>' + esc(ap.commande) + '</strong>'
-        + (ap.client ? ' — ' + esc(ap.client) : '') + '</p>'
-        + '<p>${T("La demande disparaît de la liste")}'
-        + (ap.aPhoto ? ', <strong>${T("et la photo envoyée par le client est effacée du stockage")}</strong>' : '')
-        + '.</p>'
-        + '<p style="color:var(--tx-err);font-weight:600"><span class="ic">⚠</span> ${T("Cette action est irréversible.")}</p>'
-        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-        + '<button class="prim" id="v-oui" style="background:#dc2626;border-color:#dc2626;color:var(--tx-blanc)">'
-        + '${T("Supprimer définitivement")}</button></div>',
-        function(fermer){
-          document.getElementById('v-non').onclick = fermer;
-          document.getElementById('v-oui').onclick = function(){
-            this.disabled = true;
-            appeler('retour:supprimerEcrire', [ID]).then(function(r){
-              fermer();
-              if (!r.ok) { dire(expliquer(r), 'err'); return; }
-              dire('${T("Demande supprimée.")}', 'bon');
-              // Le dossier n existe plus : rester dessus n aurait aucun sens.
-              rendreVerrou();
-              P.fermer();
-            });
-          };
+      /* (2026-11-27) Une vraie fenetre de l application (szConfirmer). */
+      var dS = [['${T("Commande")}', ap.commande]];
+      if (ap.client) dS.push(['${T("Client")}', ap.client]);
+      szConfirmer({
+        titre: '${T("Supprimer la demande")}',
+        texte: ap.aPhoto ? '${T("La demande disparaît de la liste, et la photo envoyée par le client est effacée du stockage.")}'
+          : '${T("La demande disparaît de la liste.")}',
+        details: dS,
+        note: '${T("Cette action est irréversible.")}',
+        oui: '${T("Supprimer définitivement")}',
+        danger: true
+      }).then(function(oui){
+        if (!oui) return;
+        appeler('retour:supprimerEcrire', [ID]).then(function(r){
+          if (!r.ok) { dire(expliquer(r), 'err'); return; }
+          dire('${T("Demande supprimée.")}', 'bon');
+          // Le dossier n existe plus : rester dessus n aurait aucun sens.
+          rendreVerrou();
+          P.fermer();
         });
+      });
     });
   }
 

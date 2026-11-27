@@ -562,33 +562,32 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('codesbarres')}
 
   function avertirLisibilite(v){
     var p = v.problemes;
-    var h = '<h3 style="color:var(--tx-att)"><span class="ic">⚠</span> ${T("Ces codes ne se scanneront pas")}</h3>'
-      + '<p>${T("Sur une étiquette de <strong>")}' + szNombre(v.largeurPo) + '${T(" po</strong> à <strong>")}'
-      + v.dpi + '${T(" ppp</strong>, ")}' + (p.length > 1 ? '${T("ces codes sont trop longs")}' : '${T("ce code est trop long")}')
-      + '${T(" : la barre la plus fine tomberait à ")}'
-      + '${T("<strong>1 point</strong>, sous le seuil de lecture des lecteurs. ")}'
-      + '${T("L’étiquette s’imprimera correctement — mais elle ne se lira pas.")}</p>'
-      + '<ul style="padding-left:0" data-pages="cb-illisibles">' + p.map(function(x){
-          return '<li class="item"><strong>' + esc(x.sku) + '</strong>'
-            + (x.nom ? ' — ' + esc(x.nom) : '')
-            + '<br><span style="color:var(--tx2)">' + x.modules + '${T(" modules · il faudrait une ")}'
-            + '${T("étiquette d’au moins ")}' + szNombre(x.largeurMiniPo) + '${T(" po")}</span></li>'; }).join('')
-      + '</ul>'
-      + '<p style="color:var(--tx2)">${T("Deux leviers : raccourcir le <strong>code couleur</strong> ")}'
-      + '${T("(Inventaire → Attributs → Couleurs) ou passer à une étiquette plus large. ")}'
-      + '${T("Une imprimante 300 ppp règle aussi le cas.")}</p>'
-      + '<div class="pied-boite"><button id="v-non">${T("Annuler")}</button>'
-      + '<button id="v-oui">${T("Imprimer quand même")}</button></div>';
-    voile(h, function(fermer){
-      document.getElementById('v-non').onclick = function(){
-        fermer();
-        var b = document.getElementById('cb-imprimer');
-        if (b) b.disabled = false;
-        dire('${T("Impression annulée.")}', 'att');
-      };
-      // ⚠ PAS la classe << prim >> sur ce bouton-la : imprimer quand meme est
-      // le choix par defaut de personne. Annuler doit rester le geste facile.
-      document.getElementById('v-oui').onclick = function(){ fermer(); lancer(); };
+    /* (2026-11-27) Une vraie fenetre de l application (szConfirmer), plus une surimpression.
+       Chaque code fautif est une ligne de la liste : son SKU, son nom, et la largeur qu il lui faudrait.
+       La fenetre ne montre que 14 lignes : au-dela, on le DIT au lieu de couper en silence. */
+    var lignes = p.map(function(x){
+      return [x.sku, x.nom, x.modules + '${T(" modules · il faudrait une ")}' + '${T("étiquette d’au moins ")}'
+        + szNombre(x.largeurMiniPo) + '${T(" po")}'].filter(Boolean).join(' — ');
+    });
+    if (lignes.length > 14) lignes = lignes.slice(0, 13).concat([('… ' + '${T("et {0} autres")}').split('{0}').join(p.length - 13)]);
+    // ⚠ « prudent » : le foyer sur Annuler. Imprimer quand meme est le choix par
+    // defaut de personne — Annuler doit rester le geste facile.
+    szConfirmer({
+      titre: '${T("Ces codes ne se scanneront pas")}',
+      texte: '${T("Sur une étiquette de {0} po à {1} ppp, {2} : la barre la plus fine tomberait à 1 point, sous le seuil de lecture des lecteurs.")}'
+          .split('{0}').join(szNombre(v.largeurPo)).split('{1}').join(String(v.dpi))
+          .split('{2}').join(p.length > 1 ? '${T("ces codes sont trop longs")}' : '${T("ce code est trop long")}')
+        + ' ${T("L’étiquette s’imprimera correctement — mais elle ne se lira pas.")}',
+      listeTitre: '${T("Codes concernés :")}',
+      liste: lignes,
+      note: '${T("Deux leviers : raccourcir le code couleur (Inventaire → Attributs → Couleurs) ou passer à une étiquette plus large. Une imprimante 300 ppp règle aussi le cas.")}',
+      oui: '${T("Imprimer quand même")}',
+      prudent: true
+    }).then(function(oui){
+      if (oui) { lancer(); return; }
+      var b = document.getElementById('cb-imprimer');
+      if (b) b.disabled = false;
+      dire('${T("Impression annulée.")}', 'att');
     });
   }
 

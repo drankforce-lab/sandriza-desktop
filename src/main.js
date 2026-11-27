@@ -1455,6 +1455,72 @@ ipcMain.on('session:fermee', (e) => {
   if (!_deLaPrincipale(e)) return;
   try { _fermerFenetresDeSession(); } catch (er) {}
 });
+/* ══ LES BOÎTES DE DIALOGUE EN VRAIES FENÊTRES (2026-11-27) ═══════════════════════════════════
+   Sa demande, capture à l'appui : « Supprimer la commande » était dessinée PAR-DESSUS la fiche — « la
+   fenêtre de suppression n'est pas en natif et le devrait ». Toutes les questions du socle
+   (szConfirmer, szDemanderNip, szBrouillonDemander) passent par ici : une fenêtre MODALE, fille de la
+   fenêtre qui demande, au thème (fenetres/dialogue.js). Même famille que « Déconnexion ».
+   ⚠ LA FERMETURE VAUT « NON », et la promesse est TOUJOURS tenue (voir deconnexionFermer).
+   ⚠ La hauteur suit le contenu : la page la mesure (dialogue:taille) avant de se montrer. */
+const { pageDialogue } = require('./fenetres/dialogue');
+const _dialogues = new Map();
+ipcMain.handle('dialogue:demander', (e, o) => new Promise((resolve) => {
+  let parent = null;
+  try { parent = BrowserWindow.fromWebContents(e.sender); } catch (er) { parent = null; }
+  if (!parent || parent.isDestroyed()) { try { parent = BrowserWindow.getFocusedWindow(); } catch (er) { parent = null; } }
+  if (!parent || parent.isDestroyed() || (panneauWin && parent === panneauWin)) parent = (mainWindow && !mainWindow.isDestroyed()) ? mainWindow : null;
+  if (!parent) { resolve(undefined); return; }
+  const opt = (o && typeof o === 'object') ? o : {};
+  const L = (Array.isArray(opt.liste) && opt.liste.length) || (Array.isArray(opt.details) && opt.details.length > 3) ? 600 : 540;
+  let H = 260, px, py, b = null;
+  try { b = parent.getBounds(); px = Math.round(b.x + (b.width - L) / 2); py = Math.round(b.y + (b.height - H) / 3); } catch (er) {}
+  let win;
+  try {
+    win = new BrowserWindow({
+      width: L, height: H, ...(Number.isFinite(px) && Number.isFinite(py) ? { x: px, y: py } : {}),
+      parent, modal: true, resizable: false, minimizable: false, maximizable: false, fullscreenable: false,
+      skipTaskbar: true, show: false, autoHideMenuBar: true, useContentSize: true,
+      title: String(opt.titre || 'Sandriza').slice(0, 120), backgroundColor: _fondTheme(),
+      webPreferences: { preload: path.join(__dirname, 'pont-preload.js'), minimumFontSize: 11, contextIsolation: true, nodeIntegration: false, sandbox: true },
+    });
+  } catch (er) { resolve(undefined); return; }
+  const id = win.webContents.id;
+  const etat = { fini: false, montree: false, L };
+  const finir = (r) => {
+    if (etat.fini) return;
+    etat.fini = true;
+    _dialogues.delete(id);
+    resolve(r);
+    if (!win.isDestroyed()) { try { win.destroy(); } catch (er) {} }
+    try { if (!parent.isDestroyed()) parent.focus(); } catch (er) {}
+  };
+  etat.finir = finir;
+  etat.montrer = () => {
+    if (etat.montree || win.isDestroyed()) return;
+    etat.montree = true;
+    try { win.show(); win.focus(); } catch (er) {}
+  };
+  etat.taille = (h) => {
+    if (win.isDestroyed()) return;
+    let max = 720;
+    try { const { screen } = require('electron'); max = Math.round(screen.getDisplayMatching(win.getBounds()).workAreaSize.height * 0.85); } catch (er) {}
+    const hh = Math.max(140, Math.min(max, h));
+    try {
+      win.setContentSize(L, hh);
+      if (b) { const wb = win.getBounds(); win.setPosition(Math.round(b.x + (b.width - wb.width) / 2), Math.round(b.y + Math.max(40, (b.height - wb.height) / 3))); }
+    } catch (er) {}
+    etat.montrer();
+  };
+  _dialogues.set(id, etat);
+  win.on('page-title-updated', (ev) => { ev.preventDefault(); });
+  win.on('closed', () => finir(opt.genre === 'confirmer' || !opt.genre ? 'non' : null));
+  win.once('ready-to-show', () => { setTimeout(etat.montrer, 400); });
+  try { appliquerTheme(win.webContents); } catch (er) {}
+  win.loadURL('data:text/html;charset=utf-8,' + encodeURIComponent(pageDialogue(opt)));
+}));
+ipcMain.on('dialogue:taille', (e, h) => { const d = _dialogues.get(e.sender.id); if (d) d.taille(parseInt(h, 10) || 0); });
+ipcMain.on('dialogue:reponse', (e, r) => { const d = _dialogues.get(e.sender.id); if (d) d.finir(r == null ? null : r); });
+
 ipcMain.on('deconnexion:reponse', (e, oui) => {
   if (!deconnexionWin || deconnexionWin.isDestroyed()) return;
   if (e.sender !== deconnexionWin.webContents) return;

@@ -1545,24 +1545,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
   function pad6(){
     var d = PRODS && PRODS.pad6;
     if (!d || !d.n) return;
-    voile('<h3>${T("Passer les SKU à six chiffres")}</h3>'
-      + '<p>' + d.n + ' ' + szPl(d.n, '${T("produit sera renuméroté (ex.")}', '${T("produits seront renumérotés (ex.")}') + ' ' + esc(d.avant || '') + ' → '
-      + esc(d.apres || '') + '${T("). Les étiquettes <strong>déjà imprimées</strong> ne correspondront ")}'
-      + '${T("plus au nouveau code — il faudra les réimprimer pour la marchandise concernée.")} '
-      + '<strong>${T("Irréversible.")}</strong></p>'
-      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-      + '<button class="prim" id="v-oui">${T("Renuméroter")}</button></div>',
-      function(fermer){
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){
-          this.disabled = true;
-          appeler('stock:skuPad6').then(function(r){
-            fermer();
-            dire(r.ok ? r.n + ' ' + szPl(r.n, '${T("SKU normalisé.")}', '${T("SKU normalisés.")}') : expliquer(r), r.ok ? 'bon' : 'err');
-            if (r.ok) chargerOnglet();
-          });
-        };
+    /* (2026-11-27) Une vraie fenetre de l application (szConfirmer), plus une surimpression. */
+    szConfirmer({
+      titre: '${T("Passer les SKU à six chiffres")}',
+      texte: d.n + ' ' + szPl(d.n, '${T("produit sera renuméroté.")}', '${T("produits seront renumérotés.")}'),
+      details: (d.avant || d.apres) ? [['${T("Exemple")}', [d.avant || '', d.apres || ''].join(' → ')]] : null,
+      note: '${T("Les étiquettes déjà imprimées ne correspondront plus au nouveau code : il faudra les réimprimer pour la marchandise concernée. Cette action est irréversible.")}',
+      oui: '${T("Renuméroter")}',
+      prudent: true
+    }).then(function(oui){
+      if (!oui) return;
+      appeler('stock:skuPad6').then(function(r){
+        dire(r.ok ? r.n + ' ' + szPl(r.n, '${T("SKU normalisé.")}', '${T("SKU normalisés.")}') : expliquer(r), r.ok ? 'bon' : 'err');
+        if (r.ok) chargerOnglet();
       });
+    });
   }
   function modifier(pid){
     dire('${T("Ouverture…")}');
@@ -2059,30 +2056,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
        pas. Des casiers pointant vers un batiment disparu perdraient la premiere
        moitie de leur libelle — et c est ce libelle que l import CSV retrouve. */
     if (n > 0) {
-      voile('<h3>${T("Suppression impossible")}</h3>'
-        + '<p>${T("Le lieu")} <strong>' + esc(l.nom) + '</strong> ${T("contient")} <strong>'
-        + n + ' ' + szPl(n, '${T("emplacement")}', '${T("emplacements")}') + '</strong>.</p>'
-        + '<p style="color:var(--tx2);font-size:.8rem">${T("Déplacez ou supprimez ces emplacements")} '
-        + '${T("avant de supprimer le lieu.")}</p>'
-        + '<div class="fin2"><button class="prim" id="v-ok">${T("Compris")}</button></div>',
-        function(fermer){ document.getElementById('v-ok').onclick = fermer; });
+      szConfirmer({
+        titre: '${T("Suppression impossible")}',
+        texte: '${T("Le lieu")} ' + l.nom + ' ${T("contient")} ' + n + ' ' + szPl(n, '${T("emplacement")}', '${T("emplacements")}') + '. '
+          + '${T("Déplacez ou supprimez ces emplacements")} ' + '${T("avant de supprimer le lieu.")}',
+        oui: '${T("Compris")}',
+        seul: true
+      });
       return;
     }
-    voile('<h3>${T("Supprimer le lieu")}</h3>'
-      + '<p>${T("Supprimer")} <strong>' + esc(l.nom) + '</strong> ${T("? Aucun emplacement ne s’y trouve.")}</p>'
-      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-      + '<button class="prim" id="v-oui">${T("Supprimer")}</button></div>',
-      function(fermer){
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){
-          this.disabled = true;
-          appeler('stock:lieuSupprimer', [id]).then(function(r){
-            fermer();
-            dire(r.ok ? '${T("Lieu «")} ' + (r.nom || '') + ' ${T("» supprimé.")}' : expliquer(r), r.ok ? 'bon' : 'err');
-            chargerOnglet();
-          });
-        };
+    szConfirmer({
+      titre: '${T("Supprimer le lieu")}',
+      texte: '${T("Supprimer")} ' + l.nom + ' ${T("? Aucun emplacement ne s’y trouve.")}',
+      oui: '${T("Supprimer")}',
+      danger: true
+    }).then(function(oui){
+      if (!oui) return;
+      appeler('stock:lieuSupprimer', [id]).then(function(r){
+        dire(r.ok ? '${T("Lieu «")} ' + (r.nom || '') + ' ${T("» supprimé.")}' : expliquer(r), r.ok ? 'bon' : 'err');
+        chargerOnglet();
       });
+    });
   }
 
   function entrepotEnregistrer(){
@@ -2118,30 +2112,27 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
     // ⚠ MEME REGLE QUE L ECRAN DU SITE : utilise = pas supprimable, on
     // reassigne d abord. Le pont refuse aussi — ceci n est que le recit.
     if (w.usage > 0) {
-      voile('<h3>${T("Suppression impossible")}</h3>'
-        + '<p>${T("L’emplacement")} <strong>' + esc(w.code) + '</strong> ${T("est utilisé par")} <strong>'
-        + w.usage + ' ' + szPl(w.usage, '${T("variante")}', '${T("variantes")}') + '</strong> ${T("de produit.")}</p>'
-        + '<p style="color:var(--tx2);font-size:.8rem">${T("Réassignez ces variantes à un autre")} '
-        + '${T("emplacement avant de supprimer celui-ci.")}</p>'
-        + '<div class="fin2"><button class="prim" id="v-ok">${T("Compris")}</button></div>',
-        function(fermer){ document.getElementById('v-ok').onclick = fermer; });
+      szConfirmer({
+        titre: '${T("Suppression impossible")}',
+        texte: '${T("L’emplacement")} ' + w.code + ' ${T("est utilisé par")} ' + w.usage + ' ' + szPl(w.usage, '${T("variante")}', '${T("variantes")}')
+          + ' ${T("de produit.")} ' + '${T("Réassignez ces variantes à un autre")} ' + '${T("emplacement avant de supprimer celui-ci.")}',
+        oui: '${T("Compris")}',
+        seul: true
+      });
       return;
     }
-    voile('<h3>${T("Supprimer l’emplacement")}</h3>'
-      + '<p>${T("Supprimer")} <strong>' + esc(w.code) + '</strong> ${T("? Aucune variante ne l’utilise.")}</p>'
-      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-      + '<button class="prim" id="v-oui">${T("Supprimer")}</button></div>',
-      function(fermer){
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){
-          this.disabled = true;
-          appeler('stock:entrepotSupprimer', [id]).then(function(r){
-            fermer();
-            dire(r.ok ? '${T("Emplacement «")} ' + (r.code || '') + ' ${T("» supprimé.")}' : expliquer(r), r.ok ? 'bon' : 'err');
-            chargerOnglet();
-          });
-        };
+    szConfirmer({
+      titre: '${T("Supprimer l’emplacement")}',
+      texte: '${T("Supprimer")} ' + w.code + ' ${T("? Aucune variante ne l’utilise.")}',
+      oui: '${T("Supprimer")}',
+      danger: true
+    }).then(function(oui){
+      if (!oui) return;
+      appeler('stock:entrepotSupprimer', [id]).then(function(r){
+        dire(r.ok ? '${T("Emplacement «")} ' + (r.code || '') + ' ${T("» supprimé.")}' : expliquer(r), r.ok ? 'bon' : 'err');
+        chargerOnglet();
       });
+    });
   }
 
   // ══ CHARGEMENT ════════════════════════════════════════════════════════════
@@ -2376,77 +2367,76 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
      de cause. (Quand il a touche d AUTRES variantes, le site a deja fusionne et
      rejoue tout seul — on n arrive jamais ici dans ce cas.) */
   function conflit(r){
-    var lignes = (r.conflits || []).map(function(c){
-      return '<div class="rangee"><span>' + esc(nommer(c.cle)) + '</span><strong>' + c.actuel + '</strong></div>';
-    }).join('');
-    voile('<h3><span class="ic">⚠</span> ${T("Inventaire non enregistré")}</h3>'
-      + '<p>${T("Un collègue vient de modifier")} ' + ((r.conflits || []).length > 1 ? '${T("ces variantes")}' : '${T("cette variante")}')
-      + '. <strong>${T("Rien n’a été écrit.")}</strong></p>'
-      + lignes
-      + '<p style="color:var(--tx2);font-size:.8rem">${T("La grille est rechargée avec les quantités à jour :")} '
-      + '${T("refaites votre saisie par-dessus.")}</p>'
-      + '<div class="fin2"><button class="prim" id="v-ok">${T("Recharger la grille")}</button></div>',
-      function(fermer){
-        document.getElementById('v-ok').onclick = function(){
-          fermer();
-          var pid = PROD.id;
-          rendreVerrou();
-          ouvrirProduit(pid);
-        };
-      });
+    /* (2026-11-27) Une vraie fenetre (szConfirmer, un seul bouton) : quelle que soit la sortie
+       (bouton, Echap, fermeture), la grille est rechargee — comme le seul bouton de l ancienne boite. */
+    szConfirmer({
+      titre: '${T("Inventaire non enregistré")}',
+      texte: '${T("Un collègue vient de modifier")} ' + ((r.conflits || []).length > 1 ? '${T("ces variantes")}' : '${T("cette variante")}')
+        + '. ${T("Rien n’a été écrit.")} ' + '${T("La grille est rechargée avec les quantités à jour :")} '
+        + '${T("refaites votre saisie par-dessus.")}',
+      details: (r.conflits || []).map(function(c){ return [nommer(c.cle), String(c.actuel)]; }),
+      oui: '${T("Recharger la grille")}',
+      seul: true
+    }).then(function(){
+      var pid = PROD.id;
+      rendreVerrou();
+      ouvrirProduit(pid);
+    });
   }
 
   function apresSucces(r){
-    var h = '<h3><span class="ic">✅</span> ${T("Inventaire enregistré")}</h3><p>' + esc(r.nom || '') + '</p>';
+    /* (2026-11-27) Une vraie fenetre de l application (szConfirmer) : le bilan, et la question
+       des etiquettes quand il y en a (sinon un seul bouton « Fermer »). */
+    var texte = [];
+    var note = '', liste = null;
     var c = r.courriels;
     if (c && c.manuel) {
       // ⚠ ON NE PRETEND PAS QUE C EST PARTI. Resend n est pas configure : aucun
       // courriel n a ete envoye, et les demandes restent en attente en base.
-      h += '<p class="" style="color:var(--tx-att)"><span class="ic">⚠</span> '
-        // (2026-10-25, audit) Phrases ENTIERES traduites : « client(s) attend(ent) » restait en français.
-        + (c.adresses.length > 1
+      // (2026-10-25, audit) Phrases ENTIERES traduites : « client(s) attend(ent) » restait en français.
+      note = (c.adresses.length > 1
             ? '${T("{0} clients attendent cette variante, et")}'.replace('{0}', c.adresses.length)
             : '${T("1 client attend cette variante, et")}') + ' '
-        + '<strong>${T("aucun courriel n’est parti")}</strong> ${T("— la clé d’envoi n’est pas configurée")} '
-        + '${T("(Configuration puis Infolettre). Les demandes restent en attente.")}</p>'
-        + '<textarea rows="2" readonly aria-label="${T("Adresses des demandes en attente")}">' + esc(c.adresses.join(', ')) + '</textarea>';
+        + '${T("aucun courriel n’est parti")} ${T("— la clé d’envoi n’est pas configurée")} '
+        + '${T("(Configuration puis Infolettre). Les demandes restent en attente.")}';
+      // La fenetre ne montre que 14 lignes : au-dela, on le DIT au lieu de couper en silence.
+      liste = c.adresses.length > 14
+        ? c.adresses.slice(0, 13).concat([('… ' + '${T("et {0} autres")}').split('{0}').join(c.adresses.length - 13)])
+        : c.adresses.slice();
     } else if (c) {
-      h += '<p style="color:var(--tx-ok)"><span class="ic">✉</span> ' + c.envoyes + ' '
+      texte.push(c.envoyes + ' '
         + (c.envoyes > 1
             ? '${T("courriels de retour en inventaire envoyés")}'
             : '${T("courriel de retour en inventaire envoyé")}')
-        + (c.echecs ? ', <span style="color:var(--tx-err)">' + c.echecs + ' '
-            + (c.echecs > 1 ? '${T("échecs")}' : '${T("échec")}') + '</span>' : '') + '.</p>';
+        + (c.echecs ? ', ' + c.echecs + ' ' + (c.echecs > 1 ? '${T("échecs")}' : '${T("échec")}') : '') + '.');
     }
     var etiq = r.etiquettes || [];
     var total = 0;
     etiq.forEach(function(it){ total += (parseInt(it.qty, 10) || 0); });
     if (etiq.length) {
-      h += '<p>${T("Imprimer les étiquettes code-barres selon les quantités saisies ?")} '
-        + '<strong>' + total + '</strong> ' + (total > 1 ? '${T("étiquettes")}' : '${T("étiquette")}')
+      texte.push('${T("Imprimer les étiquettes code-barres selon les quantités saisies ?")} '
+        + total + ' ' + (total > 1 ? '${T("étiquettes")}' : '${T("étiquette")}')
         + '${T(" pour ")}' + etiq.length + ' '
-        + (etiq.length > 1 ? '${T("variantes")}' : '${T("variante")}') + '.</p>';
+        + (etiq.length > 1 ? '${T("variantes")}' : '${T("variante")}') + '.');
     }
-    h += '<div class="fin2">'
-      + (etiq.length ? '<button id="v-plus-tard">${T("Plus tard")}</button>'
-                       + '<button class="prim" id="v-imprimer"><span class="ic">🖨</span> ${T("Imprimer maintenant")}</button>'
-                     : '<button class="prim" id="v-ok">${T("Fermer")}</button>')
-      + '</div>';
-    voile(h, function(fermer){
-      var ok = document.getElementById('v-ok');
-      if (ok) ok.onclick = function(){ fermer(); retourListe(); };
-      var pt = document.getElementById('v-plus-tard');
-      if (pt) pt.onclick = function(){ fermer(); retourListe(); };
-      var im = document.getElementById('v-imprimer');
-      if (im) im.onclick = function(){
-        im.disabled = true; im.textContent = '${T("Impression…")}';
-        appeler('stock:etiquettes', [etiq]).then(function(z){
-          fermer();
-          dire(z.ok ? (z.envoyees + ' ' + szPl(z.envoyees, '${T("étiquette envoyée à «")}', '${T("étiquettes envoyées à «")}') + ' ' + z.imprimante + ' ».')
-                    : expliquer(z), z.ok ? 'bon' : 'err');
-          retourListe();
-        });
-      };
+    szConfirmer({
+      titre: '${T("Inventaire enregistré")}',
+      texte: texte.join(' '),
+      details: r.nom ? [['${T("Produit")}', r.nom]] : null,
+      listeTitre: liste ? '${T("Adresses des demandes en attente")}' : '',
+      liste: liste,
+      note: note,
+      oui: etiq.length ? '${T("Imprimer maintenant")}' : '${T("Fermer")}',
+      non: etiq.length ? '${T("Plus tard")}' : '',
+      seul: !etiq.length
+    }).then(function(oui){
+      if (!oui || !etiq.length) { retourListe(); return; }
+      dire('${T("Impression…")}');
+      appeler('stock:etiquettes', [etiq]).then(function(z){
+        dire(z.ok ? (z.envoyees + ' ' + szPl(z.envoyees, '${T("étiquette envoyée à «")}', '${T("étiquettes envoyées à «")}') + ' ' + z.imprimante + ' ».')
+                  : expliquer(z), z.ok ? 'bon' : 'err');
+        retourListe();
+      });
     });
   }
 
@@ -2493,18 +2483,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('inventaire')}
       if (v.sku && q > 0) { items.push({ sku: v.sku, name: PROD.nom, size: v.taille, color: v.couleur, qty: q }); total += q; }
     });
     if (!items.length) { dire('${T("Aucune variante en stock à imprimer.")}', 'att'); return; }
-    voile('<h3><span class="ic">🏷</span> ${T("Imprimer les étiquettes")}</h3>'
-      + '<p>${T("Imprimer")} <strong>' + total + '</strong> ' + (total > 1 ? '${T("étiquettes")}' : '${T("étiquette")}')
-      + '${T(" pour ")}' + items.length + ' '
-      + (items.length > 1 ? '${T("variantes")}' : '${T("variante")}') + ' ${T("en stock ?")}</p>'
-      + '<p style="color:var(--tx2);font-size:.8rem">${T("Quantités telles qu’elles sont saisies à l’écran,")} '
-      + '${T("même si l’inventaire n’est pas encore enregistré.")}</p>'
-      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-      + '<button class="prim" id="v-oui">${T("Imprimer")}</button></div>',
-      function(fermer){
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){ fermer(); imprimer(items); };
-      });
+    szConfirmer({
+      titre: '${T("Imprimer les étiquettes")}',
+      texte: '${T("Imprimer")} ' + total + ' ' + (total > 1 ? '${T("étiquettes")}' : '${T("étiquette")}')
+        + '${T(" pour ")}' + items.length + ' '
+        + (items.length > 1 ? '${T("variantes")}' : '${T("variante")}') + ' ${T("en stock ?")} '
+        + '${T("Quantités telles qu’elles sont saisies à l’écran,")} '
+        + '${T("même si l’inventaire n’est pas encore enregistré.")}',
+      oui: '${T("Imprimer")}'
+    }).then(function(oui){ if (oui) imprimer(items); });
   }
 
   function imprimer(items){

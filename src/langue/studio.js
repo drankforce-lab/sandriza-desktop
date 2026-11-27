@@ -926,4 +926,7 @@ module.exports = {
   'fiche(s)': 'product(s)',
   'déjà au gabarit ou sur fond chargé': 'already at template or on a busy background',
   'illisible(s)': 'unreadable',
+  // Les boîtes devenues de vraies fenêtres (szConfirmer, 2026-11-27)
+  'Retirer le profil': 'Remove the profile',
+  'Recommencer le projet': 'Start the project over',
 };

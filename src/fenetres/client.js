@@ -535,23 +535,23 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     };
     var cb = document.getElementById('btn-corbeille');
     if (cb) cb.onclick = function(){
-      voile('<h3><span class="ic">🗑</span> ${T("Supprimer le client ?")}</h3>'
-        + '<p><strong>' + esc(R.client.prenom + ' ' + R.client.nom) + '</strong> (' + esc(R.client.courriel) + ')</p>'
-        + '<p class="aide"><span class="ic">🛡</span> ${T("Le compte part dans la corbeille et reste restaurable à tout moment.")} '
-        + (R.stats.commandes ? '${T("L’historique de")} ' + R.stats.commandes + ' ' + szPl(R.stats.commandes, '${T("commande est conservé intégralement.")}', '${T("commandes est conservé intégralement.")}') : '') + '</p>'
-        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-        + '<button class="danger" id="v-oui">${T("Supprimer")}</button></div>',
-        function(fermer){
-          document.getElementById('v-non').onclick = fermer;
-          document.getElementById('v-oui').onclick = function(){
-            fermer();
-            appeler('client:corbeille', [ID]).then(function(r){
-              if (!r.ok) { dire(expliquer(r), 'err'); return; }
-              dire('${T("Client mis à la corbeille.")}', 'bon');
-              recharger();
-            });
-          };
+      /* (2026-11-27) Une vraie fenetre de l application (szConfirmer), plus une boite dessinee sur la fiche. */
+      var dc = [['${T("Client")}', R.client.prenom + ' ' + R.client.nom], ['${T("Courriel")}', R.client.courriel]];
+      if (R.stats.commandes) dc.push(['${T("Commandes")}', R.stats.commandes + ' ' + szPl(R.stats.commandes, '${T("commande conservée intégralement")}', '${T("commandes conservées intégralement")}')]);
+      szConfirmer({
+        titre: '${T("Supprimer le client")}',
+        texte: '${T("Le compte part dans la corbeille et reste restaurable à tout moment.")}',
+        details: dc,
+        oui: '${T("Supprimer")}',
+        danger: true
+      }).then(function(oui){
+        if (!oui) return;
+        appeler('client:corbeille', [ID]).then(function(r){
+          if (!r.ok) { dire(expliquer(r), 'err'); return; }
+          dire('${T("Client mis à la corbeille.")}', 'bon');
+          recharger();
         });
+      });
     };
     var rs = document.getElementById('btn-restaurer');
     if (rs) rs.onclick = function(){
@@ -563,23 +563,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}${JS_TUILES('client')}
     };
     var pg = document.getElementById('btn-purger');
     if (pg) pg.onclick = function(){
-      voile('<h3><span class="ic">⚠</span> ${T("Supprimer définitivement ?")}</h3>'
-        + '<p>${T("Effacer")} <strong>' + esc(R.client.prenom + ' ' + R.client.nom) + '</strong> (' + esc(R.client.courriel) + '${T(") de la base ?")}</p>'
-        + '<p style="color:var(--tx-f6a5a5)">${T("Cette action est IRRÉVERSIBLE : le dossier disparaît du nuage, il ne sera plus restaurable.")}</p>'
-        + '<p class="aide"><span class="ic">✅</span> ${T("Ce compte n’a aucune commande — rien de comptable n’est perdu.")}</p>'
-        + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-        + '<button class="danger" id="v-oui"><span class="ic">🗑</span> ${T("Supprimer définitivement")}</button></div>',
-        function(fermer){
-          document.getElementById('v-non').onclick = fermer;
-          document.getElementById('v-oui').onclick = function(){
-            fermer();
-            appeler('client:purger', [ID]).then(function(r){
-              if (!r.ok) { dire(expliquer(r), 'err'); return; }
-              dire('${T("Compte supprimé définitivement.")}', 'bon');
-              vide('${T("Compte supprimé")}', '${T("Le dossier a été effacé de la base.")}');
-            });
-          };
+      szConfirmer({
+        titre: '${T("Supprimer le client définitivement")}',
+        texte: '${T("Ce compte n’a aucune commande — rien de comptable n’est perdu.")}',
+        details: [['${T("Client")}', R.client.prenom + ' ' + R.client.nom], ['${T("Courriel")}', R.client.courriel]],
+        note: '${T("Cette action est IRRÉVERSIBLE : le dossier disparaît du nuage, il ne sera plus restaurable.")}',
+        oui: '${T("Supprimer définitivement")}',
+        danger: true
+      }).then(function(oui){
+        if (!oui) return;
+        appeler('client:purger', [ID]).then(function(r){
+          if (!r.ok) { dire(expliquer(r), 'err'); return; }
+          dire('${T("Compte supprimé définitivement.")}', 'bon');
+          vide('${T("Compte supprimé")}', '${T("Le dossier a été effacé de la base.")}');
         });
+      });
     };
   }
   function brancherEdition(){

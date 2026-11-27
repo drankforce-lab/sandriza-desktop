@@ -260,4 +260,10 @@ module.exports = {
   'Client': 'Customer',
   'Actif': 'Active',
   'Inactif': 'Inactive',
+  /* (2026-11-27) Les deux suppressions passent par une vraie fenetre (szConfirmer). */
+  'Supprimer le client': 'Delete customer',
+  'Supprimer le client définitivement': 'Delete customer permanently',
+  'Courriel': 'Email',
+  'commande conservée intégralement': 'order kept in full',
+  'commandes conservées intégralement': 'orders kept in full',
 };

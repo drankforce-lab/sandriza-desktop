@@ -428,38 +428,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       apresNip();
       return;
     }
-    voile('<h3><span class="ic">🔐</span> ${T("Code d’exemption")}</h3>'
-      + '<p>${T("Renoncer aux frais de service Square exige le code confidentiel.")}</p>'
-      + '<input type="password" id="v-nip" aria-label="${T("NIP de validation")}" autocomplete="off" '
-      + 'style="letter-spacing:.14em;text-align:center;font-family:ui-monospace,monospace">'
-      + '<div id="v-nip-err" style="display:none;font-size:.78rem;color:var(--tx-err);margin-top:.35rem">${T("Code incorrect — réessayez.")}</div>'
-      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-      + '<button class="prim" id="v-oui">${T("Confirmer")}</button></div>',
-      function(fermer){
-        var champ = document.getElementById('v-nip');
-        champ.focus();
-        champ.onkeydown = function(ev){ if (ev.key === 'Enter') document.getElementById('v-oui').click(); };
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){
-          // ⚠ C EST LE SITE QUI COMPARE (remboursement:nip) : le code configure
-          // ne voyage jamais vers cette fenetre, seul le verdict revient. Et le
-          // coeur REVERIFIERA a l ecriture — deux controles valent mieux qu un
-          // sur un geste d argent.
-          var essai = champ.value || '';
-          appeler('remboursement:nip', [essai]).then(function(r){
-            if (!r.ok) { dire(expliquer(r), 'err'); return; }
-            if (!r.valide) {
-              document.getElementById('v-nip-err').style.display = '';
-              champ.value = ''; champ.focus();
-              return;
-            }
-            NIP_SAISI = essai;
-            NIP_OK = true;
-            fermer();
-            apresNip();
-          });
-        };
+    essayerNip('');
+  }
+  /* (2026-11-27) LA SAISIE EST UNE VRAIE FENETRE (szDemanderNip). Le code se definit dans
+     Configuration (payments.js du site) : des CHIFFRES, de 4 a 12 — le serveur refuse autre chose.
+     Un code faux rouvre la saisie avec le message d erreur. */
+  function essayerNip(erreur){
+    szDemanderNip({ titre: '${T("Code d’exemption")}',
+      texte: '${T("Renoncer aux frais de service Square exige le code confidentiel.")}',
+      oui: '${T("Accorder l’exemption")}', erreur: erreur, min: 4, max: 12 }).then(function(essai){
+      if (essai == null) return;
+      // ⚠ C EST LE SITE QUI COMPARE (remboursement:nip) : le code configure
+      // ne voyage jamais vers cette fenetre, seul le verdict revient. Et le
+      // coeur REVERIFIERA a l ecriture — deux controles valent mieux qu un
+      // sur un geste d argent.
+      appeler('remboursement:nip', [essai]).then(function(r){
+        if (!r.ok) { dire(expliquer(r), 'err'); return; }
+        if (!r.valide) { essayerNip('${T("Code incorrect — réessayez.")}'); return; }
+        NIP_SAISI = essai;
+        NIP_OK = true;
+        apresNip();
       });
+    });
   }
   function apresNip(){
     var ok = document.getElementById('z-nip-ok');

@@ -7608,7 +7608,9 @@ const JEU = {
          surcouche cessait de s’ouvrir, le rendu resterait maigre — et VERT. C’est
          exactement « un écran non regardé qui se lit comme un écran propre ».
          L’exigence ci-dessous est ce qui l’empêche. */
-      exige: ['↩ Revenir à l’état précédent'],
+      /* (2026-11-27) La boite est devenue une vraie fenetre (szConfirmer) : son titre ne porte plus la fleche.
+         Hors du pont (ce banc), le socle la dessine dans la page — c est ce repli qui est lu ici. */
+      exige: ['Revenir à l’état précédent'],
       id: 'annuler',
       reponses: {
         'studio:explorer': {

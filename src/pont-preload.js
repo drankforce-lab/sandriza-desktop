@@ -194,6 +194,13 @@ contextBridge.exposeInMainWorld('szPont', {
      simple qui n'a rien à attendre ne doit pas ouvrir de promesse — c'est une
      promesse de plus qui peut rester en l'air. */
   deconnexionReponse: (oui) => ipcRenderer.send('deconnexion:reponse', !!oui),
+  /* ══ LES BOÎTES DE DIALOGUE EN VRAIES FENÊTRES (2026-11-27, sa demande) — fenetres/dialogue.js ══
+     `dialogue(o)` ouvre la boîte (modale, fille de la fenêtre qui demande) et rend sa réponse :
+     'oui' | 'non' | { valeur } | l'id d'un bouton | null. ⚠ UNDEFINED veut dire « pas de boîte native
+     possible » (pont refusé) : le socle retombe alors sur sa boîte dessinée dans la page. */
+  dialogue: (o) => ipcRenderer.invoke('dialogue:demander', o || {}).catch(() => undefined),
+  dialogueReponse: (r) => ipcRenderer.send('dialogue:reponse', r == null ? null : r),
+  dialogueTaille: (h) => ipcRenderer.send('dialogue:taille', parseInt(h, 10) || 0),
   /* Le code à 6 chiffres avant une exportation (fenetres/code-export.js) : le code tapé, ou
      null pour « annuler ». C'est le principal qui le fait vérifier par le serveur. */
   codeExportReponse: (code) => ipcRenderer.send('codeexport:reponse', code == null ? null : String(code)),

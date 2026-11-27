@@ -1357,14 +1357,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
      rendu est un apercu gratuit ou deja enregistre. */
   function confirmerPerte(suite){
     if (!(RESULT && !RESULT.essai && !ENREG)) { suite(); return; }
-    voile('<h3>${T("Rendu non enregistré")}</h3>'
-      + '<p>${T("Le rendu affiché n’est pas enregistré dans la photothèque. Passer à une autre photo le fera disparaître.")}</p>'
-      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-      + '<button class="prim" id="v-oui">${T("Changer de photo")}</button></div>',
-      function(fermer){
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){ fermer(); suite(); };
-      });
+    /* (2026-11-27) Une vraie fenetre de l application (szConfirmer), modale et fille de celle-ci. */
+    szConfirmer({
+      titre: '${T("Rendu non enregistré")}',
+      texte: '${T("Le rendu affiché n’est pas enregistré dans la photothèque. Passer à une autre photo le fera disparaître.")}',
+      oui: '${T("Changer de photo")}',
+      danger: true
+    }).then(function(oui){ if (oui) suite(); });
   }
 
   /* ⚠ LES RAFRAICHISSEMENTS DE FOND NE REDESSINENT PAS PENDANT UN TRAVAIL. Un
@@ -2789,27 +2788,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
   function retirerRecette(){
     var x = recetteChoisie();
     if (!x || RO) return;
-    voile('<h3>${T("Retirer le profil ?")}</h3>'
-      + '<p>« <strong>' + esc(x.nom) + '</strong> ${T("» sera effacé. Les réglages restent à l’écran :")} '
-      + '${T("c’est le raccourci qui disparaît, pas la mise en scène.")}</p>'
-      + '<div class="fin2"><button id="rs-non">${T("Annuler")}</button>'
-      + '<button class="conf" id="rs-oui">${T("Retirer")}</button></div>',
-      function(fermer){
-        var non = document.getElementById('rs-non');
-        var oui = document.getElementById('rs-oui');
-        if (non) non.onclick = fermer;
-        if (oui) oui.onclick = function(){
-          oui.disabled = true;
-          appeler('studio:recetteRetirer', [{ id: x.id }]).then(function(res){
-            if (fermer) fermer();
-            if (!res || !res.ok) { dire(expliquer(res), 'err'); return; }
-            RECETTES = res.recettes || [];
-            RC_SEL = '';
-            dessiner();
-            dire('${T("Profil retiré.")}', 'att');
-          });
-        };
+    szConfirmer({
+      titre: '${T("Retirer le profil")}',
+      texte: '« ' + x.nom + ' ${T("» sera effacé. Les réglages restent à l’écran :")} '
+        + '${T("c’est le raccourci qui disparaît, pas la mise en scène.")}',
+      oui: '${T("Retirer")}',
+      danger: true
+    }).then(function(oui){
+      if (!oui) return;
+      appeler('studio:recetteRetirer', [{ id: x.id }]).then(function(res){
+        if (!res || !res.ok) { dire(expliquer(res), 'err'); return; }
+        RECETTES = res.recettes || [];
+        RC_SEL = '';
+        dessiner();
+        dire('${T("Profil retiré.")}', 'att');
       });
+    });
   }
 
   /* La liste au chargement. ⚠ Une lecture qui echoue ne bloque RIEN : la barre
@@ -3587,15 +3581,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
       PROJET_BASE = null; chargerCredits();
       dire('${T("Nouveau projet : tout est remis à zéro.")}', 'att');
     };
-    voile('<h3>${T("Recommencer ?")}</h3>'
-      + '<p>${T("La photo, les réglages et le rendu affiché seront effacés.")}'
-      + ((RESULT && !RESULT.essai && !ENREG) ? ' <strong>${T("Le rendu payé n’est pas enregistré dans la photothèque.")}</strong>' : '')
-      + '</p><div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-      + '<button class="prim" id="v-oui">${T("Recommencer")}</button></div>',
-      function(fermer){
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){ fermer(); faire(); };
-      });
+    szConfirmer({
+      titre: '${T("Recommencer le projet")}',
+      texte: '${T("La photo, les réglages et le rendu affiché seront effacés.")}',
+      note: (RESULT && !RESULT.essai && !ENREG) ? '${T("Le rendu payé n’est pas enregistré dans la photothèque.")}' : '',
+      oui: '${T("Recommencer")}',
+      danger: true
+    }).then(function(oui){ if (oui) faire(); });
   }
 
   /* ══ LANCER UN LOT (#27) ══════════════════════════════════════════════════
@@ -4093,18 +4085,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         if (FIL_POSE && logoChoisi()) appliquerFiligrane();
       } else if (r && r.motif === 'prix_change' && r.prixReel != null) {
         // LE PRIX A CHANGÉ depuis l affichage : RIEN n est parti. On dit le vrai montant ; la personne décide.
-        var h = '<h3><span class="ic">⚠</span> ${T("Le prix a changé")}</h3>'
-          + '<p>${T("Affiché : {0} — prix réel : {1} ({2} appel(s)). Rien n’a été lancé ni facturé.")}'
-              .split('{0}').join(szArgentSymbole(argent(r.prixAnnonce)))
-              .split('{1}').join('<strong>' + szArgentSymbole(argent(r.prixReel)) + '</strong>')
-              .split('{2}').join(String(r.appels || 1)) + '</p>'
-          + '<div class="fin2"><button id="pc-non">${T("Annuler")}</button>'
-          + '<button class="conf" id="pc-oui">${T("Lancer —")} ' + szArgentSymbole(argent(r.prixReel)) + '</button></div>';
         dire('${T("Le prix a changé : à confirmer.")}', 'att');
-        voile(h, function(fermer){
-          var non = document.getElementById('pc-non'), oui = document.getElementById('pc-oui');
-          if (non) non.onclick = function(){ fermer(); dire('${T("Annulé : rien n’a été facturé.")}', 'att'); };
-          if (oui) oui.onclick = function(){ fermer(); PRIX_ANNONCE = r.prixReel; lancer(); };
+        szConfirmer({
+          titre: '${T("Le prix a changé")}',
+          texte: '${T("Affiché : {0} — prix réel : {1} ({2} appel(s)). Rien n’a été lancé ni facturé.")}'
+              .split('{0}').join(szArgentSymbole(argent(r.prixAnnonce)))
+              .split('{1}').join(szArgentSymbole(argent(r.prixReel)))
+              .split('{2}').join(String(r.appels || 1)),
+          oui: '${T("Lancer — {0}")}'.split('{0}').join(szArgentSymbole(argent(r.prixReel))),
+          prudent: true
+        }).then(function(oui){
+          if (!oui) { dire('${T("Annulé : rien n’a été facturé.")}', 'att'); return; }
+          PRIX_ANNONCE = r.prixReel; lancer();
         });
       } else {
         dire(expliquer(r), 'err');
@@ -4177,52 +4169,47 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
         if (n <= 1) { dire('${T("1 appel facturé ≈ {0} — vérifié avant l’envoi.")}'.split('{0}').join(szArgentSymbole(argent(r.coutMax)))); suite(); return; }
         var causes = causesAppels();
         var bu = r.budget || {};
-        var h = '<h3>'
-      /* ⚠ LE <em> COUPAIT LA PHRASE EN TROIS, et c est la FORME SOURCE contre la
-         FORME RENDUE : le poseur cherche << appels pour >>, << une seule >> et
-         << photo >> separement, la page rendue lit << appels pour une seule
-         photo >> d un seul tenant. On enveloppe les DEUX morceaux de part et
-         d autre, en gardant l emphase. */
-      + n + ' ${T("appels pour")} <em>${T("une seule")}</em> ${T("photo")}</h3>';
-        {
-          h += '<p><strong>' + n + ' ${T("appels facturés ≈")} ' + szArgentSymbole(argent(r.coutMax))
-            + ' ${T("pour cette")} '
-            + '${T("photo. Un mannequin virtuel n’en coûterait qu’un seul.")}</p>';
-          if (bu.actif) {
-            /* Même phrase à trous que plus haut : le symbole change de côté. */
-            h += '<p>${T("Plafond du mois :")} '
-              + '${T("{0} dépensés sur {1} — il reste {2}.")}'
-                  .split('{0}').join(szArgentSymbole(argent(bu.depense)))
-                  .split('{1}').join(szArgentSymbole(argent(bu.mensuel)))
-                  .split('{2}').join(szArgentSymbole(argent(bu.restant)))
-              + '</p>';
-          }
+        /* (2026-11-27) Une vraie fenetre de l application (szConfirmer), plus une surimpression.
+           ⚠ LE <em> COUPAIT LA PHRASE EN TROIS, et c est la FORME SOURCE contre la
+           FORME RENDUE : le poseur cherche << appels pour >>, << une seule >> et
+           << photo >> separement. Les trois morceaux restent separes ici aussi. */
+        var titre = n + ' ${T("appels pour")} ' + '${T("une seule")}' + ' ${T("photo")}';
+        var texte = n + ' ${T("appels facturés ≈")} ' + szArgentSymbole(argent(r.coutMax))
+          + ' ${T("pour cette")} '
+          + '${T("photo. Un mannequin virtuel n’en coûterait qu’un seul.")}';
+        if (bu.actif) {
+          /* Même phrase à trous que plus haut : le symbole change de côté. */
+          texte += ' ${T("Plafond du mois :")} '
+            + '${T("{0} dépensés sur {1} — il reste {2}.")}'
+                .split('{0}').join(szArgentSymbole(argent(bu.depense)))
+                .split('{1}').join(szArgentSymbole(argent(bu.mensuel)))
+                .split('{2}').join(szArgentSymbole(argent(bu.restant)));
         }
         /* ⚠ ON DIT COMMENT REDESCENDRE A UN APPEL, pas seulement combien ça
            coûte : un avertissement sans porte de sortie ne fait que retarder le
            même clic. Mais on ne le dit QUE si l on sait pourquoi — conseiller de
            decocher un agrandissement qui est deja decoche envoie chercher un
            reglage qui n existe pas, et l ecran perd sa credibilite pour la fois
-           suivante, celle ou le montant compte vraiment. */
+           suivante, celle ou le montant compte vraiment.
+           (Les causes portent un <strong> pour l ecran : la fenetre ecrit du texte brut, on l ote.) */
+        var note = '';
         if (causes.length) {
-          h += '<p>${T("Pourquoi :")} ' + causes.join(' ; ') + '.</p>';
+          texte += ' ${T("Pourquoi :")} ' + causes.map(function(x){ return String(x).replace(/<[^>]+>/g, ''); }).join(' ; ') + '.';
           var sortie = [];
           if (AV.upActive) sortie.push('${T("décochez l’agrandissement")}');
           if (VOIE === 'fantome') sortie.push('${T("passez au « Mannequin virtuel »")}');
           if (sortie.length) {
-            h += '<p class="rcav">${T("Pour n’en payer qu’un :")} ' + (sortie.length > 1 ? '${T("{0}, ou {1}")}'.split('{0}').join(sortie[0]).split('{1}').join(sortie[1]) : sortie[0]) + '.</p>';
+            note = '${T("Pour n’en payer qu’un :")} ' + (sortie.length > 1 ? '${T("{0}, ou {1}")}'.split('{0}').join(sortie[0]).split('{1}').join(sortie[1]) : sortie[0]) + '.';
           }
         }
-        h += '<div class="fin2"><button id="cd-non">${T("Annuler")}</button>'
-          + '<button class="conf" id="cd-oui">'
-          + '${T("Lancer —")} ' + szArgentSymbole(argent(r.coutMax)) + '</button></div>';
         dire('');
-        voile(h, function(fermer){
-          var non = document.getElementById('cd-non');
-          var oui = document.getElementById('cd-oui');
-          if (non) non.onclick = fermer;
-          if (oui) oui.onclick = function(){ fermer(); suite(); };
-        });
+        szConfirmer({
+          titre: titre,
+          texte: texte,
+          note: note,
+          oui: '${T("Lancer — {0}")}'.split('{0}').join(szArgentSymbole(argent(r.coutMax))),
+          prudent: true
+        }).then(function(oui){ if (oui) suite(); });
       });
   }
 

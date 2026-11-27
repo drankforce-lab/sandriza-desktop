@@ -269,4 +269,12 @@ module.exports = {
   // (2026-10-25, audit)
   'cotation seulement': 'quote only',
   'Rester': 'Stay',
+  /* (2026-11-27) La commande et la creation de l etiquette passent par une vraie fenetre (szConfirmer). */
+  'Commander l’étiquette': 'Order the label',
+  'Une étiquette est facturée dès sa création ; elle ne s’annule que tant que le colis n’est pas parti (« Annuler l’étiquette »).':
+    'A label is charged as soon as it is created; it can only be cancelled while the parcel has not left (“Cancel label”).',
+  'Poids': 'Weight',
+  'Prix coté': 'Quoted price',
+  'Suivi': 'Tracking',
+  'L’étiquette est prête à imprimer.': 'The label is ready to print.',
 };

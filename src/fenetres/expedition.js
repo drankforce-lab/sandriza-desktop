@@ -569,24 +569,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}
        que l ancienne version allait chercher dans un formulaire absent. Les
        relire ici, en toutes lettres, est la derniere occasion de voir qu on
        s apprete a etiqueter quatre kilos pour cinq cents grammes. */
-    voile('<h3><span class="ic">💳</span> ${T("Commander l’étiquette ?")}</h3>'
-      + '<p>${T("Une étiquette est ")}<strong>${T("facturée dès sa création")}</strong>${T(" ; elle ne s’annule que tant que le colis n’est pas parti (« Annuler l’étiquette »).")}</p>'
-      + '<p>${T("Transporteur : ")}<strong>' + esc(t ? t.nom : TRANSPORTEUR) + '</strong><br>'
-      + '${T("Service : ")}<strong>' + esc(libelle || service || '—') + '</strong><br>'
-      + '${T("Poids : ")}<strong>' + esc(szNombre(poids, 3)) + ' kg</strong><br>'
-      + '${T("Prix coté : ")}<strong>' + esc(szArgent(px.reel)) + '</strong></p>'
-      + (CMD.commande.aUneEtiquette
-          ? '<p style="color:var(--tx-att)"><span class="ic">⚠</span> ${T("Une étiquette existe déjà pour cette commande. ")}'
-            + '${T("En commander une seconde sera facturé une seconde fois.")}</p>' : '')
-      + '<div class="fin2"><button id="v-non">${T("Annuler")}</button>'
-      + '<button class="prim" id="v-oui">${T("Commander")}</button></div>',
-      function(fermer){
-        document.getElementById('v-non').onclick = fermer;
-        document.getElementById('v-oui').onclick = function(){
-          fermer();
-          lancerEtiquette(service, poids, px.reel, forcer);
-        };
-      });
+    /* (2026-11-27) Une vraie fenetre de l application (szConfirmer), plus une boite dessinee sur la fiche. */
+    szConfirmer({
+      titre: '${T("Commander l’étiquette")}',
+      texte: '${T("Une étiquette est facturée dès sa création ; elle ne s’annule que tant que le colis n’est pas parti (« Annuler l’étiquette »).")}',
+      details: [['${T("Transporteur")}', t ? t.nom : TRANSPORTEUR], ['${T("Service")}', libelle || service || '—'],
+        ['${T("Poids")}', szNombre(poids, 3) + ' kg'], ['${T("Prix coté")}', szArgent(px.reel)]],
+      note: CMD.commande.aUneEtiquette
+        ? '${T("Une étiquette existe déjà pour cette commande. ")}' + '${T("En commander une seconde sera facturé une seconde fois.")}' : '',
+      oui: '${T("Commander")}',
+      prudent: true
+    }).then(function(oui){
+      if (!oui) return;
+      lancerEtiquette(service, poids, px.reel, forcer);
+    });
   }
 
   function lancerEtiquette(service, poids, prix, forcer){
@@ -613,15 +609,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       // ⚠ ON RELIT LA COMMANDE plutot que de rafistoler l etat en memoire : le
       // suivi, l historique et le drapeau d etiquette viennent du site.
       recharger().then(function(){
-        voile('<h3><span class="ic">✅</span> ${T("Étiquette créée")}</h3>'
-          + '<p>${T("Suivi : ")}<strong>' + esc(r.suivi || '—') + '</strong></p>'
-          + ''
-          + '<div class="fin2"><button id="v-non">${T("Plus tard")}</button>'
-          + '<button class="prim" id="v-oui"><span class="ic">🖨</span> ${T("Imprimer maintenant")}</button></div>',
-          function(fermer){
-            document.getElementById('v-non').onclick = fermer;
-            document.getElementById('v-oui').onclick = function(){ fermer(); imprimer(); };
-          });
+        szConfirmer({
+          titre: '${T("Étiquette créée")}',
+          texte: '${T("L’étiquette est prête à imprimer.")}',
+          details: [['${T("Suivi")}', r.suivi || '—']],
+          oui: '${T("Imprimer maintenant")}',
+          non: '${T("Plus tard")}'
+        }).then(function(oui){ if (oui) imprimer(); });
       });
     });
   }

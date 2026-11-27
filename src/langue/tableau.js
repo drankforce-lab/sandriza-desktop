@@ -382,4 +382,11 @@ module.exports = {
   'messages vocaux non écoutés': 'unheard voicemails',
   'À faire aujourd’hui': 'To do today',
   'Rien d’urgent : tout est à jour.': 'Nothing urgent: everything is up to date.',
+  'Supprimer la commande': 'Delete the order',
+  'Éléments qui seront supprimés :': 'Items that will be deleted:',
+  'Cette action est irréversible.': 'This action cannot be undone.',
+  'Supprimer définitivement': 'Delete permanently',
+  'Suppression non confirmée par le serveur — réessayez.': 'Deletion not confirmed by the server — try again.',
+  'Commande supprimée — inventaire rétabli.': 'Order deleted — inventory restored.',
+  'Date': 'Date',
 };
