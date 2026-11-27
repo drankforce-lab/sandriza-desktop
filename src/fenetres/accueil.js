@@ -132,6 +132,63 @@ button.prim:disabled{opacity:.5;cursor:default}
 .diapos-choix button{font:inherit;font-size:.78rem;font-weight:600;padding:.32rem .75rem;border-radius:99px;
   border:1px solid var(--v12);background:var(--v05);color:var(--tx2);cursor:pointer}
 .diapos-choix button.on{background:var(--or);border-color:var(--or);color:#17202c}
+
+/* ── LES BANNIÈRES DES SAISONS (2026-11-27) ── deux colonnes qui tiennent dans la fenêtre : à gauche la saison et
+   ses textes, à droite l aperçu qui joue et les plans. Aucune glissière. */
+.ss{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,7fr);gap:1rem;align-items:start}
+.ss-col{display:flex;flex-direction:column;gap:.55rem;min-width:0}
+.ss-liste{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.45rem}
+.ss-s{display:flex;gap:.5rem;align-items:center;text-align:left;font:inherit;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:9px;padding:.35rem .45rem;cursor:pointer;min-width:0}
+.ss-s.on{border-color:var(--or);box-shadow:0 0 0 1px var(--or)}
+.ss-s img{width:3.4rem;height:2.1rem;object-fit:cover;border-radius:5px;flex:0 0 auto}
+.ss-s .t{display:flex;flex-direction:column;min-width:0;line-height:1.25}
+.ss-s b{font-size:.82rem}
+.ss-s small{font-size:.68rem;color:var(--tx2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ss-s .pas{font-size:.62rem;font-weight:700;color:var(--tx-ok,#3aa76d)}
+.ss-s .pas.pro{color:var(--or)}
+.ss-lg{display:flex;gap:.35rem;align-items:center}
+.ss-lg button{font:inherit;font-size:.74rem;font-weight:700;padding:.25rem .7rem;border-radius:99px;border:1px solid var(--v12);background:transparent;color:var(--tx2);cursor:pointer}
+.ss-lg button.on{background:var(--or);border-color:var(--or);color:#17202c}
+.ss-gr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:.35rem .6rem}
+.ss-gr .lg{grid-column:1/-1}
+.ss-ch{display:flex;flex-direction:column;gap:.15rem;min-width:0}
+.ss-ch label{font-size:.7rem;color:var(--tx2);font-weight:600}
+.ss-ch input,.ss-ch select{font:inherit;font-size:.82rem;color:var(--tx);background:var(--f-champ);border:1px solid var(--v12);border-radius:7px;padding:.3rem .5rem;width:100%;min-width:0}
+.ss-ap{position:relative;aspect-ratio:16/6.4;border-radius:9px;overflow:hidden;background:#000;container-type:inline-size}
+.ss-ap video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0;transition:opacity 1s ease}
+.ss-ap video.on{opacity:1}
+.ss-ap .vo{position:absolute;inset:0;z-index:3}
+.ss-ap.g .vo{background:linear-gradient(90deg,rgba(0,0,0,.6),rgba(0,0,0,.25) 40%,rgba(0,0,0,0) 64%)}
+.ss-ap.d .vo{background:linear-gradient(270deg,rgba(0,0,0,.6),rgba(0,0,0,.25) 40%,rgba(0,0,0,0) 64%)}
+.ss-ap .tx{position:absolute;inset:0;z-index:4;display:flex;align-items:center;padding:0 6cqw;color:#fff}
+.ss-ap.d .tx{justify-content:flex-end}
+.ss-ap .bl{max-width:46cqw;display:flex;flex-direction:column;align-items:flex-start}
+.ss-ap .su{font-size:1.25cqw;font-weight:600;letter-spacing:.42em;text-transform:uppercase;color:#E9CDA8;margin:0}
+.ss-ap .ti{font-family:Georgia,"Playfair Display",serif;font-weight:400;font-size:5cqw;line-height:1.03;margin:1.2cqw 0 0}
+.ss-ap .ti em{color:#E9CDA8}
+.ss-ap .so{font-family:Georgia,serif;font-style:italic;font-size:1.6cqw;margin:1.2cqw 0 0}
+.ss-ap .li{display:flex;gap:1cqw;margin-top:2cqw}
+.ss-ap .li span{font-size:.95cqw;font-weight:600;letter-spacing:.16em;text-transform:uppercase;padding:1.2cqw 2.2cqw;border:1px solid #fff}
+.ss-ap .li span:first-child{background:#fff;color:#111}
+.ss-ap .nu{position:absolute;z-index:5;right:.5rem;bottom:.4rem;font-size:.68rem;background:rgba(0,0,0,.5);color:#fff;padding:.05rem .5rem;border-radius:99px}
+.ss-plans{display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:.4rem}
+.ss-aj{font:inherit;font-size:.74rem;font-weight:600;color:var(--tx2);background:transparent;border:1.5px dashed var(--v12);border-radius:8px;cursor:pointer;min-height:7rem}
+.ss-aj:hover{color:var(--tx);border-color:var(--or)}
+.ss-p{background:var(--f-champ);border:1px solid var(--v12);border-radius:8px;overflow:hidden;display:flex;flex-direction:column;min-width:0}
+.ss-p .vg{position:relative;aspect-ratio:16/9;background:#000}
+.ss-p .vg img{width:100%;height:100%;object-fit:cover;display:block}
+.ss-p .ct,.ss-p .cl{position:absolute;top:0;bottom:0;border:1.5px dashed;pointer-events:none}
+.ss-p .ct{border-color:rgba(201,165,126,.95);width:56.25%}
+.ss-p .cl{border-color:#fff;width:42.19%}
+.ss-p .co{padding:.3rem .4rem .4rem;display:flex;flex-direction:column;gap:.25rem}
+.ss-p .co .l1{display:flex;align-items:center;justify-content:space-between;font-size:.72rem}
+.ss-p input[type=range]{width:100%;accent-color:var(--or)}
+.ss-p .ac{display:flex;gap:.25rem;flex-wrap:wrap}
+.ss-p .ac button{font:inherit;font-size:.66rem;padding:.12rem .38rem;border-radius:6px;border:1px solid var(--v12);background:transparent;color:var(--tx);cursor:pointer}
+.ss-p .ac button:disabled{opacity:.4;cursor:default}
+.ss-fmt{font-size:.7rem;color:var(--tx2);border-left:2px solid var(--or);padding:.15rem 0 .15rem .5rem;margin:0}
+.ss-leg{display:flex;gap:.8rem;flex-wrap:wrap;font-size:.68rem;color:var(--tx2)}
+.ss-leg i{display:inline-block;width:.9rem;height:.55rem;border:1.5px dashed;vertical-align:-1px;margin-right:.3rem}
 `;
 
 function pageAccueil(ouverture) {
@@ -139,7 +196,7 @@ function pageAccueil(ouverture) {
 <title>${T("Page d’accueil — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
 <div class="tete"><span class="ico">${ICO.homepage}</span><h1>${T("Page d’accueil")}</h1>
-  <span class="droite"><button class="mini" id="b-reinit" hidden>${T("Réinitialiser")}</button></span></div>
+  <span class="droite"><button class="mini" id="b-saisons" hidden>${T("Bannières des saisons")}</button><button class="mini" id="b-reinit" hidden>${T("Réinitialiser")}</button></span></div>
 <div class="ro" id="ro" hidden>${T("Lecture seule : vous pouvez consulter, pas modifier.")}</div>
 <div class="corps"><div id="corps"><div class="sz-squel tuiles" role="status" aria-label="${T("Chargement du tableau de bord")}"><i></i><i></i><i></i><i></i><i></i><i></i></div><div class="sz-squel"><i></i><i></i><i></i><i></i></div></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -359,9 +416,261 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     return h + '</div>';
   }
 
+  /* ── LES BANNIÈRES DES SAISONS (2026-11-27, sa demande) ────────────────────────────────────────────────────
+     Les valeurs de DÉPART viennent du site (D.saisonsDepart) ; ce qu on change vit dans le bloc héro
+     (content.saisons) et repart par config:accueil:ecrire (droit apparence, écriture conditionnelle,
+     synchronisation test vers production). Une saison paraît seule une semaine avant son début. Les plans
+     téléversés passent par config:saisons:deposer (R2) ; leur format est vérifié ICI, avant l envoi. */
+  var SS = null;   // { perso, sel, lg, sale }
+  var SS_ORDRE = ['printemps', 'ete', 'automne', 'hiver'];
+  var SS_NOMS = { printemps: '${T("Printemps")}', ete: '${T("Été")}', automne: '${T("Automne")}', hiver: '${T("Hiver")}' };
+  var SS_MOIS = ['${T("janvier")}','${T("février")}','${T("mars")}','${T("avril")}','${T("mai")}','${T("juin")}','${T("juillet")}','${T("août")}','${T("septembre")}','${T("octobre")}','${T("novembre")}','${T("décembre")}'];
+  var SS_CATS = [['#shop?cat=robes','${T("Robes")}'],['#shop?cat=hauts','${T("Hauts")}'],['#shop?cat=pantalons','${T("Pantalons")}'],['#shop?cat=jupes','${T("Jupes")}'],['#shop?cat=manteaux','${T("Manteaux")}'],['#shop?cat=chaussures','${T("Chaussures")}'],['#shop?cat=accessoires','${T("Accessoires")}'],['#shop','${T("Toute la boutique")}']];
+  var SS_TOUR = null;   // le défilement de l aperçu
+
+  function ssDepart(){ return (D && D.saisonsDepart) || {}; }
+  function ssAbs(u){ u = String(u || ''); if (!u) return ''; if (u.indexOf('http') === 0) return u; return String((D && D.origine) || '') + '/' + u.replace(/^[/]+/, ''); }
+  // La date d apparition : le début de la saison, moins 7 jours (comme la boutique).
+  function ssParait(k){ var d = ssDepart()[k]; if (!d) return null; var x = new Date(2026, Math.floor(d.du / 100) - 1, d.du % 100 - 7); return { j: x.getDate(), m: x.getMonth() }; }
+  function ssJusquA(k){ var i = SS_ORDRE.indexOf(k), n = SS_ORDRE[(i + 1) % SS_ORDRE.length], p = ssParait(n); if (!p) return null; var x = new Date(2026, p.m, p.j - 1); return { j: x.getDate(), m: x.getMonth() }; }
+  function ssDate(o){ return o ? (o.j + ' ' + SS_MOIS[o.m]) : ''; }
+  function ssDuJour(){
+    var d = new Date(Date.now() + 7 * 864e5), x = (d.getMonth() + 1) * 100 + d.getDate(), dep = ssDepart(), k;
+    for (k in dep) { var s = dep[k]; if (s.du <= s.au ? (x >= s.du && x <= s.au) : (x >= s.du || x <= s.au)) return k; }
+    return SS_ORDRE[0];
+  }
+  // La saison telle que la boutique la montrera : le départ, puis ce qui est changé.
+  function ssEff(k){
+    var d = ssDepart()[k] || { fr: {}, en: {}, plans: [] }, p = (SS && SS.perso[k]) || {}, o = { cote: d.cote, fr: {}, en: {}, plans: d.plans || [], perso: !!SS.perso[k] }, l, x;
+    if (p.cote === 'gauche' || p.cote === 'droite') o.cote = p.cote;
+    ['fr', 'en'].forEach(function(l){ for (x in (d[l] || {})) o[l][x] = d[l][x]; for (x in (p[l] || {})) o[l][x] = p[l][x]; });
+    if (p.plans && p.plans.length) o.plans = p.plans;
+    return o;
+  }
+  // Ce qu on modifie part dans la saison PERSONNALISÉE (créée au premier changement).
+  function ssPerso(k){ if (!SS.perso[k]) SS.perso[k] = {}; return SS.perso[k]; }
+  function ssSale(){ SS.sale = true; var e = document.getElementById('ss-etat'); if (e) e.textContent = '${T("Modifications non enregistrées")}'; }
+
+  function ouvrirSaisons(){
+    var h = BLOCS.filter(function(x){ return x.id === 'hero'; })[0];
+    SS = { perso: JSON.parse(JSON.stringify((h && h.content && h.content.saisons) || {})), sel: ssDuJour(), lg: 'fr', sale: false };
+    EDIT = 'saisons'; dessiner(); dire('');
+  }
+
+  function ssChamp(id, lab, v, max, lg){ return '<div class="ss-ch' + (lg ? ' lg' : '') + '"><label for="' + id + '">' + lab + '</label><input id="' + id + '" maxlength="' + max + '" value="' + esc(v || '') + '"' + (RO ? ' disabled' : '') + '></div>'; }
+  function ssCat(id, lab, v){
+    return '<div class="ss-ch"><label for="' + id + '">' + lab + '</label><select id="' + id + '"' + (RO ? ' disabled' : '') + '>'
+      + SS_CATS.map(function(c){ return '<option value="' + esc(c[0]) + '"' + (c[0] === v ? ' selected' : '') + '>' + esc(c[1]) + '</option>'; }).join('') + '</select></div>';
+  }
+
+  function saisonsHtml(){
+    var k = SS.sel, e = ssEff(k), t = e[SS.lg] || {}, auj = ssDuJour();
+    var l1 = t.l1 || ['', '#shop'], l2 = t.l2 || ['', '#shop'];
+    var h = '<div class="carte edit"><div class="stitre">${T("Bannières des saisons")}</div>'
+      + '<div class="sdesc">${T("Chaque bannière paraît toute seule une semaine avant sa saison, chaque année. Les textes sont posés par la page, jamais dans la vidéo : ils suivent la langue du visiteur.")}</div>'
+      + '<div class="ss"><div class="ss-col"><div class="ss-liste">';
+    SS_ORDRE.forEach(function(s){
+      var es = ssEff(s), p0 = es.plans[0] || {};
+      var pas = s === auj ? '<span class="pas">${T("Affichée aujourd’hui")}</span>' : '<span class="pas pro">${T("Paraît le ")}' + esc(ssDate(ssParait(s))) + '</span>';
+      h += '<button type="button" class="ss-s' + (s === k ? ' on' : '') + '" data-ss="' + s + '">'
+        + (p0.poster ? '<img src="' + esc(ssAbs(p0.poster)) + '" alt="">' : '')
+        + '<span class="t"><b>' + esc(SS_NOMS[s]) + (es.perso ? ' ·' : '') + '</b><small>' + esc(ssDate(ssParait(s))) + ' – ' + esc(ssDate(ssJusquA(s))) + '</small>' + pas + '</span></button>';
+    });
+    h += '</div><div class="ss-lg"><span class="sdesc" style="margin:0">${T("Textes :")}</span>'
+      + '<button type="button" data-sl="fr" class="' + (SS.lg === 'fr' ? 'on' : '') + '">${T("Français")}</button>'
+      + '<button type="button" data-sl="en" class="' + (SS.lg === 'en' ? 'on' : '') + '">${T("Anglais")}</button></div>'
+      + '<div class="ss-gr">'
+      + ssChamp('ss-sur', '${T("Surtitre")}', t.sur, 30)
+      + '<div class="ss-ch"><label for="ss-cote">${T("Côté du texte")}</label><select id="ss-cote"' + (RO ? ' disabled' : '') + '>'
+      + '<option value="gauche"' + (e.cote === 'gauche' ? ' selected' : '') + '>${T("À gauche (personne à droite)")}</option>'
+      + '<option value="droite"' + (e.cote === 'droite' ? ' selected' : '') + '>${T("À droite (personne à gauche)")}</option></select></div>'
+      + ssChamp('ss-titre', '${T("Titre")}', t.titre, 60, true)
+      + ssChamp('ss-ital', '${T("Mot en italique doré (pris dans le titre)")}', t.italique, 30, true)
+      + ssChamp('ss-sous', '${T("Sous-titre")}', t.sous, 140, true)
+      + ssChamp('ss-l1t', '${T("Bouton 1 — texte")}', l1[0], 28) + ssCat('ss-l1c', '${T("Bouton 1 — mène à")}', l1[1])
+      + ssChamp('ss-l2t', '${T("Bouton 2 — texte")}', l2[0], 28) + ssCat('ss-l2c', '${T("Bouton 2 — mène à")}', l2[1])
+      + '</div><p class="ss-fmt">${T("Format demandé : MP4 (H.264), format large 16:9, au moins 1600 × 900, de 4 à 8 secondes, 5 Mo au plus ; le son est ignoré. Le fichier est vérifié avant l’envoi.")}</p></div>';
+    // ── à droite : l aperçu et les plans
+    h += '<div class="ss-col"><div class="ss-ap ' + (e.cote === 'droite' ? 'd' : 'g') + '" id="ss-ap"><video id="ss-v0" muted playsinline></video><video id="ss-v1" muted playsinline></video>'
+      + '<div class="vo"></div><div class="tx"><div class="bl" id="ss-bl"></div></div><span class="nu" id="ss-nu"></span></div>'
+      + '<div class="ss-leg"><span><i style="border-color:rgba(201,165,126,.95)"></i>${T("ce que voit une tablette en portrait")}</span><span><i style="border-color:#fff"></i>${T("ce que voit un téléphone")}</span></div>'
+      + '<div class="ss-plans">';
+    e.plans.forEach(function(p, i){
+      var cx = isFinite(+p.cx) ? +p.cx : 0.5;
+      var tab = Math.max(0, Math.min(43.75, cx * 100 - 28.125)), tel = Math.max(0, Math.min(57.81, cx * 100 - 21.09));
+      h += '<div class="ss-p"><div class="vg"><img src="' + esc(ssAbs(p.poster)) + '" alt=""><span class="ct" style="left:' + tab + '%"></span><span class="cl" style="left:' + tel + '%"></span></div>'
+        + '<div class="co"><div class="l1"><b>${T("Plan ")}' + (i + 1) + '</b></div>'
+        + '<input type="range" min="0" max="100" value="' + Math.round(cx * 100) + '" data-scx="' + i + '" aria-label="${T("Où est la personne ?")}" title="${T("Où est la personne ? (cadrage tablette et téléphone)")}"' + (RO ? ' disabled' : '') + '>'
+        + (RO ? '' : '<div class="ac"><button type="button" data-srep="' + i + '">${T("Remplacer")}</button>'
+          + '<button type="button" data-shaut="' + i + '"' + (i ? '' : ' disabled') + '>↑</button>'
+          + '<button type="button" data-sret="' + i + '"' + (e.plans.length > 1 ? '' : ' disabled') + '>✕</button></div>')
+        + '</div></div>';
+    });
+    // (5 plans au plus : une rangée, aucune glissière ; 5 × 5 s = 25 s, au-delà des 20 s voulues)
+    if (!RO && e.plans.length < 5) h += '<button class="ss-aj" type="button" id="ss-ajout">${T("+ Ajouter un plan")}</button>';
+    h += '</div></div></div>';
+    h += '<div style="display:flex;gap:.6rem;align-items:center;margin-top:.7rem;flex-wrap:wrap">'
+      + (RO ? '' : '<button class="prim" id="ss-save">${T("Enregistrer")}</button>')
+      + '<button class="b" id="ss-fermer">${T("← Retour")}</button>'
+      + (RO || !e.perso ? '' : '<button class="b" id="ss-origine">${T("Revenir à la bannière d’origine")}</button>')
+      + '<span class="sdesc" id="ss-etat" style="margin:0">' + (SS.sale ? '${T("Modifications non enregistrées")}' : '') + '</span></div>'
+      + '<input type="file" id="ss-fichier" accept="video/mp4" hidden></div>';
+    return h;
+  }
+
+  // L aperçu JOUE les plans en fondu ; le suivant part 1,4 s avant la fin (comme la boutique).
+  function ssApercuTexte(){
+    var bl = document.getElementById('ss-bl'); if (!bl) return;
+    var e = ssEff(SS.sel), t = e[SS.lg] || {}, ti = String(t.titre || ''), it = String(t.italique || ''), j = it ? ti.lastIndexOf(it) : -1;
+    var titre = j >= 0 ? esc(ti.slice(0, j)) + '<em>' + esc(it) + '</em>' + esc(ti.slice(j + it.length)) : esc(ti);
+    var l1 = t.l1 || [], l2 = t.l2 || [];
+    bl.innerHTML = '<p class="su">' + esc(t.sur || '') + '</p><p class="ti">' + titre + '</p><p class="so">' + esc(t.sous || '') + '</p>'
+      + '<div class="li">' + (l1[0] ? '<span>' + esc(l1[0]) + '</span>' : '') + (l2[0] ? '<span>' + esc(l2[0]) + '</span>' : '') + '</div>';
+    var ap = document.getElementById('ss-ap'); if (ap) ap.className = 'ss-ap ' + (e.cote === 'droite' ? 'd' : 'g');
+  }
+  function ssJouer(){
+    clearTimeout(SS_TOUR);
+    var v0 = document.getElementById('ss-v0'), v1 = document.getElementById('ss-v1'); if (!v0 || !v1) return;
+    var plans = ssEff(SS.sel).plans, n = plans.length, i = 0, cur = 0;
+    if (!n) return;
+    function un(){
+      if (!document.getElementById('ss-v0')) return;
+      var v = cur ? v1 : v0, autre = cur ? v0 : v1, p = plans[i % n], fait = false;
+      var nu = document.getElementById('ss-nu'); if (nu) nu.textContent = '${T("Plan ")}' + (i % n + 1) + ' / ' + n;
+      v.style.zIndex = '2'; autre.style.zIndex = '1';
+      v.poster = ssAbs(p.poster); v.src = ssAbs(p.video);
+      var suite = function(){ if (fait) return; fait = true; i++; cur = 1 - cur; un(); };
+      v.onplaying = function(){ v.classList.add('on'); setTimeout(function(){ autre.classList.remove('on'); try { autre.pause(); } catch (x) {} }, 1300); };
+      v.ontimeupdate = function(){ if (v.duration > 1.4 && v.currentTime >= v.duration - 1.4) suite(); };
+      v.onended = suite;
+      var pr = v.play(); if (pr && pr.catch) pr.catch(function(){ v.classList.add('on'); });
+      SS_TOUR = setTimeout(suite, 9000);
+    }
+    un();
+  }
+
+  // ── Un fichier choisi : vérifié, puis déposé (vidéo, puis son image fixe), puis posé dans le plan.
+  var SS_CIBLE = -1;
+  function ssVerifier(f){
+    return new Promise(function(res){
+      var r = [];
+      if (!/[.]mp4$/i.test(f.name) && f.type !== 'video/mp4') r.push('${T("ce n’est pas un MP4")}');
+      if (f.size > 5 * 1024 * 1024) r.push(szOctets(f.size) + ' ' + '${T("(5 Mo au plus)")}');
+      var v = document.createElement('video'), u = URL.createObjectURL(f);
+      v.preload = 'auto'; v.muted = true;
+      v.onloadedmetadata = function(){
+        var w = v.videoWidth, hh = v.videoHeight, d = v.duration;
+        if (w < 1600 || hh < 900) r.push(w + ' × ' + hh + ' ${T("(au moins 1600 × 900)")}');
+        if (Math.abs(w / hh - 16 / 9) > 0.03) r.push('${T("le format n’est pas 16:9")}');
+        if (!(d >= 4 && d <= 8.5)) r.push(szNombre(d, 1) + ' ' + '${T("s (de 4 à 8 secondes)")}');
+        if (r.length) { URL.revokeObjectURL(u); res({ ok: false, raisons: r }); return; }
+        v.onseeked = function(){
+          var c = document.createElement('canvas'); c.width = 1600; c.height = 900;
+          c.getContext('2d').drawImage(v, 0, 0, 1600, 900);
+          var im = c.toDataURL('image/webp', 0.82); URL.revokeObjectURL(u);
+          res({ ok: true, image: im, duree: d });
+        };
+        v.currentTime = 0.05;
+      };
+      v.onerror = function(){ URL.revokeObjectURL(u); res({ ok: false, raisons: ['${T("la vidéo ne se lit pas (codec H.264 attendu)")}'] }); };
+      v.src = u;
+    });
+  }
+  function ssLireFichier(f){
+    return new Promise(function(res){ var fr = new FileReader(); fr.onload = function(){ res(String(fr.result || '')); }; fr.onerror = function(){ res(''); }; fr.readAsDataURL(f); });
+  }
+  function ssFichierChoisi(f){
+    if (!f || SS_CIBLE < 0 || OCCUPE) return;
+    var k = SS.sel, cible = SS_CIBLE;
+    occuper(true); dire('${T("Vérification de la vidéo…")}');
+    ssVerifier(f).then(function(v){
+      if (!v.ok) { occuper(false); dire('${T("Vidéo refusée : ")}' + v.raisons.join(' ; ') + '.', 'err'); return null; }
+      dire('${T("Envoi de la vidéo…")}');
+      return ssLireFichier(f).then(function(du){
+        if (!du) throw { motif: 'echec' };
+        du = 'data:video/mp4;base64,' + du.slice(du.indexOf(',') + 1);
+        return appeler('config:saisons:deposer', [du]);
+      }).then(function(r1){
+        if (!r1 || !r1.ok) throw r1;
+        dire('${T("Envoi de l’image fixe…")}');
+        return appeler('config:saisons:deposer', [v.image]).then(function(r2){
+          if (!r2 || !r2.ok) throw r2;
+          var e = ssEff(k), lst = JSON.parse(JSON.stringify(e.plans));
+          var nouv = { video: r1.url, poster: r2.url, cx: 0.5 };
+          if (cible >= lst.length) lst.push(nouv); else lst[cible] = nouv;
+          ssPerso(k).plans = lst; ssSale();
+          occuper(false); dessiner(); dire('${T("Plan ajouté à la bannière. Enregistrez pour le publier.")}', 'bon');
+        });
+      });
+    }).catch(function(r){ occuper(false); dire(expliquer(r || { motif: 'echec' }), 'err'); });
+  }
+
+  function ssLireChamps(){
+    if (!SS || RO) return;
+    var k = SS.sel, e = ssEff(k), t = e[SS.lg] || {};
+    var lu = { sur: val('ss-sur'), titre: val('ss-titre'), italique: val('ss-ital'), sous: val('ss-sous'), l1: [val('ss-l1t'), val('ss-l1c')], l2: [val('ss-l2t'), val('ss-l2c')] };
+    var change = false, x;
+    for (x in lu) if (JSON.stringify(lu[x]) !== JSON.stringify(t[x] || (x === 'l1' || x === 'l2' ? ['', '#shop'] : ''))) change = true;
+    if (change) { var p = ssPerso(k); p[SS.lg] = p[SS.lg] || {}; for (x in lu) p[SS.lg][x] = lu[x]; ssSale(); }
+    var cote = val('ss-cote'); if (cote && cote !== e.cote) { ssPerso(k).cote = cote; ssSale(); }
+  }
+
+  function ssBrancher(){
+    corps.querySelectorAll('[data-ss]').forEach(function(el){ el.onclick = function(){ ssLireChamps(); SS.sel = el.getAttribute('data-ss'); dessiner(); }; });
+    corps.querySelectorAll('[data-sl]').forEach(function(el){ el.onclick = function(){ ssLireChamps(); SS.lg = el.getAttribute('data-sl'); dessiner(); }; });
+    ['ss-sur', 'ss-titre', 'ss-ital', 'ss-sous', 'ss-l1t', 'ss-l2t'].forEach(function(id){ var el = document.getElementById(id); if (el) el.oninput = function(){ ssLireChamps(); ssApercuTexte(); }; });
+    ['ss-l1c', 'ss-l2c', 'ss-cote'].forEach(function(id){ var el = document.getElementById(id); if (el) el.onchange = function(){ ssLireChamps(); ssApercuTexte(); }; });
+    corps.querySelectorAll('[data-scx]').forEach(function(el){ el.oninput = function(){
+      var i = +el.getAttribute('data-scx'), k = SS.sel, lst = JSON.parse(JSON.stringify(ssEff(k).plans));
+      lst[i].cx = (+el.value) / 100; ssPerso(k).plans = lst; ssSale();
+      var c = el.closest('.ss-p'), cx = lst[i].cx;
+      c.querySelector('.ct').style.left = Math.max(0, Math.min(43.75, cx * 100 - 28.125)) + '%';
+      c.querySelector('.cl').style.left = Math.max(0, Math.min(57.81, cx * 100 - 21.09)) + '%';
+    }; });
+    corps.querySelectorAll('[data-shaut]').forEach(function(el){ el.onclick = function(){
+      ssLireChamps(); var i = +el.getAttribute('data-shaut'), k = SS.sel, lst = JSON.parse(JSON.stringify(ssEff(k).plans));
+      var t = lst[i - 1]; lst[i - 1] = lst[i]; lst[i] = t; ssPerso(k).plans = lst; ssSale(); dessiner(); }; });
+    corps.querySelectorAll('[data-sret]').forEach(function(el){ el.onclick = function(){
+      ssLireChamps(); var i = +el.getAttribute('data-sret'), k = SS.sel, lst = JSON.parse(JSON.stringify(ssEff(k).plans));
+      if (lst.length < 2) return; lst.splice(i, 1); ssPerso(k).plans = lst; ssSale(); dessiner(); }; });
+    var fi = document.getElementById('ss-fichier');
+    if (fi) fi.onchange = function(){ var f = fi.files && fi.files[0]; fi.value = ''; ssFichierChoisi(f); };
+    corps.querySelectorAll('[data-srep]').forEach(function(el){ el.onclick = function(){ ssLireChamps(); SS_CIBLE = +el.getAttribute('data-srep'); if (fi) fi.click(); }; });
+    var aj = document.getElementById('ss-ajout'); if (aj) aj.onclick = function(){ ssLireChamps(); SS_CIBLE = ssEff(SS.sel).plans.length; if (fi) fi.click(); };
+    var sv = document.getElementById('ss-save'); if (sv) sv.onclick = ssEnregistrer;
+    var fe = document.getElementById('ss-fermer'); if (fe) fe.onclick = function(){
+      ssLireChamps();
+      var fermer = function(){ clearTimeout(SS_TOUR); EDIT = null; SS = null; dessiner(); dire(''); };
+      if (!SS.sale) { fermer(); return; }
+      szConfirmer({ titre: '${T("Quitter sans enregistrer")}', texte: '${T("Les changements faits aux bannières des saisons ne sont pas enregistrés. Ils seront perdus.")}', oui: '${T("Quitter sans enregistrer")}' })
+        .then(function(ok){ if (ok) fermer(); });
+    };
+    var og = document.getElementById('ss-origine'); if (og) og.onclick = function(){
+      szConfirmer({ titre: '${T("Revenir à la bannière d’origine")}', texte: '${T("Les textes et les plans changés pour cette saison seront remplacés par ceux d’origine, une fois enregistré.")}', oui: '${T("Revenir à l’origine")}' })
+        .then(function(ok){ if (!ok) return; delete SS.perso[SS.sel]; ssSale(); dessiner(); });
+    };
+    ssApercuTexte(); ssJouer();
+  }
+
+  function ssEnregistrer(){
+    if (RO || OCCUPE) return;
+    ssLireChamps();
+    var perso = JSON.parse(JSON.stringify(SS.perso));
+    ecrire(function(c){ c.forEach(function(x){ if (x.id === 'hero') x.content = Object.assign({}, x.content || {}, { saisons: perso }); }); },
+      function(){
+        var h = BLOCS.filter(function(x){ return x.id === 'hero'; })[0];
+        SS.perso = JSON.parse(JSON.stringify((h && h.content && h.content.saisons) || {})); SS.sale = false;
+        dire('${T("Bannières des saisons enregistrées.")}', 'bon');
+      });
+  }
+
   function dessiner(){
     var av = document.getElementById('ro'); if (av) av.hidden = !RO;
     breinit.hidden = RO || EDIT !== null;
+    // Le bouton n'existe que si le site connecté connaît les saisons (D.saisonsDepart) : une application plus récente que le site n'ouvre pas un écran vide.
+    var bs = document.getElementById('b-saisons'); if (bs) bs.hidden = EDIT !== null || !(D && D.saisonsDepart && Object.keys(D.saisonsDepart).length);
+    if (EDIT === 'saisons' && SS) { corps.innerHTML = saisonsHtml(); ssBrancher(); return; }
+    clearTimeout(SS_TOUR);
     corps.innerHTML = (EDIT === null) ? listeHtml() : editeurHtml();
     brancher();
     // Le bloc qu on vient de deplacer reste sous les yeux, meme s il change de page.
@@ -604,6 +913,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_BROUILLON()}
     ecrire(function(c){ c.forEach(function(x){ if (x.id === cible) x.content = JSON.parse(JSON.stringify(contenu)); }); },
       function(){ szBrouillonJeter(); EDIT=null; SLIDES=[]; });
   }
+
+  document.getElementById('b-saisons').onclick = function(){ if (OCCUPE || !D) return; ouvrirSaisons(); };
 
   breinit.onclick = function(){
     if (RO || OCCUPE) return;

@@ -3556,7 +3556,7 @@ const OPS_PONT = new Set([
   'config:logotheque:donnees', 'config:logotheque:ajouter', 'config:logotheque:renommer', 'config:logotheque:retirer',
   'config:analytics:donnees', 'config:analytics:ecrire',
   'config:bd:donnees', 'config:bd:tester', 'config:bd:pousser', 'config:bd:restaurer', 'config:bd:migrer', 'config:bd:stockage', 'config:bt:acces', 'config:bt:accesEcrire', 'config:bt:copie', 'config:bt:journal', 'config:bt:sync', 'config:bt:verrou',
-  'config:accueil:donnees', 'config:accueil:ecrire', 'config:accueil:reinit',
+  'config:accueil:donnees', 'config:accueil:ecrire', 'config:accueil:reinit', 'config:saisons:deposer',
   'config:lancement:donnees', 'config:lancement:basculer',
   // Liste VIP du prelancement (carte de la fenetre Mode lancement, 2026-10-07).
   'config:vip:donnees', 'config:vip:ecrire', 'config:vip:envoyer',
@@ -4326,6 +4326,8 @@ const LIMITES_PONT = {
   'config:analytics:donnees': 15000, 'config:analytics:ecrire': 30000,
   'config:bd:donnees': 15000, 'config:bd:tester': 30000, 'config:bd:pousser': 120000, 'config:bd:restaurer': 60000, 'config:bd:migrer': 300000, 'config:bd:stockage': 30000, 'config:bt:acces': 15000, 'config:bt:accesEcrire': 30000, 'config:bt:copie': 90000, 'config:bt:journal': 15000, 'config:bt:sync': 120000, 'config:bt:verrou': 15000,
   'config:accueil:donnees': 15000, 'config:accueil:ecrire': 30000, 'config:accueil:reinit': 20000,
+  // (2026-11-27) Un plan vidéo des bannières des saisons (jusqu'à 5,5 Mo) part vers R2 : on lui laisse 2 minutes.
+  'config:saisons:deposer': 120000,
   'config:lancement:donnees': 20000, 'config:lancement:basculer': 20000,
   /* Liste VIP : l envoi des codes enchaine des lots de courriels cote serveur
      (~35 s chacun) et s arrete de lui-meme apres 7 minutes : plafond de 9 min. */
