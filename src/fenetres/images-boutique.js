@@ -35,6 +35,9 @@ button:disabled{opacity:.45;cursor:default}
 button.prim{background:var(--sz-btn-prim,var(--or));border-color:transparent;color:var(--sz-btn-prim-txt,#1a1208);font-weight:800}
 button:focus-visible{outline:2px solid var(--or);outline-offset:2px}
 #corps{flex:1 1 auto;min-height:0;overflow:auto;padding:1rem 1.2rem 1.4rem}
+#corps.pagine{display:flex;flex-direction:column;overflow:hidden}
+#corps.pagine>.im-resume{flex:none}
+#corps.pagine>[data-pages]{flex:1 1 auto;min-height:0;overflow:hidden}
 .pied{flex:0 0 auto;padding:.35rem 1.1rem;border-top:1px solid var(--v08);min-height:1.9rem;font-size:.8rem}
 .msg.bon{color:var(--tx-ok)} .msg.err{color:var(--tx-err)} .msg.att{color:var(--tx-att)}
 .im-resume{display:flex;align-items:center;flex-wrap:wrap;gap:0;padding-bottom:.8rem;margin-bottom:1rem;border-bottom:1px solid var(--v08)}
@@ -568,6 +571,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!D) return;
     var n = Object.keys(D.images || {}).length;
     elSous.textContent = '${T("Collection")} ' + (D.collection || '2026') + (n ? ' · ' + n + ' ' + (n > 1 ? '${T("images remplacées")}' : '${T("image remplacée")}') : '');
+    corps.classList.toggle('pagine', VUE !== 'neuve');   // (2026-11-28) l'inventaire se pagine dans une hauteur bornée
     if (VUE === 'neuve') {
       dessinerAssistant();
       return;
