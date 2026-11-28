@@ -314,7 +314,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       return '<button type="button" class="as-chip' + (on ? ' on' : '') + '" data-v="' + c[0] + '" aria-pressed="' + on + '">' + esc(c[1]) + '</button>'; }).join('') + '</div>';
   }
   function argentUSD(n){ return argentUS(n) + ' US'; }
-  function argentUS(n){ return (Math.round(n * 100) / 100).toFixed(2).replace('.', ',') + ' $'; }
+  function argentUS(n){ return szArgent(n); }   // (2026-11-28) les séparateurs suivent la langue (banc-langue-mesures)
   function cote(){
     var nImg = 16 + INV.categories.length * 2 + INV.pages.length + INV.apropos.length + INV.vides.length;
     var photos = nImg * 0.06, videos = 16 * 0.42, ap = 6 * 0.06;
