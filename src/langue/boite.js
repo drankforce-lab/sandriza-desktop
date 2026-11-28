@@ -17,6 +17,7 @@ module.exports = {
   "Boîte de style": "Style box",
   "Boîte de style offerte en boutique": "Style box offered in the shop",
   "Boîte de style — Administration Sandriza": "Style box — Sandriza Administration",
+  "Les abonnées inscrites apparaissent ici, avec la boîte proposée pour chacune.": "Subscribers appear here once they sign up, each with their proposed box.",
   "Réglages de la boîte de style — Administration Sandriza": "Style box settings — Sandriza Administration",
   "Réglages de la boîte de style": "Style box settings",
   "Paliers, prix et offre en boutique": "Tiers, prices and shop offer",

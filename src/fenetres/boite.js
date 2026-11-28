@@ -110,6 +110,48 @@ button.dang{color:var(--tx-err2,var(--ep-rouge-t))}
 .bx-rg td{padding:0 .3rem}
 .bx-rg input{width:100%;height:2.1rem}
 .bx-rg .ligne{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
+/* == EPURE (2026-11-28, ses captures : << il faut que ce soit plus epure >>) ==
+   Saison : fleches a cote du titre, un seul bouton plein, compteurs en une ligne de texte, l'ecran vide en haut.
+   Paliers : l'interrupteur en tete, une carte par palier, des champs soulignes au lieu de 18 boites. */
+#corps .bx-tete{align-items:center;gap:.5rem;padding-bottom:.2rem}
+#corps .bx-titre{display:flex;align-items:center;gap:.5rem}
+#corps .bx-tete h2{font-size:1.35rem;font-weight:700;letter-spacing:-.01em}
+#corps .bx-nav{gap:.1rem}
+#corps .bx-nav button{height:1.9rem;width:1.9rem;padding:0;border-color:transparent;background:transparent;color:var(--tx2);font-size:1.05rem}
+#corps .bx-nav button:hover{background:var(--v06);color:var(--tx)}
+#corps .bx-tete button{height:2.15rem;padding:0 .9rem;font-size:.84rem}
+#corps .bx-tete button.bx-fant{background:transparent;border-color:transparent;color:var(--tx2)}
+#corps .bx-tete button.bx-fant:hover:not(:disabled){background:var(--v06);color:var(--tx)}
+#corps .bx-tete button.prim{height:2.15rem}
+#corps .bx-tete button.prim:disabled{background:transparent;border-color:var(--v16);color:var(--tx2);opacity:1}
+#corps .bx-comptes{gap:0;padding-bottom:.6rem;border-bottom:1px solid var(--v08)}
+#corps .bx-c{background:none;padding:0;border-radius:0;font-size:.8rem;color:var(--tx2)}
+#corps .bx-c b{color:var(--tx);font-weight:700;margin-right:.1rem}
+#corps .bx-c.a b{color:var(--ep-ambre-t,var(--tx-att))}
+#corps .bx-c + .bx-c::before{content:"";display:inline-block;width:3px;height:3px;border-radius:50%;background:var(--tx2);margin:0 .7rem;vertical-align:middle;opacity:.6}
+#corps .bx-vide{display:flex;align-items:flex-start;gap:.8rem;padding:1.4rem .2rem;color:var(--tx2)}
+#corps .bx-vide .i{flex:none;width:2.2rem;height:2.2rem;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:var(--v06);color:var(--or)}
+#corps .bx-vide .i svg{width:1.15rem;height:1.15rem}
+#corps .bx-vide b{display:block;color:var(--tx);font-size:.92rem;font-weight:600;margin-bottom:.1rem}
+#corps .bx-vide span{font-size:.82rem}
+#corps .bx-rg2{display:flex;flex-direction:column;gap:1rem;overflow:auto;padding-bottom:.4rem}
+#corps .bx-inter{display:flex;align-items:flex-start;gap:.7rem;padding:.2rem 0 .9rem;border-bottom:1px solid var(--v08);cursor:pointer}
+#corps .bx-inter input{margin-top:.2rem;width:1.05rem;height:1.05rem;accent-color:var(--or)}
+#corps .bx-inter b{display:block;font-size:.9rem}
+#corps .bx-inter span span{font-size:.78rem;color:var(--tx2)}
+#corps .bx-pals{display:grid;grid-template-columns:repeat(auto-fit,minmax(13.5rem,1fr));gap:.8rem}
+#corps .bx-pal{display:flex;flex-direction:column;gap:.55rem;padding:.9rem 1rem;border:1px solid var(--v08);border-radius:14px;background:transparent}
+#corps .bx-pal.ved{border-color:color-mix(in srgb,var(--or) 55%,var(--v08))}
+#corps .bx-pal input{background:transparent;border:0;border-bottom:1px solid var(--v16);border-radius:0;padding:.2rem 0;height:auto;width:100%}
+#corps .bx-pal input:focus{border-bottom-color:var(--or)}
+#corps .bx-pal input.nom{font-size:1.05rem;font-weight:700;border-bottom-color:transparent}
+#corps .bx-pal input.nom:hover,#corps .bx-pal input.nom:focus{border-bottom-color:var(--v16)}
+#corps .bx-pal .ch{display:flex;flex-direction:column;gap:.1rem}
+#corps .bx-pal .ch > span{font-size:.68rem;font-weight:600;color:var(--tx2);letter-spacing:.02em}
+#corps .bx-pal .duo{display:grid;grid-template-columns:1fr 1fr;gap:.7rem}
+#corps .bx-pal input[type=number]{font-variant-numeric:tabular-nums}
+#corps .bx-pal .vd{display:inline-flex;align-items:center;gap:.4rem;font-size:.78rem;color:var(--tx2);cursor:pointer;margin-top:.15rem}
+#corps .bx-pal .vd input{width:auto;border:0;accent-color:var(--or)}
 `;
 
 /* (2026-11-28, sa demande : « le module des boîtes de style pour la configuration devrait se retrouver dans Modules ; la
@@ -180,9 +222,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (VUE === 'reglages') { dessinerReglages(); return; }
     if (!S) return;
     var c = S.compteurs;
-    var h = '<div class="bx-tete"><div class="g"><span>' + esc('${T("Expédition prévue le")} ' + jour(ENVOI) + ' · ${T("prélèvement à l’envoi")}') + '</span><h2>' + esc(saison(ENVOI)) + '</h2></div>'
-      + '<div class="bx-nav"><button type="button" data-env="-1" aria-label="${T("Saison précédente")}">‹</button><button type="button" data-env="1" aria-label="${T("Saison suivante")}">›</button></div>'
-      + '<button type="button" id="bx-auto"' + (c.aValider ? '' : ' disabled') + '>${T("Composer automatiquement")}</button>'
+    var h = '<div class="bx-tete"><div class="g"><span>' + esc('${T("Expédition prévue le")} ' + jour(ENVOI) + ' · ${T("prélèvement à l’envoi")}') + '</span>'
+      + '<div class="bx-titre"><h2>' + esc(saison(ENVOI)) + '</h2>'
+      + '<div class="bx-nav"><button type="button" data-env="-1" aria-label="${T("Saison précédente")}">‹</button><button type="button" data-env="1" aria-label="${T("Saison suivante")}">›</button></div></div></div>'
+      + '<button type="button" class="bx-fant" id="bx-auto"' + (c.aValider ? '' : ' disabled') + '>${T("Composer automatiquement")}</button>'
       + '<button type="button" class="prim" id="bx-prel" title="${T("Le stock n’est retiré qu’au prélèvement. « Prélever et expédier » débite les boîtes par saison et crée une commande par boîte, qui suit la préparation habituelle.")}"' + (c.validees ? '' : ' disabled') + '>' + esc('${T("Prélever et expédier les validées")} (' + c.validees + ')') + '</button></div>'
       + '<div class="bx-comptes"><span class="bx-c"><b>' + c.abonnees + '</b> ${T("abonnées")}</span>'
       + '<span class="bx-c' + (c.aValider ? ' a' : '') + '"><b>' + c.aValider + '</b> ${T("à composer ou valider")}</span>'
@@ -190,7 +233,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="bx-c"><b>' + esc(argent(c.aPrelever)) + '</b> ${T("à prélever (avant taxes)")}</span>'
       + (c.annuelles ? '<span class="bx-c"><b>' + c.annuelles + '</b> ${T("annuelles déjà payées")}</span>' : '')
       + (c.prelevees ? '<span class="bx-c"><b>' + c.prelevees + '</b> ${T("commandées")}</span>' : '') + '</div>';
-    if (!S.boites.length) { corps.innerHTML = h + '<div class="carte vide">${T("Aucune abonnée ne reçoit cette saison.")}</div>'; return; }
+    if (!S.boites.length) { corps.innerHTML = h + '<div class="bx-vide"><span class="i">${ICO.giftcards}</span><div><b>${T("Aucune abonnée ne reçoit cette saison.")}</b>'
+      + '<span>${T("Les abonnées inscrites apparaissent ici, avec la boîte proposée pour chacune.")}</span></div></div>'; return; }
     corps.innerHTML = h + '<div class="bx-grille"><div class="carte bx-liste" id="bx-liste"></div><div class="carte bx-d" id="bx-d"></div></div>';
     dessinerListe(); dessinerDetail();
   }
@@ -260,14 +304,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var r = REG;
     corps.innerHTML = '<div class="bx-tete"><div class="g"><span>${T("Boîte de style")}</span><h2>${T("Paliers et prix")}</h2></div>'
       + (SEUL ? '' : '<button type="button" id="bx-retour">${T("← Retour à la saison")}</button>') + '<button type="button" class="prim" id="bx-rg-ok">${T("Enregistrer les réglages")}</button></div>'
-      + '<div class="carte bx-rg"><label class="ligne"><input type="checkbox" id="rg-actif"' + (r.actif ? ' checked' : '') + '> <b>${T("Boîte de style offerte en boutique")}</b>'
-      + '<span class="bx-note">${T("Éteinte, la page de la boutique dit « bientôt » et personne ne peut s’inscrire.")}</span></label>'
-      + '<table><thead><tr><th>${T("Palier")}</th><th>${T("Prix par saison ($)")}</th><th>${T("Prix annuel ($)")}</th><th>${T("Contenu")}</th><th>${T("Valeur visée ($)")}</th><th>${T("Vedette")}</th></tr></thead><tbody>'
-      + r.paliers.map(function(p, i){
-          return '<tr data-pal="' + i + '"><td><input data-c="nom" aria-label="${T("Palier")}" value="' + esc(p.nom) + '"></td><td><input type="number" step="1" min="1" data-c="prixSaison" aria-label="${T("Prix par saison ($)")}" value="' + esc(p.prixSaison) + '"></td>'
-            + '<td><input type="number" step="1" min="1" data-c="prixAnnuel" aria-label="${T("Prix annuel ($)")}" value="' + esc(p.prixAnnuel) + '"></td><td><input data-c="morceaux" aria-label="${T("Contenu")}" value="' + esc(p.morceaux) + '"></td>'
-            + '<td><input type="number" step="1" min="0" data-c="valeurVisee" aria-label="${T("Valeur visée ($)")}" value="' + esc(p.valeurVisee) + '"></td><td><input type="radio" name="rg-ved" data-c="vedette" aria-label="${T("Vedette")}"' + (p.vedette ? ' checked' : '') + '></td></tr>';
-        }).join('') + '</tbody></table>'
+      + '<div class="bx-rg2"><label class="bx-inter"><input type="checkbox" id="rg-actif"' + (r.actif ? ' checked' : '') + '><span><b>${T("Boîte de style offerte en boutique")}</b>'
+      + '<span>${T("Éteinte, la page de la boutique dit « bientôt » et personne ne peut s’inscrire.")}</span></span></label>'
+      + '<div class="bx-pals">' + r.paliers.map(function(p, i){
+          var ch = function(lib, c, v, num){ return '<label class="ch"><span>' + lib + '</span><input' + (num ? ' type="number" step="1" min="' + (c === 'valeurVisee' ? 0 : 1) + '"' : '') + ' data-c="' + c + '" aria-label="' + lib + '" value="' + esc(v) + '"></label>'; };
+          return '<div class="bx-pal' + (p.vedette ? ' ved' : '') + '" data-pal="' + i + '"><input class="nom" data-c="nom" aria-label="${T("Palier")}" value="' + esc(p.nom) + '">'
+            + '<div class="duo">' + ch('${T("Prix par saison ($)")}', 'prixSaison', p.prixSaison, 1) + ch('${T("Prix annuel ($)")}', 'prixAnnuel', p.prixAnnuel, 1) + '</div>'
+            + ch('${T("Contenu")}', 'morceaux', p.morceaux) + ch('${T("Valeur visée ($)")}', 'valeurVisee', p.valeurVisee, 1)
+            + '<label class="vd"><input type="radio" name="rg-ved" data-c="vedette"' + (p.vedette ? ' checked' : '') + '> ${T("Vedette")}</label></div>';
+        }).join('') + '</div>'
       + '<p class="bx-note">${T("Le prix annuel ne peut pas dépasser 3 boîtes par saison : la première boîte doit rester offerte. Les abonnements déjà en cours gardent leur prix jusqu’à leur renouvellement, annoncé 30 jours avant.")}</p></div>';
   }
 
@@ -338,7 +383,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (t.id === 'bx-retour') { VUE = 'saison'; dessiner(); return; }
     if (t.id === 'bx-rg-ok' && REG) {
       var pals = REG.paliers.map(function(p, i){
-        var tr = corps.querySelector('tr[data-pal="' + i + '"]'), v = function(c){ var e = tr.querySelector('[data-c="' + c + '"]'); return e ? (e.type === 'radio' ? e.checked : e.value) : ''; };
+        var tr = corps.querySelector('[data-pal="' + i + '"]'), v = function(c){ var e = tr.querySelector('[data-c="' + c + '"]'); return e ? (e.type === 'radio' ? e.checked : e.value) : ''; };
         return Object.assign({}, p, { nom: v('nom'), prixSaison: +v('prixSaison'), prixAnnuel: +v('prixAnnuel'), morceaux: v('morceaux'), valeurVisee: +v('valeurVisee'), vedette: v('vedette') });
       });
       var nouv = Object.assign({}, REG, { actif: document.getElementById('rg-actif').checked, paliers: pals });
