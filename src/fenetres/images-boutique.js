@@ -120,7 +120,14 @@ const CSS_ASSISTANT = `
 .as-carte .gest{display:flex;gap:.3rem;flex-wrap:wrap} .as-carte .gest button{font-size:.72rem;padding:.2rem .5rem}
 .as-carte.gardee{border-color:var(--or)}
 .as-bandeau{padding:.6rem .85rem;border-radius:10px;font-size:.8rem;margin-bottom:.8rem;background:var(--sz-accent-doux,var(--v08));border:1px solid var(--v12,var(--v16));color:var(--tx)}
-@media (prefers-reduced-motion:reduce){.as-carte .ph .rond{animation:none}}
+.as-h{margin:1.1rem 0 .5rem;font-size:.9rem} .as-h span{color:var(--tx2);font-weight:600;font-size:.76rem;margin-left:.3rem}
+.as-barre{height:6px;border-radius:99px;background:var(--v08);overflow:hidden;margin:.5rem 0 .8rem} .as-barre i{display:block;height:100%;background:var(--sz-accent,var(--or));transition:width .4s}
+.as-etat{display:flex;align-items:center;justify-content:space-between;gap:.8rem;flex-wrap:wrap}
+.as-etat div{display:flex;flex-direction:column;gap:.1rem} .as-etat span{font-size:.78rem;color:var(--tx2)}
+.as-temps{margin:0 0 .4rem;padding-left:1.2rem;display:flex;flex-direction:column;gap:.55rem;font-size:.84rem}
+.as-temps li span{display:block;color:var(--tx2);font-size:.76rem;margin-top:.1rem}
+.as-carte.echec{border-color:var(--tx-err,var(--v16))}
+@media (prefers-reduced-motion:reduce){.as-carte .ph .rond{animation:none}.as-barre i{transition:none}}
 `;
 
 
@@ -203,6 +210,56 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     evLogos: 'no logos, no brand names, no watermark',
     evMains: 'bare hands indoors',
     notes: 'Owner notes:',
+    femme: 'A woman wearing',
+    droite: 'She stands in the RIGHT third of the frame; the left half is calm, softly blurred negative space.',
+    gauche: 'She stands in the LEFT third of the frame; the right half is calm, softly blurred negative space.',
+    large: 'Wide cinematic shot, natural candid moment, she is not looking at the camera.',
+    video: 'Cinematic fashion film. Keep the woman, her face, her outfit and the setting EXACTLY as in the photo. She moves naturally and gracefully, a few slow steps and a gentle turn of the head, a light breeze in her hair and fabric, slow smooth camera dolly. No text, no logo.',
+    vDroite: 'She stays in the right third of the frame.',
+    vGauche: 'She stays in the left third of the frame.',
+    o_printemps: 'a light camel trench coat over a silk blouse|a floral midi dress and ballet flats|a soft knit cardigan with wide linen trousers|a pastel tailored blazer and a pleated skirt',
+    o_ete: 'a flowing linen dress and a straw hat|an elegant maxi sundress|a crisp white shirt and wide tailored shorts|a silk slip dress and leather sandals',
+    o_automne: 'a camel wool coat over a turtleneck|a plaid midi skirt with a chunky knit sweater|a cropped leather jacket and straight jeans|a long knit cardigan and suede boots',
+    o_hiver: 'a long tailored wool coat, a knit scarf and leather boots|a cashmere sweater and wool trousers under a cape|an elegant quilted coat with a faux fur collar|a belted wrap coat and leather gloves',
+    c_robes_a: 'A woman wearing an elegant flowing midi dress; the dress is the hero of the image, crisp fabric texture.',
+    c_robes_b: 'A woman walking in a refined satin dress, soft movement of the fabric.',
+    c_hauts_a: 'A woman wearing a silk blouse tucked into tailored trousers, upper body focus, fabric sheen visible.',
+    c_hauts_b: 'A woman in a fine knit sweater, relaxed pose, the knit texture clearly visible.',
+    c_pantalons_a: 'A woman wearing wide-leg tailored trousers, full length, the trousers are the hero of the image.',
+    c_pantalons_b: 'A woman wearing well-cut straight jeans with a simple elegant top, full length.',
+    c_jupes_a: 'A woman wearing a pleated midi skirt in gentle motion.',
+    c_jupes_b: 'A woman wearing an elegant pencil skirt with a fine knit top.',
+    c_manteaux_a: 'A woman wearing a long tailored wool coat, the coat is the hero of the image.',
+    c_manteaux_b: 'A woman wearing a cropped tweed jacket over a simple top.',
+    c_chaussures_a: 'Close framing on elegant leather heels worn by a woman, lower legs and shoes only, the shoes are the hero.',
+    c_chaussures_b: 'Stylish leather ankle boots worn by a woman walking on a cobbled street, close framing on the shoes.',
+    c_accessoires_a: 'Still life of luxury accessories: a structured leather handbag, a silk scarf, fine gold jewelry and sunglasses on a marble surface, no people.',
+    c_accessoires_b: 'Still life of a leather tote bag, a wide-brim hat, a slim belt and gold earrings on cream linen, no people.',
+    p_livraison: 'Close-up of hands with a gold ring opening a plain cream cardboard box at home, folded soft knitwear wrapped in white tissue paper inside, linen sofa in soft focus.',
+    p_retours: 'A neatly folded garment placed back into a cream gift box with a satin ribbon, on a light wooden table, calm and reassuring.',
+    p_tailles: 'A tailor measuring tape draped over a folded wool garment beside a fashion sketchbook on a light desk.',
+    p_faq: 'A cozy reading corner in a bright shop, an armchair, a cup of tea and a fashion magazine, no people.',
+    p_contact: 'A smiling woman holding a phone at a sunlit coffee shop table, soft focus background.',
+    p_compte: 'A woman at home on a linen sofa browsing on a tablet, relaxed, warm light.',
+    p_cartes_cadeaux: 'An elegant cream and gold gift envelope tied with a silk ribbon, dried flowers, on marble, no visible writing.',
+    p_parrainage: 'Two women friends laughing together while shopping, holding paper shopping bags, sunny street.',
+    p_politiques: 'A calm minimalist desk with a fountain pen, a leather notebook and a vase with a single flower.',
+    p_boite: 'An open premium cardboard box filled with carefully folded clothing in tissue paper, a blank card on top.',
+    p_boite_decouverte: 'A small elegant box with two folded garments and a small accessory, light tissue paper, airy and fresh.',
+    p_boite_classique: 'A medium elegant box with three folded garments, a scarf and a jewelry pouch, cream tissue paper.',
+    p_boite_prestige: 'A large luxurious black box with gold details, folded cashmere, a silk scarf and fine jewelry, sumptuous.',
+    p_anticipe: 'A woman looking through a shop window at dawn before opening, the new collection displayed inside, anticipation.',
+    p_ambassadrices: 'Three stylish women of different ages and origins walking together in the city, confident and joyful.',
+    p_seconde_main: 'Carefully selected pre-loved garments on a wooden rack in a bright space, natural and sustainable mood.',
+    p_vip: 'A private fitting salon with a velvet armchair, a glass of champagne and a curated rail of garments, exclusive mood.',
+    a_hiver: 'A woman in a winter coat stepping into a warm, softly lit shop, snow falling outside.',
+    a_bureau: 'A calm, elegant small fashion atelier in soft morning light, racks of carefully chosen garments in soft focus, a marble counter with fresh flowers, no people.',
+    a_accessoires: 'Hands carefully choosing a fabric swatch among samples on an atelier table.',
+    a_soiree: 'A woman in an elegant evening dress on a terrace at dusk, city lights in soft focus.',
+    a_weekend: 'A woman in a relaxed chic weekend outfit at a farmers market, carrying a straw bag.',
+    v_favoris_vide: 'A small heart drawn in the condensation of a window, cream linen curtains, warm afternoon light, a folded cashmere sweater on a chair.',
+    v_introuvable: 'An empty elegant fitting room with an open velvet curtain and soft light, no people.',
+    v_panier_vide: 'An empty woven basket on a wooden bench in a bright shop, no people.',
     pourImg: 'For this image:' };
   var AS = { etape: 1, gen: false, depense: 0 };
   var BRIEF_DEF = { annee: '2027', ambiance: ['chic', 'chaleur'], palette: 'creme', ages: ['25', '35', '50'], varie: ['origines', 'silhouettes'],
@@ -227,7 +284,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   function consigne(a){
     var p = [];
     p.push(a.sujet);
-    if (a.lieu && BRIEF.lieux[a.lieu]) p.push(SZ_DONNEES.decor + ' ' + BRIEF.lieux[a.lieu] + '.');
+    var LT = a.lieuTexte || (a.lieu && BRIEF.lieux[a.lieu]);
+    if (LT) p.push(SZ_DONNEES.decor + ' ' + LT + '.');
     if (a.modele) {
       var age = dn('age', hasard(BRIEF.ages.length ? BRIEF.ages : ['35'])) || SZ_DONNEES.age35;
       var qui = SZ_DONNEES.qui + ' ' + age;
@@ -252,14 +310,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       var on = un ? val === c[0] : (val || []).indexOf(c[0]) >= 0;
       return '<button type="button" class="as-chip' + (on ? ' on' : '') + '" data-v="' + c[0] + '" aria-pressed="' + on + '">' + esc(c[1]) + '</button>'; }).join('') + '</div>';
   }
+  function argentUSD(n){ return argentUS(n) + ' US'; }
   function argentUS(n){ return (Math.round(n * 100) / 100).toFixed(2).replace('.', ',') + ' $'; }
   function cote(){
-    var photos = 16 * 3 * 0.06 + (14 + 17 + 5 + 3) * 2 * 0.06, videos = 16 * 0.70, ap = 6 * 0.06;
+    var nImg = 16 + INV.categories.length * 2 + INV.pages.length + INV.apropos.length + INV.vides.length;
+    var photos = nImg * 0.06, videos = 16 * 0.42, ap = 6 * 0.06;
     return '<aside class="as-cote"><h3>${T("Coût estimé")}</h3><div class="as-total"><b>' + argentUS(photos + videos + ap) + '</b><span>US</span></div>'
-      + '<ul class="as-l"><li><span>${T("Photos (3 essais par plan, 2 ailleurs)")}</span><b>' + argentUS(photos) + '</b></li>'
+      + '<ul class="as-l"><li><span>' + nImg + ' ${T("images, une par emplacement")}</span><b>' + argentUS(photos) + '</b></li>'
       + '<li><span>${T("Vidéos de saison (16 × 5 s)")}</span><b>' + argentUS(videos) + '</b></li>'
       + '<li><span>${T("Aperçu (6 images)")}</span><b>' + argentUS(ap) + '</b></li>'
       + (AS.depense ? '<li><span>${T("Déjà dépensé pour l’aperçu")}</span><b>' + argentUS(AS.depense) + '</b></li>' : '') + '</ul>'
+      + '<li><span>${T("Chaque image refaite")}</span><b>0,06 $</b></li>'
       + '<p class="as-fin">${T("Prix fal.ai du 27 novembre 2026. Chaque image passe par le plafond de dépense des images.")}</p></aside>';
   }
   function etapes(){
@@ -296,16 +357,131 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + (reste ? '<button type="button" class="prim" id="as-tout"' + (AS.gen ? ' disabled' : '') + '>' + '${T("Générer les images manquantes")}' + ' (' + reste + ' · ' + argentUS(reste * 0.06) + ')</button> ' : '')
       + '<button type="button" data-etape="3">${T("Étape suivante")}</button></span></div>';
   }
+  /* ── LOT C : la génération complète. Le travail vit dans la page principale (imagesboutique:lancer…) ; ici on le
+     montre, on le relance, on le sonde toutes les 4 s tant qu'il tourne et que la fenêtre est sur l'étape 3. ── */
+  var C = null, C_MIN = null, C_AJ = {};
+  function nomCle(k){ return String(k).replace(/-/g, '_'); }
+  function lieuxDe(s){ var l = String(BRIEF.lieux[s] || '').split(',').map(function(x){ return x.trim(); }).filter(Boolean); return l.length ? l : ['']; }
+  function cheminApropos(k){ return (k === 'soiree' || k === 'weekend') ? 'assets/img/apropos/' + k + '-1600.webp' : 'assets/img/apropos/' + k + '-2400.webp'; }
+  var GARDE_ID = { hiver: 's-hiver-1', printemps: 's-printemps-1', robes: 'c-robes-a', livraison: 'p-livraison', histoire: 'a-bureau', favoris: 'v-favoris-vide' };
+  function planCollection(){
+    var l = [];
+    INV.saisons.forEach(function(s){
+      var lieux = lieuxDe(s[0]), tenues = String(SZ_DONNEES['o_' + s[0]] || '').split('|'), droite = (s[0] === 'printemps' || s[0] === 'hiver');
+      for (var i = 1; i <= 4; i++) {
+        var a = { sujet: SZ_DONNEES.femme + ' ' + (tenues[i - 1] || tenues[0]) + '. ' + (droite ? SZ_DONNEES.droite : SZ_DONNEES.gauche) + ' ' + SZ_DONNEES.large,
+          lieuTexte: lieux[(i - 1) % lieux.length], modele: true };
+        l.push({ id: 's-' + s[0] + '-' + i, titre: s[1] + ' · ${T("plan")} ' + i, groupe: 'saisons', saison: s[0], plan: i, cx: droite ? 0.68 : 0.32, format: '16:9', a: a,
+          consigneVideo: SZ_DONNEES.video + ' ' + (droite ? SZ_DONNEES.vDroite : SZ_DONNEES.vGauche) });
+      }
+    });
+    INV.categories.forEach(function(c){
+      var acc = c[0] === 'accessoires';
+      [['a', acc ? 'cat-accessoires-e' : 'cat-' + c[0] + '-a', '1'], ['b', acc ? 'cat-accessoires-f' : 'cat-' + c[0] + '-b', '2']].forEach(function(x){
+        l.push({ id: 'c-' + c[0] + '-' + x[0], titre: c[1] + ' · ' + x[2], groupe: 'categories', chemins: ['assets/img/pages/' + x[1] + '-2x.webp'], format: '3:4',
+          a: { sujet: SZ_DONNEES['c_' + nomCle(c[0]) + '_' + x[0]] || SZ_DONNEES.sujRobes, modele: !acc } });
+      });
+    });
+    INV.pages.forEach(function(p){ l.push({ id: 'p-' + p[0], titre: p[1], groupe: 'pages', chemins: cheminsDe('assets/img/pages/' + p[0] + '-2400.webp'), format: '16:9',
+      a: { sujet: SZ_DONNEES['p_' + nomCle(p[0])] || SZ_DONNEES.sujHist, modele: false } }); });
+    INV.apropos.forEach(function(p){ l.push({ id: 'a-' + p[0], titre: p[1], groupe: 'apropos', chemins: cheminsDe(cheminApropos(p[0])), format: '16:9',
+      a: { sujet: SZ_DONNEES['a_' + nomCle(p[0])] || SZ_DONNEES.sujHist, modele: false } }); });
+    INV.vides.forEach(function(p){ l.push({ id: 'v-' + p[0], titre: p[1], groupe: 'vides', chemins: ['assets/img/pages/' + p[0] + '-2x.webp'], format: '3:4',
+      a: { sujet: SZ_DONNEES['v_' + nomCle(p[0])] || SZ_DONNEES.sujFav, modele: false } }); });
+    return l;
+  }
+  function gardeesAp(){ var g = {}; APERCU.forEach(function(a){ if (a.gardee && /^data:image\\//.test(a.image || '') && GARDE_ID[a.id]) g[GARDE_ID[a.id]] = a.image; }); return g; }
+  function chargerCol(){
+    return appeler('imagesboutique:collection').then(function(r){
+      if (!r || !r.ok) { C = null; if (VUE === 'neuve' && AS.etape >= 3) dire(expliquer(r), 'err'); }
+      else C = r;
+      if (VUE === 'neuve' && AS.etape >= 3) dessinerAssistant();
+      sonder();
+    });
+  }
+  function sonder(){
+    if (C_MIN) { clearTimeout(C_MIN); C_MIN = null; }
+    if (VUE === 'neuve' && AS.etape === 3 && C && (C.etat === 'images' || C.etat === 'videos')) C_MIN = setTimeout(chargerCol, 4000);
+  }
+  function compte(l, f){ return l.filter(f).length; }
+  function vignette(t){
+    var st = t.etat === 'faite' ? (t.video ? (t.video.etat === 'prete' ? '${T("vidéo prête")}' : t.video.etat === 'en_cours' || t.video.etat === 'soumise' ? '${T("vidéo en cours")}' : t.video.etat === 'echec' ? '${T("vidéo en échec")}' : '') : '')
+      : t.etat === 'en_cours' ? '${T("en cours")}' : t.etat === 'echec' ? '${T("échec")}' : '${T("en attente")}';
+    var refaire = C && (C.etat === 'revue' || C.etat === 'prete' || C.etat === 'pause');
+    return '<div class="as-carte' + (t.etat === 'echec' ? ' echec' : '') + '"><div class="ph" style="aspect-ratio:' + (t.format === '3:4' ? '3/4' : '16/10') + '">'
+      + (t.etat === 'en_cours' ? '<span class="rond" role="status" aria-label="${T("Génération en cours")}"></span>' : t.url ? '<img src="' + esc(t.url) + '" alt="" loading="lazy">' : '')
+      + '</div><div class="c"><b>' + esc(t.titre) + '</b>' + (st ? '<span>' + st + '</span>' : '') + (t.erreur ? '<span>' + esc(t.erreur) + '</span>' : '')
+      + (refaire && t.etat !== 'en_cours' ? '<input type="text" maxlength="200" data-aj="' + esc(t.id) + '" placeholder="${T("Ajuster (facultatif)")}" value="' + esc(C_AJ[t.id] || '') + '">'
+        + '<div class="gest"><button type="button" data-refaire="' + esc(t.id) + '">${T("Refaire")} · 0,06 $</button></div>' : '')
+      + '</div></div>';
+  }
+  var GROUPES = [['saisons', '${T("Bannières des saisons")}'], ['categories', '${T("Catégories")}'], ['pages', '${T("Pages")}'], ['apropos', '${T("À propos")}'], ['vides', '${T("Écrans vides")}']];
+  function grilleCol(){
+    return GROUPES.map(function(g){ var l = C.taches.filter(function(t){ return t.groupe === g[0]; }); if (!l.length) return '';
+      return '<h3 class="as-h">' + g[1] + ' <span>' + compte(l, function(t){ return t.etat === 'faite'; }) + ' / ' + l.length + '</span></h3><div class="as-apercus">' + l.map(vignette).join('') + '</div>'; }).join('');
+  }
+  function barre(n, total){ var p = total ? Math.round(n * 100 / total) : 0; return '<div class="as-barre" role="progressbar" aria-valuenow="' + p + '" aria-valuemin="0" aria-valuemax="100"><i style="width:' + p + '%"></i></div>'; }
   function etape3(){
-    return '<div class="im-bientot"><b>${T("La génération complète arrive dans la prochaine version")}</b>'
-      + '<span>${T("Elle refera toute la collection avec vos réponses et les images gardées comme modèle, en arrière-plan, puis l’écrira dans la boutique préparée. Vos réponses et votre aperçu sont gardés sur ce poste.")}</span>'
-      + '<button type="button" data-etape="2">${T("← Aperçu")}</button></div>';
+    if (!C) return '<div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div>';
+    if (C.etat === 'aucune') {
+      var pl = planCollection(), g = gardeesAp(), n = pl.length - Object.keys(g).length;
+      var par = function(k){ return compte(pl, function(t){ return t.groupe === k; }); };
+      return '<div class="as-bandeau">${T("La collection")} ' + esc(BRIEF.annee) + ' : <b>' + pl.length + ' ${T("images")}</b> — ' + par('saisons') + ' ${T("plans de saison")}, '
+        + par('categories') + ' ${T("photos de catégorie")}, ' + par('pages') + ' ${T("bannières de page")}, ' + par('apropos') + ' ${T("pour À propos")}, ' + par('vides') + ' ${T("écrans vides")}' + '.'
+        + (Object.keys(g).length ? ' ' + Object.keys(g).length + ' ${T("images gardées de l’aperçu sont reprises telles quelles.")}' : '') + '</div>'
+        + '<ol class="as-temps"><li><b>${T("Les images")}</b> · ' + n + ' × 0,06 $ = ' + argentUS(n * C.prixImage) + '<span>${T("Elles se font en arrière-plan : vous pouvez fermer cette fenêtre. Chacune se refait ensuite seule.")}</span></li>'
+        + '<li><b>${T("Les vidéos des saisons")}</b> · 16 × 0,42 $ = ' + argentUS(16 * C.prixVideo) + '<span>${T("Lancées après votre revue des images, à partir des plans retenus.")}</span></li>'
+        + '<li><b>${T("L’écriture dans la boutique préparée")}</b><span>${T("Rien ne change en ligne avant Publication. La collection d’aujourd’hui est gardée pour y revenir.")}</span></li></ol>'
+        + '<div class="as-pied"><button type="button" data-etape="2">${T("← Aperçu")}</button><button type="button" class="prim" id="as-lancer" data-prix="' + (Math.round(n * C.prixImage * 100) / 100) + '">${T("Lancer les images")} (' + argentUSD(n * C.prixImage) + ')</button></div>';
+    }
+    var l = C.taches, faites = compte(l, function(t){ return t.etat === 'faite'; }), echec = compte(l, function(t){ return t.etat === 'echec'; });
+    var sais = l.filter(function(t){ return t.saison && t.etat === 'faite'; }), vids = compte(sais, function(t){ return t.video && t.video.etat === 'prete'; });
+    var h = '<div class="as-etat"><div><b>${T("Collection")} ' + esc(C.annee) + '</b><span>' + faites + ' / ' + l.length + ' ${T("images")}'
+      + (C.phase === 'videos' || vids ? ' · ' + vids + ' / ' + sais.length + ' ${T("vidéos")}' : '') + (echec ? ' · ' + echec + ' ${T("en échec")}' : '')
+      + ' · ${T("dépensé")} ' + argentUSD(C.depense || 0) + '</span></div>';
+    if (C.etat === 'images' || C.etat === 'videos') h += '<button type="button" id="as-pause">${T("Mettre en pause")}</button>';
+    if (C.etat === 'pause') h += '<button type="button" class="prim" id="as-pause">${T("Reprendre")}</button>';
+    h += '</div>' + barre(C.etat === 'videos' || C.phase === 'prete' ? vids : faites, C.etat === 'videos' || C.phase === 'prete' ? sais.length : l.length);
+    if (C.etat === 'pause' && C.erreur) h += '<div class="as-bandeau">${T("En pause :")} ' + esc(C.erreur) + '</div>';
+    if (C.etat === 'images') h += '<p class="as-fin">${T("Les images se font une à une, en arrière-plan. Vous pouvez fermer cette fenêtre : le travail continue dans l’application.")}</p>';
+    if (C.etat === 'videos') h += '<p class="as-fin">${T("Les vidéos prennent 1 à 3 minutes chacune chez fal.ai. Vous pouvez fermer cette fenêtre.")}</p>';
+    if (C.etat === 'revue') {
+      var nv = compte(sais, function(t){ return !(t.video && t.video.etat === 'prete'); });
+      h += '<div class="as-bandeau">${T("Les images sont prêtes. Regardez-les et refaites celles qui ne vous plaisent pas, puis animez les saisons.")}</div>'
+        + '<div class="as-pied"><button type="button" id="as-ecrire-sans">${T("Écrire sans les vidéos")}</button>'
+        + (nv ? '<button type="button" class="prim" id="as-animer" data-prix="' + (Math.round(nv * C.prixVideo * 100) / 100) + '">${T("Animer les plans de saison")} (' + nv + ' · ' + argentUSD(nv * C.prixVideo) + ')</button>' : '') + '</div>';
+    }
+    if (C.etat === 'prete') h += '<div class="as-bandeau">${T("Images et vidéos prêtes.")}</div><div class="as-pied"><span></span><button type="button" class="prim" id="as-ecrire">${T("Écrire dans la boutique préparée")}</button></div>';
+    return h + grilleCol();
   }
   function etape4(){
-    return '<div class="im-bientot"><b>${T("Test, puis production")}</b><span>${T("La collection générée apparaîtra sur test.sandriza.com, puis dans Publication sous « Images de la boutique », prête à publier — et l’on pourra revenir à la collection précédente.")}</span>'
-      + '<button type="button" data-etape="3">${T("← Génération")}</button></div>';
+    var pre = D && D.precedente;
+    var h = '<div class="as-bandeau">${T("La collection en place dans la boutique préparée :")} <b>' + esc((D && D.collection) || '2026') + '</b>.'
+      + (C && C.ecrite ? ' ${T("Écrite le")} ' + esc(new Date(C.ecrite).toLocaleString()) + '.' : '') + '</div>'
+      + '<ol class="as-temps"><li><b>${T("Vérifier sur le site de test")}</b><span>${T("test.sandriza.com montre la boutique préparée : les bannières, les catégories et les pages de la nouvelle collection.")}</span></li>'
+      + '<li><b>${T("Publier")}</b><span>${T("Dans Publication, la fiche « Images de la boutique » envoie la collection en ligne.")}</span></li>'
+      + '<li><b>${T("Revenir en arrière")}</b><span>${T("La collection précédente est gardée entière : un clic la remet dans la boutique préparée.")}</span></li></ol>'
+      + '<div class="as-pied"><button type="button" data-etape="3">${T("← Génération")}</button><span>'
+      + (pre ? '<button type="button" id="as-revenir">${T("Revenir à la collection")} ' + esc(pre) + '</button> ' : '')
+      + (C && C.etat !== 'aucune' && C.etat !== 'images' && C.etat !== 'videos' ? '<button type="button" id="as-oublier">${T("Préparer une autre collection")}</button>' : '') + '</span></div>';
+    return h;
+  }
+  function consigneDe(id){ var t = planCollection().filter(function(x){ return x.id === id; })[0]; if (!t) return ''; var a = Object.assign({}, t.a, { ajout: C_AJ[id] || '' }); return consigne(a); }
+  function colAction(op, args, ok){
+    return appeler(op, args || []).then(function(r){
+      if (!r || !r.ok) {
+        if (r && r.motif === 'prix_change') dire('${T("Le prix a changé : ")}' + argentUSD(r.prixReel) + '. ${T("Rien n’a été lancé.")}', 'err');
+        else if (r && r.motif === 'deja_en_cours') dire('${T("Un travail est déjà en cours.")}', 'err');
+        else dire(expliquer(r), 'err');
+        return chargerCol();
+      }
+      if (ok) dire(typeof ok === 'function' ? ok(r) : ok, 'bon');
+      if (r.taches) { C = r; dessinerAssistant(); sonder(); } else chargerCol();
+      return r;
+    });
   }
   function dessinerAssistant(){
+    if (!AS.vuCol) { AS.vuCol = true; chargerCol().then(function(){ if (C && C.etat !== 'aucune' && AS.etape < 3) { AS.etape = 3; dessinerAssistant(); sonder(); } }); }
     corps.innerHTML = etapes() + (AS.etape === 1 ? etape1() : AS.etape === 2 ? etape2() : AS.etape === 3 ? etape3() : etape4());
   }
   function generer(i){
@@ -329,7 +505,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (VUE !== 'neuve') return;
     var t = ev.target; if (!t || !t.closest) return;
     var b;
-    if ((b = t.closest('[data-etape]'))) { AS.etape = +b.getAttribute('data-etape'); dessinerAssistant(); corps.scrollTop = 0; return; }
+    if ((b = t.closest('[data-etape]'))) { AS.etape = +b.getAttribute('data-etape'); dessinerAssistant(); corps.scrollTop = 0; if (AS.etape >= 3) chargerCol(); return; }
     if ((b = t.closest('.as-chip'))) {
       var g = b.parentNode, cle = g.getAttribute('data-cle'), v = b.getAttribute('data-v');
       if (g.getAttribute('data-un')) BRIEF[cle] = v;
@@ -339,12 +515,46 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if ((b = t.closest('[data-gen]'))) { generer(+b.getAttribute('data-gen')); return; }
     if ((b = t.closest('[data-garder]'))) { var a = APERCU[+b.getAttribute('data-garder')]; a.gardee = !a.gardee; garderAp(a); dessinerAssistant(); return; }
     if (t.id === 'as-tout') { genererManquantes(); return; }
+    if (t.id === 'as-lancer') {
+      var prix = +t.getAttribute('data-prix');
+      var pl = planCollection().map(function(x){ var o = Object.assign({}, x); o.consigne = consigne(x.a); delete o.a; return o; });
+      szConfirmer({ titre: '${T("Lancer les images")}', texte: '${T("Les images de la collection seront générées en arrière-plan, pour")} ' + argentUSD(prix) + '. ${T("Rien ne change dans la boutique avant l’écriture.")}', oui: '${T("Lancer")}' })
+        .then(function(oui){ if (oui) { t.disabled = true; colAction('imagesboutique:lancer', [BRIEF.annee, pl, gardeesAp(), prix], '${T("Génération lancée.")}'); } });
+      return;
+    }
+    if (t.id === 'as-pause') { colAction('imagesboutique:pause', []); return; }
+    if ((b = t.closest('[data-refaire]'))) { var id = b.getAttribute('data-refaire'); b.disabled = true; colAction('imagesboutique:refaire', [id, consigneDe(id)], '${T("Image remise dans la file.")}'); return; }
+    if (t.id === 'as-animer') {
+      var pv = +t.getAttribute('data-prix');
+      szConfirmer({ titre: '${T("Animer les plans de saison")}', texte: '${T("Chaque plan devient une vidéo de 5 secondes, sans son. Coût :")} ' + argentUSD(pv) + '.', oui: '${T("Animer")}' })
+        .then(function(oui){ if (oui) colAction('imagesboutique:animer', [pv], '${T("Animation lancée.")}'); });
+      return;
+    }
+    if (t.id === 'as-ecrire' || t.id === 'as-ecrire-sans') {
+      szConfirmer({ titre: '${T("Écrire dans la boutique préparée")}', texte: '${T("La nouvelle collection remplace celle de la boutique préparée (test.sandriza.com). Rien ne change en ligne avant Publication, et la collection d’aujourd’hui reste disponible pour y revenir.")}', oui: '${T("Écrire")}' })
+        .then(function(oui){ if (!oui) return; appeler('imagesboutique:ecrire').then(function(r){
+          if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+          dire(r.images + ' ${T("images et")} ' + r.saisons + ' ${T("saisons écrites dans la boutique préparée.")}', 'bon');
+          AS.etape = 4; charger(); chargerCol();
+        }); });
+      return;
+    }
+    if (t.id === 'as-revenir') {
+      szConfirmer({ titre: '${T("Revenir à la collection précédente")}', texte: '${T("La collection précédente revient dans la boutique préparée. À publier ensuite depuis Publication.")}', oui: '${T("Revenir")}' })
+        .then(function(oui){ if (!oui) return; appeler('imagesboutique:revenir').then(function(r){
+          if (!r || !r.ok) { dire(expliquer(r), 'err'); return; }
+          dire('${T("Collection")} ' + r.collection + ' ${T("remise dans la boutique préparée.")}', 'bon'); charger();
+        }); });
+      return;
+    }
+    if (t.id === 'as-oublier') { colAction('imagesboutique:oublier', []).then(function(){ AS.etape = 1; dessinerAssistant(); }); return; }
   });
   corps.addEventListener('input', function(ev){
     if (VUE !== 'neuve') return;
     var t = ev.target;
     if (t.id === 'as-ajust') { BRIEF.ajust = t.value; garderBrief(); return; }
     if (t.getAttribute && t.getAttribute('data-lieu')) { BRIEF.lieux[t.getAttribute('data-lieu')] = t.value; garderBrief(); return; }
+    if (t.getAttribute && t.getAttribute('data-aj') !== null) { C_AJ[t.getAttribute('data-aj')] = t.value; return; }
     if (t.getAttribute && t.getAttribute('data-ajout') !== null) { var a = APERCU[+t.getAttribute('data-ajout')]; if (a) { a.ajout = t.value; garderAp(a); } }
   });
   function carte(chemin, nom, info, remplacable){
@@ -366,7 +576,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<span class="k"><b>16</b>${T("vidéos de saison")}</span><span class="k"><b>' + n + '</b>${T("remplacées")}</span></div>';
     h += '<div class="im-g"><h2>${T("Bannières des saisons")} <span>${T("4 plans vidéo par saison — refaits par la nouvelle collection")}</span></h2><div class="im-s">'
       + INV.saisons.map(function(s){ return '<div class="im-saison"><div class="t"><b>' + esc(s[1]) + '</b><span>${T("vidéo")}</span></div><div class="plans">'
-        + [1, 2, 3, 4].map(function(i){ return '<img src="' + esc(src('assets/video/saisons/' + s[2] + '-' + i + '.webp')) + '" alt="" loading="lazy">'; }).join('') + '</div></div>'; }).join('') + '</div></div>';
+        + [1, 2, 3, 4].map(function(i){ var g = D.saisons && D.saisons[s[0]] && D.saisons[s[0]][i - 1]; return '<img src="' + esc((g && g.poster) || src('assets/video/saisons/' + s[2] + '-' + i + '.webp')) + '" alt="" loading="lazy">'; }).join('') + '</div></div>'; }).join('') + '</div></div>';
     h += '<div class="im-g"><h2>${T("Catégories")} <span>${T("2 photos par catégorie · 1200 × 1600")}</span></h2><div class="im-grille p">'
       + INV.categories.map(function(c){
           var a = c[0] === 'accessoires' ? 'cat-accessoires-e' : 'cat-' + c[0] + '-a', b = c[0] === 'accessoires' ? 'cat-accessoires-f' : 'cat-' + c[0] + '-b';

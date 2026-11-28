@@ -3489,7 +3489,13 @@ const JEU = {
   // (2026-11-28) Images de la boutique : une collection avec deux images remplacees, le droit d ecrire.
   'images-boutique.js': { 'imagesboutique:donnees': { ok: true, collection: '2026', site: 'https://www.sandriza.com', peutModifier: true,
       images: { 'assets/img/pages/cat-robes-a-2x.webp': 'https://cdn.exemple/boutique/robes-a.webp', 'assets/img/pages/livraison-2400.webp': 'https://cdn.exemple/boutique/livraison.webp' } },
-    'imagesboutique:remplacer': { ok: true, url: 'https://cdn.exemple/boutique/neuve.webp' }, 'imagesboutique:retablir': { ok: true }, 'imagesboutique:apercu': { ok: true, image: 'https://cdn.exemple/boutique/apercu.jpg', cout: 0.06 } },
+    'imagesboutique:remplacer': { ok: true, url: 'https://cdn.exemple/boutique/neuve.webp' }, 'imagesboutique:retablir': { ok: true }, 'imagesboutique:apercu': { ok: true, image: 'https://cdn.exemple/boutique/apercu.jpg', cout: 0.06 },
+    'imagesboutique:collection': { ok: true, etat: 'revue', phase: 'revue', annee: '2027', depense: 3.3, erreur: '', ecrite: '', prixImage: 0.06, prixVideo: 0.42,
+      taches: [{ id: 's-hiver-1', titre: 'Hiver · plan 1', groupe: 'saisons', saison: 'hiver', plan: 1, format: '16:9', etat: 'faite', url: 'https://cdn.exemple/boutique/h1.webp', erreur: '', video: { etat: 'attente', url: '', erreur: '' } },
+        { id: 'p-livraison', titre: 'Livraison', groupe: 'pages', saison: '', plan: 1, format: '16:9', etat: 'echec', url: '', erreur: 'refus', video: null }] },
+    'imagesboutique:lancer': { ok: true, etat: 'images', taches: [] }, 'imagesboutique:refaire': { ok: true, etat: 'images', taches: [] },
+    'imagesboutique:pause': { ok: true, etat: 'pause', taches: [] }, 'imagesboutique:animer': { ok: true, etat: 'videos', taches: [] },
+    'imagesboutique:ecrire': { ok: true, images: 39, saisons: 4 }, 'imagesboutique:revenir': { ok: true, collection: '2026' }, 'imagesboutique:oublier': { ok: true, etat: 'aucune' } },
   'boite.js': (function(){
     var B = [
       { aboId: 'bs_aaaaaaaaaaaaaaaaaaaa', userId: 'u1', envoi: '2027-03-15', statut: 'proposee', nom: 'Marie Tremblay', email: 'marie@exemple.ca', palier: 'classique', palierNom: 'Classique',
