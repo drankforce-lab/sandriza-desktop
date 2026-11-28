@@ -972,7 +972,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         // ⚠ Etiquetee mais pas partie : la ligne se teinte. C est l etat qui se
         // perd le plus facilement, entre l impression et le depot au comptoir.
         var attente = o.aUneEtiquette && o.statut !== 'shipped' && o.statut !== 'delivered';
-        t += '<tr class="' + (attente ? 'attente' : '') + ck.classe(o) + '" data-id="' + esc(o.id)
+        t += '<tr class="' + (attente ? 'attente' : '') + ck.classe(o) + (EN_SUPP[o.id] ? ' sz-supp' : '') + '" data-id="' + esc(o.id)
           + '" style="cursor:pointer" title="${T("Clic : détails · clic droit : changer le statut")}">'
           + ck.td(o)
           + '<td><div class="rf-prod"><span class="rf-av" aria-hidden="true">' + esc(initiales(o.client)) + '</span>'
@@ -1110,7 +1110,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         + esc(o.par || '${T("Quelqu’un")}') + '</span>';
       else if (CTX && CTX.peutEditer && o.statut !== 'pending') act = '<button type="button" class="prep" data-prep="' + esc(o.id) + '">${T("Préparer")}</button>';
     }
-    return '<tr class="' + ck.classe(o) + '" data-id="' + esc(o.id) + '" style="--mq-ton:' + g.ton + '" title="${T("Clic : détails · clic droit : changer le statut")}">'
+    return '<tr class="' + ck.classe(o) + (EN_SUPP[o.id] ? ' sz-supp' : '') + '" data-id="' + esc(o.id) + '" style="--mq-ton:' + g.ton + '" title="${T("Clic : détails · clic droit : changer le statut")}">'
       + '<td class="b"><i></i></td>' + ck.td(o)
       + '<td class="no">' + esc(o.numero) + '</td>'
       /* (2026-11-23, sa capture : « pas beau ») Plus de pastille dans la cellule : la règle Épuré « une pastille seule =
@@ -2001,8 +2001,17 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
      modale de l application), plus une boite dessinee par-dessus la fiche. Et depuis la LISTE, on ne
      passe plus par la fiche : « je ne veux pas voir une fenetre de detail ». « id » absent = la commande
      de la fiche ouverte ; « depuisListe » = on recharge la liste au lieu de revenir a la liste. */
+  /* (2026-11-28) UNE SUPPRESSION A LA FOIS PAR COMMANDE : de la confirmation a la reponse du serveur, la commande est
+     notee ici ; sa ligne est grisee et sans gestes (sz-supp), et un second « Supprimer » est refuse. */
+  var EN_SUPP = {};
+  function marquerSupp(id, on){
+    if (on) EN_SUPP[id] = 1; else delete EN_SUPP[id];
+    var l = corps.querySelectorAll('tr[data-id]');
+    for (var i = 0; i < l.length; i++) if (l[i].getAttribute('data-id') === id) l[i].classList.toggle('sz-supp', !!on);
+  }
   function flowSupprimer(id, depuisListe){
     var cible = id || DET_ID;
+    if (EN_SUPP[cible]) { dire('${T("Suppression déjà en cours pour cette commande.")}', 'att'); return; }
     appeler('commandes:supprimerApercu', [cible]).then(function(ap){
       if (!ap.ok) { dire(expliquer(ap), 'err'); return; }
       szConfirmer({
@@ -2016,6 +2025,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
         danger: true
       }).then(function(oui){
         if (!oui) return;
+        if (EN_SUPP[cible]) return;
+        marquerSupp(cible, true);
+        dire('${T("Suppression en cours…")}');
         appeler('commandes:supprimerEcrire', [cible]).then(function(r){
           var sq = r.square || {};
           var note = sq.etat === 'initie' ? ' ${T("Remboursement Square de")} ' + argent(sq.montant) + '${T(" initié.")}'
@@ -2023,11 +2035,14 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
             : sq.etat === 'echec' ? ' ${T("Remboursement Square échoué :")} ' + (sq.detail || '?')
             : sq.etat === 'reseau' ? ' ${T("Erreur réseau Square :")} ' + (sq.detail || '?') : '';
           if (!r.ok) {
+            marquerSupp(cible, false);
             dire('${T("Suppression non confirmée par le serveur (")}' + (r.detail || '${T("erreur inconnue")}') + '${T(") — réessayez.")}' + note, 'err');
             if (!depuisListe) rechargerDetail(); else charger();
             return;
           }
           dire('${T("Commande supprimée — inventaire rétabli.")}' + note, sq.etat === 'echec' || sq.etat === 'reseau' ? 'att' : 'bon');
+          // la ligne reste grisee jusqu a ce que la liste relue ne la porte plus (au plus 2 minutes)
+          setTimeout(function(){ delete EN_SUPP[cible]; }, 120000);
           if (depuisListe) charger(); else retourListe();
         });
       });
@@ -2036,6 +2051,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   // ══ LE MENU COMPLET D UNE LIGNE (2026-10-13) — le menu du socle (szCtxMenu), les gestes de la ligne ══
   function menuLigne(ev, o, tr){
+    if (EN_SUPP[o.id]) { dire('${T("Suppression en cours…")}'); return; }
     var l = [{ lib: '${T("Ouvrir le détail")}', fn: function(){
       ouvrir('commandes:ouvrirDetail', o.id, '${T("Détail")}'); setTimeout(function(){ charger(); }, 1200); } }];
     var pr = tr.querySelector('[data-prep]');

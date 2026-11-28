@@ -475,7 +475,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}
   }
   /* (2026-11-27, sa demande) SUPPRIMER UNE COMMANDE SANS OUVRIR SA FICHE : la question est une vraie fenetre
      (szConfirmer), la cascade est annoncee avant le bouton — meme geste que la liste des commandes. */
+  /* (2026-11-28) une suppression a la fois par commande ; sa ligne du fil est grisee et sans gestes jusqu a la relecture */
+  var EN_SUPP = {};
+  function marquerSupp(id, on){
+    if (on) EN_SUPP[id] = 1; else delete EN_SUPP[id];
+    var l = document.querySelectorAll('.cmd[data-ligne]');
+    for (var i = 0; i < l.length; i++) if (l[i].getAttribute('data-ligne') === id) l[i].classList.toggle('sz-supp', !!on);
+  }
   function supprimerCommande(id){
+    if (EN_SUPP[id]) { dire('${T("Suppression déjà en cours pour cette commande.")}', 'att'); return; }
     appeler('commandes:supprimerApercu', [id]).then(function(ap){
       if (!ap || !ap.ok) { dire(expliquer(ap), 'err'); return; }
       var quand = ap.date ? new Date(ap.date).toLocaleDateString('${LIEU()}', { day: 'numeric', month: 'long', year: 'numeric' }) : '';
@@ -489,10 +497,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         oui: '${T("Supprimer définitivement")}',
         danger: true
       }).then(function(oui){
-        if (!oui) return;
+        if (!oui || EN_SUPP[id]) return;
+        marquerSupp(id, true);
+        dire('${T("Suppression en cours…")}');
         appeler('commandes:supprimerEcrire', [id]).then(function(r){
-          if (!r || !r.ok) { dire('${T("Suppression non confirmée par le serveur — réessayez.")}', 'err'); return; }
+          if (!r || !r.ok) { marquerSupp(id, false); dire('${T("Suppression non confirmée par le serveur — réessayez.")}', 'err'); return; }
           dire('${T("Commande supprimée — inventaire rétabli.")}', 'bon');
+          setTimeout(function(){ delete EN_SUPP[id]; }, 120000);
           charger();
         });
       });
@@ -1011,7 +1022,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
           /* PAS DE PHOTO ICI (2026-10-12, sa demande) : le CLIENT, le MONTANT et la priorite d abord ; dessous,
              le numero et le statut de la commande. */
           var ton = { delivered: 'vert', shipped: 'bleu', confirmed: 'bleu', verification: 'bleu', pending: 'ambre', preparing: 'ambre', cancelled: 'rouge' }[c.statut] || '';
-          return '<div class="cmd' + (c.prioritaire ? ' prio' : '') + (NEUVES[c.oid] ? ' neuve' : '') + '" data-ligne="' + esc(c.oid) + '" title="${T("Ouvrir la commande")}">'
+          return '<div class="cmd' + (c.prioritaire ? ' prio' : '') + (NEUVES[c.oid] ? ' neuve' : '') + (EN_SUPP[c.oid] ? ' sz-supp' : '') + '" data-ligne="' + esc(c.oid) + '" title="${T("Ouvrir la commande")}">'
             + '<div class="t"><b><span class="nm">' + esc(c.client || c.numero || '—') + '</span>'
             + (c.prioritaire ? '<span class="prio-pill" role="img" title="${T("Prioritaire")} — ${T("Traitement prioritaire demandé par le client")}" aria-label="${T("Prioritaire")}">!</span>' : '')
             + '<span class="cadslot" data-cad="' + esc(c.oid) + '"></span></b>'
@@ -1189,6 +1200,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (rt) return [{ lib: '${T("Ouvrir le retour")}', fn: function(){ ligne.click(); } }];
     var oid = ligne.getAttribute && ligne.classList && ligne.classList.contains('cmd') ? ligne.getAttribute('data-ligne') : '';
     if (!oid) return null;
+    if (EN_SUPP[oid]) return null;   // (2026-11-28) en cours de suppression : aucun geste
     var ouvrirAvec = function(suffixe){
       appeler('commandes:ouvrirDetail', [oid + (suffixe || '')]).then(function(r){ if (!r || !r.ok) dire(expliquer(r), 'err'); else dire(''); });
     };

@@ -5050,6 +5050,49 @@ const _traduireLibelles = (x, prof) => {
 
 const VITRINES = ['pos-client', 'encan-ecran'];
 const _deVitrine = (e) => VITRINES.some((c) => { const w = fenetresNatives.get(c); return !!(w && !w.isDestroyed() && e && e.sender === w.webContents); });
+/* ══ UNE ÉCRITURE À LA FOIS, ET JAMAIS DEUX FOIS (2026-11-28, ses mots : « après avoir cliqué sur supprimer
+   définitivement, le serveur prend tellement de temps à se rafraîchir qu'on peut relancer une autre suppression », puis
+   « assure-toi de mettre ce genre de contrôle sur toutes les données qui sont modifiées en attente du serveur ») ══════
+   Toute ÉCRITURE de toute fenêtre passe ici. Sa clé : le module + la FICHE visée (1er argument, ou son id).
+   · la MÊME écriture, relancée pendant que la première attend (double clic, second « Supprimer », menu rouvert) : elle
+     n'est PAS rejouée — elle reçoit la réponse de la première ;
+   · une AUTRE écriture sur la même fiche : elle ATTEND son tour, et part après la réponse du serveur.
+   ⚠ La caisse, l'encan et la VENTE au stock en sont exclus : scanner deux fois le même article, ce sont DEUX unités
+   (ils ont leur propre file, rejouable sans double). Les autres écritures du stock (lieux, entrepôts) sont gardées. Les lectures ne sont pas touchées. */
+const _ECR_EXCLUS = /^(caisse|encan):|^stock:vendre/;   // la vente au scan : deux scans = deux unites
+const _ECR_LECTURE = /^(lire|.*Lire|apercu|.*Apercu|donnees|.*Donnees|etat|.*Etat|chercher|recherche|.*Chercher|liste|.*Liste)$/i;
+const _ECR_GESTE = /(ecrire|supprim|enregistr|valider|prelever|envoy|statut|rembours|creer|ajout|retir|publi|approuv|rouvrir|import|annul|bascul|appliqu|payer|compos|traiter|expedi|copier|depos|planifi|confirm|renvoy|etiquette|coeur)/i;
+const _ecrituresEnVol = new Map();
+const _estEcriture = (op) => {
+  if (_ECR_EXCLUS.test(op)) return false;
+  if (OPS_CRITIQUES.has(op)) return true;
+  const action = op.split(':').pop() || '';
+  return !_ECR_LECTURE.test(action) && _ECR_GESTE.test(action);
+};
+const _cibleEcriture = (args) => {
+  const a = Array.isArray(args) ? args[0] : undefined;
+  if (typeof a === 'string' || typeof a === 'number') return String(a);
+  if (a && typeof a === 'object') { const id = a.id || a.aboId || a.orderId || a.staffId; if (id) return String(id); }
+  return '';
+};
+const _ecrireUneFois = (opN, args, lancer) => {
+  const cible = _cibleEcriture(args);
+  const cle = opN.split(':')[0] + '|' + (cible || ('*' + opN));
+  let sig = opN + '|?';
+  try { sig = opN + '|' + JSON.stringify(args === undefined ? null : args).slice(0, 4000); } catch (er) {}
+  const enCours = _ecrituresEnVol.get(cle);
+  if (enCours && enCours.sig === sig) {
+    try { _journalFenetre('ecriture en double ignoree : ' + opN + (cible ? ' (' + cible + ')' : '')); } catch (er) {}
+    return enCours.promesse;
+  }
+  const avant = enCours ? enCours.promesse.then(() => null, () => null) : Promise.resolve();
+  const promesse = avant.then(() => lancer()).finally(() => {
+    const x = _ecrituresEnVol.get(cle);
+    if (x && x.promesse === promesse) _ecrituresEnVol.delete(cle);
+  });
+  _ecrituresEnVol.set(cle, { sig, promesse });
+  return promesse;
+};
 ipcMain.handle('pont:appeler', (e, op, args) => {
   // Les ventes de l'encan ne partent QUE du processus principal (src/encan-vente.js) : aucune page ne les déclenche.
   if (/^encan:/.test(String(op || ''))) return { ok: false, motif: 'droit' };
@@ -5069,13 +5112,17 @@ ipcMain.handle('pont:appeler', (e, op, args) => {
     });
   }
   const opN = String(op || '');
-  if (OPS_CRITIQUES.has(opN)) {
-    if (_majVerrou) return { ok: false, motif: 'maj_en_cours' };
-    _opsCritiquesEnVol++;
-    return Promise.resolve().then(() => executerOpSite(opN, args, e.sender))
-      .finally(() => { _opsCritiquesEnVol = Math.max(0, _opsCritiquesEnVol - 1); });
-  }
-  return executerOpSite(opN, args, e.sender);
+  const lancer = () => {
+    if (OPS_CRITIQUES.has(opN)) {
+      if (_majVerrou) return { ok: false, motif: 'maj_en_cours' };
+      _opsCritiquesEnVol++;
+      return Promise.resolve().then(() => executerOpSite(opN, args, e.sender))
+        .finally(() => { _opsCritiquesEnVol = Math.max(0, _opsCritiquesEnVol - 1); });
+    }
+    return executerOpSite(opN, args, e.sender);
+  };
+  if (_estEcriture(opN)) return _ecrireUneFois(opN, args, lancer);
+  return lancer();
 });
 // L'APERÇU 3D, PRÉPARÉ AU POSTE (7.16.0) : le modèle rendu par Fal.ai (17 à 20 Mo) est téléchargé
 // ICI puis compressé (modele3d.js : matière mate, textures 1024 px, géométrie simplifiée + Draco),

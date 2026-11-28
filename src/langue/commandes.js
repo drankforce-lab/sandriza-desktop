@@ -569,4 +569,6 @@ module.exports = {
   'Déjà remboursé': 'Already refunded',
   'Total retenu': 'Total withheld',
   'Les frais de service retenus seront remboursés au client via Square.': 'The withheld service fees will be refunded to the customer through Square.',
+  'Suppression en cours…': 'Deleting…',
+  'Suppression déjà en cours pour cette commande.': 'This order is already being deleted.',
 };

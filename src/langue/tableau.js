@@ -389,4 +389,6 @@ module.exports = {
   'Suppression non confirmée par le serveur — réessayez.': 'Deletion not confirmed by the server — try again.',
   'Commande supprimée — inventaire rétabli.': 'Order deleted — inventory restored.',
   'Date': 'Date',
+  'Suppression en cours…': 'Deleting…',
+  'Suppression déjà en cours pour cette commande.': 'This order is already being deleted.',
 };

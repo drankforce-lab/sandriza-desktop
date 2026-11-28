@@ -4093,6 +4093,10 @@ const CSS_JOUR_TEXTES = `
 /* (2026-11-28) L'icone des ECRANS VIDES (Paie : .em-vide .i ; Boite de style : .bx-vide .i) : l'or de nuit sur le gris
    pale du jour tombait a 1,94. Le meme or, assombri. */
 html.jour .em-vide .i,html.jour .bx-vide .i,html.jour #corps .bx-vide .i{color:#7a5524}
+/* (2026-11-28, sa remarque : apres « Supprimer definitivement », la commande restait cliquable tant que le serveur
+   n avait pas repondu — on pouvait relancer une seconde suppression) La ligne en cours de suppression est grisee,
+   barree, et ne recoit plus aucun geste. */
+.sz-supp{opacity:.42!important;pointer-events:none!important;cursor:progress;text-decoration:line-through;text-decoration-color:rgba(255,255,255,.35)}
 /* ⚠⚠ LE GRAS D UN PANNEAU GARDAIT SA COULEUR DE NUIT — ET C ETAIT DU TEXTE
    INVISIBLE. Les panneaux (.info, .bien, .avis) ont bien leur reprise de jour ;
    mais le B a l interieur porte sa PROPRE couleur en dur (#dbe7fb, #d3f6e4 :
