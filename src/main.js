@@ -1339,12 +1339,16 @@ ipcMain.handle('reglages:page', () => { try { return reglagesPage(); } catch (e)
 let _depuisReglages = 0;
 const _retourCfgPoser = (wc, on) => {
   if (!wc || wc.isDestroyed()) return;
-  let lib = '← Configuration';
-  try { if (require('./langue').langueCourante() === 'en') lib = '← Settings'; } catch (e) {}
+  /* (2026-11-28, sa capture : « refais le bouton de retour, je n'aime pas ») Un fil d'Ariane : chevron dessiné, libellé
+     discret, filet avant le titre — plus de flèche en texte ni de pastille dorée. */
+  let lib = 'Configuration';
+  try { if (require('./langue').langueCourante() === 'en') lib = 'Settings'; } catch (e) {}
   const js = '(function(on,lib){try{var t=document.querySelector(".tete");if(!t)return;var b=document.getElementById("sz-retour-cfg");'
     + 'if(!on){if(b)b.remove();return;}if(!b){b=document.createElement("button");b.type="button";b.id="sz-retour-cfg";b.className="sz-retour-cfg";'
     + 'b.onclick=function(){try{window.szPont&&window.szPont.ouvrirModule&&window.szPont.ouvrirModule("reglages");}catch(e){}};t.insertBefore(b,t.firstChild);}'
-    + 'b.textContent=lib;}catch(e){}})(' + (on ? 'true' : 'false') + ',' + JSON.stringify(lib) + ');';
+    + 'b.setAttribute("aria-label",lib);b.title=lib;'
+    + 'b.innerHTML=\'<svg viewBox="0 0 16 16" width="14" height="14" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10 3.5 5.5 8l4.5 4.5"/></svg><span></span>\';'
+    + 'b.querySelector("span").textContent=lib;}catch(e){}})(' + (on ? 'true' : 'false') + ',' + JSON.stringify(lib) + ');';
   try { wc.executeJavaScript(js, true).catch(() => {}); } catch (e) {}
 };
 ipcMain.handle('recherche:menu:agir', (e, brut) => {

@@ -5891,9 +5891,17 @@ html[data-sz-theme="epure"] .ed-seg[role="group"] button:hover{background:var(--
 html[data-sz-theme="epure"] .ed-seg[role="group"] button.on{background:var(--sz-accent-doux)!important;border-color:var(--sz-accent)!important;color:var(--tx-or)!important}
 html[data-sz-theme="epure"] .st-onglets button{border-radius:0!important}
 /* « ← Configuration » (posé par la coquille quand l'écran vient de la page Configuration) : un lien de retour discret, en tête. */
-.sz-retour-cfg{flex:none;height:30px;padding:0 10px;margin-right:4px;border:0!important;border-radius:8px;background:transparent!important;
-  color:var(--tx-or,var(--tx));font:inherit;font-size:13px;font-weight:700;white-space:nowrap;cursor:pointer;-webkit-app-region:no-drag}
-.sz-retour-cfg:hover{background:var(--v06)!important}
+/* (2026-11-28, « refais le bouton de retour, je n'aime pas ») Un fil d'Ariane : chevron fin + « Configuration » en gris,
+   un filet avant le titre ; au survol, le texte s'éclaire. Ni cadre, ni pastille, ni or. */
+.sz-retour-cfg,html[data-sz-theme="epure"] .sz-retour-cfg{flex:none;display:inline-flex;align-items:center;gap:4px;height:28px;padding:0 8px 0 4px;
+  margin:0 12px 0 -4px;border:0!important;border-radius:7px!important;background:transparent!important;box-shadow:none!important;
+  color:var(--tx2)!important;font:inherit;font-size:12.5px!important;font-weight:600!important;letter-spacing:.01em;white-space:nowrap;cursor:pointer;
+  position:relative;-webkit-app-region:no-drag;transition:color .15s ease,background .15s ease}
+.sz-retour-cfg svg{flex:none;opacity:.85;transition:transform .15s ease}
+.sz-retour-cfg::after{content:"";position:absolute;right:-7px;top:6px;bottom:6px;width:1px;background:var(--v12,var(--v08))}
+.sz-retour-cfg:hover,html[data-sz-theme="epure"] .sz-retour-cfg:hover{color:var(--tx)!important;background:var(--v05)!important}
+.sz-retour-cfg:hover svg{transform:translateX(-2px)}
+.sz-retour-cfg:focus-visible{outline:2px solid var(--or);outline-offset:1px}
 /* (2026-11-19, banc des contrastes au rendu) Le COMPTEUR d'un onglet (Bons de commande, Transferts…) : l'onglet actif lui
    passait la couleur de son texte (claire la nuit) sur l'accent — illisible. Les compteurs d'onglets sont en ton NEUTRE. */
 html[data-sz-theme="epure"] .onglets button .pastille{background:var(--ep-neutre-f)!important;color:var(--ep-neutre-t)!important}
