@@ -88,6 +88,18 @@ if (process.argv.includes('--site-seulement')) {
   if (!bancs.length) { console.log('ECHEC  aucun banc ne lit le site — le motif ne marche plus.'); process.exit(1); }
 }
 
+/* (2026-11-28, après QUATRE constructions de 10 min refusées pour des fautes qu'un banc du poste voyait en secondes :
+   « 40 minutes, ça n'a pas d'allure ») `--sans-navigateur` (livrer, étape 2) : TOUS les bancs du travail `windows` qui
+   n'ouvrent ni Chrome ni Electron, sur le poste, AVANT d'envoyer la construction. Ceux qui ouvrent un navigateur restent
+   l'affaire de GitHub, comme le voulait sa question du matin. */
+if (process.argv.includes('--sans-navigateur')) {
+  const NAVIGATEUR = /chrome|require\(['"]electron['"]\)|electron\.exe/i;
+  const avant = bancs.length;
+  bancs = bancs.filter((b) => { try { return !NAVIGATEUR.test(fs.readFileSync(path.join(RACINE, b), 'utf8')); } catch (e) { return true; } });
+  console.log('  --   --sans-navigateur : ' + bancs.length + ' banc(s) sur le poste ; les ' + (avant - bancs.length)
+    + ' qui ouvrent un navigateur tournent dans la construction GitHub.\n');
+}
+
 if (bancs.length < 5 && !process.argv.includes('--site-seulement')) {
   console.log('ECHEC  ' + bancs.length + ' banc(s) trouve(s) dans build.yml — le motif de lecture ne marche plus,');
   console.log('       et un lanceur qui ne trouve rien repondrait << tout va bien >> sur un depot casse.');

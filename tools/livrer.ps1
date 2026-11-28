@@ -197,7 +197,8 @@ if ($SansControles) {
   # ceux qui lisent le depot du site, que le runner n'a pas. Un rouge sur GitHub bloque toujours la publication.
   Push-Location $racine
   try {
-    & node (Join-Path $racine 'tools\bancs.js') --site-seulement
+    # (2026-11-28) TOUS les bancs sans navigateur, plus seulement ceux qui lisent le site : un rouge ici coûte 2 min, sur GitHub 10.
+    & node (Join-Path $racine 'tools\bancs.js') --sans-navigateur
     if ($LASTEXITCODE -ne 0) { Mauvais "un banc refuse — rien n'est livre" }
   } finally { Pop-Location }
   Bon "les bancs passent"
