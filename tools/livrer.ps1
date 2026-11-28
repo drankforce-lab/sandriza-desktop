@@ -192,23 +192,32 @@ if ($SansControles) {
   # un depot qui n'est pas le leur.
   # ⚠ UNE FAUTE FANTOME EST PIRE QU'UN SILENCE : on la cherche dans le code, et
   # elle n'y est pas. Push-Location / Pop-Location, et le probleme disparait.
-  Etape "2. Les bancs de l'application"
+  Etape "2. Les bancs de l'application (ceux qui lisent le site)"
+  # (2026-11-28) Les bancs de l'application tournent DEJA dans la construction GitHub (travail « windows ») : ici, seuls
+  # ceux qui lisent le depot du site, que le runner n'a pas. Un rouge sur GitHub bloque toujours la publication.
   Push-Location $racine
   try {
-    & node (Join-Path $racine 'tools\bancs.js')
+    & node (Join-Path $racine 'tools\bancs.js') --site-seulement
     if ($LASTEXITCODE -ne 0) { Mauvais "un banc refuse — rien n'est livre" }
   } finally { Pop-Location }
   Bon "les bancs passent"
 
   Etape "3. Le controle avant deploiement (site)"
+  # (2026-11-28) DEJA FAIT A L'ENVOI ? Le crochet pre-push ecrit dans .git/sz-verifie le commit qu'il a controle EN ENTIER
+  # (rendus compris). Meme commit, rien de modifie : on ne le refait pas — c'etait ~5 minutes de Chrome en double.
+  $tamponSite = ''
+  try { $tamponSite = (Get-Content (Join-Path $Site '.git\sz-verifie') -Raw -ErrorAction Stop).Trim() } catch {}
+  $teteSite = (& git -C $Site rev-parse HEAD).Trim()
+  $deja = ($tamponSite -and $tamponSite -eq $teteSite -and -not (& git -C $Site status --porcelain))
+  if ($deja) { Bon "deja controle a l'envoi (commit $($teteSite.Substring(0,8))) — on ne le refait pas" }
   Push-Location $Site
-  try {
+  if (-not $deja) { try {
     $args3 = @('-File', (Join-Path $Site 'tools\check\verifier.ps1'))
     if ($SansRendu) { $args3 += '-SansRendu' }
     & pwsh @args3
     if ($LASTEXITCODE -ne 0) { Mauvais "verifier.ps1 refuse — rien n'est livre" }
-  } finally { Pop-Location }
-  Bon "le controle avant deploiement passe"
+  } finally { Pop-Location } } else { Pop-Location }
+  if (-not $deja) { Bon "le controle avant deploiement passe" }
   if ($SansRendu) { Note "-SansRendu : les contrastes au rendu n'ont PAS ete mesures ici. C'est l'etape 4 qui les lira." }
 
   # 3b. (2026-11-26, avec son accord) Les champs de la BOUTIQUE au rendu : 13 parcours x 2 largeurs, fichiers locaux,

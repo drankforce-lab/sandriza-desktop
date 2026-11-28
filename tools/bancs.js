@@ -74,7 +74,21 @@ const JAMAIS_LOCAL = new Set(['tools/banc-contraste-rendu.js']);
   }
 }
 
-if (bancs.length < 5) {
+/* (2026-11-28, sa question : « pourquoi tous ces contrôles sont faits de mon poste et non de GitHub ? ») LES BANCS
+   TOURNENT DÉJÀ SUR GITHUB : ce sont les lignes `node tools/…` du travail `windows` de build.yml, avant les
+   installateurs — et un rouge y bloque la publication (livrer lit chaque travail). Ce qu'un runner ne VOIT PAS, c'est le
+   dépôt du SITE posé à côté : les bancs qui le lisent y passent leur tour (« site absent »).
+   ➡ `--site-seulement` (livrer, étape 2) : on ne garde ICI que ces bancs-là ; les autres sont l'affaire de GitHub. */
+if (process.argv.includes('--site-seulement')) {
+  const LIT_LE_SITE = /'Sandriza'|"Sandriza"|SZ_SITE|depot du site|site absent|dépôt du site/;
+  const avant = bancs.length;
+  bancs = bancs.filter((b) => { try { return LIT_LE_SITE.test(fs.readFileSync(path.join(RACINE, b), 'utf8')); } catch (e) { return true; } });
+  console.log('  --   --site-seulement : ' + bancs.length + ' banc(s) qui lisent le dépôt du site ; les ' + (avant - bancs.length)
+    + ' autres tournent dans la construction GitHub (travail « windows »).\n');
+  if (!bancs.length) { console.log('ECHEC  aucun banc ne lit le site — le motif ne marche plus.'); process.exit(1); }
+}
+
+if (bancs.length < 5 && !process.argv.includes('--site-seulement')) {
   console.log('ECHEC  ' + bancs.length + ' banc(s) trouve(s) dans build.yml — le motif de lecture ne marche plus,');
   console.log('       et un lanceur qui ne trouve rien repondrait << tout va bien >> sur un depot casse.');
   process.exit(1);
