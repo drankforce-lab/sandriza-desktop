@@ -514,4 +514,16 @@ module.exports = {
   "plus de 4 Mo": "over 4 MB",
   "T4": "T4",
   "Année d’imposition": "Tax year",
+  "Modifier": "Edit",
+  "Embauche le": "Hired on",
+  "Date d’embauche à saisir": "Hire date to enter",
+  "Rémunération": "Pay",
+  "Vacances et congés": "Vacation and leave",
+  "En cas d’urgence": "In case of emergency",
+  "Aucun contact saisi": "No contact entered",
+  "Confidentiel": "Confidential",
+  "Coordonnées, NAS, dépôt direct": "Contact details, SIN, direct deposit",
+  "Bulletins, relevés et pièces, chiffrés": "Pay stubs, slips and documents, encrypted",
+  "+ Pointage": "+ Punch",
+  "+ Congé": "+ Leave"
 };
