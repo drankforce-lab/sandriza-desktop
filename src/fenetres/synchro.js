@@ -424,7 +424,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
     sous_cout: '${T("Vendu sous le coût")}', stock_vide: '${T("Aucun stock")}', ugs_double: '${T("UGS déjà prise en ligne")}' };
   function alertes(e){ var a = (e.controles || []).slice(); if (e.avert === 'ugs_double') a.push('ugs_double'); return a; }
   // une clé encore inconnue s'écrit en mots (« gift_cfg » → « Gift ») plutôt qu'en nom de base de données
-  function nomCle(e){ return e.tbl === 'products' ? (e.titre || e.cle) : (CLES[e.cle] || motCle(String(e.cle).replace(/_(cfg|reglages)$/, ''))); }
+  function nomCle(e){ return e.tbl === 'products' ? (e.titre || e.cle) : (CLES[e.cle] || motCle(String(e.cle).replace(/(?:_cfg|_reglages)$/, ''))); }
   function etiquette(e){
     if (e.sens === 'conflit') return ['conflit', '${T("Conflit")}'];
     if (e.sens === 'prod') return ['enligne', '${T("Changé en ligne")}'];
