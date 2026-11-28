@@ -241,6 +241,14 @@ jobs:
         if: env.SITE_LECTURE != ''
         with:
           node-version: 22
+      # Le PHP DU POSTE (8.2, avec SQLite) : celui de la machine GitHub est en 8.5, sans pdo_sqlite, et ses avis
+      # « Deprecated » s'impriment dans les réponses des bancs serveur (17 bancs rouges le 2026-11-28, code sain).
+      - uses: shivammathur/setup-php@v2
+        if: env.SITE_LECTURE != ''
+        with:
+          php-version: '8.2'
+          extensions: curl, mbstring, openssl, pdo_sqlite, sqlite3, gd, intl, sodium, zip, fileinfo
+          coverage: none
       - name: Controle avant deploiement du site (verifier.ps1, rendus compris)
         if: env.SITE_LECTURE != ''
         shell: pwsh
