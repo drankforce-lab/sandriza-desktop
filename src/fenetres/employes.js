@@ -383,7 +383,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       var n = equipe().length, ep = (r.enPoste || []).length;
       elSous.textContent = n + ' ' + (n > 1 ? '${T("personnes à la paie")}' : '${T("personne à la paie")}') + (ep ? ' · ' + ep + ' ${T("en poste")}' : '');
       if (ONGLET === 'paie') chargerPaie(); else if (ONGLET === 'politiques') chargerPol(); else dessiner();
-      if (OUVRIR_REGLAGES) { OUVRIR_REGLAGES = false; setTimeout(boiteReglages, 0); }
+      szBoiteSiDemandee(OUVRE);
+      if (OUVRIR_REGLAGES) { OUVRIR_REGLAGES = false; setTimeout(function(){ natif('reglages'); }, 0); }
     });
   }
   function chargerPaie(){
@@ -803,6 +804,39 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     var premier = v.querySelector('input:not([type=checkbox]),select');
     try { if (premier) premier.focus(); } catch (e) {}
     return { el: v, fermer: fermer, ok: v.querySelector('#bx-ok'), val: function(id){ var e = v.querySelector('#' + id); return e ? (e.type === 'checkbox' ? e.checked : e.value) : ''; } };
+  }
+  /* (2026-11-28, sa capture d'« Ajouter un congé » : « il y a encore beaucoup de fenetres non natives ») LES BOITES EN
+     VRAIES FENETRES, comme les autres ecrans (9.2.49, boite-native.js) : chaque boite s'ouvre par natif(nom, args) dans une
+     fenetre modale fille, qui refait cette page et rouvre la boite (szBoiteSiDemandee) ; a sa fermeture, la mere recharge.
+     Les arguments sont des IDENTIFIANTS ou des valeurs simples, jamais des objets de la page. Sans pont : ici, comme avant. */
+  var OUVRE = {
+    quart: function(a){ boiteQuart(a); },
+    pointage: function(a){ boitePointage(a); },
+    conge: function(a){ boiteConge(a.staffId, a.date); },
+    fiche: function(a){ var x = pers(a.id); if (x) boiteFiche(x); },
+    dossier: function(a){ var x = pers(a.id); if (x) boiteDossier(x); },
+    docs: function(a){ var x = pers(a.id); if (x) boiteDocs(x); },
+    taux: function(a){ var x = pers(a.id); if (x) boiteTaux(x); },
+    feuillets: function(a){ boiteFeuillets(a.annee); },
+    avantages: function(){ boiteAvantages(); },
+    reglages: function(){ boiteReglages(); },
+    refus: function(a){ boiteRefus(a.id); },
+    politique: function(a){
+      if (!a || !a.id) { boitePolitique(null); return; }
+      appeler('employes:politiques', []).then(function(r){
+        var l = (r && r.ok) ? (r.politiques || []) : [];
+        var x = l.filter(function(y){ return y.id === a.id; })[0];
+        if (x) boitePolitique(x);
+      });
+    }
+  };
+  function natif(nom, args){
+    szBoite(nom, args || null, function(){ OUVRE[nom](args || null); }).then(function(r){ if (r) { PAIE = null; POL = null; charger(); } });
+  }
+  function boiteRefus(dr){
+    var bx = boite('${T("Refuser la demande")}', '${T("La personne verra la raison à la caisse.")}',
+      '<div class="champs"><label class="ch large">${T("Raison")}<input id="dr-r" maxlength="200" placeholder="${T("Ex. : inventaire ce jour-là")}"></label></div>', '${T("Refuser")}');
+    bx.ok.onclick = function(){ envoyer(bx, 'employes:demandeTraiter', [dr, false, bx.val('dr-r')], '${T("Demande refusée.")}'); };
   }
   function optionsPersonnes(sel){
     return equipe().map(function(s){ return '<option value="' + esc(s.id) + '"' + (s.id === sel ? ' selected' : '') + '>' + esc(s.nom) + '</option>'; }).join('');
@@ -1234,18 +1268,18 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     if (!D.peutModifier) return;
     if ((b = t.closest('[data-act]'))) {
       var a = b.getAttribute('data-act'), sel = pers(CHOISI) || equipe()[0];
-      if (a === 'pointage') boitePointage({ staffId: (sel || {}).id || '', date: D.aujourdhui, entree: '09:00', sortie: '17:00' });
-      else if (a === 'conge') boiteConge(ONGLET === 'equipe' && sel ? sel.id : ((equipe()[0] || {}).id || ''), ONGLET === 'horaire' ? JOUR : D.aujourdhui);
-      else if (a === 'fiche' && sel) boiteFiche(sel);
-      else if (a === 'dossier' && sel) boiteDossier(sel);
-      else if (a === 'docs' && sel) boiteDocs(sel);
-      else if (a === 'taux' && sel) boiteTaux(sel);
+      if (a === 'pointage') natif('pointage', { staffId: (sel || {}).id || '', date: D.aujourdhui, entree: '09:00', sortie: '17:00' });
+      else if (a === 'conge') natif('conge', { staffId: ONGLET === 'equipe' && sel ? sel.id : ((equipe()[0] || {}).id || ''), date: ONGLET === 'horaire' ? JOUR : D.aujourdhui });
+      else if (a === 'fiche' && sel) natif('fiche', { id: sel.id });
+      else if (a === 'dossier' && sel) natif('dossier', { id: sel.id });
+      else if (a === 'docs' && sel) natif('docs', { id: sel.id });
+      else if (a === 'taux' && sel) natif('taux', { id: sel.id });
       return;
     }
-    if ((b = t.closest('[data-pmod]'))) { var p = pointageDe(b.getAttribute('data-pmod')); if (p) boitePointage(p); return; }
+    if ((b = t.closest('[data-pmod]'))) { var p = pointageDe(b.getAttribute('data-pmod')); if (p) natif('pointage', JSON.parse(JSON.stringify(p))); return; }
     if ((b = t.closest('[data-qmod]'))) {
       var q = (D.horaires || []).filter(function(x){ return x.id === b.getAttribute('data-qmod'); })[0];
-      if (q) boiteQuart({ id: q.id, staffId: q.staffId, date: q.date, debut: q.debut, fin: q.fin, note: q.note || '' });
+      if (q) natif('quart', { id: q.id, staffId: q.staffId, date: q.date, debut: q.debut, fin: q.fin, note: q.note || '' });
       return;
     }
     if ((b = t.closest('[data-cgx]'))) {
@@ -1260,8 +1294,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       var an = (D.anomalies || [])[+b.getAttribute('data-absent')]; if (!an) return;
       var qq = (an.prevu || '').split('–');
       szConfirmer({ titre: nomDe(an.staffId) + ' · ' + jourLong(an.date), texte: '${T("Ce quart n’a aucun pointage. Était-ce une absence (congé), ou un oubli de pointage ?")}', oui: '${T("Saisir le pointage")}', non: '${T("C’était un congé")}' }).then(function(okc){
-        if (okc) boitePointage({ staffId: an.staffId, date: an.date, entree: qq[0] || '09:00', sortie: qq[1] || '17:00', note: '${T("Oubli de pointage")}' });
-        else boiteConge(an.staffId, an.date);
+        if (okc) natif('pointage', { staffId: an.staffId, date: an.date, entree: qq[0] || '09:00', sortie: qq[1] || '17:00', note: '${T("Oubli de pointage")}' });
+        else natif('conge', { staffId: an.staffId, date: an.date });
       });
       return;
     }
@@ -1270,15 +1304,15 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       var sid = b.getAttribute('data-zone');
       if (ARME) { poserModele(ARME, sid); return; }
       var d0 = heureSous(b, ev), m0 = minDe(d0) + 8 * 60;
-      boiteQuart({ staffId: sid, date: JOUR, debut: d0, fin: deux(Math.min(23, Math.floor(m0 / 60))) + ':' + deux(m0 % 60) });
+      natif('quart', { staffId: sid, date: JOUR, debut: d0, fin: deux(Math.min(23, Math.floor(m0 / 60))) + ':' + deux(m0 % 60) });
       return;
     }
-    if (t.id === 'em-mods' || t.id === 'em-reg') { boiteReglages(); return; }
-    if (t.id === 'em-av') { boiteAvantages(); return; }
-    if (t.id === 'em-fe') { boiteFeuillets(String(new Date().getFullYear() - 1)); return; }
+    if (t.id === 'em-mods' || t.id === 'em-reg') { natif('reglages'); return; }
+    if (t.id === 'em-av') { natif('avantages'); return; }
+    if (t.id === 'em-fe') { natif('feuillets', { annee: String(new Date().getFullYear() - 1) }); return; }
     if (t.id === 'em-publier') { publier(); return; }
-    if (t.id === 'pol-neuve') { boitePolitique(null); return; }
-    if ((b = t.closest('[data-polmod]'))) { var pm = (POL || []).filter(function(x){ return x.id === b.getAttribute('data-polmod'); })[0]; if (pm) boitePolitique(pm); return; }
+    if (t.id === 'pol-neuve') { natif('politique', null); return; }
+    if ((b = t.closest('[data-polmod]'))) { natif('politique', { id: b.getAttribute('data-polmod') }); return; }
     if ((b = t.closest('[data-polret]'))) {
       var pid2 = b.getAttribute('data-polret');
       szConfirmer({ titre: '${T("Retirer la politique")}', texte: '${T("Elle disparaît du portail des employés. Les signatures déjà données sont gardées.")}', oui: '${T("Retirer")}' }).then(function(okc){
@@ -1293,10 +1327,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       return;
     }
     if ((b = t.closest('[data-dref]'))) {
-      var dr = b.getAttribute('data-dref');
-      var bx = boite('${T("Refuser la demande")}', '${T("La personne verra la raison à la caisse.")}',
-        '<div class="champs"><label class="ch large">${T("Raison")}<input id="dr-r" maxlength="200" placeholder="${T("Ex. : inventaire ce jour-là")}"></label></div>', '${T("Refuser")}');
-      bx.ok.onclick = function(){ envoyer(bx, 'employes:demandeTraiter', [dr, false, bx.val('dr-r')], '${T("Demande refusée.")}'); };
+      natif('refus', { id: b.getAttribute('data-dref') });
       return;
     }
     if (t.id === 'em-copier') {
