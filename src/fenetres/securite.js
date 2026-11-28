@@ -887,7 +887,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
          a restreindre. */
       A = { F: r, etape: 0, role: defaut, perms: null,
             first:'', last:'', username:'', email:'', pw:'',
-            active:true, reqmfa:true, exempt:false, q1:'', a1:'', q2:'', a2:'' };
+            active:true, reqmfa:true, exempt:false, employe:false, q1:'', a1:'', q2:'', a2:'' };
       dessinerAssistant();
     });
   }
@@ -960,6 +960,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + '<span>${T("Compte actif")}<span class="quoi">${T("Décoché, la personne ne peut plus se connecter — sans que le compte ni son historique soient supprimés.")}</span></span></label>'
         + '<label class="case"><input type="checkbox" id="a-reqmfa" '+(A.reqmfa?'checked':'')+'>'
         + '<span>${T("Exiger la configuration MFA à la 1<sup>re</sup> connexion")}<span class="quoi">${T("Elle devra lier une application d’authentification avant d’accéder à l’administration.")}</span></span></label>'
+        + '<label class="case"><input type="checkbox" id="a-employe" '+(A.employe?'checked':'')+'>'
+        + '<span>${T("Donner accès au portail des employés")}<span class="quoi">${T("Coché, la personne devient un employé : horaire, paie et portail RH. Décoché, c’est un compte de l’administration seulement ; le module Employés peut l’ajouter plus tard.")}</span></span></label>'
         + '<label class="case"><input type="checkbox" id="a-exempt" '+(A.exempt?'checked':'')+'>'
         + '<span>${T("Exempté de MFA")}<span class="quoi">${T("À réserver aux cas où le second facteur est impossible : c’est un rempart en moins.")}</span></span></label>'
         + (MODE==='avance' ? questionsHtml('a') : '');
@@ -983,6 +985,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         + (A.perms ? '${T(" (modifiés à la main)")}' : '${T(" (ceux du rôle)")}')+'</dd>'
         + '<dt>${T("Mot de passe")}</dt><dd>'+(A.pw?'${T("Choisi ici")}':'${T("Généré et envoyé par courriel")}')+'</dd>'
         + '<dt>${T("État")}</dt><dd>'+(A.active?'${T("Actif dès la création")}':'${T("Créé désactivé")}')+'</dd>'
+        + '<dt>${T("Employé")}</dt><dd>'+(A.employe?'${T("Oui — horaire, paie et portail des employés")}':'${T("Non — administration seulement")}')+'</dd>'
         + '<dt>MFA</dt><dd>'+(A.exempt?'${T("Exempté — un rempart en moins")}':(A.reqmfa?'${T("Exigé à la 1re connexion")}':'${T("Facultatif")}'))+'</dd>'
         + '</dl>'
         + (sens.length ? '<div class="sens"><b>${T("Ce compte recevra des droits sensibles :")}</b><ul><li>'
@@ -1082,7 +1085,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       A.username=txv('a-username'); A.email=txv('a-email');
     } else if (cle === 'acces'){
       A.pw=txv('a-pw'); A.active=chkv('a-active');
-      A.reqmfa=chkv('a-reqmfa'); A.exempt=chkv('a-exempt');
+      A.reqmfa=chkv('a-reqmfa'); A.exempt=chkv('a-exempt'); A.employe=chkv('a-employe');
       if (document.getElementById('a-q1')){ A.q1=txv('a-q1'); A.a1=txv('a-a1'); A.q2=txv('a-q2'); A.a2=txv('a-a2'); }
     } else if (cle === 'droits'){
       var p=[], cbs=document.querySelectorAll('#a-perms [data-perm]');
@@ -1122,7 +1125,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       firstName: A.first.trim(), lastName: A.last.trim(),
       username: A.username.trim(), email: A.email.trim(),
       password: A.pw, role: A.role,
-      active: A.active, requireMfaSetup: A.reqmfa, mfaExempt: A.exempt,
+      active: A.active, requireMfaSetup: A.reqmfa, mfaExempt: A.exempt, employe: !!A.employe,
       perms: permsCourantes(),
       securityQ1: A.q1.trim(), securityA1: A.a1.trim(),
       securityQ2: A.q2.trim(), securityA2: A.a2.trim()
@@ -1133,7 +1136,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
         fermerAssistant();
         var msg = '${T("Compte créé.")}' + (r.courrielEnvoye
           ? '${T(" Courriel d’accueil envoyé à ")}'+(r.courriel||'')+'.'
-          : '${T(" (courriel non envoyé).")}');
+          : '${T(" (courriel non envoyé).")}')
+          + (r.employeEchec ? '${T(" La fiche d’employé n’a pas pu être créée : ajoutez la personne dans le module Employés.")}' : '');
         recharger(msg, 'bon');
         if (r.tempPassword) montrerMdp(r.tempPassword, r.courriel||'', !!r.courrielEnvoye, false);
       } else aerr(expliquer(r));
@@ -1205,7 +1209,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<label class="case"><input type="checkbox" id="u-reqmfa" '+(c.requireMfaSetup&&!c.mfaEnabled?'checked':'')+'>'
       + '<span>${T("Exiger la configuration MFA à la 1<sup>re</sup> connexion")}<span class="quoi">${T("Elle devra lier une application d’authentification avant d’accéder à l’administration.")}</span></span></label>'
       + '<label class="case"><input type="checkbox" id="u-exempt" '+(c.mfaExempt?'checked':'')+'>'
-      + '<span>${T("Exempté de MFA")}<span class="quoi">${T("À réserver aux cas où le second facteur est impossible : c’est un rempart en moins.")}</span></span></label>';
+      + '<span>${T("Exempté de MFA")}<span class="quoi">${T("À réserver aux cas où le second facteur est impossible : c’est un rempart en moins.")}</span></span></label>'
+      // (2026-11-28) À la CRÉATION seulement : un compte n'est employé (horaire, paie, portail RH) que sur choix.
+      + (nouv ? '<label class="case"><input type="checkbox" id="u-employe">'
+        + '<span>${T("Donner accès au portail des employés")}<span class="quoi">${T("Coché, la personne devient un employé : horaire, paie et portail RH. Décoché, c’est un compte de l’administration seulement ; le module Employés peut l’ajouter plus tard.")}</span></span></label>' : '');
 
     var volQuestions = '<div class="note">${T("<b>Questions de secours</b> — elles servent à rouvrir le compte si le mot de passe est perdu. Facultatives, mais sans elles la seule issue est de recréer le compte.")}</div>'
       + '<div class="cols2">'
@@ -1295,7 +1302,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       firstName: txv('u-first').trim(), lastName: txv('u-last').trim(),
       username: txv('u-username').trim(), email: txv('u-email').trim(),
       password: txv('u-pw'), role: txv('u-role'),
-      active: chkv('u-active'), requireMfaSetup: chkv('u-reqmfa'), mfaExempt: chkv('u-exempt'),
+      active: chkv('u-active'), requireMfaSetup: chkv('u-reqmfa'), mfaExempt: chkv('u-exempt'), employe: !id && chkv('u-employe'),
       perms: perms,
       securityQ1: txv('u-q1').trim(), securityA1: txv('u-a1').trim(),
       securityQ2: txv('u-q2').trim(), securityA2: txv('u-a2').trim()
@@ -1306,7 +1313,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       if (r&&r.ok){
         fermerEditeurCompte();
         var msg = (r.mode==='create')
-          ? ('${T("Compte créé.")}' + (r.courrielEnvoye ? '${T(" Courriel d’accueil envoyé à ")}'+(r.courriel||'')+'.' : '${T(" (courriel non envoyé).")}'))
+          ? ('${T("Compte créé.")}' + (r.courrielEnvoye ? '${T(" Courriel d’accueil envoyé à ")}'+(r.courriel||'')+'.' : '${T(" (courriel non envoyé).")}')
+            + (r.employeEchec ? '${T(" La fiche d’employé n’a pas pu être créée : ajoutez la personne dans le module Employés.")}' : ''))
           : '${T("Compte modifié.")}';
         recharger(msg, 'bon');
         if (r.mode==='create' && r.tempPassword) montrerMdp(r.tempPassword, r.courriel||'', !!r.courrielEnvoye, false);

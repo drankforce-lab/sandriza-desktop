@@ -610,7 +610,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
   /* ══ ÉQUIPE : des fiches et un panneau ══ */
   function vueEquipe(){
     var tous = (D && D.personnel) || [];
-    if (!tous.length) return '<div class="carte vide">${T("Aucun compte du personnel. Ajoutez-les dans Configuration → Sécurité → Accès utilisateurs ; ils paraîtront ici.")}</div>';
+    /* (2026-11-28, sa demande) Les employés sont CHOISIS parmi les comptes du personnel : un compte n'en est pas un
+       d'office (ni du portail RH). « Ajouter un employé » propose les autres comptes. */
+    var ajout = (D && D.peutModifier && (D.autresComptes || []).length) ? '<div class="gestes"><button class="mini" data-act="ajouterEmp">${T("Ajouter un employé")}</button></div>' : '';
+    if (!tous.length) return '<div class="carte vide">${T("Aucun employé. « Ajouter un employé » choisit parmi les comptes du personnel ; un compte créé dans l’application n’en est pas un d’office.")}' + ajout + '</div>';
     if (!CHOISI || !pers(CHOISI)) CHOISI = (equipe()[0] || tous[0]).id;
     var carte = function(s){
       var f = s.fiche || {}, ep = (D.enPoste || []).some(function(e){ return e.staffId === s.id; });
@@ -622,7 +625,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     var g = '<div class="cartes">' + equipe().map(carte).join('') + '</div>';
     var hors = tous.filter(function(s){ return !inclus(s); });
     if (hors.length) g += '<div class="sec-t">${T("Hors paie")}</div><div class="cartes">' + hors.map(carte).join('') + '</div>';
-    return '<div class="g3"><div style="display:flex;flex-direction:column;gap:.7rem">' + g + '</div>' + panneau(pers(CHOISI)) + '</div>';
+    return '<div class="g3"><div style="display:flex;flex-direction:column;gap:.7rem">' + ajout + g + '</div>' + panneau(pers(CHOISI)) + '</div>';
   }
   function panneau(s){
     if (!s) return '';
@@ -650,7 +653,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       }).join('') + '</div>';
     }
     if (f.note) h += '<div class="note">' + esc(f.note) + '</div>';
-    if (D.peutModifier) h += '<div class="gestes"><button class="mini" data-act="fiche">${T("Modifier la fiche")}</button><button class="mini" data-act="dossier">${T("Dossier confidentiel")}</button><button class="mini" data-act="docs">${T("Documents de paie")}</button>' + (inclus(s) ? '<button class="mini" data-act="taux">${T("Nouveau taux")}</button><button class="mini" data-act="conge">${T("Ajouter un congé")}</button>' : '') + '</div>';
+    if (D.peutModifier) h += '<div class="gestes"><button class="mini" data-act="fiche">${T("Modifier la fiche")}</button><button class="mini" data-act="dossier">${T("Dossier confidentiel")}</button><button class="mini" data-act="retirerEmp">${T("Retirer des employés")}</button><button class="mini" data-act="docs">${T("Documents de paie")}</button>' + (inclus(s) ? '<button class="mini" data-act="taux">${T("Nouveau taux")}</button><button class="mini" data-act="conge">${T("Ajouter un congé")}</button>' : '') + '</div>';
     return h + '</div>';
   }
 
@@ -821,6 +824,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     avantages: function(){ boiteAvantages(); },
     reglages: function(){ boiteReglages(); },
     refus: function(a){ boiteRefus(a.id); },
+    ajouterEmp: function(){ boiteAjouterEmp(); },
+    retirerEmp: function(a){ var x = pers(a.id); if (x) boiteRetirerEmp(x); },
     politique: function(a){
       if (!a || !a.id) { boitePolitique(null); return; }
       appeler('employes:politiques', []).then(function(r){
@@ -832,6 +837,20 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
   };
   function natif(nom, args){
     szBoite(nom, args || null, function(){ OUVRE[nom](args || null); }).then(function(r){ if (r) { PAIE = null; POL = null; charger(); } });
+  }
+  function boiteAjouterEmp(){
+    var l = (D && D.autresComptes) || [];
+    var b = boite('${T("Ajouter un employé")}', '${T("La personne entre à l’horaire, à la paie et au portail des employés.")}',
+      '<div class="champs"><label class="ch large">${T("Compte du personnel")}<select id="ae-s">' + l.map(function(s){
+        return '<option value="' + esc(s.id) + '">' + esc(s.nom + (s.role ? ' · ' + szTd(s.role) : '') + (s.actif ? '' : ' · ${T("inactif")}')) + '</option>'; }).join('') + '</select></label></div>',
+      '${T("Ajouter")}');
+    b.ok.onclick = function(){ var id = b.val('ae-s'); CHOISI = id; envoyer(b, 'employes:ajouter', [id], '${T("Employé ajouté.")}'); };
+  }
+  function boiteRetirerEmp(s){
+    var b = boite('${T("Retirer des employés")}', esc(s.nom),
+      '<div class="note">${T("La personne sort de l’horaire, de la paie et du portail des employés. Son compte, sa fiche et son historique (périodes payées, pointages) restent ; « Ajouter un employé » la ramène.")}</div>',
+      '${T("Retirer")}');
+    b.ok.onclick = function(){ CHOISI = ''; envoyer(b, 'employes:retirer', [s.id], '${T("Retiré des employés : ")}' + s.nom); };
   }
   function boiteRefus(dr){
     var bx = boite('${T("Refuser la demande")}', '${T("La personne verra la raison à la caisse.")}',
@@ -1271,6 +1290,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
       if (a === 'pointage') natif('pointage', { staffId: (sel || {}).id || '', date: D.aujourdhui, entree: '09:00', sortie: '17:00' });
       else if (a === 'conge') natif('conge', { staffId: ONGLET === 'equipe' && sel ? sel.id : ((equipe()[0] || {}).id || ''), date: ONGLET === 'horaire' ? JOUR : D.aujourdhui });
       else if (a === 'fiche' && sel) natif('fiche', { id: sel.id });
+      else if (a === 'ajouterEmp') natif('ajouterEmp', {});
+      else if (a === 'retirerEmp' && sel) natif('retirerEmp', { id: sel.id });
       else if (a === 'dossier' && sel) natif('dossier', { id: sel.id });
       else if (a === 'docs' && sel) natif('docs', { id: sel.id });
       else if (a === 'taux' && sel) natif('taux', { id: sel.id });

@@ -417,4 +417,11 @@ module.exports = {
   'Le prénom est obligatoire.': 'The first name is required.',
   'Le nom est obligatoire.': 'The last name is required.',
   'Nom d’utilisateur invalide : de 2 à 30 caractères (minuscules, chiffres, tiret ou soulignement).': 'Invalid username: 2 to 30 characters (lowercase letters, digits, hyphen or underscore).',
+  // (2026-11-28) Un compte n'est employé (horaire, paie, portail RH) que sur choix.
+  'Donner accès au portail des employés': 'Give access to the employee portal',
+  'Coché, la personne devient un employé : horaire, paie et portail RH. Décoché, c’est un compte de l’administration seulement ; le module Employés peut l’ajouter plus tard.': 'Checked, the person becomes an employee: schedule, payroll and HR portal. Unchecked, it is an administration-only account; the Staff module can add them later.',
+  'Employé': 'Employee',
+  'Oui — horaire, paie et portail des employés': 'Yes — schedule, payroll and employee portal',
+  'Non — administration seulement': 'No — administration only',
+  ' La fiche d’employé n’a pas pu être créée : ajoutez la personne dans le module Employés.': ' The employee record could not be created: add the person in the Staff module.',
 };

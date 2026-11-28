@@ -3933,6 +3933,8 @@ const OPS_PONT = new Set([
   'employes:demander', 'employes:demandeAnnuler', 'employes:mesDemandes', 'employes:demandeTraiter',
   'employes:politiques', 'employes:politiqueEcrire', 'employes:politiqueRetirer',
   'employes:dossier', 'employes:dossierEcrire', 'employes:dossierReveler',
+  // (2026-11-28) Les employés sont choisis : un compte du personnel n'en est pas un d'office.
+  'employes:ajouter', 'employes:retirer',
   'employes:docs', 'employes:docTeleverser', 'employes:docOuvrir', 'employes:docJournal', 'employes:docRetirer', 'employes:feuillets',
   // Relance des clients endormis (fenetre Relance, 2026-11-20). `relance:envoyer` passe par Resend (infolettre).
   'relance:donnees', 'relance:apercu', 'relance:envoyer', 'relance:reglages',
@@ -4961,6 +4963,7 @@ const OPS_QUI_CHANGENT_LE_TABLEAU = new Set([
   // (2026-11-22) Un pointage fait a la caisse se voit dans la fenetre Employes ouverte.
   'employes:pointer', 'employes:pointage', 'employes:fiche', 'employes:quart',
   'employes:conge', 'employes:taux', 'employes:approuver', 'employes:rouvrir',
+  'employes:ajouter', 'employes:retirer',
 ]);
 
 /* ══ LES LIBELLÉS TRADUITS SUR LE TRAJET ════════════════════════════════════

@@ -514,4 +514,15 @@ module.exports = {
   "plus de 4 Mo": "over 4 MB",
   "T4": "T4",
   "Année d’imposition": "Tax year",
+  // (2026-11-28) Les employés sont choisis parmi les comptes du personnel.
+  "Ajouter un employé": "Add an employee",
+  "Aucun employé. « Ajouter un employé » choisit parmi les comptes du personnel ; un compte créé dans l’application n’en est pas un d’office.": "No employees. “Add an employee” picks from the staff accounts; an account created in the application is not an employee by default.",
+  "Retirer des employés": "Remove from employees",
+  "La personne entre à l’horaire, à la paie et au portail des employés.": "The person joins the schedule, payroll and the employee portal.",
+  "Compte du personnel": "Staff account",
+  "inactif": "inactive",
+  "Ajouter": "Add",
+  "Employé ajouté.": "Employee added.",
+  "La personne sort de l’horaire, de la paie et du portail des employés. Son compte, sa fiche et son historique (périodes payées, pointages) restent ; « Ajouter un employé » la ramène.": "The person leaves the schedule, payroll and the employee portal. Their account, record and history (paid periods, punches) stay; “Add an employee” brings them back.",
+  "Retiré des employés : ": "Removed from employees: ",
 };
