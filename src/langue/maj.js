@@ -75,5 +75,15 @@ module.exports = {
     'Save what is open. The application will restart by itself.',
   /* ⚠ Celui-la fait vraiment quelque chose : il n attend pas les 30 secondes. */
   'Redémarrer maintenant': 'Restart now',
-  'Redémarrage…': 'Restarting…'
+  'Redémarrage…': 'Restarting…',
+  'modifications non enregistrées': 'unsaved changes',
+  'Fenêtre ouverte : ': 'Open window: ',
+  'Installation reportée': 'Installation postponed',
+  'La mise à jour n’a pas été installée maintenant.': 'The update was not installed now.',
+  'Pour ne rien perdre, elle ne s’installe que lorsque tout est fermé et enregistré.': 'So nothing is lost, it only installs once everything is closed and saved.',
+  'Encore actif': 'Still active',
+  'autre(s)': 'more',
+  'Fermez ces fenêtres et enregistrez votre travail, puis réessayez. Sinon, elle s’installera d’elle-même à la fermeture de l’application, avant son prochain démarrage.': 'Close these windows and save your work, then try again. Otherwise it will install by itself when the application closes, before its next start.',
+  'Fermer': 'Close',
+  'Réessayer': 'Try again',
 };

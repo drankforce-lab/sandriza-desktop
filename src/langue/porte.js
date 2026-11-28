@@ -104,4 +104,7 @@ module.exports = {
   'Des fenêtres ont des modifications non enregistrées.': 'Some windows have unsaved changes.',
   'Enregistrez-les ou fermez-les avant d’installer : sinon ce travail sera perdu.': 'Save or close them before installing: otherwise this work will be lost.',
   'Le téléchargement de la mise à jour a échoué.': 'The update download failed.',
+  'Installation de la mise à jour': 'Installing the update',
+  'Attente des opérations en cours…': 'Waiting for operations in progress…',
+  'Préparation de l’installation — l’application va redémarrer.': 'Preparing the installation — the application will restart.',
 };

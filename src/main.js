@@ -7403,7 +7403,12 @@ const _majCompteARebours = async (version) => {
      doit partir quand même — sinon un report se transformerait en mise à jour
      jamais installée. La page AFFICHE le compte à rebours ; elle ne le décide
      pas. */
-  setTimeout(() => {
+  setTimeout(async () => {
+    /* (2026-11-28) À l'échéance aussi, le contrôle : si quelque chose est ouvert ou non enregistré, on NE FORCE PAS ;
+       la fenêtre le dit, et la mise à jour s'installera à la fermeture de l'application. */
+    let bl = [];
+    try { bl = await _majControler(); } catch (e) { bl = []; }
+    if (bl.length) { try { actionApp('maj', 'bloque|' + String(version) + '|' + encodeURIComponent(JSON.stringify(bl))); } catch (e) {} return; }
     try { installerEtRelancer(autoUpdaterCourant || getUpdater()); } catch {}
   }, MAJ_GRACE_S * 1000);
 };
@@ -7464,9 +7469,13 @@ const _majProposer = async (version) => {
 };
 
 /* La page répond. `heures` nul ou 0 = installer maintenant. */
-ipcMain.handle('maj:decision', (e, heures) => {
+ipcMain.handle('maj:decision', async (e, heures) => {
   const h = parseInt(heures, 10) || 0;
   if (!h) {
+    /* (2026-11-28) LE CONTRÔLE AVANT D'INSTALLER : une fenêtre ouverte, une donnée non enregistrée ou une opération en
+       vol, et l'installation est REFUSÉE ; la mise à jour s'installera à la fermeture de l'application. */
+    const bl = await _majControler();
+    if (bl.length) return { ok: false, motif: 'bloque', bloquants: bl };
     try { reglages.set('majPlanifiee', null); } catch {}
     try { installerEtRelancer(autoUpdaterCourant || getUpdater()); } catch {}
     return { ok: true, quand: null };
@@ -7550,9 +7559,96 @@ const _attendreOpsCritiques = (max) => new Promise((res) => {
   const tic = () => { if (_opsCritiquesEnVol <= 0 || Date.now() > fin) return res(); setTimeout(tic, 250); };
   tic();
 });
-const installerEtRelancer = async (autoUpdater) => {
+
+/* ══ L'INSTALLATION CONTRÔLÉE (2026-11-28, sa demande) ═══════════════════════════════════════════════════════════════
+   Ses mots : « un contrôle plus strict pour l'installation des mises à jour pendant que l'administration roule : un contrôle
+   de fenêtre ouverte, un contrôle sur les données non enregistrées, un suivi des fichiers en copie pendant l'installation
+   et une désactivation temporaire pendant l'installation. Deux phases : le téléchargement en arrière-plan sans
+   interruption ; l'installation, qui applique les contrôles, désactive tout avec un rond d'installation, et si une
+   fenêtre ou une donnée non enregistrée est encore active, refuse l'installation et la continue uniquement au redémarrage ».
+   ➡ (1) _majControler : la liste de ce qui bloque (fenêtres ouvertes, brouillons, opérations critiques en vol) ;
+     (2) _majVoile : un voile et un rond sur TOUTES les pages (site, écrans ancrés, fenêtres) + les fenêtres désactivées ;
+     (3) _majLancerSuivi : une petite fenêtre Sandriza, INDÉPENDANTE de l'application (PowerShell + WinForms), qui suit
+         la copie des fichiers dans le dossier d'installation pendant que l'installateur tourne, et se ferme au redémarrage.
+   Refusée, la mise à jour reste prête : `autoInstallOnAppQuit` l'installe à la fermeture de l'application, donc avant
+   son prochain démarrage. */
+const MAJ_FEN_IGNOREES = new Set(['maj', 'notes']);
+const _majTitre = (k) => { try { const d = PAGES_ANCRABLES()[k]; if (d && d[0]) return d[0]; } catch (e) {} return String(k || ''); };
+const _majControler = async () => {
+  const bl = [];
+  const vus = new Set();
+  const ajout = (quoi, nom) => { const k = quoi + '|' + nom; if (vus.has(k)) return; vus.add(k); bl.push({ quoi, nom }); };
+  // (a) les FENÊTRES ouvertes : fenêtres de travail, écrans détachés, boîtes-formulaires
+  try { fenetresNatives.forEach((w, k) => { if (MAJ_FEN_IGNOREES.has(k) || !w || w.isDestroyed() || !w.isVisible()) return; ajout('fenetre', w.getTitle() || _majTitre(k)); }); } catch (e) {}
+  try { ancrees.forEach((a, k) => { if (a && a.fenetre && !a.fenetre.isDestroyed()) ajout('fenetre', _majTitre(k)); }); } catch (e) {}
+  try { if (_boites.size) ajout('fenetre', 'Boîte de formulaire'); } catch (e) {}
+  // (b) les DONNÉES NON ENREGISTRÉES : chaque page dit si son brouillon est « sale » (szBrouillonEtat, socle)
+  const pages = [];
+  try { ancrees.forEach((a, k) => { if (a && a.view && !a.view.webContents.isDestroyed()) pages.push([_majTitre(k), a.view.webContents]); }); } catch (e) {}
+  try { fenetresNatives.forEach((w, k) => { if (!MAJ_FEN_IGNOREES.has(k) && w && !w.isDestroyed()) pages.push([w.getTitle() || _majTitre(k), w.webContents]); }); } catch (e) {}
+  await Promise.all(pages.map(([nom, wc]) => Promise.race([
+    Promise.resolve().then(() => wc.executeJavaScript('!!(window.szBrouillonEtat && window.szBrouillonEtat())', true)).catch(() => false),
+    new Promise((r) => setTimeout(() => r(false), 1500)),
+  ]).then((sale) => { if (sale) ajout('donnees', nom); })));
+  // (c) une opération critique EN VOL (vente, étiquette, envoi…)
+  if (_opsCritiquesEnVol > 0) ajout('operation', 'Vente, étiquette ou envoi en cours');
+  return bl;
+};
+// Le voile : un rond et l'étape, par-dessus chaque page ; toutes les fenêtres refusent les gestes.
+const _majVoile = (on, etape) => {
+  const titre = TP('Installation de la mise à jour');
+  const js = '(function(on,v,t){try{var id="sz-maj-voile",b=document.getElementById(id);if(!on){if(b)b.remove();return;}'
+    + 'if(!b){b=document.createElement("div");b.id=id;b.setAttribute("role","alertdialog");b.setAttribute("aria-busy","true");'
+    + 'var st=document.createElement("style");st.textContent="#sz-maj-voile{position:fixed;inset:0;z-index:2147483647;display:flex;align-items:center;justify-content:center;'
+    + 'background:rgba(9,12,18,.74);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px);font:14px/1.5 system-ui,Segoe UI,sans-serif;color:#e8ecf2;cursor:progress}'
+    + '#sz-maj-voile .c{display:flex;flex-direction:column;align-items:center;gap:12px;padding:28px 36px;border-radius:16px;background:#151a24;border:1px solid #283142;'
+    + 'box-shadow:0 30px 60px -20px rgba(0,0,0,.6);min-width:300px;text-align:center}'
+    + '#sz-maj-voile .r{width:46px;height:46px;border-radius:50%;border:3px solid rgba(201,165,126,.18);border-top-color:#C9A57E;animation:szmv 1s linear infinite}'
+    + '@keyframes szmv{to{transform:rotate(360deg)}}#sz-maj-voile b{font-size:15px;font-weight:700}#sz-maj-voile span{color:#9aa4b5;font-size:13px}";'
+    + 'b.appendChild(st);var c=document.createElement("div");c.className="c";c.innerHTML="<div class=\\"r\\"></div><b></b><span></span>";b.appendChild(c);'
+    + '(document.body||document.documentElement).appendChild(b);'
+    + '["keydown","keyup","keypress","mousedown","mouseup","click","dblclick","wheel","contextmenu"].forEach(function(n){window.addEventListener(n,function(e){if(document.getElementById(id)){e.stopPropagation();e.preventDefault();}},true);});}'
+    + 'b.querySelector("b").textContent=v;b.querySelector("span").textContent=t;}catch(e){}})('
+    + (on ? 'true' : 'false') + ',' + JSON.stringify(titre) + ',' + JSON.stringify(String(etape || '')) + ');';
+  const tous = [];
+  try { const w = siteWC(); if (w) tous.push(w); } catch (e) {}
+  try { ancrees.forEach((a) => { if (a.view && !a.view.webContents.isDestroyed()) tous.push(a.view.webContents); }); } catch (e) {}
+  try { fenetresNatives.forEach((w, k) => { if (k !== 'maj' && w && !w.isDestroyed()) tous.push(w.webContents); }); } catch (e) {}
+  tous.forEach((wc) => { try { wc.executeJavaScript(js, true).catch(() => {}); } catch (e) {} });
+  const fen = [];
+  try { if (mainWindow && !mainWindow.isDestroyed()) fen.push(mainWindow); } catch (e) {}
+  try { fenetresNatives.forEach((w, k) => { if (k !== 'maj' && w && !w.isDestroyed()) fen.push(w); }); } catch (e) {}
+  try { ancrees.forEach((a) => { if (a.fenetre && !a.fenetre.isDestroyed()) fen.push(a.fenetre); }); } catch (e) {}
+  fen.forEach((w) => { try { w.setEnabled(!on); } catch (e) {} });
+};
+/* La fenêtre de suivi de la copie. Elle vit HORS de l'application (l'installateur la ferme et remplace ses fichiers) :
+   un script PowerShell + WinForms, au thème Sandriza, qui observe le dossier d'installation (FileSystemWatcher), affiche
+   le fichier en cours et le compte, puis se ferme quand la nouvelle version a démarré (ou au bout de 6 minutes). */
+let _majSuiviLance = false;
+const _majLancerSuivi = (version) => {
+  if (_majSuiviLance || process.platform !== 'win32' || !app.isPackaged) return;
+  _majSuiviLance = true;
+  try {
+    const os = require('os');
+    const dossier = path.dirname(process.execPath);
+    const exe = path.basename(process.execPath, '.exe');
+    const en = (() => { try { return require('./langue').langueCourante() === 'en'; } catch (e) { return false; } })();
+    const f = path.join(os.tmpdir(), 'sandriza-suivi-installation.ps1');
+    fs.writeFileSync(f, '﻿' + require('./suivi-installation').script(), 'utf8');
+    const { spawn } = require('child_process');
+    const p = spawn('powershell.exe', ['-NoProfile', '-ExecutionPolicy', 'Bypass', '-WindowStyle', 'Hidden', '-File', f,
+      '-Dossier', dossier, '-Exe', exe, '-Version', String(version || ''), '-Langue', en ? 'en' : 'fr', '-PidAncien', String(process.pid)],
+      { detached: true, stdio: 'ignore', windowsHide: true });
+    p.unref();
+  } catch (e) { try { console.error('[maj] suivi de copie :', e && e.message); } catch (er) {} }
+};
+const installerEtRelancer = async (autoUpdater, opts) => {
+  const o = opts || {};
   majVerrouiller();
+  // (2026-11-28) toute l'administration se désactive sous le voile et son rond (sauf à la porte : rien n'y est ouvert)
+  if (!o.sansVoile) _majVoile(true, TP('Attente des opérations en cours…'));
   await _attendreOpsCritiques(90000);
+  if (!o.sansVoile) _majVoile(true, TP('Préparation de l’installation — l’application va redémarrer.'));
   // ⚠ LE LAISSEZ-PASSER, SANS QUOI LA PROTECTION SE MORD LA QUEUE. Le garde de
   // fermeture bloque tout départ pendant une mise à jour ; or installer EXIGE de
   // quitter. Sans cette ligne, la mise à jour se téléchargerait indéfiniment sans
@@ -7565,6 +7661,7 @@ const installerEtRelancer = async (autoUpdater) => {
      une page deja en train de se fermer. Le laissez-passer est pose AVANT, donc
      rien ne peut bloquer la fermeture pendant ces 1,2 s. */
   majEtat({ etape: 'installation', version: _majVersionPrete || '', percent: 100 });
+  try { _majLancerSuivi(_majVersionPrete || ''); } catch (e) {}   // la petite fenêtre qui suit la copie des fichiers
   setTimeout(() => {
     try { autoUpdater.quitAndInstall(true, true); }
     catch { autoUpdater.quitAndInstall(); }   // repli : mieux vaut l'assistant que rien
@@ -7699,7 +7796,7 @@ const getUpdater = () => {
         _porteActive = false;
         // On reste en zone critique : le redémarrage part dans 1,6 s et il ne doit
         // pas être devancé par un Alt+F4 pendant qu'on lit le message.
-        setTimeout(() => installerEtRelancer(autoUpdater), 1600);
+        setTimeout(() => installerEtRelancer(autoUpdater, { sansVoile: true }), 1600);
         return;
       }
 
@@ -10043,6 +10140,8 @@ if (!app.requestSingleInstanceLock()) {
     // `_quitAutorise` est posé par la mise à jour juste avant de redémarrer.
     if (fermetureBloquee()) { ev.preventDefault(); refuserFermeture(); return; }
     if (_usbTimer) clearInterval(_usbTimer);
+    // (2026-11-28) une mise à jour prête s'installe à la fermeture (autoInstallOnAppQuit) : la copie est suivie elle aussi
+    try { if (_majVersionPrete && process.platform === 'win32') _majLancerSuivi(_majVersionPrete); } catch (e) {}
   });
 
   /* ⚠⚠ NE PAS QUITTER TANT QUE L'ICÔNE VEILLE (2026-09-08). Sans ce garde, tout

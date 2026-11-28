@@ -96,6 +96,8 @@ p.fine{font-size:.76rem;color:var(--tx2)}
    se choisit d un clic ou ne se choisit pas. */
 .heures{display:flex;gap:.5rem;margin:.2rem 0 0}
 .heures button{flex:1 1 0;justify-content:center;text-align:center}
+ul.bl{margin:.35rem 0 0;padding-left:1.1rem;font-size:.84rem;line-height:1.55}
+ul.bl li{margin:.1rem 0}
 .bloc{background:var(--v03);border:1px solid var(--v08);border-radius:10px;
   padding:.8rem .85rem;margin:.85rem 0 0}
 .bloc .t{font:700 .72rem/1.3 inherit;text-transform:uppercase;letter-spacing:.08em;
@@ -118,9 +120,12 @@ p.fine{font-size:.76rem;color:var(--tx2)}
  */
 function pageMaj(arg) {
   const bouts = String(arg || '').split('|');
-  const ecran = bouts[0] === 'compte' ? 'compte' : 'proposition';
+  const ecran = bouts[0] === 'compte' ? 'compte' : (bouts[0] === 'bloque' ? 'bloque' : 'proposition');
+  // (2026-11-28) « bloque|version|<liste JSON encodée> » : l'installation a été refusée par le contrôle (main.js, _majControler)
+  let bloquants = [];
+  if (ecran === 'bloque') { try { bloquants = JSON.parse(decodeURIComponent(bouts[2] || '')) || []; } catch (e) { bloquants = []; } }
   const version = (bouts[1] || '').replace(/[^0-9a-zA-Z.\-]/g, '');
-  const secondes = Math.max(5, Math.min(600, parseInt(bouts[2], 10) || 30));
+  const secondes = ecran === 'compte' ? Math.max(5, Math.min(600, parseInt(bouts[2], 10) || 30)) : 30;
   return `${TETE()}
 <title>${T("Mise à jour")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body class="${ecran === 'compte' ? 'presse' : ''}">
@@ -136,6 +141,7 @@ ${JS_DIRE()}
   var VERSION = '${version}';
   var TOTAL = ${secondes};
   var HEURES = [2, 4, 8];
+  var BLOQUANTS = ${JSON.stringify(bloquants).replace(/</g, '\\u003c')};
   var depart = Date.now();
   var tic = null;
 
@@ -223,6 +229,34 @@ ${JS_DIRE()}
     if (m) m.focus();
   }
 
+  /* ══ L ECRAN « INSTALLATION REPORTEE » (2026-11-28, sa demande) ══════════════
+     Le controle de la coquille a trouve une fenetre ouverte, une donnee non enregistree ou une operation en cours :
+     on NE desactive rien, on le dit, et l installation se fera a la fermeture de l application. */
+  function dessinerBloque(liste){
+    var l = liste || [];
+    var lib = function(b){
+      if (b.quoi === 'donnees') return esc(b.nom) + ' : ${T("modifications non enregistrées")}';
+      if (b.quoi === 'operation') return esc(b.nom);
+      return '${T("Fenêtre ouverte : ")}' + esc(b.nom);
+    };
+    el('titre').textContent = '${T("Installation reportée")}';
+    el('corps').innerHTML =
+      '<div class="ver"><span class="pill">' + esc(VERSION || '?') + '</span>'
+      + '<div class="txt"><b>${T("La mise à jour n’a pas été installée maintenant.")}</b>'
+      + '<span>${T("Pour ne rien perdre, elle ne s’installe que lorsque tout est fermé et enregistré.")}</span></div></div>'
+      + '<div class="bloc"><div class="t">${T("Encore actif")}</div><ul class="bl">'
+      + l.slice(0, 12).map(function(b){ return '<li>' + lib(b) + '</li>'; }).join('')
+      + (l.length > 12 ? '<li>' + (l.length - 12) + ' ${T("autre(s)")}</li>' : '') + '</ul></div>'
+      + '<p class="fine">${T("Fermez ces fenêtres et enregistrez votre travail, puis réessayez. Sinon, elle s’installera d’elle-même à la fermeture de l’application, avant son prochain démarrage.")}</p>';
+    el('pied').innerHTML =
+      '<button id="b-fermer">${T("Fermer")}</button>'
+      + '<span class="ecart"></span>'
+      + '<button class="prim" id="b-reessayer">${T("Réessayer")}</button>'
+      + '<span class="msg" id="msg"></span>';
+    var f = el('b-fermer'); if (f) f.onclick = function(){ try { P.fermer(); } catch (e) {} };
+    var r = el('b-reessayer'); if (r) { r.onclick = function(){ envoyer(0, r); }; r.focus(); }
+  }
+
   /* ⚠ TOUS LES BOUTONS SE FIGENT PENDANT L ENVOI, pas seulement celui qu on a
      clique : deux decisions envoyees coup sur coup ecriraient deux echeances,
      et la seconde ecraserait la premiere sans que personne le sache. */
@@ -243,6 +277,7 @@ ${JS_DIRE()}
         setTimeout(function(){ try { P.fermer(); } catch (e) {} }, 900);
         return;
       }
+      if (r && r.motif === 'bloque') { dessinerBloque(r.bloquants || []); return; }
       for (var j = 0; j < tous.length; j++) tous[j].disabled = false;
       var t2 = el('b-tard'); if (t2) t2.disabled = true;   // le choix reste ouvert
       if (bouton) bouton.textContent = heures ? (heures + '${T(" heures")}') : '${T("Installer maintenant")}';
@@ -310,7 +345,7 @@ ${JS_DIRE()}
 
   window.addEventListener('beforeunload', function(){ if (tic) clearInterval(tic); });
 
-  if (ECRAN === 'compte') dessinerCompte(); else dessinerProposition();
+  if (ECRAN === 'compte') dessinerCompte(); else if (ECRAN === 'bloque') dessinerBloque(BLOQUANTS); else dessinerProposition();
 })();
 </script></body></html>`;
 }

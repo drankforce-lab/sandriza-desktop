@@ -1807,6 +1807,7 @@ function szBrouillonProposer(){
    ⚠ ON N EXPOSE QUE CES TROIS-LA, et pas tout le bloc : ce sont les seules que
    le principal a besoin d appeler. Le reste appartient a la fenetre. */
 window.szBrouillonDemander = szBrouillonDemander;
+window.szBrouillonEtat = szBrouillonEtat;   // (2026-11-28) la coquille demande, AVANT d'installer une mise à jour, s'il reste du non enregistré
 window.szBrouillonMaintenant = szBrouillonMaintenant;
 window.szBrouillonJeter = szBrouillonJeter;
 `;
