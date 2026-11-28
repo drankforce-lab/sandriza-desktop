@@ -747,7 +747,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
       dessiner();
     };
     var bm = document.getElementById('p-marges');
-    if (bm) bm.onclick = ouvrirMarges;
+    // (2026-11-28) « Verifier mes marges » dans une vraie fenetre de l application (szBoite) ; sans pont, ici comme avant
+    if (bm) bm.onclick = function(){ szBoite('marges', null, ouvrirMarges).then(function(r){ if (r) charger(true); }); };
     var nv = document.getElementById('p-nouveau');
     if (nv) nv.onclick = function(){
       dire('${T("Ouverture…")}');
@@ -948,6 +949,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}
 
   var sous = document.getElementById('sous');
   if (sous) sous.textContent = '';
+  szBoiteSiDemandee({ marges: ouvrirMarges });   // la boite charge ses propres donnees
   charger();
   szVerrousSuivre(['products']);
 })();

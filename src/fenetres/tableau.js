@@ -1146,7 +1146,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!t || !t.closest) return;
     var ev2 = t.closest('#tb-etiq-vu');
     if (ev2) { appeler('tableau:etiquettesVu', [String(ev2.getAttribute('data-ids') || '').split(',').map(Number).filter(Boolean)]).then(function(){ charger(); }); return; }
-    if (t.closest('#tb-top100')) { top100(); return; }
+    // (2026-11-28) le Top 100 dans une vraie fenetre de l application (szBoite) ; sans pont, ici comme avant
+    if (t.closest('#tb-top100')) { szBoite('top100', null, top100); return; }
     var dc = t.closest('[data-courbe]');
     if (dc) { COURBE = dc.getAttribute('data-courbe'); try { localStorage.setItem('sz-tb-courbe', COURBE); } catch (e) {} dessiner(); return; }
     var dj = t.closest('[data-direct]');
@@ -1278,6 +1279,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       D = r;
       garderTableau(r);
       dessiner();
+      szBoiteSiDemandee({ top100: top100 });
       bilanDuSoir();
       chargerSauvegarde();
       chargerSemaine();

@@ -452,7 +452,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var man = document.getElementById('m-man'), lv = document.getElementById('m-lever'), pl = document.getElementById('m-plan');
     if (man) man.onchange = function(){ ecrireMaint({ manuel: man.checked, avisDes: m.avisDes || '', debut: m.debut || '', fin: m.fin || '', message: m.message || '', messageAvis: m.messageAvis || '' }, man); };
     if (lv) lv.onclick = function(){ ecrireMaint({ manuel: false, debut: '', fin: '', avisDes: '', message: m.message || '', messageAvis: m.messageAvis || '' }, null, true); };
-    if (pl) pl.onclick = ouvrirPlanif;
+    // (2026-11-28) la planification dans une vraie fenetre de l application (szBoite) ; sans pont, ici comme avant
+    if (pl) pl.onclick = function(){ szBoite('planif', null, ouvrirPlanif).then(function(r){ if (r) chargerMaint(); }); };
   }
   function ouvrirPlanif(){
     var m = MT || {};
@@ -506,7 +507,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     go();
   }
   function chargerMaint(){
-    appeler('config:boutique:maint').then(function(x){ MT = (x && x.ok) ? x : { erreur: true }; dessinerMaint(); });
+    appeler('config:boutique:maint').then(function(x){ MT = (x && x.ok) ? x : { erreur: true }; dessinerMaint(); if (x && x.ok) szBoiteSiDemandee({ planif: ouvrirPlanif }); });
   }
 
   function charger(){

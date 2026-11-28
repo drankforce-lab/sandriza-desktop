@@ -695,7 +695,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
     }
     box.innerHTML = h;
     var bs = box.querySelectorAll('[data-iaj]');
-    for (var j = 0; j < bs.length; j++) bs[j].onclick = function(){ lireAppelIa(l[parseInt(this.getAttribute('data-iaj'), 10)]); };
+    // (2026-11-28) la transcription dans une vraie fenetre de l application (szBoite) ; sans pont, ici comme avant
+    for (var j = 0; j < bs.length; j++) bs[j].onclick = function(){ var x = l[parseInt(this.getAttribute('data-iaj'), 10)]; if (x) szBoite('iaAppel', JSON.parse(JSON.stringify(x)), function(){ lireAppelIa(x); }); };
   }
   function lireAppelIa(a){
     if (!a) return;
@@ -1090,6 +1091,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('telephonie')}
         dire(expliquer(r), 'err'); return;
       }
       adopter(r); dessiner(); dire('');
+      szBoiteSiDemandee({ iaAppel: lireAppelIa });
       chargerResume();
     });
   }
