@@ -226,6 +226,11 @@ jobs:
       - name: Jeton du depot du site present ?
         if: env.SITE_LECTURE == ''
         run: echo "::notice title=Controle du site NON fait sur GitHub::Ajoutez le secret SITE_LECTURE (jeton en lecture seule du depot Sandriza) pour l'activer. Le controle reste fait sur le poste (crochet d'envoi)."
+      # Les fins de ligne DU DÉPÔT (LF), comme sur le poste : la machine Windows de GitHub les convertit en CRLF par
+      # défaut, et les bancs qui posent une panne en cherchant un texte avec « \n » ne la posaient plus (2026-11-28).
+      - name: Fins de ligne telles quelles
+        if: env.SITE_LECTURE != ''
+        run: git config --global core.autocrlf false
       - uses: actions/checkout@v4
         if: env.SITE_LECTURE != ''
         with:
