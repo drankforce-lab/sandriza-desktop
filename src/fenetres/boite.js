@@ -112,11 +112,16 @@ button.dang{color:var(--tx-err2,var(--ep-rouge-t))}
 .bx-rg .ligne{display:flex;align-items:center;gap:.8rem;flex-wrap:wrap}
 `;
 
-function pageBoite() {
+/* (2026-11-28, sa demande : « le module des boîtes de style pour la configuration devrait se retrouver dans Modules ; la
+   composition, on la laisse dans le menu telle quelle ») Comme la relance : Configuration › Modules › Boîte de style ouvre
+   CETTE page en mode 'config-seul' (les paliers, les prix et l'interrupteur, seuls). La fenêtre du module ne compose plus
+   que la saison : son bouton « Paliers et prix » est parti. */
+function pageBoite(ouverture) {
+  const seul = (ouverture === 'config-seul');
   return `${TETE()}
-<title>${T("Boîte de style — Administration Sandriza")}</title>
+<title>${seul ? T("Réglages de la boîte de style — Administration Sandriza") : T("Boîte de style — Administration Sandriza")}</title>
 <style>${CSS}${CSS_JOUR}</style></head><body>
-<div class="tete"><span class="ico">${ICO.giftcards}</span><h1>${T("Boîte de style")}</h1>
+<div class="tete"><span class="ico">${ICO.giftcards}</span><h1>${seul ? T("Réglages de la boîte de style") : T("Boîte de style")}</h1>
   <span class="cx-resume" id="sous"></span></div>
 <div id="corps"><div class="sz-squel" role="status" aria-label="${T("Chargement en cours")}"><i></i><i></i><i></i></div></div>
 <div class="pied"><span class="msg" id="msg"></span></div>
@@ -126,7 +131,8 @@ function pageBoite() {
   var P = window.szPont;
 ${JS_ACTIVITE()}${JS_DIRE()}
   var corps = document.getElementById('corps'), elSous = document.getElementById('sous');
-  var S = null, REG = null, ENVOI = '', SEL = '', VUE = 'saison', PAGE = 0, CHERCHE = '', RES = [];
+  var SEUL = ${seul ? 'true' : 'false'};
+  var S = null, REG = null, ENVOI = '', SEL = '', VUE = SEUL ? 'reglages' : 'saison', PAGE = 0, CHERCHE = '', RES = [];
   function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, function(c){ return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'})[c]; }); }
   function dire(t, cl, ci){ szDire(t, cl, ci); }
   var MOTIFS = {
@@ -176,7 +182,6 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     var c = S.compteurs;
     var h = '<div class="bx-tete"><div class="g"><span>' + esc('${T("Expédition prévue le")} ' + jour(ENVOI) + ' · ${T("prélèvement à l’envoi")}') + '</span><h2>' + esc(saison(ENVOI)) + '</h2></div>'
       + '<div class="bx-nav"><button type="button" data-env="-1" aria-label="${T("Saison précédente")}">‹</button><button type="button" data-env="1" aria-label="${T("Saison suivante")}">›</button></div>'
-      + '<button type="button" id="bx-rg">${T("Paliers et prix")}</button>'
       + '<button type="button" id="bx-auto"' + (c.aValider ? '' : ' disabled') + '>${T("Composer automatiquement")}</button>'
       + '<button type="button" class="prim" id="bx-prel" title="${T("Le stock n’est retiré qu’au prélèvement. « Prélever et expédier » débite les boîtes par saison et crée une commande par boîte, qui suit la préparation habituelle.")}"' + (c.validees ? '' : ' disabled') + '>' + esc('${T("Prélever et expédier les validées")} (' + c.validees + ')') + '</button></div>'
       + '<div class="bx-comptes"><span class="bx-c"><b>' + c.abonnees + '</b> ${T("abonnées")}</span>'
@@ -254,7 +259,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     if (!REG) { corps.innerHTML = '<div class="carte vide">${T("Lecture des réglages…")}</div>'; return; }
     var r = REG;
     corps.innerHTML = '<div class="bx-tete"><div class="g"><span>${T("Boîte de style")}</span><h2>${T("Paliers et prix")}</h2></div>'
-      + '<button type="button" id="bx-retour">${T("← Retour à la saison")}</button><button type="button" class="prim" id="bx-rg-ok">${T("Enregistrer les réglages")}</button></div>'
+      + (SEUL ? '' : '<button type="button" id="bx-retour">${T("← Retour à la saison")}</button>') + '<button type="button" class="prim" id="bx-rg-ok">${T("Enregistrer les réglages")}</button></div>'
       + '<div class="carte bx-rg"><label class="ligne"><input type="checkbox" id="rg-actif"' + (r.actif ? ' checked' : '') + '> <b>${T("Boîte de style offerte en boutique")}</b>'
       + '<span class="bx-note">${T("Éteinte, la page de la boutique dit « bientôt » et personne ne peut s’inscrire.")}</span></label>'
       + '<table><thead><tr><th>${T("Palier")}</th><th>${T("Prix par saison ($)")}</th><th>${T("Prix annuel ($)")}</th><th>${T("Contenu")}</th><th>${T("Valeur visée ($)")}</th><th>${T("Vedette")}</th></tr></thead><tbody>'
@@ -364,10 +369,13 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }, 220);
   });
 
-  window.szActualiser = function(){ if (VUE === 'saison') charger(); };
+  function chargerReglages(){
+    appeler('boite:reglages').then(function(r){ if (!r.ok) { corps.innerHTML = '<div class="carte vide">' + esc(expliquer(r)) + '</div>'; return; } REG = r.reglages; dessinerReglages(); });
+  }
+  window.szActualiser = function(){ if (VUE === 'saison') charger(); else if (SEUL) chargerReglages(); };
   window.szRevenir = function(){ if (VUE === 'saison') charger(); };
   window.addEventListener('resize', function(){ clearTimeout(window.__bxR); window.__bxR = setTimeout(function(){ if (VUE === 'saison' && S) dessinerListe(); }, 120); });
-  charger();
+  if (SEUL) { elSous.textContent = '${T("Paliers, prix et offre en boutique")}'; chargerReglages(); } else charger();
 })();
 </script></body></html>`;
 }

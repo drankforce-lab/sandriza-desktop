@@ -5508,6 +5508,8 @@ const PAGES_ANCRABLES = () => ({
   'config-relance': ['Réglages de la relance', () => pageRelance('config-seul')],
   'config-secondevie': ['Réglages de la seconde vie', () => pageSecondeVie('config-seul')],
   'config-tresorerie': ['Réglages de la trésorerie', () => pageTresorerie('config-seul')],
+  // (2026-11-28) les paliers, les prix et l'interrupteur de la boîte de style ; la composition reste dans « boite »
+  'config-boite': ['Réglages de la boîte de style', () => pageBoite('config-seul')],
   // Le calendrier (2026-11-18, relooking) : précommandes, ramassages, échéances fiscales et rappels sur un mois.
   calendrier: ['Calendrier', () => pageCalendrier()],
   // La boîte de style (2026-11-23) : composer la saison, valider, prélever et expédier.
@@ -8469,7 +8471,7 @@ const actionApp = (nom, arg) => {
     case 'demarque':
     case 'assistante':
     case 'fiabilite':
-    case 'config-infolettre': case 'config-fidelite': case 'config-relance': case 'config-secondevie': case 'config-tresorerie':
+    case 'config-infolettre': case 'config-fidelite': case 'config-relance': case 'config-secondevie': case 'config-tresorerie': case 'config-boite':
     // Calendrier (2026-11-18) : meme cas, ne natif ; sa section hote cote site ne porte que la zone.
     case 'calendrier':
     case 'boite':
