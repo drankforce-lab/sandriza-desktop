@@ -5894,7 +5894,10 @@ const _dockOuvrir = async (cle, etat) => {
     /* (2026-11-28) Vue conservee cachee : elle se MONTRE TOUT DE SUITE, telle qu'on l'a laissee, et relit ses donnees
        EN ARRIERE-PLAN (szRevenir redessine sur place, sans vider l'ecran). Avant, on attendait la relecture au serveur
        avant de la montrer : c'etait l'ecran de chargement a chaque retour au tableau de bord. */
-    try { a.view.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {}); } catch {}
+    /* La regle du 2026-09-26 tient toujours : une vue qui n'a encore RIEN dessine (squelette, ecran vide — le tableau de
+       bord prechauffe au demarrage) attend ses chiffres avant de paraitre. Une vue qui a deja son contenu se montre sans
+       attendre ; szRevenir la relit quand meme, en arriere-plan. */
+    await _attendreContenu(a.view, 'window.szRevenir ? (function(p){ return document.querySelector(".sz-squel, #corps > .vide, .corps > .vide") ? p : null; })(window.szRevenir()) : null');
   }
   if (etatVoulu === 'detache') {
     // L ecran a ete LAISSE detache : on le rouvre tel quel. Le site montre
