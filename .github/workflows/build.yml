@@ -212,6 +212,43 @@ jobs:
       - name: Clic droit — 108 fenetres essayees au rendu
         run: node tools/banc-clic-droit.js
 
+  # ══ LE CONTRÔLE DU SITE, SUR GITHUB (2026-11-28, son « point 3 ») ═══════════════════════════════════════════════════
+  # Le même verifier.ps1 que le crochet d'envoi du site, sur une machine Windows de GitHub, EN PARALLÈLE des
+  # installateurs (il n'allonge pas la construction). Le dépôt du site est PRIVÉ : il faut le secret SITE_LECTURE (un jeton
+  # GitHub en LECTURE SEULE du dépôt Sandriza). Sans lui, le travail le DIT et passe — rien n'est bloqué en attendant.
+  # Les deux dépôts sont posés CÔTE À CÔTE (sandriza-desktop/ et Sandriza/) : plusieurs contrôles lisent l'un et l'autre ;
+  # SZ_COQUILLE dit au site où est l'application.
+  site:
+    runs-on: windows-latest
+    env:
+      SITE_LECTURE: ${{ secrets.SITE_LECTURE }}
+    steps:
+      - name: Jeton du depot du site present ?
+        if: env.SITE_LECTURE == ''
+        run: echo "::notice title=Controle du site NON fait sur GitHub::Ajoutez le secret SITE_LECTURE (jeton en lecture seule du depot Sandriza) pour l'activer. Le controle reste fait sur le poste (crochet d'envoi)."
+      - uses: actions/checkout@v4
+        if: env.SITE_LECTURE != ''
+        with:
+          path: sandriza-desktop
+      - uses: actions/checkout@v4
+        if: env.SITE_LECTURE != ''
+        with:
+          repository: drankforce-lab/Sandriza
+          ref: main
+          token: ${{ secrets.SITE_LECTURE }}
+          path: Sandriza
+      - uses: actions/setup-node@v4
+        if: env.SITE_LECTURE != ''
+        with:
+          node-version: 22
+      - name: Controle avant deploiement du site (verifier.ps1, rendus compris)
+        if: env.SITE_LECTURE != ''
+        shell: pwsh
+        working-directory: Sandriza
+        env:
+          SZ_COQUILLE: ${{ github.workspace }}\sandriza-desktop
+        run: pwsh -NoProfile -File tools/check/verifier.ps1
+
   windows:
     needs: menage
     runs-on: windows-latest
