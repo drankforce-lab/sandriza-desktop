@@ -43,7 +43,7 @@ button:focus-visible{outline:2px solid var(--or);outline-offset:2px}
 .im-resume .esp{margin-left:auto;display:flex;gap:.5rem}
 .im-g{margin-bottom:1.4rem}
 .im-g h2{display:flex;align-items:baseline;gap:.6rem;margin:0 0 .6rem;font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--tx2)}
-.im-g h2 span{font-weight:500;letter-spacing:0;text-transform:none;font-size:.78rem;opacity:.8}
+.im-g h2 span{font-weight:500;letter-spacing:0;text-transform:none;font-size:.78rem}
 .im-grille{display:grid;gap:.65rem}
 .im-grille.l{grid-template-columns:repeat(auto-fill,minmax(10rem,1fr))}
 .im-grille.p{grid-template-columns:repeat(auto-fill,minmax(7rem,1fr))}
@@ -337,7 +337,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + '<div class="as-q"><h3>${T("Qui porte les vêtements ?")}</h3><p>${T("Une mannequin différente à chaque plan.")}</p>' + chips('ages', [['25', '${T("25 à 35 ans")}'], ['35', '${T("35 à 50 ans")}'], ['50', '${T("50 ans et plus")}']]) + ' ' + chips('varie', [['origines', '${T("Origines variées")}'], ['silhouettes', '${T("Silhouettes variées")}']]) + '</div>'
       + '<div class="as-q"><h3>${T("Quel cadrage ?")}</h3>' + chips('cadrage', [['pied', '${T("En pied, tenue entière")}'], ['trois', '${T("Trois quarts")}'], ['detail', '${T("Détails et matières")}']], true) + '</div>'
       + '<div class="as-q"><h3>${T("À éviter")}</h3>' + chips('eviter', [['texte', '${T("Aucun texte ni enseigne")}'], ['logos', '${T("Aucun logo de marque")}'], ['mains', '${T("Mains nues à l’intérieur")}']]) + '</div>'
-      + '<div class="as-q"><h3>${T("Vos ajustements")}</h3><p>${T("Tout ce que les questions n’ont pas dit, en vos mots.")}</p><textarea id="as-ajust" maxlength="600">' + esc(BRIEF.ajust || '') + '</textarea></div>'
+      + '<div class="as-q"><h3>${T("Vos ajustements")}</h3><p>${T("Tout ce que les questions n’ont pas dit, en vos mots.")}</p><textarea id="as-ajust" maxlength="600" aria-label="${T("Vos ajustements")}">' + esc(BRIEF.ajust || '') + '</textarea></div>'
       + '</div>' + cote() + '</div>'
       + '<div class="as-pied"><span></span><button type="button" class="prim" data-etape="2">${T("Voir l’aperçu")}</button></div>';
   }
@@ -345,7 +345,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return '<div class="as-carte' + (a.gardee ? ' gardee' : '') + '" data-ap="' + i + '"><div class="ph" style="aspect-ratio:' + (a.format === '3:4' ? '3/4' : '16/10') + '">'
       + (a.etat === 'gen' ? '<span class="rond" role="status" aria-label="${T("Génération en cours")}"></span>' : (a.image ? '<img src="' + a.image + '" alt="">' : '<span style="font-size:.74rem;color:var(--tx2)">${T("Pas encore générée")}</span>'))
       + '</div><div class="c"><b>' + esc(a.titre) + '</b>'
-      + '<input type="text" maxlength="200" data-ajout="' + i + '" placeholder="${T("Ajuster cette image (facultatif)")}" value="' + esc(a.ajout || '') + '">'
+      + '<input type="text" maxlength="200" data-ajout="' + i + '" aria-label="${T("Ajuster cette image (facultatif)")}" placeholder="${T("Ajuster cette image (facultatif)")}" value="' + esc(a.ajout || '') + '">'
       + '<div class="gest"><button type="button" data-gen="' + i + '"' + (AS.gen ? ' disabled' : '') + '>' + (a.image ? '${T("Régénérer")}' : '${T("Générer")}') + ' · 0,06 $</button>'
       + (a.image ? '<button type="button" data-garder="' + i + '">' + (a.gardee ? '${T("✓ Gardée")}' : '${T("Garder")}') + '</button>' : '') + '</div></div></div>';
   }
@@ -411,7 +411,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     return '<div class="as-carte' + (t.etat === 'echec' ? ' echec' : '') + '"><div class="ph" style="aspect-ratio:' + (t.format === '3:4' ? '3/4' : '16/10') + '">'
       + (t.etat === 'en_cours' ? '<span class="rond" role="status" aria-label="${T("Génération en cours")}"></span>' : t.url ? '<img src="' + esc(t.url) + '" alt="" loading="lazy">' : '')
       + '</div><div class="c"><b>' + esc(t.titre) + '</b>' + (st ? '<span>' + st + '</span>' : '') + (t.erreur ? '<span>' + esc(t.erreur) + '</span>' : '')
-      + (refaire && t.etat !== 'en_cours' ? '<input type="text" maxlength="200" data-aj="' + esc(t.id) + '" placeholder="${T("Ajuster (facultatif)")}" value="' + esc(C_AJ[t.id] || '') + '">'
+      + (refaire && t.etat !== 'en_cours' ? '<input type="text" maxlength="200" data-aj="' + esc(t.id) + '" aria-label="${T("Ajuster (facultatif)")}" placeholder="${T("Ajuster (facultatif)")}" value="' + esc(C_AJ[t.id] || '') + '">'
         + '<div class="gest"><button type="button" data-refaire="' + esc(t.id) + '">${T("Refaire")} · 0,06 $</button></div>' : '')
       + '</div></div>';
   }
@@ -574,6 +574,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
     }
     var h = '<div class="im-resume"><span class="k"><b>' + (INV.categories.length * 2 + INV.pages.length + INV.apropos.length + INV.vides.length) + '</b>${T("photos")}</span>'
       + '<span class="k"><b>16</b>${T("vidéos de saison")}</span><span class="k"><b>' + n + '</b>${T("remplacées")}</span></div>';
+    h += '<div data-pages="images-inv">';   // (2026-11-28) paginé : la vue défilait
     h += '<div class="im-g"><h2>${T("Bannières des saisons")} <span>${T("4 plans vidéo par saison — refaits par la nouvelle collection")}</span></h2><div class="im-s">'
       + INV.saisons.map(function(s){ return '<div class="im-saison"><div class="t"><b>' + esc(s[1]) + '</b><span>${T("vidéo")}</span></div><div class="plans">'
         + [1, 2, 3, 4].map(function(i){ var g = D.saisons && D.saisons[s[0]] && D.saisons[s[0]][i - 1]; return '<img src="' + esc((g && g.poster) || src('assets/video/saisons/' + s[2] + '-' + i + '.webp')) + '" alt="" loading="lazy">'; }).join('') + '</div></div>'; }).join('') + '</div></div>';
@@ -589,6 +590,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}
       + INV.apropos.map(function(a){ var ch = (a[0] === 'soiree' || a[0] === 'weekend') ? 'assets/img/apropos/' + a[0] + '-1600.webp' : 'assets/img/apropos/' + a[0] + '-2400.webp'; return carte(ch, a[1], '', true); }).join('') + '</div></div>';
     h += '<div class="im-g"><h2>${T("Écrans vides")}</h2><div class="im-grille p">'
       + INV.vides.map(function(e){ return carte('assets/img/pages/' + e[0] + '-2x.webp', e[1], '', true); }).join('') + '</div></div>';
+    h += '</div>';
     corps.innerHTML = h;
   }
   function charger(){
