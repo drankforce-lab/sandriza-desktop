@@ -389,6 +389,10 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
   var CHAMPS = { name: '${T("Nom")}', price: '${T("Prix")}', salePrice: '${T("Prix soldé")}', compareAtPrice: '${T("Prix barré")}', cost: '${T("Coût")}',
     description: '${T("Description")}', images: '${T("Photos")}', image: '${T("Photo principale")}', additionalImages: '${T("Autres photos")}', photoDos: '${T("Photo du dos")}',
     category: '${T("Catégorie")}', sizes: '${T("Tailles")}', colors: '${T("Couleurs")}', tags: '${T("Étiquettes")}', sku: '${T("UGS")}', active: '${T("Active")}',
+    actif: '${T("Activée")}', paliers: '${T("Paliers")}', envois: '${T("Dates d’envoi")}', entente: '${T("Entente")}', livraisonIncluse: '${T("Livraison incluse")}',
+    delaiInscriptionJ: '${T("Délai d’inscription (jours)")}', renouvAvantJ: '${T("Renouvellement (jours avant)")}', graceJ: '${T("Grâce (jours)")}',
+    reflexionJ: '${T("Réflexion (jours)")}', avisPrelevementJ: '${T("Avis avant prélèvement (jours)")}', avisRenouvJ: '${T("Avis de renouvellement (jours)")}',
+    reportsParAn: '${T("Reports par année")}',
     visible: '${T("Visible")}', featured: '${T("En vedette")}', brand: '${T("Marque")}', material: '${T("Matière")}', '(fiche)': '${T("Fiche entière")}', '(valeur)': '${T("Valeur")}',
     entretien: '${T("Entretien")}', genre: '${T("Genre")}', ageGroup: '${T("Groupe d’âge")}', style: '${T("Style")}', sizeGuideId: '${T("Guide des tailles")}',
     tag: '${T("Étiquette")}', supplierId: '${T("Fournisseur")}', ajustement: '${T("Ajustement")}', acquisitionCost: '${T("Coût d’acquisition")}', weight: '${T("Poids")}',
@@ -405,13 +409,22 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
   var CLES = { promo_bar_cfg: '${T("Barre promotionnelle")}', promos: '${T("Promotions")}', theme: '${T("Thème")}', apparence: '${T("Apparence")}', store_theme: '${T("Thème de la boutique")}',
     footer_cfg: '${T("Pied de page")}', nav_cfg: '${T("Navigation")}', hp_blocks_v2: '${T("Page d’accueil")}', homepage: '${T("Page d’accueil")}', custom_pages: '${T("Pages")}',
     collections: '${T("Collections")}', ship_cfg: '${T("Livraison")}', intl_ship: '${T("Livraison internationale")}', tax_rules: '${T("Taxes")}', seo: '${T("Référencement")}',
-    email_tpl: '${T("Modèles de courriel")}', brand_name: '${T("Nom de la marque")}', banner: '${T("Bannière")}', annonce: '${T("Annonce")}', launch: '${T("Lancement")}' };
+    email_tpl: '${T("Modèles de courriel")}', brand_name: '${T("Nom de la marque")}', banner: '${T("Bannière")}', annonce: '${T("Annonce")}', launch: '${T("Lancement")}',
+    /* (2026-11-28, sa capture : « bs_reglages », « ça a besoin d'être plus clair ») chaque réglage de la boutique a son nom */
+    bs_reglages: '${T("Boîte de style — réglages")}', vip_cfg: '${T("Liste VIP")}', paliers_cfg: '${T("Paliers de fidélité")}', parrainage_cfg: '${T("Parrainage")}',
+    seconde_vie_cfg: '${T("Seconde vie")}', cabine_reglages: '${T("Cabine d’essayage")}', cabine_mannequin: '${T("Mannequin de la cabine")}', email_ctrl: '${T("Envois de courriels")}',
+    liv_minimums: '${T("Minimums de livraison")}', return_address: '${T("Adresse de retour")}', marque_jeu: '${T("Jeu de la marque")}', inv_cats: '${T("Catégories")}',
+    inv_meta: '${T("Attributs des produits")}', photo_lib: '${T("Photothèque")}', atelier_modeles: '${T("Modèles de l’atelier")}', conseillere_cfg: '${T("Conseillère")}',
+    recherche_photo_cfg: '${T("Recherche par photo")}', rec_rules: '${T("Règles des recommandations")}', rec_manual: '${T("Recommandations choisies")}',
+    rec_deleted: '${T("Recommandations retirées")}', studio_modeles: '${T("Modèles du studio")}', studio_recettes: '${T("Recettes du studio")}', support_cfg: '${T("Soutien à la clientèle")}',
+    carriers_cfg: '${T("Transporteurs")}', nl_cfg: '${T("Infolettre")}', nl_offer: '${T("Offre de l’infolettre")}', img_plafond: '${T("Taille des images")}', warehouses: '${T("Entrepôts")}' };
   var PHOTO = /^(image|images|additionalImages|photoDos|photos)$/;
   /* (2026-11-25) LE CONTRÔLE AVANT DÉPART (calculé au serveur, bt_controles) : rien n'est bloqué, tout est montré. */
   var CTRL = { sans_nom: '${T("Sans nom")}', sans_photo: '${T("Sans photo")}', prix_nul: '${T("Prix à zéro")}', solde_invalide: '${T("Prix soldé au-dessus du prix")}',
     sous_cout: '${T("Vendu sous le coût")}', stock_vide: '${T("Aucun stock")}', ugs_double: '${T("UGS déjà prise en ligne")}' };
   function alertes(e){ var a = (e.controles || []).slice(); if (e.avert === 'ugs_double') a.push('ugs_double'); return a; }
-  function nomCle(e){ return e.tbl === 'products' ? (e.titre || e.cle) : (CLES[e.cle] || e.cle); }
+  // une clé encore inconnue s'écrit en mots (« gift_cfg » → « Gift ») plutôt qu'en nom de base de données
+  function nomCle(e){ return e.tbl === 'products' ? (e.titre || e.cle) : (CLES[e.cle] || motCle(String(e.cle).replace(/_(cfg|reglages)$/, ''))); }
   function etiquette(e){
     if (e.sens === 'conflit') return ['conflit', '${T("Conflit")}'];
     if (e.sens === 'prod') return ['enligne', '${T("Changé en ligne")}'];
@@ -660,7 +673,11 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
     return h.length ? '<div class="photos">' + h.join('') + '</div>' : VIDE;
   }
   function tuile(e, c, trouves){
-    var nom = CHAMPS[c.champ] || c.champ, v;
+    var nom = CHAMPS[c.champ] || motCle(c.champ), v;
+    if (/^(ajout|ajout_prod|suppression|suppression_prod)$/.test(e.type) && c.champ !== '(fiche)') {
+      v = rendre(lire(c.test != null ? c.test : c.prod));
+      return '<div class="sy-tuile' + (/class="(kvs|obs|sy-pas)"/.test(v) || v.length > 420 ? ' sy-large' : '') + '"><span class="n">' + esc(nom) + '</span><div class="v">' + v + '</div></div>';
+    }
     if (e.tbl === 'products' && PHOTO.test(c.champ) && e.photos && ((e.photos.test || []).length || (e.photos.prod || []).length)) v = photosDelta(e.photos.prod || [], e.photos.test || []);
     else if (ARGENT.test(c.champ)) v = deltaVal(argent(lire(c.prod)), argent(lire(c.test)));
     else v = deltaVal(lire(c.prod), lire(c.test));
@@ -672,6 +689,8 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
   function sousCarte(e){
     if (e.type === 'ajout') return '${T("Nouveau dans la boutique préparée")}';
     if (e.type === 'suppression') return '${T("Retiré de la boutique préparée")}';
+    if (e.type === 'ajout_prod') return '${T("Créé directement en ligne — absent de la boutique préparée")}';
+    if (e.type === 'suppression_prod') return '${T("Retiré directement en ligne")}';
     if (e.sens === 'prod') return '${T("Changé directement en ligne")}';
     if (e.sens === 'conflit') return '${T("Changé aussi en ligne depuis la préparation")}';
     var n = (e.champs || []).length;
@@ -709,7 +728,9 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
   function corpsHtml(e){
     var k = cle(e), h = '<div class="sy-corps">', q = RECH.trim().toLowerCase(), tr = trouveDans(e, q);
     if (e.avert === 'ugs_double') h += '<div class="avert">' + '${T("Cette UGS existe déjà en ligne sur un autre produit : la publication sera refusée tant qu’elle n’est pas changée.")}' + '</div>';
-    if (e.sens === 'prod') h += '<div class="avert">' + '${T("Ce changement a été fait directement en ligne : la boutique préparée ne l’a pas. « Reprendre » l’aligne sur la version en ligne.")}' + '</div>';
+    if (e.sens === 'prod') h += '<div class="avert">' + (e.type === 'ajout_prod'
+      ? '${T("Ce réglage a été enregistré directement dans la boutique en ligne : la boutique préparée ne l’a pas encore. Voici ce qu’il contient en ligne. « Reprendre » le copie dans la boutique préparée ; rien ne change en ligne.")}'
+      : '${T("Ce changement a été fait directement en ligne : la boutique préparée a encore l’ancienne version. « Reprendre » la met à jour ; rien ne change en ligne.")}') + '</div>';
     var ctl = (e.controles || []);
     if (ctl.length) h += '<div class="sy-ctrl"><span>' + '${T("Contrôle avant départ :")}' + '</span>' + ctl.map(function(a){ return '<b>' + esc(CTRL[a] || a) + '</b>'; }).join('') + '</div>';
     if (e.type === 'ajout' || e.type === 'suppression') {
