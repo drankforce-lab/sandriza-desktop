@@ -28,6 +28,8 @@
 # ce workflow n'a QUE ce déclencheur : pas de `push`, pas de `pull_request`.
 # =============================================================================
 name: Construire
+# (2026-11-28, sa demande) la version dans le titre de chaque exécution : « Construire 9.2.52 »
+run-name: Construire ${{ inputs.version }}
 
 on:
   workflow_dispatch:
