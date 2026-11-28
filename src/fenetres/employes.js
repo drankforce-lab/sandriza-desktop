@@ -179,6 +179,25 @@ html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
 .bandeau.a{background:var(--ep-ambre-f);color:var(--ep-ambre-t)}
 .bandeau b{font-weight:800}
 .bandeau button{margin-left:auto}
+/* (2026-11-28, sa capture de Paie : << ameliore tout cela, le module employes et paie merite un meilleur travail >>)
+   Les tuiles sont retirees partout (sa regle) : une LIGNE de totaux les remplace ; la periode en cours se dit en une
+   ligne discrete ; l'ecran vide est en haut et dit quoi faire ; les gestes secondaires sont des boutons legers. */
+.em-tete button.fant{background:transparent;border-color:transparent;color:var(--tx2)}
+.em-tete button.fant:hover:not(:disabled){background:var(--v06);color:var(--tx)}
+.em-etat{display:flex;align-items:center;gap:.5rem;font-size:.8rem;color:var(--tx2)}
+.em-etat::before{content:"";width:7px;height:7px;border-radius:50%;background:var(--ep-ambre-t,var(--tx-att));flex:none}
+.em-etat b{color:var(--tx);font-weight:700}
+.em-etat button{margin-left:.3rem}
+.em-resume{display:flex;flex-wrap:wrap;align-items:baseline;gap:.2rem 0;padding:.15rem 0 .7rem;border-bottom:1px solid var(--v08)}
+.em-resume .k{display:inline-flex;align-items:baseline;gap:.35rem;font-size:.8rem;color:var(--tx2)}
+.em-resume .k b{font-size:1rem;color:var(--tx);font-weight:700;font-variant-numeric:tabular-nums}
+.em-resume .k.or b{color:var(--tx-or,var(--or))}
+.em-resume .k + .k::before{content:"";display:inline-block;width:3px;height:3px;border-radius:50%;background:var(--tx2);opacity:.6;margin:0 .8rem;align-self:center}
+.em-vide{display:flex;align-items:flex-start;gap:.85rem;padding:1.2rem .2rem;color:var(--tx2);font-size:.84rem;line-height:1.5}
+.em-vide .i{flex:none;width:2.3rem;height:2.3rem;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:var(--v06);color:var(--or)}
+.em-vide .i svg{width:1.2rem;height:1.2rem}
+.em-vide b{display:block;color:var(--tx);font-size:.95rem;font-weight:600;margin-bottom:.15rem}
+.em-vide button{margin-top:.6rem}
 .em-t{width:100%;border-collapse:collapse;font-size:.82rem}
 .em-t th{text-align:left;font-size:.66rem;text-transform:uppercase;letter-spacing:.06em;color:var(--tx-or,var(--tx2));font-weight:700;padding:.35rem .55rem;border-bottom:1px solid var(--v08);white-space:nowrap}
 .em-t td{padding:.5rem .55rem;border-bottom:1px solid var(--v06);vertical-align:middle;white-space:nowrap}
@@ -392,7 +411,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     } else if (ONGLET === 'paie') {
       h += '<div class="em-nav"><button data-per="-1" aria-label="${T("Période précédente")}">‹</button><b>'
         + esc('${T("Du ")}' + court(D.periode.debut) + ' ${T("au")} ' + court(D.periode.fin)) + '</b><button data-per="1" aria-label="${T("Période suivante")}">›</button></div>'
-        + '<button class="mini" id="em-reg">${T("Réglages de la paie")}</button><button class="mini" id="em-av">${T("Avantages sociaux")}</button><button class="mini" id="em-fe">${T("Feuillets T4 / RL-1")}</button><button class="mini" id="em-csv">${T("Exporter (CSV)")}</button>';
+        + '<button class="mini fant" id="em-reg">${T("Réglages de la paie")}</button><button class="mini fant" id="em-av">${T("Avantages sociaux")}</button><button class="mini fant" id="em-fe">${T("Feuillets T4 / RL-1")}</button><button class="mini fant" id="em-csv">${T("Exporter (CSV)")}</button>';
     } else if (ONGLET === 'politiques') {
       if (D.peutModifier) h += '<button class="prim mini" id="pol-neuve">${T("Nouvelle politique")}</button>';
     } else if (ONGLET === 'equipe') {
@@ -645,15 +664,28 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
     var nA = (D.anomalies || []).length;
     if (PAIE.approuvee) h += '<div class="bandeau v"><span>✓</span><span><b>${T("Période approuvée")}</b> ${T("le")} ' + esc(court(String(PAIE.approuvee.le).slice(0, 10))) + ' ${T("par")} ' + esc(PAIE.approuvee.par || '') + ' · ${T("les chiffres sont figés.")}</span>'
       + (D.peutModifier ? '<button class="mini" id="em-rouvrir">${T("Rouvrir")}</button>' : '') + '</div>';
-    else if (!finie) h += '<div class="bandeau a"><span>${T("Période en cours : les chiffres bougent jusqu’au")} <b>' + esc(court(D.periode.fin)) + '</b>' + (nA ? ' ' + nA + ' ${T("à régler dans Aujourd’hui.")}' : '') + '</span></div>';
+    else if (!finie) h += '<div class="em-etat"><span>${T("Période en cours : les chiffres bougent jusqu’au")} <b>' + esc(court(D.periode.fin)) + '</b>' + (nA ? ' · ' + nA + ' ${T("à régler dans Aujourd’hui.")}' : '') + '</span>'
+      + (nA ? '<button class="mini" data-og="aujourdhui">${T("Voir")}</button>' : '') + '</div>';
     else h += '<div class="bandeau a"><span>' + (nA ? '<b>' + nA + ' ${T("à régler")}</b> ${T("avant d’approuver.")}' : '<b>${T("Prête à approuver.")}</b> ${T("Vérifiez les bulletins, puis approuvez : la période sera figée.")}') + '</span>'
       + (D.peutModifier ? (nA ? '<button class="mini" data-og="aujourdhui">${T("Voir")}</button>' : '') + '<button class="prim mini" id="em-approuver">${T("Approuver la période")}</button>' : '') + '</div>';
-    h += szTuiles('<div class="em-tuiles">'
+    var tu = szTuiles('<div class="em-tuiles">'
       + tuile('t2', '${T("Heures")}', h2((t.heures || 0) + (t.heuresSup || 0)), (t.heuresSup || 0) > 0 ? h2(t.heuresSup) + ' ${T("supplémentaires")}' : '${T("aucune supplémentaire")}')
       + tuile('t3', '${T("Fériés et maladie")}', szArgent((t.ferie || 0) + (t.maladie || 0)), (PAIE.feries || []).length ? (PAIE.feries || []).map(function(f){ return esc(f.nom); }).join(', ') : '${T("aucun férié dans la période")}')
       + tuile('t4', '${T("Vacances")}', szArgent(t.vacances || 0), R.vacancesMode === 'accumule' ? '${T("versées au départ en vacances")}' : '${T("versées à chaque paie")}')
       + tuile('t1', '${T("Brut avant retenues")}', szArgent(t.brut || 0), l.length + ' ' + (l.length > 1 ? '${T("personnes")}' : '${T("personne")}')) + '</div>');
-    if (!l.length) return h + '<div class="carte vide">${T("Rien à payer dans cette période : aucun pointage fermé et aucune vente au comptoir attribuée.")}</div>' + historique();
+    var k = function(v, lib, cl){ return '<span class="k' + (cl ? ' ' + cl : '') + '"><b>' + v + '</b>' + lib + '</span>'; };
+    h += tu || ('<div class="em-resume">' + k(h2((t.heures || 0) + (t.heuresSup || 0)), '${T("Heures")}')
+      + ((t.heuresSup || 0) > 0 ? k(h2(t.heuresSup), '${T("supplémentaires")}') : '')
+      + k(szArgent((t.ferie || 0) + (t.maladie || 0)), '${T("Fériés et maladie")}') + k(szArgent(t.vacances || 0), '${T("Vacances")}')
+      + k(szArgent(t.brut || 0), '${T("Brut avant retenues")}', 'or') + k(String(l.length), l.length > 1 ? '${T("personnes")}' : '${T("personne")}') + '</div>');
+    if (!l.length) {
+      var ic = '<span class="i"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg></span>';
+      if (!equipe().length) return h + '<div class="em-vide">' + ic + '<div><b>${T("Personne n’est encore à la paie.")}</b>'
+        + '${T("Ajoutez une personne dans Équipe : son taux horaire, ses vacances et ses avantages. Ses pointages entreront ensuite dans la paie.")}'
+        + '<br><button class="mini" data-og="equipe">${T("Ouvrir l’équipe")}</button></div></div>' + historique();
+      return h + '<div class="em-vide">' + ic + '<div><b>${T("Rien à payer dans cette période.")}</b>'
+        + '${T("Aucun pointage fermé et aucune vente au comptoir attribuée entre ces dates.")}</div></div>' + historique();
+    }
     var tab = '<div class="carte" style="padding:.5rem .6rem"><table class="em-t"><thead><tr><th>${T("Personne")}</th><th class="n">${T("Heures")}</th><th class="n">${T("Supp.")}</th>'
       + '<th class="n">${T("Férié")}</th><th class="n">${T("Vacances")}</th><th class="n">${T("Commissions")}</th><th class="n">${T("Brut")}</th></tr></thead><tbody>'
       + l.map(function(x){
