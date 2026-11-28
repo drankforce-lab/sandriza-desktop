@@ -128,6 +128,7 @@ button.dang{color:var(--tx-err2,var(--ep-rouge-t))}
 #corps .bx-c{background:none;padding:0;border-radius:0;font-size:.8rem;color:var(--tx2)}
 #corps .bx-c b{color:var(--tx);font-weight:700;margin-right:.1rem}
 #corps .bx-c.a b{color:var(--ep-ambre-t,var(--tx-att))}
+html.jour #corps .bx-c.a b{color:#8a5212}   /* (contrastes au rendu, 2026-11-28) l'ambre de nuit sur le fond clair tombait a 1,47 */
 #corps .bx-c + .bx-c::before{content:"";display:inline-block;width:3px;height:3px;border-radius:50%;background:var(--tx2);margin:0 .7rem;vertical-align:middle;opacity:.6}
 #corps .bx-vide{display:flex;align-items:flex-start;gap:.8rem;padding:1.4rem .2rem;color:var(--tx2)}
 #corps .bx-vide .i{flex:none;width:2.2rem;height:2.2rem;border-radius:10px;display:inline-flex;align-items:center;justify-content:center;background:var(--v06);color:var(--or)}
