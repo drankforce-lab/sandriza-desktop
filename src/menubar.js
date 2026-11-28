@@ -268,6 +268,15 @@ ${css}
 .ep-pan .ep-col .sz-item:hover{background:#f4f5f9!important;color:var(--ep-doux-t,#6b431e)!important}
 .sz-sombre.ep-pan .ep-col .sz-item:hover{background:#222a38!important;color:var(--ep-douxN-t,#e3c29e)!important}
 .ep-pan .sz-coche{display:inline-block;width:1em;flex:none;color:var(--ep-a,#8a5a2b);font-weight:800}
+/* (2026-11-28, sa capture d'Affichage : « c'est beaucoup trop grand ») Le panneau COMPACT : lignes de 30 px, colonnes
+   étroites, petits groupes empilés dans une même colonne (voir panneauMaquette). */
+.ep-pan.ep-compact{padding:12px 12px 10px!important}
+.ep-compact .ep-tete{margin:0 0 8px}
+.ep-compact .ep-col{min-width:8.5rem;padding:0 10px}
+.ep-pan.ep-compact .ep-col .sz-item{height:30px!important;min-height:30px!important;font-size:12.5px!important;gap:8px!important}
+.ep-pan.ep-compact .ep-col .sz-item .sz-lbl{font-size:12.5px!important}
+.ep-compact .ep-col .t{padding:0 8px 4px;font-size:10.5px}
+.ep-col .t.suite{padding-top:12px}
 .sz-sombre.ep-pan .sz-coche{color:var(--ep-aN,#c9a27a)}
 #sous{display:none;margin-left:7px}
 .sz-item .sz-fleche{margin-left:auto;opacity:.6;font-size:.8em;padding-left:1.2em}
@@ -413,6 +422,24 @@ ${PAN}
       cols = plates.concat(cols);
     }
     var n = 0; cols.forEach(function(c){ n += c.items.length; });
+    /* (2026-11-28, « beaucoup trop grand ») AFFICHAGE en compact : un groupe long (> 6) se coupe en deux colonnes, et
+       les petits groupes (≤ 3) se partagent une colonne, jusqu'à 6 entrées. Les autres panneaux gardent leur rangement. */
+    var compact = /^(Affichage|View)$/.test(String(m.label||'').trim());
+    var colonnes = cols.map(function(c){ return { groupes: [c], n: c.items.length, pile: false }; });
+    if (compact) {
+      pan.classList.add('ep-compact');
+      colonnes = [];
+      cols.forEach(function(c){
+        var der = colonnes[colonnes.length - 1];
+        if (c.items.length > 6) {
+          var moit = Math.ceil(c.items.length / 2);
+          colonnes.push({ groupes: [{ t: c.t, items: c.items.slice(0, moit) }], n: moit, pile: false });
+          colonnes.push({ groupes: [{ t: c.t ? ' ' : '', items: c.items.slice(moit) }], n: c.items.length - moit, pile: false });
+        } else if (c.items.length <= 3 && der && der.pile && der.n + c.items.length <= 6) {
+          der.groupes.push(c); der.n += c.items.length;
+        } else colonnes.push({ groupes: [c], n: c.items.length, pile: c.items.length <= 3 });
+      });
+    }
     var tete=document.createElement('div'); tete.className='ep-tete';
     /* (2026-11-20, sa demande) Une icône au trait, la même que la colonne du site (appbar.js ICO_SECTION) ; la lettre reste le repli. */
     var ic=document.createElement('span'); ic.className='ic'; var _sv=ICO_SECTION[String(m.label||'').trim()];
@@ -429,17 +456,19 @@ ${PAN}
     var grille=document.createElement('div'); grille.className='ep-cols';
     /* (2026-11-18, sa capture d'Affichage : six colonnes, le panneau sortait de la fenêtre et couvrait la colonne)
        Au-delà de QUATRE groupes, les colonnes passent sur deux rangées au lieu d'élargir le panneau. */
-    var parRang = cols.length > 4 ? Math.ceil(cols.length / Math.ceil(cols.length / 4)) : cols.length;
-    if (cols.length > 4) {
+    var parRang = colonnes.length > 4 ? Math.ceil(colonnes.length / Math.ceil(colonnes.length / 4)) : colonnes.length;
+    if (colonnes.length > 4) {
       grille.style.gridAutoFlow = 'row';
       grille.style.gridTemplateColumns = 'repeat(' + parRang + ', max-content)';
       grille.style.rowGap = '18px';
     }
-    cols.forEach(function(c, ci){
+    colonnes.forEach(function(cc, ci){
       var col=document.createElement('div'); col.className='ep-col';
-      if (cols.length > 4 && ci % parRang === 0) col.style.borderLeft = '0';
-      if (c.t) { var t=document.createElement('span'); t.className='t'; t.textContent=c.t; col.appendChild(t); }
-      c.items.forEach(function(it){ col.appendChild(entree(it, false)); });
+      if (colonnes.length > 4 && ci % parRang === 0) col.style.borderLeft = '0';
+      cc.groupes.forEach(function(c, gi){
+        if (c.t) { var t=document.createElement('span'); t.className='t' + (gi ? ' suite' : ''); t.textContent=c.t; col.appendChild(t); }
+        c.items.forEach(function(it){ col.appendChild(entree(it, false)); });
+      });
       grille.appendChild(col);
     });
     pan.appendChild(grille);
