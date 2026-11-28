@@ -2848,6 +2848,7 @@ const _portePalette = () => {
    c'était sa demande du matin (« le thème de la page de chargement n'est pas appliqué »), et une
    vérification sans mise à jour passerait sinon d'une palette à l'autre à chaque lancement. */
 let _porteSansTheme = false;
+let _porteCleAffichee = null; // écran de mise à jour avec barre actuellement affiché (titre|sansThème), voir montrerPorte
 /* L'ÉCRAN DE DÉMARRAGE EN « ÉPURÉ » (2026-11-18, « tout en look épuré ») : le panneau de marque perd son dégradé et
    ses halos — blanc à filet le jour, bleu nuit la nuit —, la marque et les titres prennent la police de la maquette,
    la barre d'avancement le brun. Les autres jeux gardent l'écran d'avant. */
@@ -7094,6 +7095,21 @@ const montrerPorte = (titre, message, progression, sansTheme, attente) => {
      l'écran d'origine pendant une vraie mise à jour (2026-10-15) ne vaut plus en Épuré : le look est le même partout. */
   let epureP = false; try { epureP = _themeCouleur() === 'epure'; } catch (e) {}
   _porteSansTheme = !!sansTheme && !epureP;
+  /* (2026-11-28, sa capture du téléchargement : « à chaque fois que le pourcentage augmente l'animation repart ») Chaque
+     événement de progression RECHARGEAIT la page entière : logo, reflet, orbes et barre repartaient de zéro. Même écran
+     (même titre, barre déjà là) → on ne change que le texte et la largeur de la barre, sur place. */
+  const _cle = titre + '|' + _porteSansTheme;
+  let _urlIci = ''; try { _urlIci = mainWindow.webContents.getURL() || ''; } catch (e) {}
+  if (progression !== undefined && _porteCleAffichee === _cle && _urlIci.startsWith('data:text/html')) {
+    const w = Math.max(0, Math.min(100, Number(progression) || 0));
+    mainWindow.webContents.executeJavaScript(
+      '(function(){var s=document.querySelector(".sub"),g=document.querySelector(".pg-in");if(!s||!g)return false;'
+      + 's.innerHTML=' + JSON.stringify(String(message)) + ';g.style.width="' + w + '%";return true;})()', true)
+      .then((ok) => { if (!ok) { _porteCleAffichee = null; montrerPorte(titre, message, progression, sansTheme, attente); } })
+      .catch(() => {});
+    return;
+  }
+  _porteCleAffichee = (progression !== undefined) ? _cle : null;
   _bandePorte(true);
   mainWindow.loadURL(portePage(titre, message, progression))
     // La navigation remet la bande au fond de la fenêtre (did-start-navigation) : on repose celle de la porte une fois chargée.
