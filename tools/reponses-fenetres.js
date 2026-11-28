@@ -9448,7 +9448,7 @@ const JEU = {
          ramene le champ (connexion:cleEntrer rend motDePasse). */
       nom: 'nom retenu avec une cle : sans mot de passe',
       id: '',
-      exige: ['id="sl-clepret"', 'id="sl-mdp-bloc"', 'id="sl-bascule"'],
+      exige: ['id="sl-compte"', 'id="sl-changer"', 'id="sl-nom-bloc"', 'id="sl-mdp-bloc"', 'id="sl-bascule"'],
       reponses: {
         'connexion:contexte': { ok: true,
           theme: { bgFrom: '#191238', bgMid: '#2b2262', logoFrom: '#4f46e5',

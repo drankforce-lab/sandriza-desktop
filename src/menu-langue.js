@@ -286,6 +286,7 @@ const MENU_APP_EN = {
   'Mon entreprise': 'My business',
   'Calendrier': 'Calendar',
   'Boîte de style': 'Style box',
+  'Images de la boutique': 'Shop images',
   'Confortable': 'Comfortable',
   'Compacte': 'Compact',
   'Rechercher partout': 'Search everywhere',
