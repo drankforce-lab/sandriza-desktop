@@ -5818,7 +5818,10 @@ const _dockOuvrir = async (cle, etat) => {
     return { ok: true, deja: 'fenetre' };
   }
   // Une seule vue ancree visible a la fois : la zone est la meme pour toutes.
-  ancrees.forEach((a, k) => { if (k !== c && !a.fenetre && a.view) { try { a.view.setVisible(false); } catch {} } });
+  /* (2026-11-28, sa demande : « le tableau de bord ne devrait jamais se recharger si on revient… c'est tannant de voir
+     toujours chargement du module avec un fond vide ») L'ECRAN QU'ON QUITTE RESTE EN PLACE JUSQU'A CE QUE LE NOUVEAU SOIT
+     POSE : on ne le cache plus AVANT d'attendre le suivant (le fond vide et « chargement du module » venaient de ce trou). */
+  const cacherLesAutres = () => ancrees.forEach((x, k) => { if (k !== c && !x.fenetre && x.view) { try { x.view.setVisible(false); } catch {} } });
   let a = ancrees.get(c);
   if (a && a.fenetre && !a.fenetre.isDestroyed()) {
     // Deja detachee : le reclic la ramene au premier plan.
@@ -5888,13 +5891,15 @@ const _dockOuvrir = async (cle, etat) => {
     });
     await _attendreContenu(a.view, 'window.szPret || null');
   } else {
-    // Vue conservee cachee : elle RELIT ses donnees en revenant — et on ATTEND
-    // qu elle les ait dessinees avant de la montrer (voir _attendreContenu).
-    await _attendreContenu(a.view, 'window.szRevenir ? window.szRevenir() : null');
+    /* (2026-11-28) Vue conservee cachee : elle se MONTRE TOUT DE SUITE, telle qu'on l'a laissee, et relit ses donnees
+       EN ARRIERE-PLAN (szRevenir redessine sur place, sans vider l'ecran). Avant, on attendait la relecture au serveur
+       avant de la montrer : c'etait l'ecran de chargement a chaque retour au tableau de bord. */
+    try { a.view.webContents.executeJavaScript('window.szRevenir && window.szRevenir()', true).catch(() => {}); } catch {}
   }
   if (etatVoulu === 'detache') {
     // L ecran a ete LAISSE detache : on le rouvre tel quel. Le site montre
     // l ecriteau << detache >> dans la zone (dock:detachee).
+    cacherLesAutres();
     poserEnFenetre(c, a);
     a.fenetre.show(); a.fenetre.focus();
     if (ancreeVisible !== c) { /* la vue posee, s il y en avait une, a ete cachee ci-dessus */ }
@@ -5914,6 +5919,7 @@ const _dockOuvrir = async (cle, etat) => {
   const b = boundsAncrage();
   if (b) { try { a.view.setBounds(b); } catch {} }
   try { a.view.setVisible(true); } catch {}
+  cacherLesAutres();   // le nouvel ecran est pose : l'ancien peut partir, sans trou entre les deux
   /* ⚠ LE CLAVIER VA AU MODULE OUVERT (2026-10-17, son signalement : « dans la vente au comptoir, on doit toujours
      cliquer dans la zone de recherche pour scanner »). La vue était montrée sans recevoir le clavier : le curseur
      clignotait dans la zone de scan, mais les frappes du lecteur (un clavier) partaient dans la page du menu. */
