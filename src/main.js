@@ -3908,7 +3908,7 @@ const OPS_PONT = new Set([
   // Le calendrier (2026-11-18) : lecture seule, chaque source selon son droit (pont.js, calendrierMois).
   'calendrier:mois',
   // Les images de la boutique (2026-11-28) : manifeste images_cfg, dépôt R2 (pont.js, imagesDonnees…).
-  'imagesboutique:donnees', 'imagesboutique:remplacer', 'imagesboutique:retablir',
+  'imagesboutique:donnees', 'imagesboutique:remplacer', 'imagesboutique:retablir', 'imagesboutique:apercu',
   // La boîte de style (2026-11-23, lot 3) : la règle au serveur (lib-boite.php), le pont relaie.
   'boite:saison', 'boite:proposer', 'boite:composer', 'boite:valider', 'boite:devalider', 'boite:prelever', 'boite:reglages', 'boite:reglagesEcrire', 'boite:produits',
   // La liste des marques et modeles d une annee, demandee a la NHTSA (vPIC).
@@ -4701,7 +4701,7 @@ const LIMITES_PONT = {
   'vehicules:deplacement': 30000, 'vehicules:deplacementOter': 30000, 'vehicules:changement': 30000,
   'vehicules:dpa': 30000,
   'calendrier:mois': 15000,
-  'imagesboutique:donnees': 10000, 'imagesboutique:remplacer': 120000, 'imagesboutique:retablir': 20000,
+  'imagesboutique:donnees': 10000, 'imagesboutique:remplacer': 120000, 'imagesboutique:retablir': 20000, 'imagesboutique:apercu': 120000,
   'boite:saison': 20000, 'boite:proposer': 60000, 'boite:composer': 20000, 'boite:prelever': 600000, 'boite:reglagesEcrire': 20000,
   /* 37 demandes paralleles a la NHTSA (une par marque), puis l ecriture de la
      configuration partagee : 10 a 30 s d habitude, davantage sur un reseau lent. */

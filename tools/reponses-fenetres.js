@@ -3489,7 +3489,7 @@ const JEU = {
   // (2026-11-28) Images de la boutique : une collection avec deux images remplacees, le droit d ecrire.
   'images-boutique.js': { 'imagesboutique:donnees': { ok: true, collection: '2026', site: 'https://www.sandriza.com', peutModifier: true,
       images: { 'assets/img/pages/cat-robes-a-2x.webp': 'https://cdn.exemple/boutique/robes-a.webp', 'assets/img/pages/livraison-2400.webp': 'https://cdn.exemple/boutique/livraison.webp' } },
-    'imagesboutique:remplacer': { ok: true, url: 'https://cdn.exemple/boutique/neuve.webp' }, 'imagesboutique:retablir': { ok: true } },
+    'imagesboutique:remplacer': { ok: true, url: 'https://cdn.exemple/boutique/neuve.webp' }, 'imagesboutique:retablir': { ok: true }, 'imagesboutique:apercu': { ok: true, image: 'https://cdn.exemple/boutique/apercu.jpg', cout: 0.06 } },
   'boite.js': (function(){
     var B = [
       { aboId: 'bs_aaaaaaaaaaaaaaaaaaaa', userId: 'u1', envoi: '2027-03-15', statut: 'proposee', nom: 'Marie Tremblay', email: 'marie@exemple.ca', palier: 'classique', palierNom: 'Classique',
