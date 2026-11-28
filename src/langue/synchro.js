@@ -314,4 +314,5 @@ module.exports = {
   'partira {0}': 'leaves {0}',
   'Elle partira {0}, même si l’application est fermée.': 'It will go out {0}, even if the app is closed.',
   'Elle partira {0} (plus tôt si l’application est ouverte), dans la version préparée à ce moment-là.': 'It will go out {0} (sooner if the app is open), in the version prepared at that time.',
+  'Images de la boutique': 'Shop images',
 };

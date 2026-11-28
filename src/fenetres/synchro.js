@@ -411,7 +411,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_MESURES()}
     collections: '${T("Collections")}', ship_cfg: '${T("Livraison")}', intl_ship: '${T("Livraison internationale")}', tax_rules: '${T("Taxes")}', seo: '${T("Référencement")}',
     email_tpl: '${T("Modèles de courriel")}', brand_name: '${T("Nom de la marque")}', banner: '${T("Bannière")}', annonce: '${T("Annonce")}', launch: '${T("Lancement")}',
     /* (2026-11-28, sa capture : « bs_reglages », « ça a besoin d'être plus clair ») chaque réglage de la boutique a son nom */
-    bs_reglages: '${T("Boîte de style — réglages")}', vip_cfg: '${T("Liste VIP")}', paliers_cfg: '${T("Paliers de fidélité")}', parrainage_cfg: '${T("Parrainage")}',
+    bs_reglages: '${T("Boîte de style — réglages")}', images_cfg: '${T("Images de la boutique")}', vip_cfg: '${T("Liste VIP")}', paliers_cfg: '${T("Paliers de fidélité")}', parrainage_cfg: '${T("Parrainage")}',
     seconde_vie_cfg: '${T("Seconde vie")}', cabine_reglages: '${T("Cabine d’essayage")}', cabine_mannequin: '${T("Mannequin de la cabine")}', email_ctrl: '${T("Envois de courriels")}',
     liv_minimums: '${T("Minimums de livraison")}', return_address: '${T("Adresse de retour")}', marque_jeu: '${T("Jeu de la marque")}', inv_cats: '${T("Catégories")}',
     inv_meta: '${T("Attributs des produits")}', photo_lib: '${T("Photothèque")}', atelier_modeles: '${T("Modèles de l’atelier")}', conseillere_cfg: '${T("Conseillère")}',
