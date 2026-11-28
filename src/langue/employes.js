@@ -525,4 +525,16 @@ module.exports = {
   "Employé ajouté.": "Employee added.",
   "La personne sort de l’horaire, de la paie et du portail des employés. Son compte, sa fiche et son historique (périodes payées, pointages) restent ; « Ajouter un employé » la ramène.": "The person leaves the schedule, payroll and the employee portal. Their account, record and history (paid periods, punches) stay; “Add an employee” brings them back.",
   "Retiré des employés : ": "Removed from employees: ",
+  "Modifier": "Edit",
+  "Embauche le": "Hired on",
+  "Date d’embauche à saisir": "Hire date to enter",
+  "Rémunération": "Pay",
+  "Vacances et congés": "Vacation and leave",
+  "En cas d’urgence": "In case of emergency",
+  "Aucun contact saisi": "No contact entered",
+  "Confidentiel": "Confidential",
+  "Coordonnées, NAS, dépôt direct": "Contact details, SIN, direct deposit",
+  "Bulletins, relevés et pièces, chiffrés": "Pay stubs, slips and documents, encrypted",
+  "+ Pointage": "+ Punch",
+  "+ Congé": "+ Leave"
 };

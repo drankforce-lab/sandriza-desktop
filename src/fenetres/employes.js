@@ -172,6 +172,21 @@ html.jour .carte{box-shadow:0 10px 24px -18px rgba(20,30,50,.22)}
 .hist b{color:var(--tx);font-size:.8rem}
 .hist .fut{color:var(--tx-or,var(--tx))}
 .gestes{display:flex;gap:.45rem;flex-wrap:wrap}
+.fi-tete{display:flex;align-items:center;gap:.6rem} .fi-tete .em-qui{margin-right:auto}
+.fi-meta{font-size:.76rem;color:var(--tx2);margin-top:-.35rem}
+.fi-s{display:flex;flex-direction:column;gap:.45rem;border-top:1px solid var(--v06);padding-top:.65rem}
+.fi-s h4{display:flex;align-items:center;margin:0;font-size:.68rem;font-weight:800;text-transform:uppercase;letter-spacing:.06em;color:var(--tx2)}
+.fi-s h4 .lien{margin-left:auto;text-transform:none;letter-spacing:0;font-size:.76rem;font-weight:700;background:transparent;border:0;padding:.1rem .3rem;color:var(--tx-or,var(--tx))}
+.fi-s h4 .lien:hover{text-decoration:underline}
+.fi-s .hist{border-top:0;padding-top:0}
+.fi-urg{font-size:.82rem}
+.fi-lien{display:flex;align-items:center;gap:.6rem;width:100%;text-align:left;padding:.5rem .6rem;border-radius:10px;border:1px solid var(--v08);background:var(--v04,var(--v05));color:var(--tx)}
+.fi-lien:hover{border-color:var(--v16)}
+.fi-lien .i{flex:none;width:1.9rem;height:1.9rem;border-radius:8px;display:inline-grid;place-items:center;background:var(--v06);color:var(--tx2)}
+.fi-lien .i svg{width:1rem;height:1rem}
+.fi-lien .t{display:flex;flex-direction:column;line-height:1.3;margin-right:auto;min-width:0}
+.fi-lien .t b{font-size:.82rem} .fi-lien .t small{font-size:.72rem;color:var(--tx2)}
+.fi-lien .ch{color:var(--tx2);font-size:1.1rem}
 
 /* PAIE */
 .bandeau{display:flex;align-items:center;gap:.6rem;padding:.6rem .85rem;border-radius:12px;font-size:.84rem}
@@ -396,19 +411,21 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
   }
 
   /* ── La tête : onglets, puis les gestes de l'onglet ── */
+  var ICO_CADENAS = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
+  var ICO_DOC = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z"/><path d="M14 3v5h5M9 13h6M9 17h6"/></svg>';
   function tete(){
     var nA = (D.anomalies || []).length + (D.demandes || []).length;
     var og = function(v, l, nb){ return '<button type="button" class="' + (ONGLET === v ? 'on' : '') + '" data-og="' + v + '">' + l + (nb ? '<span class="nb">' + nb + '</span>' : '') + '</button>'; };
     var h = '<div class="em-tete"><div class="ed-seg">' + og('aujourdhui', '${T("Aujourd’hui")}', nA) + og('horaire', '${T("Horaire")}')
       + og('equipe', '${T("Équipe")}') + og('paie', '${T("Paie")}') + og('politiques', '${T("Politiques")}') + '</div><div class="droite">';
     if (ONGLET === 'aujourdhui') {
-      if (D.peutModifier) h += '<button class="mini" data-act="pointage">${T("Ajouter un pointage")}</button><button class="mini" data-act="conge">${T("Ajouter un congé")}</button>';
+      if (D.peutModifier) h += '<button class="mini fant" data-act="pointage">${T("+ Pointage")}</button><button class="mini fant" data-act="conge">${T("+ Congé")}</button>';
     } else if (ONGLET === 'horaire') {
       h += '<div class="em-nav"><button data-sem="-7" aria-label="${T("Semaine précédente")}">‹</button><b>'
         + esc(court(D.semaine[0]) + ' – ' + court(D.semaine[6])) + '</b><button data-sem="7" aria-label="${T("Semaine suivante")}">›</button>'
         + '<button data-sem="0">${T("Cette semaine")}</button></div>';
-      if (D.peutModifier) h += '<button class="mini" id="em-copier" title="${T("Reprend les quarts de la semaine précédente (ceux déjà posés et les congés restent).")}">${T("Copier la semaine précédente")}</button>'
-        + '<button class="mini" data-act="conge">${T("Ajouter un congé")}</button>' + boutonPublier();
+      if (D.peutModifier) h += '<button class="mini fant" id="em-copier" title="${T("Reprend les quarts de la semaine précédente (ceux déjà posés et les congés restent).")}">${T("Copier la semaine précédente")}</button>'
+        + '<button class="mini fant" data-act="conge">${T("+ Congé")}</button>' + boutonPublier();
     } else if (ONGLET === 'paie') {
       h += '<div class="em-nav"><button data-per="-1" aria-label="${T("Période précédente")}">‹</button><b>'
         + esc('${T("Du ")}' + court(D.periode.debut) + ' ${T("au")} ' + court(D.periode.fin)) + '</b><button data-per="1" aria-label="${T("Période suivante")}">›</button></div>'
@@ -629,31 +646,41 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES('employes')}
   }
   function panneau(s){
     if (!s) return '';
-    var f = s.fiche || {}, R = D.reglages || {};
-    var h = '<div class="carte fiche"><div style="display:flex;align-items:center;gap:.6rem">' + qui(s.id, s.nom, esc(f.embauche ? '${T("embauche le")} ' + court(f.embauche) + ' ' + f.embauche.slice(0, 4) : '${T("date d’embauche à saisir")}')) + '</div>';
+    var f = s.fiche || {}, R = D.reglages || {}, M = D.peutModifier;
+    var h = '<div class="carte fiche"><div class="fi-tete">' + qui(s.id, s.nom, esc([f.poste || szTd(s.role || ''), emploi(f)].filter(Boolean).join(' · ')))
+      + (M ? '<button class="mini" data-act="fiche">${T("Modifier")}</button>' : '') + '</div>';
+    h += '<div class="fi-meta">' + esc(f.embauche ? '${T("Embauche le")} ' + court(f.embauche) + ' ' + f.embauche.slice(0, 4) + (anciennete(s) ? ' · ' + anciennete(s) : '') : '${T("Date d’embauche à saisir")}') + '</div>';
     if (!inclus(s)) {
       h += '<div class="note">${T("Hors paie : cette personne n’entre ni à l’horaire ni dans le rapport de paie (propriétaire, compte technique…).")}</div>';
     } else {
-      h += '<div class="kv"><span>${T("Taux horaire")}</span><b>' + szArgent(s.taux || 0) + '</b>'
-        + '<span>${T("Commission")}</span><b>' + szNombre(f.commission || 0, 1) + ' %</b>'
-        + '<span>${T("Emploi")}</span><b>' + esc(emploi(f) || '—') + '</b>'
-        + '<span>${T("Vacances")}</span><b>' + s.vacancesPct + ' % · ' + (R.vacancesMode === 'accumule' ? '${T("accumulées")}' : '${T("versées à chaque paie")}') + '</b>'
-        + (R.vacancesMode === 'accumule' ? '<span>${T("Solde accumulé")}</span><b>' + szArgent(s.vacancesSolde || 0) + '</b>' : '')
-        + '<span>${T("Maladie payée cette année")}</span><b>' + (s.maladiePayees || 0) + ' ${T("sur")} 2</b>'
-        + '<span>${T("Contact d’urgence")}</span><b>' + esc(f.urgence || '—') + '</b></div>';
-      if (f.embauche && s.vacancesPct < 6) {
-        var p = Math.min(100, Math.round((s.mois || 0) / 36 * 100));
-        h += '<div><div class="jauge"><i style="width:' + p + '%"></i></div><div class="note" style="margin-top:.3rem">${T("Passe à 6 % de vacances le")} ' + esc(court(s.dateSixPct) + ' ' + String(s.dateSixPct).slice(0, 4)) + '</div></div>';
-      }
       if (s.sousMinimum) h += '<div class="bandeau a">${T("Taux sous le salaire minimum réglé")} (' + szArgent(R.salaireMin) + ').</div>';
-      if (!(R.salaireMin > 0)) h += '<div class="note">${T("Le salaire minimum n’est pas réglé : réglez-le dans Paie → Réglages pour être averti d’un taux trop bas (il change chaque 1er mai).")}</div>';
-      h += '<div class="hist"><b>${T("Historique du taux")}</b>' + (f.tauxHist || []).slice().reverse().map(function(x){
+      h += '<section class="fi-s"><h4>${T("Rémunération")}' + (M ? '<button class="lien" data-act="taux">${T("Nouveau taux")}</button>' : '') + '</h4>'
+        + '<div class="kv"><span>${T("Taux horaire")}</span><b>' + szArgent(s.taux || 0) + '</b>'
+        + '<span>${T("Commission")}</span><b>' + szNombre(f.commission || 0, 1) + ' %</b>'
+        + '<span>${T("Emploi")}</span><b>' + esc(emploi(f) || '—') + '</b></div>';
+      var hist = (f.tauxHist || []).slice().reverse();
+      if (hist.length > 1 || (hist[0] && hist[0].des > D.aujourdhui)) h += '<div class="hist">' + hist.map(function(x){
         var futur = x.des > D.aujourdhui;
         return '<span class="' + (futur ? 'fut' : '') + '">' + szArgent(x.taux) + ' ' + (x.des <= '2000-01-01' ? '${T("depuis le début")}' : (futur ? '${T("à partir du")} ' : '${T("depuis le")} ') + esc(court(x.des) + ' ' + x.des.slice(0, 4))) + (futur ? ' · ${T("prévu")}' : '') + '</span>';
       }).join('') + '</div>';
+      if (!(R.salaireMin > 0)) h += '<div class="note">${T("Le salaire minimum n’est pas réglé : réglez-le dans Paie → Réglages pour être averti d’un taux trop bas (il change chaque 1er mai).")}</div>';
+      h += '</section>';
+      h += '<section class="fi-s"><h4>${T("Vacances et congés")}' + (M ? '<button class="lien" data-act="conge">${T("Ajouter un congé")}</button>' : '') + '</h4>'
+        + '<div class="kv"><span>${T("Vacances")}</span><b>' + s.vacancesPct + ' % · ' + (R.vacancesMode === 'accumule' ? '${T("accumulées")}' : '${T("versées à chaque paie")}') + '</b>'
+        + (R.vacancesMode === 'accumule' ? '<span>${T("Solde accumulé")}</span><b>' + szArgent(s.vacancesSolde || 0) + '</b>' : '')
+        + '<span>${T("Maladie payée cette année")}</span><b>' + (s.maladiePayees || 0) + ' ${T("sur")} 2</b></div>';
+      if (f.embauche && s.vacancesPct < 6) {
+        var pc = Math.min(100, Math.round((s.mois || 0) / 36 * 100));
+        h += '<div><div class="jauge"><i style="width:' + pc + '%"></i></div><div class="note" style="margin-top:.3rem">${T("Passe à 6 % de vacances le")} ' + esc(court(s.dateSixPct) + ' ' + String(s.dateSixPct).slice(0, 4)) + '</div></div>';
+      }
+      h += '</section>';
     }
+    h += '<section class="fi-s"><h4>${T("En cas d’urgence")}</h4><div class="fi-urg">' + esc(f.urgence || '${T("Aucun contact saisi")}') + '</div></section>';
     if (f.note) h += '<div class="note">' + esc(f.note) + '</div>';
-    if (D.peutModifier) h += '<div class="gestes"><button class="mini" data-act="fiche">${T("Modifier la fiche")}</button><button class="mini" data-act="dossier">${T("Dossier confidentiel")}</button><button class="mini" data-act="retirerEmp">${T("Retirer des employés")}</button><button class="mini" data-act="docs">${T("Documents de paie")}</button>' + (inclus(s) ? '<button class="mini" data-act="taux">${T("Nouveau taux")}</button><button class="mini" data-act="conge">${T("Ajouter un congé")}</button>' : '') + '</div>';
+    if (M) h += '<section class="fi-s"><h4>${T("Confidentiel")}</h4>'
+      + '<button type="button" class="fi-lien" data-act="dossier"><span class="i">' + ICO_CADENAS + '</span><span class="t"><b>${T("Dossier confidentiel")}</b><small>${T("Coordonnées, NAS, dépôt direct")}</small></span><span class="ch" aria-hidden="true">›</span></button>'
+      + '<button type="button" class="fi-lien" data-act="docs"><span class="i">' + ICO_DOC + '</span><span class="t"><b>${T("Documents de paie")}</b><small>${T("Bulletins, relevés et pièces, chiffrés")}</small></span><span class="ch" aria-hidden="true">›</span></button></section>';
+    if (M) h += '<div class="gestes"><button class="mini" data-act="retirerEmp">${T("Retirer des employés")}</button></div>';
     return h + '</div>';
   }
 
