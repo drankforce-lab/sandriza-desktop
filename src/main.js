@@ -7662,11 +7662,11 @@ const _majVoile = (on, etape) => {
   try { ancrees.forEach((a) => { if (a.view && !a.view.webContents.isDestroyed()) tous.push(a.view.webContents); }); } catch (e) {}
   try { fenetresNatives.forEach((w, k) => { if (k !== 'maj' && w && !w.isDestroyed()) tous.push(w.webContents); }); } catch (e) {}
   tous.forEach((wc) => { try { wc.executeJavaScript(js, true).catch(() => {}); } catch (e) {} });
-  const fen = [];
-  try { if (mainWindow && !mainWindow.isDestroyed()) fen.push(mainWindow); } catch (e) {}
-  try { fenetresNatives.forEach((w, k) => { if (k !== 'maj' && w && !w.isDestroyed()) fen.push(w); }); } catch (e) {}
-  try { ancrees.forEach((a) => { if (a.fenetre && !a.fenetre.isDestroyed()) fen.push(a.fenetre); }); } catch (e) {}
-  fen.forEach((w) => { try { w.setEnabled(!on); } catch (e) {} });
+  const lesFenetres = [];
+  try { if (mainWindow && !mainWindow.isDestroyed()) lesFenetres.push(mainWindow); } catch (e) {}
+  try { fenetresNatives.forEach((w, k) => { if (k !== 'maj' && w && !w.isDestroyed()) lesFenetres.push(w); }); } catch (e) {}
+  try { ancrees.forEach((a) => { if (a.fenetre && !a.fenetre.isDestroyed()) lesFenetres.push(a.fenetre); }); } catch (e) {}
+  lesFenetres.forEach((w) => { try { w.setEnabled(!on); } catch (e) {} });
 };
 /* La fenêtre de suivi de la copie. Elle vit HORS de l'application (l'installateur la ferme et remplace ses fichiers) :
    un script PowerShell + WinForms, au thème Sandriza, qui observe le dossier d'installation (FileSystemWatcher), affiche
