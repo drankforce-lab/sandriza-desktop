@@ -293,6 +293,17 @@ select:focus{border-color:#C49A6C;box-shadow:0 0 0 3px rgba(196,154,108,0.18)}
   inset:-5px;border-radius:inherit;border:2px solid rgba(196,154,108,0.55);
   animation:cx-onde 1.4s cubic-bezier(.2,.8,.2,1) infinite}
 .cx-bascule{display:block;margin:0.85rem auto 0}
+.cx-nom{overflow:hidden;max-height:180px;opacity:1;
+  transition:max-height .32s cubic-bezier(.2,.8,.2,1),opacity .22s ease}
+.cx-nom.cache{max-height:0;opacity:0;pointer-events:none}
+.cx-compte{display:flex;justify-content:center;align-items:baseline;gap:0.5rem;flex-wrap:wrap;margin-top:0.8rem;font-size:0.78rem;color:#7a6652}
+.cx-compte span{font-weight:600}
+.cx-lien{background:none;border:0;padding:0;font:inherit;font-weight:600;color:#7d5f3c;text-decoration:underline;text-underline-offset:2px;cursor:pointer}
+.cx-lien:focus-visible{outline:2px solid #C49A6C;outline-offset:3px;border-radius:3px}
+html[data-sz-theme="epure"] .cx-compte{color:#5b6273}
+html[data-sz-theme="epure"] .cx-lien{color:#3d4456}
+html[data-sz-theme="epure"]:not(.jour) .cx-compte{color:#9aa4b5}
+html[data-sz-theme="epure"]:not(.jour) .cx-lien{color:#c9d1dd}
 @keyframes cx-apparait{from{opacity:0;transform:translateY(-4px)}to{opacity:1;transform:none}}
 @keyframes cx-onde{from{opacity:1;transform:scale(.92)}to{opacity:0;transform:scale(1.25)}}
 /* L ecran de creation : un embleme, trois facons de faire, un nom, un geste. */
@@ -544,6 +555,8 @@ ${JS_DIRE()}
       "Authentification forte · Windows Hello ou clé de sécurité": "Strong authentication · Windows Hello or security key",
       "Sécurisée": "Secured",
       "Se connecter avec ma clé": "Sign in with my passkey",
+      "Changer de compte": "Switch account",
+      "Revenir à la connexion par clé": "Back to passkey sign-in",
       "Utiliser mon mot de passe": "Use my password",
       "Entrez votre nom d’utilisateur.": "Enter your username.",
       "Entrez d’un seul geste, sans mot de passe ni code. Facultatif — le mot de passe reste toujours possible.": "Sign in with a single gesture, no password or code. Optional — your password always remains available.",
@@ -853,6 +866,7 @@ ${JS_DIRE()}
       + '</div>'
       + avisFermeture()
       + '<form id="cx-form" novalidate>'
+      + '<div class="cx-nom" id="sl-nom-bloc">'
       + '<div style="margin-bottom:1rem">'
       + '<label class="cx-lbl" for="sl-email">' + T('Nom d’utilisateur') + '</label>'
       + '<div class="cx-champ"><span class="cx-ic">' + IC.personne + '</span>'
@@ -863,10 +877,7 @@ ${JS_DIRE()}
       + '<input type="checkbox" id="sl-remember"' + (CTX.souvenir ? ' checked' : '') + '>'
       + '<label for="sl-remember">' + T('Se souvenir de mon nom d’utilisateur') + '</label>'
       + '</div>'
-      + '<div class="cx-clepret" id="sl-clepret"><span class="em">' + IC.empreinte(19) + '</span>'
-      + '<div class="tx"><b>' + T('Clé d’accès active') + '</b>'
-      + '<span class="t">' + T('Authentification forte · Windows Hello ou clé de sécurité') + '</span></div>'
-      + '<span class="etat">' + T('Sécurisée') + '</span></div>'
+      + '</div>'
       + '<div class="cx-mdp" id="sl-mdp-bloc" style="margin-bottom:1.25rem">'
       + '<label class="cx-lbl" for="sl-password">' + T('Mot de passe') + '</label>'
       + '<div class="cx-champ"><span class="cx-ic">' + IC.cadenas + '</span>'
@@ -877,6 +888,8 @@ ${JS_DIRE()}
       + '<div class="cx-err" id="sl-error"></div>'
       + '<div id="cap-zone"></div>'
       + '<button type="submit" class="cx-btn" id="sl-btn" style="' + btnStyle() + '">' + T('Se connecter') + '</button>'
+      + '<div class="cx-compte" id="sl-compte" style="display:none"><span id="sl-compte-nom"></span>'
+      + '<button type="button" class="cx-lien" id="sl-changer">' + T('Changer de compte') + '</button></div>'
       + '<button type="button" class="admlogin-back cx-bascule" id="sl-bascule" style="display:none"></button>'
       + '</form>'
       + '<div class="cx-centre cx-recours' + (DEJA_RATE ? '' : ' cx-voile') + '">'
@@ -1524,19 +1537,49 @@ ${JS_DIRE()}
      personnel depuis cet ecran.
      ⚠ LE CHOIX DE LA PERSONNE TIENT : apres << Utiliser mon mot de passe >>,
      la frappe suivante ne replie pas le champ sous ses doigts. */
-  var CLE_CONNUE = false, MODE_CLE = false, MDP_CHOISI = '', NOM_T = null, NOM_N = 0;
+  /* (2026-11-28, sa demande) LE NOM SE RETIRE AUSSI. Le compte retenu a une clé : l'écran ne montre plus que le
+     bouton de la clé et, dessous, le nom en petit avec « Changer de compte ». L'encart « Clé d'accès active » est parti
+     (trop de place pour ce qu'il disait). « Changer de compte » rend le nom et le mot de passe ; « Revenir à la
+     connexion par clé » ramène le compte retenu. ⚠ Le nom ne se replie QUE pour le compte retenu, jamais sous les
+     doigts de quelqu'un qui tape. */
+  var CLE_CONNUE = false, MODE_CLE = false, MDP_CHOISI = '', NOM_T = null, NOM_N = 0, NOM_MASQUE = false;
   function modeCle(connue, actif){
     CLE_CONNUE = !!connue;
     MODE_CLE = CLE_CONNUE && actif !== false;
-    var m = el('sl-mdp-bloc'), c = el('sl-clepret'), b = el('sl-btn'), bs = el('sl-bascule'), pw = el('sl-password');
+    if (!MODE_CLE) NOM_MASQUE = false;
+    var masque = MODE_CLE && NOM_MASQUE;
+    var m = el('sl-mdp-bloc'), b = el('sl-btn'), bs = el('sl-bascule'), pw = el('sl-password');
+    var nb = el('sl-nom-bloc'), nm = el('sl-email'), cp = el('sl-compte'), cpn = el('sl-compte-nom');
     if (m) m.className = 'cx-mdp' + (MODE_CLE ? ' cache' : '');
     if (pw) pw.tabIndex = MODE_CLE ? -1 : 0;
-    if (c) c.className = 'cx-clepret' + (MODE_CLE ? ' on' : '');
+    if (nb) nb.className = 'cx-nom' + (masque ? ' cache' : '');
+    if (nm) nm.tabIndex = masque ? -1 : 0;
+    if (cp) cp.style.display = masque ? '' : 'none';
+    if (cpn) cpn.textContent = masque && nm ? nm.value.trim() : '';
     if (b && !b.disabled) b.innerHTML = MODE_CLE ? (IC.empreinte(18) + '<span>' + T('Se connecter avec ma clé') + '</span>') : T('Se connecter');
     if (bs) {
-      bs.style.display = CLE_CONNUE ? '' : 'none';
-      bs.textContent = MODE_CLE ? T('Utiliser mon mot de passe') : T('Utiliser ma clé d’identification');
+      var retour = !CLE_CONNUE && !!(CTX.cle && CTX.prefill);
+      bs.style.display = masque ? 'none' : ((CLE_CONNUE || retour) ? '' : 'none');
+      bs.setAttribute('data-retour', retour ? '1' : '');
+      bs.textContent = retour ? T('Revenir à la connexion par clé') : (MODE_CLE ? T('Utiliser mon mot de passe') : T('Utiliser ma clé d’identification'));
     }
+  }
+  function compteChanger(){
+    var nn = el('sl-email'), pw = el('sl-password');
+    fauteEffacer('sl-error');
+    NOM_MASQUE = false; MDP_CHOISI = ''; NOM_N++;
+    if (nn) nn.value = '';
+    if (pw) pw.value = '';
+    modeCle(false);
+    if (nn) nn.focus();
+  }
+  function compteRetenu(){
+    var nn = el('sl-email');
+    fauteEffacer('sl-error');
+    if (nn) nn.value = CTX.prefill;
+    NOM_MASQUE = true; MDP_CHOISI = ''; NOM_N++;
+    modeCle(true, true);
+    var b = el('sl-btn'); if (b) b.focus();
   }
   function nomVerifier(){
     var idc = el('sl-email');
@@ -1566,6 +1609,7 @@ ${JS_DIRE()}
       if (b2) b2.disabled = false;
       /* La cle n a pas passe : le mot de passe REVIENT, le curseur dedans. */
       MDP_CHOISI = v.toLowerCase();
+      NOM_MASQUE = false;
       modeCle(true, false);
       faute('sl-error', r || {});
       var pw = el('sl-password'); if (pw) pw.focus();
@@ -1809,8 +1853,10 @@ ${JS_DIRE()}
     for (var pi = 0; pi < prims.length; pi++) btnSurvol(prims[pi]);
     var f = el('cx-form');
     if (f) f.onsubmit = function(e){ e.preventDefault(); if (MODE_CLE) cleEntrer(); else entrer(); };
+    var chg = el('sl-changer'); if (chg) chg.onclick = compteChanger;
     var bsc = el('sl-bascule');
     if (bsc) bsc.onclick = function(){
+      if (bsc.getAttribute('data-retour') === '1') { compteRetenu(); return; }
       var nn = el('sl-email'), vv = nn ? nn.value.trim().toLowerCase() : '';
       fauteEffacer('sl-error');
       MDP_CHOISI = MODE_CLE ? vv : '';
@@ -1963,7 +2009,7 @@ ${JS_DIRE()}
     var n = el('sl-email'), v = n ? n.value.trim() : '';
     /* Le nom retenu a une cle : replie TOUT DE SUITE, sans aller-retour, pour
        que le champ ne paraisse pas une fraction de seconde puis s en aille. */
-    if (v && v === CTX.prefill && CTX.cle) modeCle(true, MDP_CHOISI !== v.toLowerCase());
+    if (v && v === CTX.prefill && CTX.cle) { NOM_MASQUE = MDP_CHOISI !== v.toLowerCase(); modeCle(true, NOM_MASQUE); }
     else if (v) nomVerifier();
     var z = el(MODE_CLE ? 'sl-btn' : (v ? 'sl-password' : 'sl-email'));
     if (z) z.focus();
