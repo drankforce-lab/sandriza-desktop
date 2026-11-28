@@ -525,12 +525,24 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
       + ch('', '${T("Texte du bouton")}', '<input id="of-cta" aria-label="${T("Texte du bouton")}" value="' + esc(o.bandeauCta || '') + '" placeholder="${T("Voir les articles")}">')
       + ch('', '${T("Texte du bouton (anglais)")}', '<input id="of-cta-en" aria-label="${T("Texte du bouton (anglais)")}" value="' + esc(o.bandeauCtaEN || '') + '">')
       + '</div><div class="grille g3 ecart">'
-      + ch('', '${T("Lien du bouton")}', '<input id="of-url" aria-label="${T("Lien du bouton")}" value="' + esc(o.bandeauUrl || '#shop') + '">')
+      + ch('', '${T("Lien du bouton")}', '<input id="of-url" aria-label="${T("Lien du bouton")}" value="' + esc(o.bandeauUrl || '') + '" placeholder="${T("Vide : la page de l’offre")}">')
       + ch('', '${T("Couleur du fond")}', '<input type="color" id="of-fond" aria-label="${T("Couleur du fond")}" value="' + esc(o.bandeauFond || '#1a1a2e') + '">')
       + ch('', '${T("Couleur du texte")}', '<input type="color" id="of-texte" aria-label="${T("Couleur du texte")}" value="' + esc(o.bandeauTexte || '#ffffff') + '">')
       + '</div></div>'
       + '<p class="aide-off" id="of-bandeau-off"' + (affiche ? ' hidden' : '') + '>${T("Aucun bandeau : l’offre s’applique à la caisse sans être annoncée.")}</p>'
       + '</section>'
+      /* (2026-11-28, sa demande : « quand des liens de promotion arrivent, la page devrait avoir un texte accrocheur
+         correspondant uniquement pour cette page ») La bannière de LA PAGE DE L'OFFRE (#shop?promo=<id>) : vide = le nom
+         de l'offre, son rabais, sa portée et sa date de fin, écrits tout seuls. */
+      + '<section class="sect"><h4>${T("Page de l’offre")}</h4>'
+      + '<p class="aide-off">${T("Le lien de l’offre mène à une page de ses pièces, avec sa propre bannière. Laissez vide pour le texte automatique (nom, rabais, date de fin).")}</p>'
+      + (o.lienPage ? '<p class="aide-off"><b>${T("Lien à partager : ")}</b><code>' + esc('https://www.sandriza.com/' + o.lienPage) + '</code></p>' : '')
+      + '<div class="grille g2">'
+      + ch('', '${T("Grand titre")}', '<input id="of-p-titre" maxlength="80" aria-label="${T("Grand titre")}" value="' + esc(o.pageTitre || '') + '" placeholder="${T("ex. Méga solde : 70 % de rabais")}">')
+      + ch('', '${T("Grand titre (anglais)")}', '<input id="of-p-titre-en" maxlength="80" aria-label="${T("Grand titre (anglais)")}" value="' + esc(o.pageTitreEN || '') + '">')
+      + ch('', '${T("Phrase sous le titre")}', '<input id="of-p-sous" maxlength="160" aria-label="${T("Phrase sous le titre")}" value="' + esc(o.pageSous || '') + '" placeholder="${T("ex. Trois jours seulement.")}">')
+      + ch('', '${T("Phrase sous le titre (anglais)")}', '<input id="of-p-sous-en" maxlength="160" aria-label="${T("Phrase sous le titre (anglais)")}" value="' + esc(o.pageSousEN || '') + '">')
+      + '</div></section>'
       + '</div></div>';
 
     h += '<div class="pied-boite"><button class="mini" id="pr-annuler">${T("Annuler")}</button>'
@@ -972,6 +984,7 @@ ${JS_ACTIVITE()}${JS_DIRE()}${JS_TUILES()}${JS_BROUILLON()}
           bandeauFond: val('of-fond'), bandeauTexte: val('of-texte'),
           bandeauCta: val('of-cta'), bandeauCtaEN: val('of-cta-en'), bandeauUrl: val('of-url'),
           bandeauAffiche: coche('of-bandeau-affiche'),
+          pageTitre: val('of-p-titre'), pageTitreEN: val('of-p-titre-en'), pageSous: val('of-p-sous'), pageSousEN: val('of-p-sous-en'),
           priorite: val('of-priorite'), debut: val('of-debut'), fin: val('of-fin')
         }]).then(function(r){
           be.disabled = false;
