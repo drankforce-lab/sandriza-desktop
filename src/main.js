@@ -7099,10 +7099,12 @@ const montrerPorte = (titre, message, progression, sansTheme, attente) => {
      événement de progression RECHARGEAIT la page entière : logo, reflet, orbes et barre repartaient de zéro. Même écran
      (même titre, barre déjà là) → on ne change que le texte et la largeur de la barre, sur place. */
   const _cle = titre + '|' + _porteSansTheme;
-  let _urlIci = ''; try { _urlIci = mainWindow.webContents.getURL() || ''; } catch (e) {}
-  if (progression !== undefined && _porteCleAffichee === _cle && _urlIci.startsWith('data:text/html')) {
+  // La porte est dessinée dans la fenêtre VISIBLE : c'est le rôle du cadre (banc-couture-cadre), pas celui du site.
+  const _wcP = cadreWC();
+  let _urlIci = ''; try { _urlIci = (_wcP && _wcP.getURL()) || ''; } catch (e) {}
+  if (_wcP && progression !== undefined && _porteCleAffichee === _cle && _urlIci.startsWith('data:text/html')) {
     const w = Math.max(0, Math.min(100, Number(progression) || 0));
-    mainWindow.webContents.executeJavaScript(
+    _wcP.executeJavaScript(
       '(function(){var s=document.querySelector(".sub"),g=document.querySelector(".pg-in");if(!s||!g)return false;'
       + 's.innerHTML=' + JSON.stringify(String(message)) + ';g.style.width="' + w + '%";return true;})()', true)
       .then((ok) => { if (!ok) { _porteCleAffichee = null; montrerPorte(titre, message, progression, sansTheme, attente); } })
